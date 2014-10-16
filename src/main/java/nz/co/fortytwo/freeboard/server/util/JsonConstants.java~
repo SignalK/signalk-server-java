@@ -1,0 +1,220 @@
+/*
+ * Copyright 2012,2013 Robert Huitema robert@42.co.nz
+ * 
+ * This file is part of FreeBoard. (http://www.42.co.nz/freeboard)
+ *
+ *  FreeBoard is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+
+ *  FreeBoard is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+
+ *  You should have received a copy of the GNU General Public License
+ *  along with FreeBoard.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package nz.co.fortytwo.freeboard.server.util;
+
+public class JsonConstants {
+	
+public static final String vessels = "vessels";
+
+public static final String name = "name";
+public static final String mmsi = "mmsi";
+public static final String source = "source";
+public static final String timezone = "timezone";
+public static final String navigation = "navigation";
+public static final String nav_state = "state";
+public static final String nav_headingNorth = "headingNorth";
+public static final String nav_headingMagnetic = "headingMagnetic";
+public static final String nav_declination = "declination";
+public static final String nav_speedOverGround = "speedOverGround";
+public static final String nav_speedOverWater = "speedOverWater";
+public static final String nav_latitude = "latitude";
+public static final String nav_longitude = "longitude";
+public static final String nav_altitude = "altitude";
+public static final String nav_pitch = "pitch";
+public static final String nav_roll = "roll";
+public static final String nav_rateOfTurn = "rateOfTurn";
+public static final String nav_currentRoute = "currentRoute";
+public static final String nav_currentRoute_route = "route";
+public static final String nav_currentRoute_startTime = "startTime";
+public static final String nav_currentRoute_eta = "eta";
+public static final String nav_currentRoute_lastWaypoint = "lastWaypoint";
+public static final String nav_currentRoute_lastWaypointTime = "lastWaypointTime";
+public static final String nav_currentRoute_nextWaypoint = "nextWaypoint";
+public static final String nav_currentRoute_nextWaypointEta = "nextWaypointEta";
+public static final String nav_currentRoute_directBearing = "directBearing";
+public static final String nav_currentRoute_actualBearing = "actualBearing";
+public static final String nav_currentRoute_courseRequired = "courseRequired";
+public static final String nav_currentRoute_xte = "xte";
+
+public static final String nav_set = "set";
+public static final String nav_drift = "drift";
+
+
+public static final String communication = "communication";
+public static final String comm_dscCallsign = "dscCallsign";
+public static final String comm_vhfCallsign = "vhfCallsign";
+public static final String comm_hfCallsign = "hfCallsign";
+public static final String comm_hfEmail = "hfEmail";
+public static final String comm_email = "email";
+public static final String comm_cellPhone = "cellPhone";
+public static final String comm_satPhone = "satPhone";
+public static final String comm_skipperName = "skipperName";
+
+
+public static final String environmental = "environmental";
+public static final String env_waterTemp = "waterTemp";
+public static final String env_salinity = "salinity";
+public static final String env_highTideHeight = "highTideHeight";
+public static final String env_highTideTime = "highTideTime";
+public static final String env_lowTideHeight = "lowTideHeight";
+public static final String env_lowTideTime = "lowTideTime";
+public static final String env_actualTideHeight = "actualTideHeight";
+public static final String env_currentSpeed = "currentSpeed";
+public static final String env_currentDirection = "currentDirection";
+public static final String env_airTemp = "airTemp";
+public static final String env_airPressure = "airPressure";
+public static final String env_airPressureChangeRateAlarm = "airPressureChangeRateAlarm";
+public static final String env_humidity = "humidity";
+public static final String env_trueWindSpeed = "trueWindSpeed";
+public static final String env_trueWindDirection = "trueWindDirection";
+public static final String env_apparentWindSpeed = "apparentWindSpeed";
+public static final String env_apparentWindDirection = "apparentWindDirection";
+public static final String env_windSpeedAlarm = "windSpeedAlarm";
+public static final String env_windDirectionChangeAlarm = "windDirectionChangeAlarm";
+public static final String env_gpsSatelliteData = "gpsSatelliteData";
+
+
+public static final String alarms = "alarms";
+public static final String alarm_silentInterval = "silentInterval";
+public static final String alarm_windAlarmMethod = "windAlarmMethod";
+public static final String alarm_windAlarmState = "windAlarmState";
+public static final String alarm_anchorAlarmMethod = "anchorAlarmMethod";
+public static final String alarm_anchorAlarmState = "anchorAlarmState";
+public static final String alarm_autopilotAlarmMethod = "autopilotAlarmMethod";
+public static final String alarm_autopilotAlarmState = "autopilotAlarmState";
+public static final String alarm_panpanAlarmMethod = "panpanAlarmMethod";
+public static final String alarm_panpanAlarmState = "panpanAlarmState";
+public static final String alarm_maydayAlarmMethod = "maydayAlarmMethod";
+public static final String alarm_maydayAlarmState = "maydayAlarmState";
+public static final String alarm_fireAlarmMethod = "fireAlarmMethod";
+public static final String alarm_fireAlarmState = "fireAlarmState";
+public static final String alarm_gpsAlarmMethod = "gpsAlarmMethod";
+public static final String alarm_gpsAlarmState = "gpsAlarmState";
+public static final String alarm_gasAlarmMethod = "gasAlarmMethod";
+public static final String alarm_gasAlarmState = "gasAlarmState";
+public static final String alarm_powerAlarmMethod = "powerAlarmMethod";
+public static final String alarm_powerAlarmState = "powerAlarmState";
+public static final String alarm_engineAlarmMethod = "engineAlarmMethod";
+public static final String alarm_engineAlarmState = "engineAlarmState";
+
+
+public static final String power = "power";
+public static final String power_normalVoltage = "normalVoltage";
+public static final String power_actualVoltage = "actualVoltage";
+public static final String power_alarmUpperVoltage = "alarmUpperVoltage";
+public static final String power_alarmLowerVoltage = "alarmLowerVoltage";
+
+
+public static final String propulsion = "propulsion";
+
+public static final String prop_name = "name";
+public static final String prop_type = "type";
+public static final String prop_state = "state";
+public static final String prop_rpm = "rpm";
+public static final String prop_rpmAlarm = "rpmAlarm";
+public static final String prop_engineTemperature = "engineTemperature";
+public static final String prop_engineTemperatureAlarm = "engineTemperatureAlarm";
+public static final String prop_oilTemperature = "oilTemperature";
+public static final String prop_oilTemperatureAlarm = "oilTemperatureAlarm";
+public static final String prop_oilPressure = "oilPressure";
+public static final String prop_oilPressureAlarm = "oilPressureAlarm";
+public static final String prop_waterTemp = "waterTemp";
+public static final String prop_waterTempAlarm = "waterTempAlarm";
+public static final String prop_exhaustTemp = "exhaustTemp";
+public static final String prop_exhaustTempAlarm = "exhaustTempAlarm";
+public static final String prop_fuelUsageRate = "fuelUsageRate";
+
+
+public static final String tanks = "tanks";
+
+
+public static final String tank_name = "name";
+public static final String tank_capacity = "capacity";
+public static final String tank_level = "level";
+public static final String tank_alarmLevel = "alarmLevel";
+
+
+public static final String steering = "steering";
+public static final String rudderAngle = "rudderAngle";
+public static final String rudderAngleTarget = "rudderAngleTarget";
+public static final String autopilot = "autopilot";
+public static final String autopilot_state = "state";
+public static final String autopilot_mode = "mode";
+public static final String autopilot_targetHeadingNorth = "targetHeadingNorth";
+public static final String autopilot_targetHeadingMagnetic = "targetHeadingMagnetic";
+public static final String autopilot_alarmHeadingXte = "alarmHeadingXte";
+public static final String autopilot_headingSource = "headingSource";
+public static final String autopilot_deadZone = "deadZone";
+public static final String autopilot_backlash = "backlash";
+public static final String autopilot_gain = "gain";
+public static final String autopilot_maxDriveAmps = "maxDriveAmps";
+public static final String autopilot_maxDriveRate = "maxDriveRate";
+public static final String autopilot_portLock = "portLock";
+public static final String autopilot_starboardLock = "starboardLock";
+
+
+public static final String charts = "charts";
+
+
+public static final String chart_id = "code";
+public static final String chart_name = "name";
+public static final String chart_datum = "datum";
+public static final String chart_boundary = "boundary";
+public static final String chart_date = "date";
+public static final String chart_scale = "scale";
+public static final String chart_url = "url";
+
+
+public static final String waypoints = "waypoints";
+
+
+public static final String waypoints_uid = "uid";
+public static final String waypoints_name = "name";
+public static final String waypoints_latitude = "latitude";
+public static final String waypoints_longitude = "longitude";
+public static final String waypoints_comment = "comment";
+public static final String waypoints_type = "type";
+public static final String waypoints_source = "source";
+
+
+public static final String regions = "regions";
+
+
+public static final String regions_uid = "uid";
+public static final String regions_name = "name";
+public static final String regions_comment = "comment";
+public static final String regions_source = "source";
+public static final String regions_type = "type";
+public static final String regions_boundary = "boundary";
+
+
+public static final String routes = "routes";
+
+
+public static final String routes_uid = "uid";
+public static final String routes_name = "name";
+public static final String routes_comment = "comment";
+public static final String routes_source = "source";
+public static final String routes_distance = "distance";
+public static final String routes_waypoints = "waypoints";
+
+
+
+}

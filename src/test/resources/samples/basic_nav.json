@@ -1,0 +1,85 @@
+{
+    "vessels": {
+        "motu": {
+            "version": "0.1",
+            "name": "motu",
+            "mmsi": "2345678",
+            "source": "self",
+            "timezone": "NZDT",
+            "navigation": {
+                "state": {
+                    "value": "sailing",
+                    "source": "self",
+                    "timestamp": "2014-03-24T00: 15: 41Z"
+                },
+                "headingTrue": {
+                    "value": 23,
+                    "source": "self",
+                    "timestamp": "2014-03-24T00: 15: 41Z"
+                },
+                "headingMagnetic": {
+                    "value": 43,
+                    "source": "self",
+                    "timestamp": "2014-03-24T00: 15: 41Z"
+                },
+                "courseOverGroundTrue": {
+                    "value": 23,
+                    "source": "self",
+                    "timestamp": "2014-03-24T00: 15: 41Z"
+                },
+                "courseOverGroundMagnetic": {
+                    "value": 43,
+                    "source": "self",
+                    "timestamp": "2014-03-24T00: 15: 41Z"
+                },
+                "declination": {
+                    "value": 20,
+                    "source": "self",
+                    "timestamp": "2014-03-24T00: 15: 41Z"
+                },
+                "speedOverGround": {
+                    "value": 4.5,
+                    "source": "self",
+                    "timestamp": "2014-03-24T00: 15: 41Z"
+                },
+                "speedThroughWater": {
+                    "value": 4.4,
+                    "source": "self",
+                    "timestamp": "2014-03-24T00: 15: 41Z"
+                },
+                "position": {
+                    "latitude": {
+                        "value": -41.6789,
+                        "source": "self",
+                        "timestamp": "2014-03-24T00: 15: 41Z"
+                    },
+                    "longitude": {
+                        "value": 173.12345,
+                        "source": "self",
+                        "timestamp": "2014-03-24T00: 15: 41Z"
+                    },
+                    "altitude": {
+                        "value": 0,
+                        "source": "self",
+                        "timestamp": "2014-03-24T00: 15: 41Z"
+                    }
+                },
+                "pitch": {
+                    "value": 0.1,
+                    "source": "self",
+                    "timestamp": "2014-03-24T00: 15: 41Z"
+                },
+                "roll": {
+                    "value": 0,
+                    "source": "self",
+                    "timestamp": "2014-03-24T00: 15: 41Z"
+                },
+                "rateOfTurn": {
+                    "value": 0,
+                    "source": "self",
+                    "timestamp": "2014-03-24T00: 15: 41Z"
+                }
+            }
+        }
+    }
+}
