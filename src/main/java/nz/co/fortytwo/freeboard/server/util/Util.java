@@ -266,7 +266,7 @@ public class Util {
 	 * @return
 	 */
 	public static Json merge(Json mainNode, Json updateNode) {
-		//System.out.println("Merge objects");
+		//logger.debug("Merge objects");
 		if(updateNode==null)return mainNode;
 		if (mainNode != null && mainNode.isArray() && updateNode != null && updateNode.isArray()) {
 			//mergeArrays( mainNode, updateNode);
@@ -275,7 +275,7 @@ public class Util {
 		while (fieldNames.hasNext()) {
 
 			String fieldName = fieldNames.next();
-			System.out.println("Merge " + fieldName);
+			//logger.debug("Merge " + fieldName);
 			Json json = mainNode.at(fieldName);
 			// if field exists and is an embedded object
 			if (json != null && json.isArray()) {
@@ -287,7 +287,7 @@ public class Util {
 					// Overwrite field
 
 					Json value = updateNode.at(fieldName);
-					//System.out.println(fieldName + "=" + value);
+					//logger.debug(fieldName + "=" + value);
 					mainNode.set(fieldName, value);
 				}
 			}
@@ -304,14 +304,14 @@ public class Util {
 	 * @param updateNode
 	 */
 	/*private static void mergeArrays(Json mainNode, Json updateNode) {
-		//System.out.println("Merge arrays");
+		//logger.debug("Merge arrays");
 		boolean found = false;
 		Json main = null;
 		List<Json> mainList = mainNode.asJson();
 		for(Json node : updateNode.asJsonList()){
 			if(mainhas(node.))
 			key = node.fields().next().getKey();
-			//System.out.println("Merge array item " + key);
+			//logger.debug("Merge array item " + key);
 			// if its not there the just add it
 			Iterator<Json> mainItr = mainNode.elements();
 			found = false;
@@ -437,7 +437,7 @@ public class Util {
 		while (fieldNames.hasNext()) {
 
 			String fieldName = fieldNames.next();
-			System.out.println("Merge " + fieldName);
+			logger.debug("Merge " + fieldName);
 			// if field exists and starts with _, delete it
 			if(fieldName.startsWith("_")){
 				mainNode.delAt(fieldName);
