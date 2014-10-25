@@ -18,29 +18,45 @@
  */
 package nz.co.fortytwo.freeboard.server;
 
+import mjson.Json;
+
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
 
 /**
- * Exports the signalkModel as a json object
+ * Validate the signalkModel json.
+ * Make sure it has timestamp and source
  * 
  * @author robert
  * 
  */
-public class SignalkModelExportProcessor extends FreeboardProcessor implements Processor{
+public class ValidationProcessor extends FreeboardProcessor implements Processor{
 
-	private static Logger logger = Logger.getLogger(SignalkModelExportProcessor.class);
+	private static Logger logger = Logger.getLogger(ValidationProcessor.class);
 	
 	public void process(Exchange exchange) throws Exception {
 		
 		try {
-			exchange.getIn().setBody(signalkModel.safeDuplicate());
+			validate(exchange.getIn().getBody(Json.class));
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
 		}
 	}
 
 	
+	public void validate(Json node){
+		//is this a leaf?
+		if(node.has("value")){
+			//it should have timestamp and source
+			if(!node.has("timestamp"))node.set("timestamp",new DateTime().toString());
+			if(!node.has("source"))node.set("source","unknown");
+		}else{
+			for(Json n : node.asJsonMap().values()){
+				validate(n);
+			}
+		}
+	}
 
 }

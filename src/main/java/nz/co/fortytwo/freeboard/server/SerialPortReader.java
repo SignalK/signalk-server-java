@@ -24,12 +24,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import nz.co.fortytwo.freeboard.server.util.Constants;
+import nz.co.fortytwo.freeboard.server.util.JsonConstants;
 import nz.co.fortytwo.freeboard.server.util.Util;
 
 import org.apache.camel.Exchange;
@@ -142,11 +145,14 @@ public class SerialPortReader implements Processor {
 		private InputStream in;
 		byte[] buff = new byte[256]; 
 		int x=0;
+		Map<String, Object> headers = new HashMap<String, Object>();
 		
 		public SerialReader() throws Exception {
 			
 			//this.in = new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
 			this.in = new BufferedInputStream(serialPort.getInputStream());
+			headers.put(JsonConstants.MSG_TYPE, JsonConstants.SERIAL);
+			headers.put(JsonConstants.MSG_PORT, portName);
 			uid = Pattern.compile(Constants.UID + ":");
 			logger.info("Setup serialReader on :"+portName);
 			sendMessage = new Boolean(Util.getConfig(null).getProperty(Constants.SEND_MESSAGE, "true"));
@@ -198,7 +204,7 @@ public class SerialPortReader implements Processor {
 										}
 									}*/
 									if(sendMessage){
-										producer.sendBody(lineStr);
+										producer.sendBodyAndHeaders(lineStr,headers);
 									}else{
 										logger.debug("sendMessage false:"+lineStr);
 									}

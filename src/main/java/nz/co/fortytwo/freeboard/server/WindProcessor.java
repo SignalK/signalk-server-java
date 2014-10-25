@@ -18,9 +18,13 @@
  */
 package nz.co.fortytwo.freeboard.server;
 
+import static nz.co.fortytwo.freeboard.server.util.JsonConstants.SELF;
+import static nz.co.fortytwo.freeboard.server.util.JsonConstants.env_wind_directionApparent;
+import static nz.co.fortytwo.freeboard.server.util.JsonConstants.env_wind_directionTrue;
+import static nz.co.fortytwo.freeboard.server.util.JsonConstants.env_wind_speedApparent;
+import static nz.co.fortytwo.freeboard.server.util.JsonConstants.env_wind_speedTrue;
+import static nz.co.fortytwo.freeboard.server.util.JsonConstants.nav_speedOverGround;
 import mjson.Json;
-import static nz.co.fortytwo.freeboard.server.util.JsonConstants.*;
-import nz.co.fortytwo.freeboard.server.util.Util;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -54,9 +58,9 @@ public class WindProcessor extends FreeboardProcessor implements Processor{
 	public  void handle() {
 		try {
 
-			Json vesselSpeed =  Util.findValue(signalkModel.self(), nav_speedOverGround);
-			Json apparentDirection = Util.findValue(signalkModel.self(), env_wind_directionApparent);
-			Json apparentWindSpeed =Util.findValue(signalkModel.self(), env_wind_speedApparent);
+			Json vesselSpeed =  signalkModel.findValue(signalkModel.self(), nav_speedOverGround);
+			Json apparentDirection = signalkModel.findValue(signalkModel.self(), env_wind_directionApparent);
+			Json apparentWindSpeed =signalkModel.findValue(signalkModel.self(), env_wind_speedApparent);
 			if (apparentWindSpeed !=null && apparentDirection!=null && vesselSpeed!=null) {
 				// now calc and add to body
 				// 0-360 from bow clockwise
@@ -66,11 +70,11 @@ public class WindProcessor extends FreeboardProcessor implements Processor{
 					
 					if (!Double.isNaN(windCalc[1])) {
 						//map.put(Constants.WIND_DIR_TRUE, round(trueDirection, 2));
-						Util.putWith(signalkModel.self(), env_wind_directionTrue, round(windCalc[1], 2), SELF);
+						signalkModel.putWith(signalkModel.self(), env_wind_directionTrue, round(windCalc[1], 2), SELF);
 					}
 					if (!Double.isNaN(windCalc[0])) {
 						//map.put(Constants.WIND_SPEED_TRUE, round(trueWindSpeed, 2));
-						Util.putWith(signalkModel.self(), env_wind_speedTrue, round(windCalc[0], 2), SELF);
+						signalkModel.putWith(signalkModel.self(), env_wind_speedTrue, round(windCalc[0], 2), SELF);
 					}
 				}
 

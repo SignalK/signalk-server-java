@@ -26,27 +26,25 @@ import static nz.co.fortytwo.freeboard.server.util.JsonConstants.nav_position_la
 import static nz.co.fortytwo.freeboard.server.util.JsonConstants.propulsion_engineTemperature;
 import static nz.co.fortytwo.freeboard.server.util.JsonConstants.propulsion_oilPressure;
 import static nz.co.fortytwo.freeboard.server.util.JsonConstants.propulsion_rpm;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 
-import static org.junit.Assert.*;
 import mjson.Json;
 import nz.co.fortytwo.freeboard.server.util.Constants;
 import nz.co.fortytwo.freeboard.server.util.Util;
 import nz.co.fortytwo.freeboard.signalk.SignalKModel;
 import nz.co.fortytwo.freeboard.signalk.impl.SignalKModelFactory;
-import nz.co.fortytwo.freeboard.signalk.impl.SignalKModelImpl;
 
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class NMEAProcessorTest {
 
@@ -55,7 +53,7 @@ public class NMEAProcessorTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		ObjectMapper m = new ObjectMapper();
+	
 		File jsonFile = new File("./conf/self.json");
 		System.out.println(jsonFile.getAbsolutePath());
 		try{
@@ -89,8 +87,8 @@ public class NMEAProcessorTest {
 		
 		 Json json = (Json) processor.handle(nmea1);
 		 logger.debug(json);
-		 assertEquals(51.9485185d,Util.findValue(json.at(VESSELS).at(SELF), nav_position_latitude).asDouble(),0.00001);
-		 logger.debug("Lat :"+Util.findValue(json, nav_position_latitude));
+		 assertEquals(51.9485185d,signalkModel.findValue(json.at(VESSELS).at(SELF), nav_position_latitude).asDouble(),0.00001);
+		 logger.debug("Lat :"+signalkModel.findValue(json, nav_position_latitude));
 	}
 	@Test
 	@Ignore
@@ -98,11 +96,11 @@ public class NMEAProcessorTest {
 		NMEAProcessor processor = new NMEAProcessor();
 		Json json = (Json) processor.handle("$YXXDR,G,0004,,G,12.27,,G,,,G,003.3,,G,0012,,MaxVu110*4E");
 		//RPM,EVV,DBT,EPP,ETT
-		assertEquals(4.0,Util.findValue(json, propulsion_rpm).asDouble());
-		//assertEquals(12.27,Util.findValue(json, propulsion_).asDouble());
-		assertEquals(null,Util.findValue(json, env_depth_belowTransducer));
-		assertEquals(3.3,Util.findValue(json, propulsion_oilPressure).asDouble());
-		assertEquals(12.0,Util.findValue(json, propulsion_engineTemperature).asDouble());
+		assertEquals(4.0,signalkModel.findValue(json, propulsion_rpm).asDouble(),0.0001);
+		//assertEquals(12.27,signalkModel.findValue(json, propulsion_).asDouble());
+		assertEquals(null,signalkModel.findValue(json, env_depth_belowTransducer));
+		assertEquals(3.3,signalkModel.findValue(json, propulsion_oilPressure).asDouble(),0.0001);
+		assertEquals(12.0,signalkModel.findValue(json, propulsion_engineTemperature).asDouble(),0.0001);
 	}
 	
 	@Test
@@ -115,11 +113,11 @@ public class NMEAProcessorTest {
 		
 		Json json = (Json) processor.handle("$YXXDR,G,0004,,G,12.27,,G,,,G,003.3,,G,0012,,MaxVu110*4E");
 		//RPM,EVV,DBT,EPP,ETT
-		assertEquals(4.0,Util.findValue(json, propulsion_rpm).asDouble());
+		assertEquals(4.0,signalkModel.findValue(json, propulsion_rpm).asDouble(),0.0001);
 		//assertEquals(12.27,map.get(Constants.ENGINE_VOLTS));
-		assertTrue(Util.findValue(json, env_depth_belowTransducer)==null);
-		assertEquals(3.3,Util.findValue(json, propulsion_oilPressure).asDouble());
-		assertEquals(12.0,Util.findValue(json, propulsion_engineTemperature).asDouble());
+		assertTrue(signalkModel.findValue(json, env_depth_belowTransducer)==null);
+		assertEquals(3.3,signalkModel.findValue(json, propulsion_oilPressure).asDouble(),0.0001);
+		assertEquals(12.0,signalkModel.findValue(json, propulsion_engineTemperature).asDouble(),0.0001);
 	}
 	@Test
 	@Ignore
@@ -131,11 +129,11 @@ public class NMEAProcessorTest {
 		map.put(Constants.NMEA, "$YXXDR,G,0004,,G,12.27,,G,,,G,003.3,,G,0012,,MaxVu110*4E");
 		Json json = (Json) processor.handle("$YXXDR,G,0004,,G,12.27,,G,,,G,003.3,,G,0012,,MaxVu110*4E");
 		//RPM,EVV,DBT,EPP,ETT
-		assertTrue(Util.findValue(json, propulsion_rpm)==null);
-		//assertTrue(Util.findValue(json, propulsion_rpm)==null);
-		assertTrue(Util.findValue(json, env_depth_belowTransducer)==null);
-		assertTrue(Util.findValue(json, propulsion_oilPressure)==null);
-		assertTrue(Util.findValue(json, propulsion_engineTemperature)==null);
+		assertTrue(signalkModel.findValue(json, propulsion_rpm)==null);
+		//assertTrue(signalkModel.findValue(json, propulsion_rpm)==null);
+		assertTrue(signalkModel.findValue(json, env_depth_belowTransducer)==null);
+		assertTrue(signalkModel.findValue(json, propulsion_oilPressure)==null);
+		assertTrue(signalkModel.findValue(json, propulsion_engineTemperature)==null);
 	}
 
 }

@@ -1,7 +1,6 @@
 package nz.co.fortytwo.freeboard.signalk.impl;
 
 import nz.co.fortytwo.freeboard.signalk.SignalKModel;
-import nz.co.fortytwo.freeboard.signalk.impl.SignalKModelImpl;
 
 /**
  * Factory to get signalKModel singleton

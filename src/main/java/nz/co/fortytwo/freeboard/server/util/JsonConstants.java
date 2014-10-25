@@ -21,6 +21,13 @@ package nz.co.fortytwo.freeboard.server.util;
 
 public class JsonConstants {
 
+	public static final String MSG_TYPE = "MSG_TYPE";
+	public static final String SERIAL = "SERIAL";
+	public static final String EXTERNAL_IP = "EXTERNAL_IP";
+	public static final String INTERNAL_IP = "INTERNAL_IP";
+	public static final String MSG_PORT = "MSG_PORT";
+	public static final String MSG_APPROVAL = "MSG_APPROVAL";
+	public static final Object REQUIRED = "REQUIRED";
 	
 	public static final String VESSELS = "vessels";
 	public static final String SELF = "self";
@@ -221,6 +228,9 @@ public class JsonConstants {
 	public static final String tanks_alarmLevel = "tanks.alarmLevel";
 	public static final String tanks_capacity = "tanks.capacity";
 	public static final String tanks_tankType = "tanks.tankType";
+	
+	
+	
 
 
 

@@ -21,8 +21,6 @@ package nz.co.fortytwo.freeboard.server;
 import mjson.Json;
 import nz.co.fortytwo.freeboard.server.util.JsonConstants;
 import nz.co.fortytwo.freeboard.server.util.Magfield;
-import nz.co.fortytwo.freeboard.server.util.Util;
-import nz.co.fortytwo.freeboard.signalk.SignalKModel;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -54,8 +52,8 @@ public class DeclinationProcessor extends FreeboardProcessor implements Processo
 	//@Override
 	public void handle() {
 		logger.debug("Declination  calculation fired " );
-		Json lat = Util.findNode(signalkModel.self(), JsonConstants.nav_position_latitude);
-		Json lon = Util.findNode(signalkModel.self(), JsonConstants.nav_position_longitude);
+		Json lat = signalkModel.findNode(signalkModel.self(), JsonConstants.nav_position_latitude);
+		Json lon = signalkModel.findNode(signalkModel.self(), JsonConstants.nav_position_longitude);
 		
 		if (lat!=null && lon!=null) {
 			logger.debug("Declination  for "+lat.at("value")+", "+lon.at("value") );
@@ -64,7 +62,7 @@ public class DeclinationProcessor extends FreeboardProcessor implements Processo
 			declination = Magfield.rad_to_deg(declination) * -1;// declination is positive when true N is west of MagN, eg subtract the declination
 			declination = round(declination, 1);
 			logger.debug("Declination = " + declination);
-			Util.putWith(signalkModel.self(), JsonConstants.nav_magneticVariation, declination, JsonConstants.SELF);	
+			signalkModel.putWith(signalkModel.self(), JsonConstants.nav_magneticVariation, declination, JsonConstants.SELF);	
 		}
 		
 	}

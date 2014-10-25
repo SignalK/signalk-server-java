@@ -19,6 +19,8 @@
 package nz.co.fortytwo.freeboard.server;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import mjson.Json;
@@ -26,13 +28,12 @@ import nz.co.fortytwo.freeboard.server.util.Constants;
 import nz.co.fortytwo.freeboard.signalk.SignalKModel;
 import nz.co.fortytwo.freeboard.signalk.SignalkRouteFactory;
 import nz.co.fortytwo.freeboard.signalk.impl.SignalKModelFactory;
-import nz.co.fortytwo.freeboard.signalk.impl.SignalKModelImpl;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Predicate;
 import org.apache.camel.builder.PredicateBuilder;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.websocket.WebsocketComponent;
+import org.apache.camel.component.restlet.RestletConstants;
 
 /**
  * Main camel route definition to handle input to signalk
@@ -41,6 +42,7 @@ import org.apache.camel.component.websocket.WebsocketComponent;
  * <ul>
  * <li>Basically all input is added to seda:input
  * <li>Message is converted to hashmap, processed,added to signalk model
+ * <li>Output is sent out 1 sec.
  * </ul>
  * 
  * 
@@ -50,7 +52,9 @@ import org.apache.camel.component.websocket.WebsocketComponent;
 public class SignalKReceiver extends RouteBuilder {
 	public static final String SEDA_INPUT = "seda:input";
 	public static final String DIRECT_WEBSOCKETS = "direct:websockets";
-	private int port = 9090;
+	private static final String DIRECT_TCP = "direct:tcp";
+	private int ws_port = 9291;
+	private int rest_port = 9290;
 	private String serialUrl;
 	
 	private SerialPortManager serialPortManager;
@@ -58,17 +62,18 @@ public class SignalKReceiver extends RouteBuilder {
 	
 	private Properties config;
 	private SignalKModel signalkModel=SignalKModelFactory.getInstance();
+	private TcpServer tcpServer;
 
 	public SignalKReceiver(Properties config) {
 		this.config = config;
 	}
 
 	public int getPort() {
-		return port;
+		return ws_port;
 	}
 
 	public void setPort(int port) {
-		this.port = port;
+		this.ws_port = port;
 	}
 
 	@Override
@@ -87,13 +92,18 @@ public class SignalKReceiver extends RouteBuilder {
 		
 
 		// dump nulls, but avoid quartz jobs
-		Predicate stopNull = PredicateBuilder.and(header(Exchange.TIMER_FIRED_TIME).isNull(), body().isNull());
+		List<Predicate> predicates = new ArrayList<Predicate>();
+		predicates.add(header(Exchange.TIMER_FIRED_TIME).isNull());
+		predicates.add(header(RestletConstants.RESTLET_REQUEST).isNull());
+		predicates.add(body().isNull());
+		Predicate stopNull = PredicateBuilder.and(predicates);
 		intercept().when(stopNull).stop();
 
 		if (Boolean.valueOf(config.getProperty(Constants.DEMO))) {
 			from("stream:file?fileName=" + serialUrl).to(SEDA_INPUT);
 		}
-		
+		tcpServer = new TcpServer();
+		tcpServer.start();
 		// start a serial port manager
 		serialPortManager = new SerialPortManager();
 		new Thread(serialPortManager).start();
@@ -102,11 +112,19 @@ public class SignalKReceiver extends RouteBuilder {
 		// send input to listeners
 		SignalkRouteFactory.configureInputRoute(this, SEDA_INPUT);
 		SignalkRouteFactory.configureWebsocketRoute(this, DIRECT_WEBSOCKETS);
+		SignalkRouteFactory.configureTcpServerRoute(this, DIRECT_TCP, tcpServer);
+		//restlet
+		SignalkRouteFactory.configureRestRoute(this, "restlet:http://0.0.0.0:" + rest_port + "/signalk/api/");
+		SignalkRouteFactory.configureAuthRoute(this, "restlet:http://0.0.0.0:" + rest_port + "/signalk/auth/");
 		
 		// timed actions
 		from("timer://declination?fixedRate=true&period=10000").process(new DeclinationProcessor()).to("log:nz.co.fortytwo.freeboard.signalk.update?level=INFO").end();
 		from("timer://wind?fixedRate=true&period=1000").process(new WindProcessor()).to("log:nz.co.fortytwo.freeboard.signalk.update?level=INFO").end();
-		from("timer://signalkAll?fixedRate=true&period=1000").process(new SignalkModelExportProcessor()).to("log:nz.co.fortytwo.freeboard.signalk.signalkAll?level=INFO").to(DIRECT_WEBSOCKETS).end();;
+		from("timer://signalkAll?fixedRate=true&period=1000").process(new SignalkModelExportProcessor()).to("log:nz.co.fortytwo.freeboard.signalk.signalkAll?level=INFO")
+			.to(DIRECT_WEBSOCKETS).to(DIRECT_TCP).end();
+		
+		//react to changes
+		//from("seda.output").
 		
 	}
 

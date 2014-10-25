@@ -19,8 +19,8 @@
 
 package nz.co.fortytwo.freeboard.server;
 
-import static org.junit.Assert.assertEquals;
-import junit.framework.Assert;
+import static org.junit.Assert.*;
+
 import mjson.Json;
 
 import org.apache.log4j.Logger;
@@ -57,7 +57,7 @@ public class AISProcessorTest{
 		msg += "\\!AIVDM,2,2,4,A,R0EQCP000000000,2*45";
 		AISProcessor processor = new AISProcessor();
 		Json json = (Json) processor.handle(msg);
-		Assert.assertNull(json);
+		assertNull(json);
 
 	}
 
@@ -67,7 +67,7 @@ public class AISProcessorTest{
 		String msg = "!AIVDM,1,1,,B,15MwkRUOidG?GElEa<iQk1JV06Jd,0*6D";
 		AISProcessor processor = new AISProcessor();
 		Json json = (Json) processor.handle(msg);
-		Assert.assertNotNull(json);
+		assertNotNull(json);
 		
 		log.debug(msg);
 	}
@@ -81,14 +81,14 @@ public class AISProcessorTest{
 		String msg3 = "\\g:2-2-0136*59\\!BSVDM,2,2,4,B,000000000000000,2*3A";
 		AISProcessor processor = new AISProcessor();
 		Json json = (Json)processor.handle(msg1);
-		Assert.assertNull(json);
+		assertNull(json);
 
 		json = (Json)processor.handle(msg2);
-		Assert.assertNull(json);
+		assertNull(json);
 
 		json = (Json)processor.handle(msg3);
-		Assert.assertNull(json);
-		// Assert.assertEquals(map.get("TEST"), 5);
+		assertNull(json);
+		// assertEquals(map.get("TEST"), 5);
 	}
 
 	@Test
@@ -98,14 +98,14 @@ public class AISProcessorTest{
 		String msg1 = "!AIVDM,1,1,,A,15MvJw5P0NG?Us6EaDVTTOvR06Jd,0*22";
 		AISProcessor processor = new AISProcessor();
 		Json json = (Json)processor.handle(msg1);
-		Assert.assertNotNull(json);
-		//Assert.assertTrue(map.get(Constants.AIS) instanceof AisVesselInfo);
+		assertNotNull(json);
+		//assertTrue(map.get(Constants.AIS) instanceof AisVesselInfo);
 
 		String msg = "!AIVDM,1,1,,B,15Mtu:0000o@05tE`?Ctn@6T06Jd,0*40";
 		json=null;
 		json = (Json)processor.handle(msg);
-		Assert.assertNotNull(json);
-		//Assert.assertTrue(map.get(Constants.AIS) instanceof AisVesselInfo);
+		assertNotNull(json);
+		//assertTrue(map.get(Constants.AIS) instanceof AisVesselInfo);
 	}
 
 	@Test
@@ -117,13 +117,13 @@ public class AISProcessorTest{
 		String msg3 = "\\g:2-2-0136*59\\!BSVDM,2,2,4,B,000000000000000,2*3A";
 		AISProcessor processor = new AISProcessor();
 		Json json = (Json)processor.handle(msg1);
-		Assert.assertNull(json);
+		assertNull(json);
 
 		json = (Json)processor.handle(msg2);
-		Assert.assertNull(json);
+		assertNull(json);
 
 		json = (Json)processor.handle(msg3);
-		Assert.assertNull(json);
+		assertNull(json);
 		json=null;
 		String msg = "$PGHP,1,2010,6,11,11,46,11,929,244,0,,1,72*21\r\n";
 		msg += "\\1G2:0125,c:1354719387*0D";
@@ -132,8 +132,8 @@ public class AISProcessorTest{
 		msg += "\\!AIVDM,2,2,4,A,R0EQCP000000000,2*45";
 
 		json = (Json)processor.handle(msg);
-		Assert.assertNull(json);
-		// Assert.assertEquals(map.get("TEST"), 5);
+		assertNull(json);
+		// assertEquals(map.get("TEST"), 5);
 	}
 /*
 	@Test

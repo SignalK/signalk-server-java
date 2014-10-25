@@ -1,11 +1,8 @@
 package nz.co.fortytwo.freeboard.server.signalk.json;
 
-import static org.junit.Assert.*;
-
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Map;
 
 import mjson.Json;
 

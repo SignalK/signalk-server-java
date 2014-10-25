@@ -18,24 +18,28 @@
  */
 package nz.co.fortytwo.freeboard.server;
 
-import static nz.co.fortytwo.freeboard.server.util.JsonConstants.*;
+import static nz.co.fortytwo.freeboard.server.util.JsonConstants.VESSELS;
+import static nz.co.fortytwo.freeboard.server.util.JsonConstants.communication_callsignVhf;
+import static nz.co.fortytwo.freeboard.server.util.JsonConstants.mmsi;
+import static nz.co.fortytwo.freeboard.server.util.JsonConstants.name;
+import static nz.co.fortytwo.freeboard.server.util.JsonConstants.nav_courseOverGroundTrue;
+import static nz.co.fortytwo.freeboard.server.util.JsonConstants.nav_headingTrue;
+import static nz.co.fortytwo.freeboard.server.util.JsonConstants.nav_position_latitude;
+import static nz.co.fortytwo.freeboard.server.util.JsonConstants.nav_position_longitude;
+import static nz.co.fortytwo.freeboard.server.util.JsonConstants.nav_speedOverGround;
+import static nz.co.fortytwo.freeboard.server.util.JsonConstants.nav_state;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import mjson.Json;
 import nz.co.fortytwo.freeboard.server.ais.AisVesselInfo;
-import nz.co.fortytwo.freeboard.server.util.Constants;
-
-import nz.co.fortytwo.freeboard.server.util.Util;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import dk.dma.ais.message.AisMessage;
 import dk.dma.ais.message.AisMessage18;
@@ -122,18 +126,18 @@ public class AISProcessor extends FreeboardProcessor implements Processor {
 							vInfo=new AisVesselInfo((AisMessage18) message);
 						}
 						if(vInfo!=null){
-							Json json = Util.getEmptyRootNode();
-							Json aisVessel  = Util.addNode(json, VESSELS+"."+String.valueOf(vInfo.getUserId()));
+							Json json = signalkModel.getEmptyRootNode();
+							Json aisVessel  = signalkModel.addNode(json, VESSELS+"."+String.valueOf(vInfo.getUserId()));
 						
 							aisVessel.set(name, vInfo.getName());
 							aisVessel.set(mmsi, String.valueOf(vInfo.getUserId()));
-							Util.putWith(aisVessel, nav_state, navStatusMap.get(vInfo.getNavStatus()), "AIS");
-							Util.putWith(aisVessel, nav_position_latitude, vInfo.getPosition().getLatitude(), "AIS");
-							Util.putWith(aisVessel, nav_position_longitude, vInfo.getPosition().getLongitude(), "AIS");
-							Util.putWith(aisVessel, nav_courseOverGroundTrue, ((double)vInfo.getCog())/10, "AIS");
-							Util.putWith(aisVessel, nav_speedOverGround, ((double)vInfo.getSog())/10, "AIS");
-							Util.putWith(aisVessel, nav_headingTrue, ((double)vInfo.getTrueHeading())/10, "AIS");
-							Util.putWith(aisVessel, communication_callsignVhf, vInfo.getCallsign(), "AIS");
+							signalkModel.putWith(aisVessel, nav_state, navStatusMap.get(vInfo.getNavStatus()), "AIS");
+							signalkModel.putWith(aisVessel, nav_position_latitude, vInfo.getPosition().getLatitude(), "AIS");
+							signalkModel.putWith(aisVessel, nav_position_longitude, vInfo.getPosition().getLongitude(), "AIS");
+							signalkModel.putWith(aisVessel, nav_courseOverGroundTrue, ((double)vInfo.getCog())/10, "AIS");
+							signalkModel.putWith(aisVessel, nav_speedOverGround, ((double)vInfo.getSog())/10, "AIS");
+							signalkModel.putWith(aisVessel, nav_headingTrue, ((double)vInfo.getTrueHeading())/10, "AIS");
+							signalkModel.putWith(aisVessel, communication_callsignVhf, vInfo.getCallsign(), "AIS");
 							return json;
 						}
 					}

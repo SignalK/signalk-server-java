@@ -1,8 +1,12 @@
 package nz.co.fortytwo.freeboard.server.util;
 
-import static org.junit.Assert.*;
-import static nz.co.fortytwo.freeboard.server.util.JsonConstants.*;
+import static nz.co.fortytwo.freeboard.server.util.JsonConstants.SELF;
+import static nz.co.fortytwo.freeboard.server.util.JsonConstants.VESSELS;
+import static nz.co.fortytwo.freeboard.server.util.JsonConstants.nav_anchor_position_latitude;
+import static org.junit.Assert.assertEquals;
 import mjson.Json;
+import nz.co.fortytwo.freeboard.signalk.SignalKModel;
+import nz.co.fortytwo.freeboard.signalk.impl.SignalKModelFactory;
 
 import org.junit.After;
 import org.junit.Before;
@@ -20,12 +24,13 @@ public class UtilTest {
 
 	@Test
 	public void shouldMakeNode() {
-		Json root = Util.getEmptyRootNode();
-		//Json position = Util.addNode(root, VESSELS+"."+SELF+"."+nav_anchor_position_latitude);
+		SignalKModel signalkModel = SignalKModelFactory.getInstance();
+		Json root = signalkModel.getEmptyRootNode();
+		//Json position = signalkModel.addNode(root, VESSELS+"."+SELF+"."+nav_anchor_position_latitude);
 		//System.out.println(position);
-		System.out.println(Util.putWith(root,VESSELS+"."+SELF+"."+nav_anchor_position_latitude, 23.07d, "nmea"));
+		System.out.println(signalkModel.putWith(root,VESSELS+"."+SELF+"."+nav_anchor_position_latitude, 23.07d, "nmea"));
 		System.out.println(root);
-		assertEquals(Util.findValue(root,VESSELS+"."+SELF+"."+nav_anchor_position_latitude).asDouble(), 023.07d, 0.0002);
+		assertEquals(signalkModel.findValue(root,VESSELS+"."+SELF+"."+nav_anchor_position_latitude).asDouble(), 023.07d, 0.0002);
 	}
 
 }

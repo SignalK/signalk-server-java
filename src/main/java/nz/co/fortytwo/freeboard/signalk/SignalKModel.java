@@ -4,6 +4,8 @@ import mjson.Json;
 
 import org.joda.time.DateTime;
 
+import com.google.common.eventbus.EventBus;
+
 public interface SignalKModel{
 		
 		/**
@@ -119,7 +121,53 @@ public interface SignalKModel{
 		 */
 		public Json safeDuplicate();
 		
+		/**
+		 * Recursive addNode()
+		 * Same as findNode, but will make a new node if any node on the path is empty
+		 * @param node
+		 * @param fullPath
+		 * @param value 
+		 * @return
+		 */
+		public  Json addNode(Json node, String fullPath) ;
+		public  Json putWith(Json node, String fullPath, Object value);
+		public  Json putWith(Json node, String fullPath, Object value, String source);
+		public  Json putWith(Json node, String fullPath, Object value, String source, DateTime dateTime);
+		/**
+		 * Creates an empty root node, with vessels.ownboat structure.
+		 * @return
+		 */
+		public  Json getEmptyRootNode();
 		
+		/**
+		 * Recursive findNode(), which returns the "value" object
+		 * @param fullPath
+		 * @return
+		 */
+		public Json findValue( String fullPath) ;
+		/**
+		 * Recursive findNode()
+		 * @param fullPath
+		 * @return
+		 */
+		public Json findNode( String fullPath) ;
+		
+		/**
+		 * Recursive findNode(), which returns the "value" object
+		 * @param node
+		 * @param fullPath
+		 * @return
+		 */
+		public Json findValue(Json node, String fullPath) ;
+		/**
+		 * Recursive findNode()
+		 * @param node
+		 * @param fullPath
+		 * @return
+		 */
+		public Json findNode(Json node, String fullPath) ;
+		
+		public EventBus getEventBus();
 	
 
 }

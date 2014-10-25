@@ -24,6 +24,7 @@ import nz.co.fortytwo.freeboard.server.util.JsonConstants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.apache.log4j.Logger;
 
 /**
  * Converts the hashmap of key/values back to a string
@@ -32,6 +33,8 @@ import org.apache.camel.Processor;
  */
 public class OutputFilterProcessor extends FreeboardProcessor implements Processor {
 
+	private static Logger logger = Logger.getLogger(OutputFilterProcessor.class);
+	
 	public void process(Exchange exchange) throws Exception {
 		if (exchange.getIn().getBody()==null)
 			return;

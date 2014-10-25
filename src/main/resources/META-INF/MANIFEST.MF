@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Specification-Title: Signal K server
+Specification-Version: 1.0
+Specification-Vendor: 
+Implementation-Title: 
+Implementation-URL: http://www.42.co.nz/
+Implementation-Version: 1.0
+Implementation-Vendor: 

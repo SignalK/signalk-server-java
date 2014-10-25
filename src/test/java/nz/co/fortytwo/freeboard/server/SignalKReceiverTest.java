@@ -1,12 +1,14 @@
 package nz.co.fortytwo.freeboard.server;
 
-import static nz.co.fortytwo.freeboard.server.util.JsonConstants.*;
-import static org.junit.Assert.*;
-import nz.co.fortytwo.freeboard.server.util.Util;
+import static nz.co.fortytwo.freeboard.server.util.JsonConstants.SELF;
+import static nz.co.fortytwo.freeboard.server.util.JsonConstants.VESSELS;
+import static nz.co.fortytwo.freeboard.server.util.JsonConstants.env_wind_speedApparent;
+import static nz.co.fortytwo.freeboard.server.util.JsonConstants.env_wind_speedTrue;
+import static nz.co.fortytwo.freeboard.server.util.JsonConstants.nav_magneticVariation;
+import static nz.co.fortytwo.freeboard.server.util.JsonConstants.nav_position_latitude;
 import nz.co.fortytwo.freeboard.signalk.SignalKModel;
 import nz.co.fortytwo.freeboard.signalk.SignalkRouteFactory;
 import nz.co.fortytwo.freeboard.signalk.impl.SignalKModelFactory;
-import nz.co.fortytwo.freeboard.signalk.impl.SignalKModelImpl;
 
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
@@ -38,8 +40,8 @@ public class SignalKReceiverTest extends CamelTestSupport {
         template.sendBody("direct:input","$GPRMC,144629.20,A,5156.91111,N,00434.80385,E,0.295,,011113,,,A*78");
         
 		 logger.debug(signalkModel);
-		 assertEquals(51.9485185d,Util.findValue(signalkModel.atPath(VESSELS,SELF), nav_position_latitude).asDouble(),0.00001);
-		 logger.debug("Lat :"+Util.findValue(signalkModel.atPath(VESSELS,SELF), nav_position_latitude));
+		 assertEquals(51.9485185d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF), nav_position_latitude).asDouble(),0.00001);
+		 logger.debug("Lat :"+signalkModel.findValue(signalkModel.atPath(VESSELS,SELF), nav_position_latitude));
  
       
     }
@@ -51,8 +53,8 @@ public class SignalKReceiverTest extends CamelTestSupport {
         
 		 logger.debug(signalkModel);
 		 assertNotNull(signalkModel.atPath(VESSELS,"366998410"));
-		 assertEquals(37.8251d,Util.findValue(signalkModel.atPath(VESSELS,"366998410"), nav_position_latitude).asDouble(),0.001);
-		 logger.debug("Lat :"+Util.findValue(signalkModel.atPath(VESSELS,SELF), nav_position_latitude));
+		 assertEquals(37.8251d,signalkModel.findValue(signalkModel.atPath(VESSELS,"366998410"), nav_position_latitude).asDouble(),0.001);
+		 logger.debug("Lat :"+signalkModel.findValue(signalkModel.atPath(VESSELS,SELF), nav_position_latitude));
     }
 	@Test
     public void shouldProcessTwoMessages() throws Exception {
@@ -63,8 +65,8 @@ public class SignalKReceiverTest extends CamelTestSupport {
         
 		 logger.debug(signalkModel);
 		
-		 assertEquals(51.9485185d,Util.findValue(signalkModel.atPath(VESSELS,SELF), nav_position_latitude).asDouble(),0.00001);
-		 assertEquals(20.0d,Util.findValue(signalkModel.atPath(VESSELS,SELF),env_wind_speedApparent ).asDouble(),0.00001);
+		 assertEquals(51.9485185d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF), nav_position_latitude).asDouble(),0.00001);
+		 assertEquals(20.0d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF),env_wind_speedApparent ).asDouble(),0.00001);
       
     }
 	
@@ -77,10 +79,10 @@ public class SignalKReceiverTest extends CamelTestSupport {
         
 		 logger.debug(signalkModel);
 		
-		 assertEquals(51.9485185d,Util.findValue(signalkModel.atPath(VESSELS,SELF), nav_position_latitude).asDouble(),0.00001);
-		 assertEquals(20.0d,Util.findValue(signalkModel.atPath(VESSELS,SELF),env_wind_speedApparent ).asDouble(),0.00001);
+		 assertEquals(51.9485185d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF), nav_position_latitude).asDouble(),0.00001);
+		 assertEquals(20.0d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF),env_wind_speedApparent ).asDouble(),0.00001);
 		 windProcessor.handle();
-		 assertEquals(20.0d,Util.findValue(signalkModel.atPath(VESSELS,SELF),env_wind_speedTrue ).asDouble(),0.00001);
+		 assertEquals(20.0d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF),env_wind_speedTrue ).asDouble(),0.00001);
       
     }
 	
@@ -93,10 +95,10 @@ public class SignalKReceiverTest extends CamelTestSupport {
         
 		 logger.debug(signalkModel);
 		
-		 //assertEquals(51.9485185d,Util.findValue(signalkModel.atPath(VESSELS,SELF), nav_magneticVariation).asDouble(),0.00001);
-		// assertEquals(20.0d,Util.findValue(signalkModel.atPath(VESSELS,SELF),env_wind_speedApparent ).asDouble(),0.00001);
+		 //assertEquals(51.9485185d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF), nav_magneticVariation).asDouble(),0.00001);
+		// assertEquals(20.0d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF),env_wind_speedApparent ).asDouble(),0.00001);
 		 declinationProcessor.handle();
-		 assertEquals(-3.1d,Util.findValue(signalkModel.atPath(VESSELS,SELF),nav_magneticVariation ).asDouble(),0.00001);
+		 assertEquals(-3.1d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF),nav_magneticVariation ).asDouble(),0.00001);
       
     }
 	

@@ -19,7 +19,6 @@
 package nz.co.fortytwo.freeboard.server;
 
 import mjson.Json;
-import nz.co.fortytwo.freeboard.signalk.SignalKModel;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
