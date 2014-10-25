@@ -2,6 +2,10 @@ Signal K java server
 =================================================
 
 An example Signal K server using java
+
+Currently this is GPL until I get a better understanding of its direction. It uses technology from, and will become the core of the freeboard project ( http://www.42.co.nz/freeboard ) 
+If you need something more liberal pls raise an issue.
+
 Installation
 ------------
 
