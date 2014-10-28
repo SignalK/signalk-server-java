@@ -250,7 +250,7 @@
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
 				<configuration>
-					<mainClass>nz.co.fortytwo.freeboard.server.ServerMain</mainClass>
+					<mainClass>nz.co.fortytwo.signalk.server.ServerMain</mainClass>
 					<includePluginDependencies>false</includePluginDependencies>
 				</configuration>
 			</plugin>
@@ -282,7 +282,7 @@
 							<archive>
 								<manifest>
 									<!-- Specify class to be run at startup -->
-									<mainClass>nz.co.fortytwo.freeboard.server.SignalKServer</mainClass>
+									<mainClass>nz.co.fortytwo.signalk.server.SignalKServer</mainClass>
 								</manifest>
 							</archive>
 						</configuration>

@@ -1,6 +1,6 @@
-package nz.co.fortytwo.signalk.signalk.impl;
+package nz.co.fortytwo.signalk.model.impl;
 
-import nz.co.fortytwo.signalk.signalk.SignalKModel;
+import nz.co.fortytwo.signalk.model.SignalKModel;
 
 /**
  * Factory to get signalKModel singleton

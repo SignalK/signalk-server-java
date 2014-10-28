@@ -1,4 +1,4 @@
-package nz.co.fortytwo.signalk.signalk.event;
+package nz.co.fortytwo.signalk.model.event;
 
 import mjson.Json;
 

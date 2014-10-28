@@ -19,9 +19,9 @@
 
 package nz.co.fortytwo.signalk.server;
 
+import nz.co.fortytwo.signalk.model.SignalKModel;
+import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.server.util.Util;
-import nz.co.fortytwo.signalk.signalk.SignalKModel;
-import nz.co.fortytwo.signalk.signalk.impl.SignalKModelFactory;
 
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;

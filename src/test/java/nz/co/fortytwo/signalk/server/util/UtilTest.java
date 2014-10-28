@@ -5,8 +5,8 @@ import static nz.co.fortytwo.signalk.server.util.JsonConstants.VESSELS;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.nav_anchor_position_latitude;
 import static org.junit.Assert.assertEquals;
 import mjson.Json;
-import nz.co.fortytwo.signalk.signalk.SignalKModel;
-import nz.co.fortytwo.signalk.signalk.impl.SignalKModelFactory;
+import nz.co.fortytwo.signalk.model.SignalKModel;
+import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 
 import org.junit.After;
 import org.junit.Before;

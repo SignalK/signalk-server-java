@@ -35,11 +35,11 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import mjson.Json;
+import nz.co.fortytwo.signalk.model.SignalKModel;
+import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.server.NMEAProcessor;
 import nz.co.fortytwo.signalk.server.util.Constants;
 import nz.co.fortytwo.signalk.server.util.Util;
-import nz.co.fortytwo.signalk.signalk.SignalKModel;
-import nz.co.fortytwo.signalk.signalk.impl.SignalKModelFactory;
 
 import org.apache.log4j.Logger;
 import org.junit.After;

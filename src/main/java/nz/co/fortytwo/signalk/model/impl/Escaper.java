@@ -1,4 +1,4 @@
-package nz.co.fortytwo.signalk.signalk.impl;
+package nz.co.fortytwo.signalk.model.impl;
 
 /*
  * Copyright (C) 2008 Google Inc.

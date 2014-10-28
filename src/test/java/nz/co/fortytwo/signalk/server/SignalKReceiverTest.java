@@ -6,11 +6,11 @@ import static nz.co.fortytwo.signalk.server.util.JsonConstants.env_wind_speedApp
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.env_wind_speedTrue;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.nav_magneticVariation;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.nav_position_latitude;
+import nz.co.fortytwo.signalk.model.SignalKModel;
+import nz.co.fortytwo.signalk.model.SignalkRouteFactory;
+import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.server.DeclinationProcessor;
 import nz.co.fortytwo.signalk.server.WindProcessor;
-import nz.co.fortytwo.signalk.signalk.SignalKModel;
-import nz.co.fortytwo.signalk.signalk.SignalkRouteFactory;
-import nz.co.fortytwo.signalk.signalk.impl.SignalKModelFactory;
 
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;

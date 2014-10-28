@@ -1,4 +1,4 @@
-package nz.co.fortytwo.signalk.signalk.impl;
+package nz.co.fortytwo.signalk.model.impl;
 
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.SELF;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.VESSELS;
@@ -12,7 +12,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import mjson.Json;
-import nz.co.fortytwo.signalk.signalk.impl.SignalKModelImpl;
+import nz.co.fortytwo.signalk.model.impl.SignalKModelImpl;
 
 import org.apache.log4j.Logger;
 import org.junit.After;

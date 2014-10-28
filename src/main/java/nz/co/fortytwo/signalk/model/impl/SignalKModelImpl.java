@@ -1,14 +1,14 @@
-package nz.co.fortytwo.signalk.signalk.impl;
+package nz.co.fortytwo.signalk.model.impl;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 import mjson.Json;
+import nz.co.fortytwo.signalk.model.SignalKModel;
+import nz.co.fortytwo.signalk.model.event.JsonEvent;
+import nz.co.fortytwo.signalk.model.event.JsonEvent.EventType;
 import nz.co.fortytwo.signalk.server.util.JsonConstants;
-import nz.co.fortytwo.signalk.signalk.SignalKModel;
-import nz.co.fortytwo.signalk.signalk.event.JsonEvent;
-import nz.co.fortytwo.signalk.signalk.event.JsonEvent.EventType;
 
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;

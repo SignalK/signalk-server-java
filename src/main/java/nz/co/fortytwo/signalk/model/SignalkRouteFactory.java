@@ -1,4 +1,4 @@
-package nz.co.fortytwo.signalk.signalk;
+package nz.co.fortytwo.signalk.model;
 
 import nz.co.fortytwo.signalk.server.AISProcessor;
 import nz.co.fortytwo.signalk.server.InputFilterProcessor;
@@ -29,7 +29,7 @@ public class SignalkRouteFactory {
 	 */
 	public static void configureInputRoute(RouteBuilder routeBuilder,String input) {
 		routeBuilder.from(input).onException(Exception.class).handled(true).maximumRedeliveries(0)
-		.to("log:nz.co.fortytwo.signalk.signalk.receive?level=ERROR&showException=true&showStackTrace=true").end()
+		.to("log:nz.co.fortytwo.signalk.model.receive?level=ERROR&showException=true&showStackTrace=true").end()
 		// dump misc rubbish
 		.process(new InputFilterProcessor())
 		//convert NMEA to signalk
@@ -51,7 +51,7 @@ public class SignalkRouteFactory {
 	public static void configureWebsocketRoute(RouteBuilder routeBuilder ,String input, int port, String staticResources){
 		routeBuilder.from(input).onException(Exception.class).handled(true).maximumRedeliveries(0)
 		.process(new OutputFilterProcessor())
-		.to("log:nz.co.fortytwo.signalk.signalk.websocket?level=ERROR&showException=true&showStackTrace=true").end()
+		.to("log:nz.co.fortytwo.signalk.model.websocket?level=ERROR&showException=true&showStackTrace=true").end()
 		.to("websocket://0.0.0.0:"+port+"/signalk/stream?sendToAll=true&staticResources="+staticResources);
 	}
 	public static void configureTcpServerRoute(RouteBuilder routeBuilder ,String input, TcpServer tcpServer){
