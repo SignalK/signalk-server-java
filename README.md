@@ -10,7 +10,7 @@ Installation
 ------------
 
 ```shell
-$ git clone https://github.com/rob42/Signalk-server.git
+$ git clone https://github.com/SignalK/signalk-java-server.git
 ```
 
 Then

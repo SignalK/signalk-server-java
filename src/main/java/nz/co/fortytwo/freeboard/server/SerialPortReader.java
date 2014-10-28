@@ -163,11 +163,12 @@ public class SerialPortReader implements Processor {
 		public void serialEvent(SerialPortEvent event) {
 			logger.trace("SerialEvent:"+event.getEventType());
 			try{
-				if (event.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
+				if (running && event.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
 					
 						int r=0;
 						
 						while((r>-1)&& in.available()>0 ){
+							if(!running)break;
 							try {
 								r = in.read();
 								buff[x]=(byte) r;

@@ -123,10 +123,10 @@ public class NMEAProcessorTest {
 	@Ignore
 	public void shouldRejectMismatchedValues() throws FileNotFoundException, IOException {
 		NMEAProcessor processor = new NMEAProcessor();
-		HashMap<String, Object> map = new HashMap<String, Object>();
+		//HashMap<String, Object> map = new HashMap<String, Object>();
 		//freeboard.nmea.YXXDR.MaxVu110=RPM,EVV,DBT,EPP,ETT
 		Util.getConfig(null).setProperty("freeboard.nmea.YXXDR.MaxVu110", "RPM,EVV,SKIP,EPP");
-		map.put(Constants.NMEA, "$YXXDR,G,0004,,G,12.27,,G,,,G,003.3,,G,0012,,MaxVu110*4E");
+		//map.put(Constants.NMEA, "$YXXDR,G,0004,,G,12.27,,G,,,G,003.3,,G,0012,,MaxVu110*4E");
 		Json json = (Json) processor.handle("$YXXDR,G,0004,,G,12.27,,G,,,G,003.3,,G,0012,,MaxVu110*4E");
 		//RPM,EVV,DBT,EPP,ETT
 		assertTrue(signalkModel.findValue(json, propulsion_rpm)==null);

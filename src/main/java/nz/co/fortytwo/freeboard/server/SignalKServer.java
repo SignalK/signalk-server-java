@@ -71,69 +71,18 @@ public class SignalKServer {
 		CamelContextFactory.setContext(route);
 		// web socket on port 9090
 		logger.info("  Websocket port:"+config.getProperty(Constants.WEBSOCKET_PORT));
-		route.setPort(Integer.valueOf(config.getProperty(Constants.WEBSOCKET_PORT)));
+		route.setWsPort(Integer.valueOf(config.getProperty(Constants.WEBSOCKET_PORT)));
+		logger.info("  Signalk REST API port:"+config.getProperty(Constants.REST_PORT));
+		route.setRestPort(Integer.valueOf(config.getProperty(Constants.REST_PORT)));
 		
 		//are we running demo?
-		logger.info("  Serial url:"+config.getProperty(Constants.SERIAL_URL));
-		route.setSerialUrl(config.getProperty(Constants.SERIAL_URL));
-		
+		if (Boolean.valueOf(config.getProperty(Constants.DEMO))) {
+			logger.info("  Demo streaming url:"+config.getProperty(Constants.STREAM_URL));
+			route.setStreamUrl(config.getProperty(Constants.STREAM_URL));
+		}
 		// add our routes to Camel
 		main.addRouteBuilder(route);
 
-		Connector connector = new SelectChannelConnector();
-		logger.info("  Webserver http port:"+config.getProperty(Constants.HTTP_PORT));
-		connector.setPort(Integer.valueOf(config.getProperty(Constants.HTTP_PORT)));
-
-		//virtual hosts
-		String virtualHosts = config.getProperty(Constants.VIRTUAL_URL);
-		server = new Server();
-		server.addConnector(connector);
-
-		// serve mapcache
-		ServletContextHandler mapContext = new ServletContextHandler();
-		logger.info("  Mapcache url:"+config.getProperty(Constants.MAPCACHE));
-		mapContext.setContextPath(config.getProperty(Constants.MAPCACHE));
-		logger.info("  Mapcache resource:"+config.getProperty(Constants.MAPCACHE_RESOURCE));
-		mapContext.setResourceBase(config.getProperty(Constants.MAPCACHE_RESOURCE));
-		ServletHolder mapHolder= mapContext.addServlet(DefaultServlet.class, "/*");
-		mapHolder.setInitParameter("cacheControl","max-age=3600,public" );
-		
-		//serve tracks
-		ServletContextHandler trackContext = new ServletContextHandler();
-		logger.info("  Tracks url:"+config.getProperty(Constants.TRACKS));
-		trackContext.setContextPath(config.getProperty(Constants.TRACKS));
-		logger.info("  Tracks resource:"+config.getProperty(Constants.TRACKS_RESOURCE));
-		trackContext.setResourceBase(config.getProperty(Constants.TRACKS_RESOURCE));
-		trackContext.addServlet(DefaultServlet.class, "/*");
-		
-		if(StringUtils.isNotBlank(virtualHosts)){
-			mapContext.setVirtualHosts(virtualHosts.split(","));
-			trackContext.setVirtualHosts(virtualHosts.split(","));
-		}
-		HandlerList handlers = new HandlerList();
-		handlers.addHandler(mapContext);
-		handlers.addHandler(trackContext);
-
-		// serve freeboard
-		WebAppContext wac = new WebAppContext();
-		logger.info("  Freeboard resource:"+config.getProperty(Constants.FREEBOARD_RESOURCE));
-		wac.setWar(config.getProperty(Constants.FREEBOARD_RESOURCE));
-		wac.setDefaultsDescriptor(config.getProperty(Constants.FREEBOARD_RESOURCE)+"WEB-INF/webdefault.xml");
-		
-		wac.setDescriptor(config.getProperty(Constants.FREEBOARD_RESOURCE)+"WEB-INF/web.xml");
-		logger.info("  Freeboard url:"+config.getProperty(Constants.FREEBOARD_URL));
-		wac.setContextPath(config.getProperty(Constants.FREEBOARD_URL));
-		wac.setServer(server);
-		wac.setParentLoaderPriority(true);
-		wac.setVirtualHosts(null);
-		if(StringUtils.isNotBlank(virtualHosts)){
-			wac.setVirtualHosts(virtualHosts.split(","));
-		}
-		handlers.addHandler(wac);
-		
-		server.setHandler(handlers);
-		server.start();
-		
 		// and run, which keeps blocking until we terminate the JVM (or stop CamelContext)
 		main.run();
 		
@@ -155,11 +104,7 @@ public class SignalKServer {
 		if(!logDir.exists()){
 			logDir.mkdirs();
 		}
-		//do we have a mapcache
-		File mapDir = new File(rootDir,config.getProperty(Constants.MAPCACHE_RESOURCE));
-		if(!mapDir.exists()){
-			mapDir.mkdirs();
-		}
+		
 	}
 
 	public static void main(String[] args) throws Exception {

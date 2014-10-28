@@ -127,31 +127,18 @@ public class Util {
 	 */
 	public static void setDefaults(Properties props) {
 		//populate sensible defaults here
-		props.setProperty(Constants.FREEBOARD_URL,"/freeboard");
-		props.setProperty(Constants.FREEBOARD_RESOURCE,"freeboard/");
-		props.setProperty(Constants.MAPCACHE_RESOURCE,"./mapcache");
-		props.setProperty(Constants.MAPCACHE,"/mapcache");
-		props.setProperty(Constants.HTTP_PORT,"8080");
-		props.setProperty(Constants.WEBSOCKET_PORT,"9090");
+		props.setProperty(Constants.WEBSOCKET_PORT,"9292");
+		props.setProperty(Constants.REST_PORT,"9290");
 		props.setProperty(Constants.CFG_DIR,"./conf/");
-		props.setProperty(Constants.CFG_FILE,"freeboard.cfg");
+		props.setProperty(Constants.CFG_FILE,"signalk.cfg");
 		props.setProperty(Constants.DEMO,"false");
-		props.setProperty(Constants.SERIAL_URL,"./src/test/resources/motu.log&scanStream=true&scanStreamDelay=500");
-		props.setProperty(Constants.VIRTUAL_URL,"");
+		props.setProperty(Constants.STREAM_URL,"./src/test/resources/motu.log&scanStream=true&scanStreamDelay=500");
 		props.setProperty(Constants.USBDRIVE,"/media/usb0");
-		props.setProperty(Constants.TRACKS,"/tracks");
-		props.setProperty(Constants.TRACKS_RESOURCE,"./tracks");
-		props.setProperty(Constants.TRACK_CURRENT,"current.gpx");
-		props.setProperty(Constants.WAYPOINTS,"/tracks");
-		props.setProperty(Constants.WAYPOINTS_RESOURCE,"./tracks");
-		props.setProperty(Constants.WAYPOINT_CURRENT,"waypoints.gpx");
 		props.setProperty(Constants.SERIAL_PORTS,"/dev/ttyUSB0,/dev/ttyUSB1,/dev/ttyUSB2,/dev/ttyACM0,/dev/ttyACM1,/dev/ttyACM2");
 		if(SystemUtils.IS_OS_WINDOWS){
 			props.setProperty(Constants.SERIAL_PORTS,"COM1,COM2,COM3,COM4");
 		}
 		props.setProperty(Constants.SERIAL_PORT_BAUD,"38400");
-		props.setProperty(Constants.DNS_USE_CHOICE,Constants.DNS_USE_BOAT);
-		props.setProperty(Constants.ENABLE_COMET,"false");
 	}
 	
 
@@ -262,5 +249,12 @@ public class Util {
 	public static Json getEmptyRootNode(){
 		Json tempRootNode = Json.object().set(JsonConstants.VESSELS,Json.object().set(JsonConstants.SELF,Json.object()));
 		return tempRootNode;
+	}
+
+	public static double kntToMs(double speed) {
+		return speed*0.51444;
+	}
+	public static double msToKnts(double speed) {
+		return speed*1.943844492;
 	}
 }

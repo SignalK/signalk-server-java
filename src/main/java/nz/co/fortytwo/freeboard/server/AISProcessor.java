@@ -35,6 +35,7 @@ import java.util.Map;
 
 import mjson.Json;
 import nz.co.fortytwo.freeboard.server.ais.AisVesselInfo;
+import nz.co.fortytwo.freeboard.server.util.Util;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -132,10 +133,12 @@ public class AISProcessor extends FreeboardProcessor implements Processor {
 							aisVessel.set(name, vInfo.getName());
 							aisVessel.set(mmsi, String.valueOf(vInfo.getUserId()));
 							signalkModel.putWith(aisVessel, nav_state, navStatusMap.get(vInfo.getNavStatus()), "AIS");
-							signalkModel.putWith(aisVessel, nav_position_latitude, vInfo.getPosition().getLatitude(), "AIS");
-							signalkModel.putWith(aisVessel, nav_position_longitude, vInfo.getPosition().getLongitude(), "AIS");
+							if(vInfo.getPosition()!=null){
+								signalkModel.putWith(aisVessel, nav_position_latitude, vInfo.getPosition().getLatitude(), "AIS");
+								signalkModel.putWith(aisVessel, nav_position_longitude, vInfo.getPosition().getLongitude(), "AIS");
+							}
 							signalkModel.putWith(aisVessel, nav_courseOverGroundTrue, ((double)vInfo.getCog())/10, "AIS");
-							signalkModel.putWith(aisVessel, nav_speedOverGround, ((double)vInfo.getSog())/10, "AIS");
+							signalkModel.putWith(aisVessel, nav_speedOverGround, Util.kntToMs(((double)vInfo.getSog())/10), "AIS");
 							signalkModel.putWith(aisVessel, nav_headingTrue, ((double)vInfo.getTrueHeading())/10, "AIS");
 							signalkModel.putWith(aisVessel, communication_callsignVhf, vInfo.getCallsign(), "AIS");
 							return json;

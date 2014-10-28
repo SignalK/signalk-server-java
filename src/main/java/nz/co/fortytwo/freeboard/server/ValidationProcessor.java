@@ -39,6 +39,11 @@ public class ValidationProcessor extends FreeboardProcessor implements Processor
 	public void process(Exchange exchange) throws Exception {
 		
 		try {
+			if(!(exchange.getIn().getBody() instanceof Json)){
+				logger.debug("Invalid object found:" + exchange.getIn().getBody());
+				exchange.getIn().setBody(null);
+				return;
+			}
 			validate(exchange.getIn().getBody(Json.class));
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
@@ -48,6 +53,8 @@ public class ValidationProcessor extends FreeboardProcessor implements Processor
 	
 	public void validate(Json node){
 		//is this a leaf?
+		logger.debug(node.toString());
+		if(node.isNull()||node.isPrimitive())return;
 		if(node.has("value")){
 			//it should have timestamp and source
 			if(!node.has("timestamp"))node.set("timestamp",new DateTime().toString());

@@ -228,6 +228,8 @@ public class JsonConstants {
 	public static final String tanks_alarmLevel = "tanks.alarmLevel";
 	public static final String tanks_capacity = "tanks.capacity";
 	public static final String tanks_tankType = "tanks.tankType";
+	public static final String SIGNALK_AUTH = "/signalk/auth/";
+	public static final String SIGNALK_API = "/signalk/api/";
 	
 	
 	

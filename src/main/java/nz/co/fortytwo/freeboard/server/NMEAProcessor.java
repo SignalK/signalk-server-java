@@ -286,8 +286,8 @@ public class NMEAProcessor extends FreeboardProcessor implements Processor {
 				if (evt.getSentence() instanceof RMCSentence) {
 					RMCSentence sen = (RMCSentence) evt.getSentence();
 					Util.checkTime(sen);
-					previousSpeed = Util.movingAverage(ALPHA, previousSpeed, sen.getSpeed());
-					signalkModel.putWith(json, nav_speedOverGround , sen.getSpeed(), "nmea");
+					previousSpeed = Util.movingAverage(ALPHA, previousSpeed, Util.kntToMs(sen.getSpeed()));
+					signalkModel.putWith(json, nav_speedOverGround , Util.kntToMs(sen.getSpeed()), "nmea");
 				}
 				if (evt.getSentence() instanceof VHWSentence) {
 					VHWSentence sen = (VHWSentence) evt.getSentence();
@@ -299,8 +299,8 @@ public class NMEAProcessor extends FreeboardProcessor implements Processor {
 					} catch (DataNotAvailableException e) {
 						logger.error(e.getMessage());
 					}
-					previousSpeed = Util.movingAverage(ALPHA, previousSpeed, sen.getSpeedKnots());
-					signalkModel.putWith(json, nav_speedOverGround , previousSpeed, "nmea");
+					previousSpeed = Util.movingAverage(ALPHA, previousSpeed, Util.kntToMs(sen.getSpeedKnots()));
+					signalkModel.putWith(json, nav_speedOverGround , Util.kntToMs(previousSpeed), "nmea");
 					
 				}
 
@@ -313,7 +313,7 @@ public class NMEAProcessor extends FreeboardProcessor implements Processor {
 					// relative to bow
 					double angle = sen.getAngle();
 					signalkModel.putWith(json, env_wind_directionApparent , angle, "nmea");
-					signalkModel.putWith(json, env_wind_speedApparent , sen.getSpeed(), "nmea");
+					signalkModel.putWith(json, env_wind_speedApparent , Util.kntToMs(sen.getSpeed()), "nmea");
 					
 				}
 				// Cruzpro BVE sentence

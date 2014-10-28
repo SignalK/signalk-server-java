@@ -48,11 +48,11 @@ public class SignalkRouteFactory {
 	 * @param routeBuilder
 	 * @param input
 	 */
-	public static void configureWebsocketRoute(RouteBuilder routeBuilder ,String input){
+	public static void configureWebsocketRoute(RouteBuilder routeBuilder ,String input, int port, String staticResources){
 		routeBuilder.from(input).onException(Exception.class).handled(true).maximumRedeliveries(0)
 		.process(new OutputFilterProcessor())
 		.to("log:nz.co.fortytwo.freeboard.signalk.websocket?level=ERROR&showException=true&showStackTrace=true").end()
-		.to("websocket://0.0.0.0:9292/signalk/stream?sendToAll=true&staticResources=file:///home/robert/gitrep/react-consumer/");
+		.to("websocket://0.0.0.0:"+port+"/signalk/stream?sendToAll=true&staticResources="+staticResources);
 	}
 	public static void configureTcpServerRoute(RouteBuilder routeBuilder ,String input, TcpServer tcpServer){
 	// push NMEA out via TCPServer.

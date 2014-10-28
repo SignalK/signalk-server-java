@@ -25,6 +25,8 @@ import java.util.Properties;
 
 import mjson.Json;
 import nz.co.fortytwo.freeboard.server.util.Constants;
+import nz.co.fortytwo.freeboard.server.util.JsonConstants;
+import nz.co.fortytwo.freeboard.server.util.Util;
 import nz.co.fortytwo.freeboard.signalk.SignalKModel;
 import nz.co.fortytwo.freeboard.signalk.SignalkRouteFactory;
 import nz.co.fortytwo.freeboard.signalk.impl.SignalKModelFactory;
@@ -53,9 +55,9 @@ public class SignalKReceiver extends RouteBuilder {
 	public static final String SEDA_INPUT = "seda:input";
 	public static final String DIRECT_WEBSOCKETS = "direct:websockets";
 	private static final String DIRECT_TCP = "direct:tcp";
-	private int ws_port = 9291;
-	private int rest_port = 9290;
-	private String serialUrl;
+	private int wsPort = 9292;
+	private int restPort = 9290;
+	private String streamUrl;
 	
 	private SerialPortManager serialPortManager;
     
@@ -68,24 +70,30 @@ public class SignalKReceiver extends RouteBuilder {
 		this.config = config;
 	}
 
-	public int getPort() {
-		return ws_port;
+	public int getWsPort() {
+		return wsPort;
 	}
 
-	public void setPort(int port) {
-		this.ws_port = port;
+	public void setWsPort(int port) {
+		this.wsPort = port;
 	}
 
 	@Override
 	public void configure() throws Exception {
 		
 		File jsonFile = new File("./conf/self.json");
-		System.out.println(jsonFile.getAbsolutePath());
-		try{
-			Json temp = Json.read(jsonFile.toURI().toURL());
-			signalkModel.merge(temp);
-		}catch(Exception ex){
-			System.out.println(ex.getMessage());
+		log.info("Checking for previous state: "+jsonFile.getAbsolutePath());
+		if(jsonFile.exists()){
+			try{
+				
+				Json temp = Json.read(jsonFile.toURI().toURL());
+				signalkModel.merge(temp);
+				log.info("   Saved state found");
+			}catch(Exception ex){
+				System.out.println(ex.getMessage());
+			}
+		}else{
+			log.info("   Saved state not found");
 		}
 		
 		// init processors who depend on this being started
@@ -100,7 +108,7 @@ public class SignalKReceiver extends RouteBuilder {
 		intercept().when(stopNull).stop();
 
 		if (Boolean.valueOf(config.getProperty(Constants.DEMO))) {
-			from("stream:file?fileName=" + serialUrl).to(SEDA_INPUT);
+			from("stream:file?fileName=" + streamUrl).to(SEDA_INPUT);
 		}
 		tcpServer = new TcpServer();
 		tcpServer.start();
@@ -111,11 +119,15 @@ public class SignalKReceiver extends RouteBuilder {
 		// main input to destination route
 		// send input to listeners
 		SignalkRouteFactory.configureInputRoute(this, SEDA_INPUT);
-		SignalkRouteFactory.configureWebsocketRoute(this, DIRECT_WEBSOCKETS);
+		
+		File htmlRoot = new File(config.getProperty(Constants.STATIC_DIR));
+		log.info("Serving static files from "+htmlRoot.getAbsolutePath());
+		
+		SignalkRouteFactory.configureWebsocketRoute(this, DIRECT_WEBSOCKETS, wsPort, "file://"+htmlRoot.getAbsolutePath());
 		SignalkRouteFactory.configureTcpServerRoute(this, DIRECT_TCP, tcpServer);
 		//restlet
-		SignalkRouteFactory.configureRestRoute(this, "restlet:http://0.0.0.0:" + rest_port + "/signalk/api/");
-		SignalkRouteFactory.configureAuthRoute(this, "restlet:http://0.0.0.0:" + rest_port + "/signalk/auth/");
+		SignalkRouteFactory.configureRestRoute(this, "restlet:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_API);
+		SignalkRouteFactory.configureAuthRoute(this, "restlet:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_AUTH);
 		
 		// timed actions
 		from("timer://declination?fixedRate=true&period=10000").process(new DeclinationProcessor()).to("log:nz.co.fortytwo.freeboard.signalk.update?level=INFO").end();
@@ -128,12 +140,15 @@ public class SignalKReceiver extends RouteBuilder {
 		
 	}
 
-	public String getSerialUrl() {
-		return serialUrl;
+	/**
+	 * @return
+	 */
+	public String getStreamUrl() {
+		return streamUrl;
 	}
 
-	public void setSerialUrl(String serialUrl) {
-		this.serialUrl = serialUrl;
+	public void setStreamUrl(String serialUrl) {
+		this.streamUrl = serialUrl;
 	}
 
 	/**
@@ -143,6 +158,14 @@ public class SignalKReceiver extends RouteBuilder {
 	public void stopSerial() {
 		serialPortManager.stopSerial();
 		//nmeaTcpServer.stop();
+	}
+
+	public int getRestPort() {
+		return restPort;
+	}
+
+	public void setRestPort(int restPort) {
+		this.restPort = restPort;
 	}
 	
 
