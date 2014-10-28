@@ -2,16 +2,16 @@
 #
 # start script for freeboard on a linux pc or maybe on a mac too
 #
-#FREEBOARD_HOME=/home/pi/freeboard
-FREEBOARD_HOME=`pwd`
+#SIGNALK_HOME=/home/pi/freeboard
+SIGNALK_HOME=`pwd`
 
 JAR=signalk-server-0.0.1-SNAPSHOT-jar-with-dependencies.jar
 #
-cd $FREEBOARD_HOME
+cd $SIGNALK_HOME
 mkdir logs
 
 #temporary until linux-arm.jar is in purejavacom.jar
-export LD_LIBRARY_PATH=$FREEBOARD_HOME/jna
+export LD_LIBRARY_PATH=$SIGNALK_HOME/jna
 
 #start server
 
@@ -29,9 +29,9 @@ fi
 EXT="-Djava.util.Arrays.useLegacyMergeSort=true"
 MEM="-Xmx24m -XX:PermSize=32m -XX:MaxPermSize=32m"
 
-LOG4J=-Dlog4j.configuration=file://$FREEBOARD_HOME/conf/log4j.properties
+LOG4J=-Dlog4j.configuration=file://$SIGNALK_HOME/conf/log4j.properties
 
-cd $FREEBOARD_HOME
+cd $SIGNALK_HOME
 echo "Starting: $JAVA $EXT $LOG4J $MEM -jar target/$JAR >>logs/start.log 2>&1 &" >>logs/start.log 2>&1 &
 $JAVA $EXT $LOG4J $MEM -jar target/$JAR 
 #>>logs/start.log 2>&1 &
