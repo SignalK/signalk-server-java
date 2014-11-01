@@ -82,8 +82,8 @@ public class NMEAProcessorTest {
 	
 	public void shouldHandleGPRMC(){
 		 String nmea1 = "$GPRMC,144629.20,A,5156.91111,N,00434.80385,E,0.295,,011113,,,A*78";
-		 String nmea2 = "$GPRMC,144629.30,A,5156.91115,N,00434.80383,E,1.689,,011113,,,A*73";
-		 String nmea3 = "$GPRMC,144629.50,A,5156.91127,N,00434.80383,E,1.226,,011113,,,A*75";
+		// String nmea2 = "$GPRMC,144629.30,A,5156.91115,N,00434.80383,E,1.689,,011113,,,A*73";
+		// String nmea3 = "$GPRMC,144629.50,A,5156.91127,N,00434.80383,E,1.226,,011113,,,A*75";
 		 NMEAProcessor processor = new NMEAProcessor();
 		
 		 Json json = (Json) processor.handle(nmea1);

@@ -25,7 +25,7 @@ public class SignalKReceiverTest extends CamelTestSupport {
 	private SignalKModel signalkModel=SignalKModelFactory.getInstance();
 
 
-	private DeclinationProcessor declinationProcessor;
+	private DeclinationProcessor declinationProcessor=new DeclinationProcessor();
 
 	private WindProcessor windProcessor = new WindProcessor();
 	//private GPXProcessor gpxProcessor;

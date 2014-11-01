@@ -1,11 +1,12 @@
 package nz.co.fortytwo.signalk.server.signalk.json;
 
-import java.net.MalformedURLException;
+import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.URL;
 
 import mjson.Json;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,9 +42,9 @@ public class BasicMjsonTest {
 		
 	}
 	@Test
-	public void test() throws URISyntaxException, MalformedURLException {
+	public void test() throws URISyntaxException, IOException {
 		//Json.Schema schema = Json.schema(new URI("https://raw.githubusercontent.com/SignalK/specification/master/schemas/signalk.json"));
-		Json basicNav = Json.read(new URL("file:/home/robert/devSpace/workspace/signalk-server/src/test/resources/samples/basic_nav.json"));
+		Json basicNav = Json.read(FileUtils.readFileToString(new File("./src/test/resources/samples/basic_nav.json")));
 		System.out.println(basicNav.toString());
 		System.out.println(basicNav.at("vessels").at("motu").at("navigation").at("position").toString());
 		Json newNav = basicNav.dup();

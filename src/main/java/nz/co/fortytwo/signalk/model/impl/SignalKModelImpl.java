@@ -8,7 +8,7 @@ import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.event.JsonEvent;
 import nz.co.fortytwo.signalk.model.event.JsonEvent.EventType;
-import nz.co.fortytwo.signalk.server.util.JsonConstants;
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;
 
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
@@ -27,11 +27,11 @@ public class SignalKModelImpl extends Json implements SignalKModel{
 	private EventBus eventBus = new EventBus();
 	
 	protected SignalKModelImpl(){
-		this.set(JsonConstants.VESSELS,Json.object().set(JsonConstants.SELF,Json.object()));
+		this.set(VESSELS,Json.object().set(SELF,Json.object()));
 	}
 	
 	public Json self(){
-		return this.at(JsonConstants.VESSELS).at(JsonConstants.SELF);
+		return this.at(VESSELS).at(SELF);
 	}
 	
 	/**
@@ -99,7 +99,7 @@ public class SignalKModelImpl extends Json implements SignalKModel{
 		node=findNode(node, fullPath);
 		if(node==null)return null;
 		
-		return node.at("value");
+		return node.at(VALUE);
 	}
 	/**
 	 * Recursive findNode()
@@ -201,7 +201,7 @@ public class SignalKModelImpl extends Json implements SignalKModel{
 	 * @return
 	 */
 	public Json setKey(String key, Object value){
-		return setKey(key,value, new DateTime(), "self");
+		return setKey(key,value, new DateTime(), SELF);
 	}
 	
 	/**
@@ -212,7 +212,7 @@ public class SignalKModelImpl extends Json implements SignalKModel{
 	 * @return
 	 */
 	public Json setKey(String key,Object value, DateTime timestamp){
-		return setKey(key,value, timestamp, "self");
+		return setKey(key,value, timestamp, SELF);
 	}
 	
 	/**
@@ -238,10 +238,10 @@ public class SignalKModelImpl extends Json implements SignalKModel{
 	public Json setKey(String key,Object value, DateTime timestamp, String source){
 		Json json = atPath(key);
 		if(json==null) return null;
-		json.set("timestamp",timestamp.toString());
-		json.set("source",source);
+		json.set(TIMESTAMP,timestamp.toString());
+		json.set(SOURCE,source);
 		eventBus.post(new JsonEvent(json, EventType.EDIT));
-		return json.set("value",value);
+		return json.set(VALUE,value);
 	}
 
 	/**
@@ -329,7 +329,7 @@ public class SignalKModelImpl extends Json implements SignalKModel{
 	}
 	
 	public  Json putWith(Json node, String fullPath, Object value) {
-		return putWith(node, fullPath,value,JsonConstants.SELF);
+		return putWith(node, fullPath,value,SELF);
 		
 	}
 	public  Json putWith(Json node, String fullPath, Object value, String source) {
@@ -338,9 +338,9 @@ public class SignalKModelImpl extends Json implements SignalKModel{
 	public  Json putWith(Json node, String fullPath, Object value, String source, DateTime dateTime) {
 		node=addNode(node,fullPath);
 		
-		node.set("value",value);
-		node.set("timestamp",dateTime.toDateTime(DateTimeZone.UTC).toString(fmt));
-		node.set("source",source);
+		node.set(VALUE,value);
+		node.set(TIMESTAMP,dateTime.toDateTime(DateTimeZone.UTC).toString(fmt));
+		node.set(SOURCE,source);
 		
 		return node;
 		
@@ -351,7 +351,7 @@ public class SignalKModelImpl extends Json implements SignalKModel{
 	 * @return
 	 */
 	public Json getEmptyRootNode(){
-		Json tempRootNode = Json.object().set(JsonConstants.VESSELS,Json.object().set(JsonConstants.SELF,Json.object()));
+		Json tempRootNode = Json.object().set(VESSELS,Json.object().set(SELF,Json.object()));
 		return tempRootNode;
 	}
 	

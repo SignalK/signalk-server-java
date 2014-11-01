@@ -56,8 +56,8 @@ public class AISProcessorTest{
 		msg += "\\2G2:0125*7B";
 		msg += "\\!AIVDM,2,2,4,A,R0EQCP000000000,2*45";
 		AISProcessor processor = new AISProcessor();
-		Json json = (Json) processor.handle(msg);
-		assertNull(json);
+		Object obj = processor.handle(msg);
+		assertEquals(msg,obj);
 
 	}
 
@@ -80,14 +80,14 @@ public class AISProcessorTest{
 		String msg2 = "\\g:1-2-0136,c:1363174860*24\\!BSVDM,2,1,4,B,53B>2V000000uHH4000@T4p4000000000000000S30C6340006h00000,0*4C\r\n";
 		String msg3 = "\\g:2-2-0136*59\\!BSVDM,2,2,4,B,000000000000000,2*3A";
 		AISProcessor processor = new AISProcessor();
-		Json json = (Json)processor.handle(msg1);
-		assertNull(json);
+		Object json = processor.handle(msg1);
+		assertEquals(msg1,json);
 
-		json = (Json)processor.handle(msg2);
-		assertNull(json);
+		json = processor.handle(msg2);
+		assertEquals(msg2,json);
 
-		json = (Json)processor.handle(msg3);
-		assertNull(json);
+		json = processor.handle(msg3);
+		assertEquals(msg3,json);
 		// assertEquals(map.get("TEST"), 5);
 	}
 
@@ -116,14 +116,14 @@ public class AISProcessorTest{
 		String msg2 = "\\g:1-2-0136,c:1363174860*24\\!BSVDM,2,1,4,B,53B>2V000000uHH4000@T4p4000000000000000S30C6340006h00000,0*4C\r\n";
 		String msg3 = "\\g:2-2-0136*59\\!BSVDM,2,2,4,B,000000000000000,2*3A";
 		AISProcessor processor = new AISProcessor();
-		Json json = (Json)processor.handle(msg1);
-		assertNull(json);
+		Object json = processor.handle(msg1);
+		assertEquals(msg1,json);
 
-		json = (Json)processor.handle(msg2);
-		assertNull(json);
+		json = processor.handle(msg2);
+		assertEquals(msg2,json);
 
-		json = (Json)processor.handle(msg3);
-		assertNull(json);
+		json = processor.handle(msg3);
+		assertEquals(msg3,json);
 		json=null;
 		String msg = "$PGHP,1,2010,6,11,11,46,11,929,244,0,,1,72*21\r\n";
 		msg += "\\1G2:0125,c:1354719387*0D";
@@ -131,8 +131,8 @@ public class AISProcessorTest{
 		msg += "\\2G2:0125*7B";
 		msg += "\\!AIVDM,2,2,4,A,R0EQCP000000000,2*45";
 
-		json = (Json)processor.handle(msg);
-		assertNull(json);
+		json = processor.handle(msg);
+		assertEquals(msg,json);
 		// assertEquals(map.get("TEST"), 5);
 	}
 /*

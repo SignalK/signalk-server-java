@@ -31,7 +31,16 @@ public class JsonConstants {
 	
 	public static final String VESSELS = "vessels";
 	public static final String SELF = "self";
-
+	public static final String CONTEXT = "context";
+	public static final String SOURCE = "source";
+	public static final String DEVICE = "device";
+	public static final String TIMESTAMP = "timestamp";
+	public static final String SRC = "src";
+	public static final String PGN = "pgn";
+	public static final String VALUE = "value";
+	public static final String VALUES = "values";
+	public static final String PATH = "path";
+	
 	public static final String name = "name";
 	public static final String mmsi = "mmsi";
 	public static final String source = "source";
@@ -230,6 +239,9 @@ public class JsonConstants {
 	public static final String tanks_tankType = "tanks.tankType";
 	public static final String SIGNALK_AUTH = "/signalk/auth/";
 	public static final String SIGNALK_API = "/signalk/api/";
+	
+	
+	
 	
 	
 	

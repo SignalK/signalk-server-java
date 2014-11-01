@@ -6,6 +6,7 @@ import nz.co.fortytwo.signalk.server.NMEAProcessor;
 import nz.co.fortytwo.signalk.server.OutputFilterProcessor;
 import nz.co.fortytwo.signalk.server.RestAuthProcessor;
 import nz.co.fortytwo.signalk.server.RestProcessor;
+import nz.co.fortytwo.signalk.server.SignalkDiffProcessor;
 import nz.co.fortytwo.signalk.server.SignalkModelProcessor;
 import nz.co.fortytwo.signalk.server.TcpServer;
 import nz.co.fortytwo.signalk.server.ValidationProcessor;
@@ -36,6 +37,8 @@ public class SignalkRouteFactory {
 		.process(new NMEAProcessor())
 		//convert AIS to signalk
 		.process(new AISProcessor())
+		//deal with diff format
+		.process(new SignalkDiffProcessor())
 		//make sure we have timestamp/source
 		.process(new ValidationProcessor())
 		//and update signalk model
@@ -48,11 +51,21 @@ public class SignalkRouteFactory {
 	 * @param routeBuilder
 	 * @param input
 	 */
-	public static void configureWebsocketRoute(RouteBuilder routeBuilder ,String input, int port, String staticResources){
+	public static void configureWebsocketTxRoute(RouteBuilder routeBuilder ,String input, int port, String staticResources){
 		routeBuilder.from(input).onException(Exception.class).handled(true).maximumRedeliveries(0)
 		.process(new OutputFilterProcessor())
-		.to("log:nz.co.fortytwo.signalk.model.websocket?level=ERROR&showException=true&showStackTrace=true").end()
+		.to("log:nz.co.fortytwo.signalk.model.websocket.tx?level=ERROR&showException=true&showStackTrace=true").end()
 		.to("websocket://0.0.0.0:"+port+"/signalk/stream?sendToAll=true&staticResources="+staticResources);
+	}
+	/**
+	 * Configures the route for input to websockets
+	 * @param routeBuilder
+	 * @param input
+	 */
+	public static void configureWebsocketRxRoute(RouteBuilder routeBuilder ,String input, int port){
+		routeBuilder.from("websocket://0.0.0.0:"+port+"/signalk/stream").onException(Exception.class).handled(true).maximumRedeliveries(0)
+		.to("log:nz.co.fortytwo.signalk.model.websocket.rx?level=ERROR&showException=true&showStackTrace=true").end()
+		.to(input);
 	}
 	public static void configureTcpServerRoute(RouteBuilder routeBuilder ,String input, TcpServer tcpServer){
 	// push NMEA out via TCPServer.
