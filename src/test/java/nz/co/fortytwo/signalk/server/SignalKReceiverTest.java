@@ -21,7 +21,7 @@ import org.junit.Test;
 
 public class SignalKReceiverTest extends CamelTestSupport {
  
-    private static Logger logger = Logger.getLogger(NMEAProcessorTest.class);
+    private static Logger logger = Logger.getLogger(SignalKReceiverTest.class);
 	private SignalKModel signalkModel=SignalKModelFactory.getInstance();
 
 

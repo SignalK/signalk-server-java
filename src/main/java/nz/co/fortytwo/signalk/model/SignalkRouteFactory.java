@@ -10,10 +10,12 @@ import nz.co.fortytwo.signalk.server.SignalkDiffProcessor;
 import nz.co.fortytwo.signalk.server.SignalkModelProcessor;
 import nz.co.fortytwo.signalk.server.TcpServer;
 import nz.co.fortytwo.signalk.server.ValidationProcessor;
+import nz.co.fortytwo.signalk.server.util.JsonConstants;
 
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.commons.lang3.StringUtils;
 
 
 
@@ -52,10 +54,17 @@ public class SignalkRouteFactory {
 	 * @param input
 	 */
 	public static void configureWebsocketTxRoute(RouteBuilder routeBuilder ,String input, int port, String staticResources){
-		routeBuilder.from(input).onException(Exception.class).handled(true).maximumRedeliveries(0)
-		.process(new OutputFilterProcessor())
-		.to("log:nz.co.fortytwo.signalk.model.websocket.tx?level=ERROR&showException=true&showStackTrace=true").end()
-		.to("websocket://0.0.0.0:"+port+"/signalk/stream?sendToAll=true&staticResources="+staticResources);
+		if(StringUtils.isBlank(staticResources)){
+			routeBuilder.from(input).onException(Exception.class).handled(true).maximumRedeliveries(0)
+			.process(new OutputFilterProcessor())
+			.to("log:nz.co.fortytwo.signalk.model.websocket.tx?level=ERROR&showException=true&showStackTrace=true").end()
+			.to("websocket://0.0.0.0:"+port+JsonConstants.SIGNALK_WS+"?sendToAll=true");
+		}else{
+			routeBuilder.from(input).onException(Exception.class).handled(true).maximumRedeliveries(0)
+			.process(new OutputFilterProcessor())
+			.to("log:nz.co.fortytwo.signalk.model.websocket.tx?level=ERROR&showException=true&showStackTrace=true").end()
+			.to("websocket://0.0.0.0:"+port+JsonConstants.SIGNALK_WS+"?sendToAll=true&staticResources="+staticResources);
+		}
 	}
 	/**
 	 * Configures the route for input to websockets
@@ -63,7 +72,7 @@ public class SignalkRouteFactory {
 	 * @param input
 	 */
 	public static void configureWebsocketRxRoute(RouteBuilder routeBuilder ,String input, int port){
-		routeBuilder.from("websocket://0.0.0.0:"+port+"/signalk/stream").onException(Exception.class).handled(true).maximumRedeliveries(0)
+		routeBuilder.from("websocket://0.0.0.0:"+port+JsonConstants.SIGNALK_WS).onException(Exception.class).handled(true).maximumRedeliveries(0)
 		.to("log:nz.co.fortytwo.signalk.model.websocket.rx?level=ERROR&showException=true&showStackTrace=true").end()
 		.to(input);
 	}

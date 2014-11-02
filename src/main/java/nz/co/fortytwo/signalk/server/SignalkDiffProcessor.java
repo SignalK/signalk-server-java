@@ -46,6 +46,7 @@ public class SignalkDiffProcessor extends FreeboardProcessor implements Processo
 			if(exchange.getIn().getBody()==null ||!(exchange.getIn().getBody() instanceof Json)) return;
 			
 			Json json = handle(exchange.getIn().getBody(Json.class));
+			logger.debug("Converted to:"+json);
 			exchange.getIn().setBody(json);
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
@@ -72,7 +73,7 @@ public class SignalkDiffProcessor extends FreeboardProcessor implements Processo
 	public Json  handle(Json node) {
 		//avoid full signalk syntax
 		if(node.has(VESSELS))return node;
-		
+		//deal with diff format
 		if(node.has(CONTEXT)){
 			logger.debug("SignalkModelProcessor  processing diff  "+node );
 			//process it

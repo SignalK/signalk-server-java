@@ -123,7 +123,7 @@ public class SignalKReceiver extends RouteBuilder {
 		log.info("Serving static files from "+htmlRoot.getAbsolutePath());
 		
 		SignalkRouteFactory.configureWebsocketTxRoute(this, DIRECT_WEBSOCKETS, wsPort, "file://"+htmlRoot.getAbsolutePath());
-		SignalkRouteFactory.configureWebsocketRxRoute(this, DIRECT_WEBSOCKETS, wsPort);
+		SignalkRouteFactory.configureWebsocketRxRoute(this, SEDA_INPUT, wsPort);
 		SignalkRouteFactory.configureTcpServerRoute(this, DIRECT_TCP, tcpServer);
 		//restlet
 		SignalkRouteFactory.configureRestRoute(this, "restlet:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_API);

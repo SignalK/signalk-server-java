@@ -241,6 +241,12 @@
 			<artifactId>dom4j</artifactId>
 			<version>1.6.1</version>
 		</dependency>	
+		<!-- test http and ws - Apache lic-->
+		<dependency>
+			<groupId>com.ning</groupId>
+			<artifactId>async-http-client</artifactId>
+			<version>1.8.14</version>
+		</dependency>
   </dependencies>
   <build>
   	<plugins>

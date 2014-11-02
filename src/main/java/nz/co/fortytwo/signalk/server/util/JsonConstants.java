@@ -239,6 +239,7 @@ public class JsonConstants {
 	public static final String tanks_tankType = "tanks.tankType";
 	public static final String SIGNALK_AUTH = "/signalk/auth/";
 	public static final String SIGNALK_API = "/signalk/api/";
+	public static final String SIGNALK_WS = "/signalk/stream";
 	
 	
 	
