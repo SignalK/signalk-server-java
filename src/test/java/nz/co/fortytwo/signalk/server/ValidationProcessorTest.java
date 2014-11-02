@@ -3,6 +3,7 @@ package nz.co.fortytwo.signalk.server;
 import static org.junit.Assert.*;
 import mjson.Json;
 import nz.co.fortytwo.signalk.server.ValidationProcessor;
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;
 
 import org.apache.log4j.Logger;
 import org.junit.After;
@@ -25,20 +26,41 @@ public class ValidationProcessorTest {
 	public void shouldAddTimestamp() {
 		ValidationProcessor validationProcessor = new ValidationProcessor();
 		Json wind = Json.read("{\"speedAlarm\": {\"value\":0.0000000000},\"directionChangeAlarm\": {\"value\":0.0000000000},\"directionApparent\": {\"value\":0.0000000000},\"directionTrue\": {\"value\":0.0000000000},\"speedApparent\": {\"value\":0.0000000000},\"speedTrue\": {\"value\":7.68}}");
-		assertNull(wind.at("speedAlarm").at("timestamp"));
+		assertNull(wind.at("speedAlarm").at(TIMESTAMP));
 		validationProcessor.validate(wind);
-		assertNotNull(wind.at("speedAlarm").at("timestamp"));
+		assertNotNull(wind.at("speedAlarm").at(TIMESTAMP));
 		logger.debug(wind);
 	}
 	@Test
 	public void shouldNotAddTimestamp() {
 		ValidationProcessor validationProcessor = new ValidationProcessor();
 		Json wind = Json.read("{\"speedAlarm\": {\"value\":0.0000000000,\"timestamp\":\"2014-10-22T21:32:43.313+13:00\",\"source\":\"unknown\"},\"directionChangeAlarm\": {\"value\":0.0000000000},\"directionApparent\": {\"value\":0.0000000000},\"directionTrue\": {\"value\":0.0000000000},\"speedApparent\": {\"value\":0.0000000000},\"speedTrue\": {\"value\":7.68}}");
-		assertNotNull(wind.at("speedAlarm").at("timestamp"));
-		assertNull(wind.at("directionChangeAlarm").at("timestamp"));
+		assertNotNull(wind.at("speedAlarm").at(TIMESTAMP));
+		assertNull(wind.at("directionChangeAlarm").at(TIMESTAMP));
 		validationProcessor.validate(wind);
-		assertNotNull(wind.at("speedAlarm").at("timestamp"));
-		assertNotNull(wind.at("directionChangeAlarm").at("timestamp"));
+		assertNotNull(wind.at("speedAlarm").at(TIMESTAMP));
+		assertNotNull(wind.at("directionChangeAlarm").at(TIMESTAMP));
+		logger.debug(wind);
+	}
+	
+	@Test
+	public void shouldAddSource() {
+		ValidationProcessor validationProcessor = new ValidationProcessor();
+		Json wind = Json.read("{\"speedAlarm\": {\"value\":0.0000000000},\"directionChangeAlarm\": {\"value\":0.0000000000},\"directionApparent\": {\"value\":0.0000000000},\"directionTrue\": {\"value\":0.0000000000},\"speedApparent\": {\"value\":0.0000000000},\"speedTrue\": {\"value\":7.68}}");
+		assertNull(wind.at("speedAlarm").at(SOURCE));
+		validationProcessor.validate(wind);
+		assertNotNull(wind.at("speedAlarm").at(SOURCE));
+		logger.debug(wind);
+	}
+	@Test
+	public void shouldNotAddSource() {
+		ValidationProcessor validationProcessor = new ValidationProcessor();
+		Json wind = Json.read("{\"speedAlarm\": {\"value\":0.0000000000,\"timestamp\":\"2014-10-22T21:32:43.313+13:00\",\"source\":\"unknown\"},\"directionChangeAlarm\": {\"value\":0.0000000000},\"directionApparent\": {\"value\":0.0000000000},\"directionTrue\": {\"value\":0.0000000000},\"speedApparent\": {\"value\":0.0000000000},\"speedTrue\": {\"value\":7.68}}");
+		assertNotNull(wind.at("speedAlarm").at(SOURCE));
+		assertNull(wind.at("directionChangeAlarm").at(SOURCE));
+		validationProcessor.validate(wind);
+		assertNotNull(wind.at("speedAlarm").at(SOURCE));
+		assertNotNull(wind.at("directionChangeAlarm").at(SOURCE));
 		logger.debug(wind);
 	}
 	
