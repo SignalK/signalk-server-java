@@ -40,6 +40,9 @@ public class SignalKModelImpl extends Json implements SignalKModel{
 	 * @return
 	 */
 	public Json merge(Json tempNode){
+		//only vessels subtree
+		if(!(tempNode.has(VESSELS)))return this;
+		if(tempNode.asJsonMap().size()>1)return this;
 		return merge(this, tempNode);
 	}
 	

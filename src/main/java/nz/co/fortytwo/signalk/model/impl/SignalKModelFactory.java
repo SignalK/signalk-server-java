@@ -19,4 +19,11 @@ public class SignalKModelFactory {
 		}
 		return signalKModel;
 	}
+	/**
+	 * Returns a different clean instance - only needed for testing!
+	 * @return
+	 */
+	public static synchronized SignalKModel getCleanInstance(){
+		return new SignalKModelImpl();
+	}
 }

@@ -18,6 +18,7 @@
  */
 package nz.co.fortytwo.signalk.server;
 
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.VESSELS;
 import mjson.Json;
 
 import org.apache.camel.Exchange;
@@ -43,6 +44,8 @@ public class SignalkModelProcessor extends FreeboardProcessor implements Process
 	public void process(Exchange exchange) throws Exception {
 		
 		try {
+			if(exchange.getIn().getBody()==null ||!(exchange.getIn().getBody() instanceof Json)) return;
+			
 			handle(exchange.getIn().getBody(Json.class));
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
@@ -51,7 +54,7 @@ public class SignalkModelProcessor extends FreeboardProcessor implements Process
 
 	//@Override
 	public void handle(Json node) {
-		//TODO: is the node valid?
+		if(!(node.has(VESSELS)))return;
 		logger.debug("SignalkModelProcessor  updating "+node );
 		signalkModel.merge(node);
 		
