@@ -82,27 +82,40 @@ public class SignalkDiffProcessor extends FreeboardProcessor implements Processo
 			//go to context
 			String path = node.at(CONTEXT).asString();
 			Json pathNode = signalkModel.addNode(temp, path);
-			String device = node.at(SOURCE).at(DEVICE).asString();
-			String ts = node.at(SOURCE).at(TIMESTAMP).asString();
-			
-			DateTime timestamp = DateTime.parse(ts,fmt);
-			
-			device = device + "-N2K-"+ node.at(SOURCE).at(SRC).asString();
-			device = device + "-"+node.at(SOURCE).at(PGN).asString();
-		//grab values and add
-			Json array = node.at(VALUES);
-			for(Json e : array.asJsonList()){
-				String key = e.at(PATH).asString();
-				Json n = signalkModel.addNode(pathNode, key);
-				int pos = key.lastIndexOf(".");
-				if(pos>0)
-				key = key.substring(pos+1);
-				signalkModel.putWith(n.up(),key, e.at(VALUE).getValue(),device,timestamp);
+			Json updates = node.at(UPDATES);
+			if(updates.isArray()){
+				for(Json update: updates.asJsonList()){
+					parseUpdate(temp, update, pathNode);
+				}
+			}else{
+				parseUpdate(temp, updates.at(UPDATES), pathNode);
 			}
+			
 			logger.debug("SignalkModelProcessor processed diff  "+temp );
 			return temp;
 		}
 		return node;
+		
+	}
+
+	private void parseUpdate(Json temp, Json update, Json pathNode) {
+		String device = update.at(SOURCE).at(DEVICE).asString();
+		String ts = update.at(SOURCE).at(TIMESTAMP).asString();
+		
+		DateTime timestamp = DateTime.parse(ts,fmt);
+		
+		device = device + "-N2K-"+ update.at(SOURCE).at(SRC).asString();
+		device = device + "-"+update.at(SOURCE).at(PGN).asString();
+	//grab values and add
+		Json array = update.at(VALUES);
+		for(Json e : array.asJsonList()){
+			String key = e.at(PATH).asString();
+			Json n = signalkModel.addNode(pathNode, key);
+			int pos = key.lastIndexOf(".");
+			if(pos>0)
+			key = key.substring(pos+1);
+			signalkModel.putWith(n.up(),key, e.at(VALUE).getValue(),device,timestamp);
+		}
 		
 	}
 

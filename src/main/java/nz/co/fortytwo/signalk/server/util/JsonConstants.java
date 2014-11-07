@@ -32,6 +32,7 @@ public class JsonConstants {
 	public static final String VESSELS = "vessels";
 	public static final String SELF = "self";
 	public static final String CONTEXT = "context";
+	public static final String UPDATES = "updates";
 	public static final String SOURCE = "source";
 	public static final String DEVICE = "device";
 	public static final String TIMESTAMP = "timestamp";

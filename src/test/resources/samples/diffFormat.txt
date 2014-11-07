@@ -1,29 +1,44 @@
- {
-    "context": "vessels.motu",
-    "source": {
-        "device" : "/dev/actisense",
-        "timestamp":"2014-08-15-16:00:00.081",
-        "src":"115",
-         "pgn":"128267"
-    },
-    "values": [
-         { "path": "navigation.courseOverGroundTrue","value": 172.9 },
-         { "path": "navigation.speedOverGround","value": 3.85 }
-      ]
-}
+ 
 
-or
-
- {
-    "context": "vessels.motu.navigation",
-    "source": {
-        "device" : "/dev/actisense",
-        "timestamp":"2014-08-15-16:00:00.081",
-        "src":"115",
-         "pgn":"128267"
-    },
-    "values": [
-         { "path": "courseOverGroundTrue","value": 172.9 },
-         { "path": "speedOverGround","value": 3.85 }
-      ]
+Final format:
+{
+    "context": "vessels.230099999",
+    "updates": [
+        {
+            "source": {
+                "pgn": "128275",
+                "device": "/dev/actisense",
+                "timestamp": "2014-08-15-16:00:05.538",
+                "src": "115"
+            },
+            "values": [
+                {
+                    "path": "navigation.logTrip",
+                    "value": 43374
+                },
+                {
+                    "path": "navigation.log",
+                    "value": 17404540
+                }
+            ]
+        },
+        {
+            "source": {
+                "device": "/dev/actisense",
+                "timestamp": "2014-08-15-16:00:00.081",
+                "src": "115",
+                "pgn": "128267"
+            },
+            "values": [
+                {
+                    "path": "navigation.courseOverGroundTrue",
+                    "value": 172.9
+                },
+                {
+                    "path": "navigation.speedOverGround",
+                    "value": 3.85
+                }
+            ]
+        }
+    ]
 }
