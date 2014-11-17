@@ -1,5 +1,7 @@
 package nz.co.fortytwo.signalk.model.impl;
 
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -8,13 +10,11 @@ import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.event.JsonEvent;
 import nz.co.fortytwo.signalk.model.event.JsonEvent.EventType;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;
 
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.DateTimeFormatterBuilder;
 import org.joda.time.format.ISODateTimeFormat;
 
 import com.google.common.eventbus.EventBus;
@@ -69,12 +69,15 @@ public class SignalKModelImpl extends Json implements SignalKModel{
 				//mergeArrays( json,  updateNode.at(fieldName));
 			} else if (json != null && json.isObject()) {
 				json = merge(json, updateNode.at(fieldName));
+				//eventBus.post(new JsonEvent(mainNode, EventType.EDIT));
 			} else {
 				if (mainNode.isObject()) {
 					// Overwrite field
 					Json value = updateNode.at(fieldName);
 					//logger.debug(fieldName + "=" + value);
 					mainNode.set(fieldName, value);
+					eventBus.post(new JsonEvent(mainNode.up(), EventType.EDIT));
+					//logger.debug(fieldName + "=" + value);
 				}
 			}
 
@@ -243,8 +246,9 @@ public class SignalKModelImpl extends Json implements SignalKModel{
 		if(json==null) return null;
 		json.set(TIMESTAMP,timestamp.toString());
 		json.set(SOURCE,source);
+		json.set(VALUE,value);
 		eventBus.post(new JsonEvent(json, EventType.EDIT));
-		return json.set(VALUE,value);
+		return json;
 	}
 
 	/**
@@ -255,6 +259,7 @@ public class SignalKModelImpl extends Json implements SignalKModel{
 	public void delete(String path, String key) {
 		Json parentNode = findNode(this, path);
 		delete(parentNode, key);
+		//eventBus.post(new JsonEvent(json, EventType.DEL));
 	}
 	/**
 	 * Delete the key from the parent node
@@ -294,7 +299,7 @@ public class SignalKModelImpl extends Json implements SignalKModel{
 		while (fieldNames.hasNext()) {
 
 			String fieldName = fieldNames.next();
-			logger.debug("Merge " + fieldName);
+			logger.trace("Safe parse " + fieldName);
 			// if field exists and starts with _, delete it
 			if(fieldName.startsWith("_")){
 				mainNode.delAt(fieldName);
@@ -325,6 +330,7 @@ public class SignalKModelImpl extends Json implements SignalKModel{
 			if(node==null){
 				node = lastNode.set(path,Json.object());
 				node = node.at(path);
+				
 			}
 			lastNode=node;
 		}
@@ -344,7 +350,7 @@ public class SignalKModelImpl extends Json implements SignalKModel{
 		node.set(VALUE,value);
 		node.set(TIMESTAMP,dateTime.toDateTime(DateTimeZone.UTC).toString(fmt));
 		node.set(SOURCE,source);
-		
+		eventBus.post(new JsonEvent(node, EventType.EDIT));
 		return node;
 		
 	}
@@ -354,7 +360,7 @@ public class SignalKModelImpl extends Json implements SignalKModel{
 	 * @return
 	 */
 	public Json getEmptyRootNode(){
-		Json tempRootNode = Json.object().set(VESSELS,Json.object().set(SELF,Json.object()));
+		Json tempRootNode = this.set(VESSELS,Json.object().set(SELF,Json.object()));
 		return tempRootNode;
 	}
 	
@@ -413,6 +419,7 @@ public class SignalKModelImpl extends Json implements SignalKModel{
 		if (property == null)
 			throw new IllegalArgumentException("Null property names are not allowed, value is " + el);
 		el.attachTo(this);
+		el.setParentKey(property);
 		object.put(property, el);
 		return this;
 	}

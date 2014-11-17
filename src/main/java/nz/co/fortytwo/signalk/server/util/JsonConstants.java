@@ -21,6 +21,7 @@ package nz.co.fortytwo.signalk.server.util;
 
 public class JsonConstants {
 
+	
 	public static final String MSG_TYPE = "MSG_TYPE";
 	public static final String SERIAL = "SERIAL";
 	public static final String EXTERNAL_IP = "EXTERNAL_IP";

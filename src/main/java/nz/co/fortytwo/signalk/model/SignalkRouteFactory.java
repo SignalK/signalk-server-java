@@ -1,12 +1,13 @@
 package nz.co.fortytwo.signalk.model;
 
 import nz.co.fortytwo.signalk.server.AISProcessor;
+import nz.co.fortytwo.signalk.server.DeltaExportProcessor;
 import nz.co.fortytwo.signalk.server.InputFilterProcessor;
 import nz.co.fortytwo.signalk.server.NMEAProcessor;
 import nz.co.fortytwo.signalk.server.OutputFilterProcessor;
 import nz.co.fortytwo.signalk.server.RestAuthProcessor;
 import nz.co.fortytwo.signalk.server.RestProcessor;
-import nz.co.fortytwo.signalk.server.SignalkDiffProcessor;
+import nz.co.fortytwo.signalk.server.DeltaImportProcessor;
 import nz.co.fortytwo.signalk.server.SignalkModelProcessor;
 import nz.co.fortytwo.signalk.server.TcpServer;
 import nz.co.fortytwo.signalk.server.ValidationProcessor;
@@ -40,7 +41,7 @@ public class SignalkRouteFactory {
 		//convert AIS to signalk
 		.process(new AISProcessor())
 		//deal with diff format
-		.process(new SignalkDiffProcessor())
+		.process(new DeltaImportProcessor())
 		//make sure we have timestamp/source
 		.process(new ValidationProcessor())
 		//and update signalk model

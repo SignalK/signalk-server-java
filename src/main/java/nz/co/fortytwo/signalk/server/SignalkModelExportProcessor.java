@@ -35,7 +35,7 @@ public class SignalkModelExportProcessor extends FreeboardProcessor implements P
 	public void process(Exchange exchange) throws Exception {
 		
 		try {
-			exchange.getIn().setBody(signalkModel.safeDuplicate());
+			//exchange.getIn().setBody(signalkModel.safeDuplicate());
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
 		}

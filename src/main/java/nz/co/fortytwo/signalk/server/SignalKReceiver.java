@@ -132,7 +132,9 @@ public class SignalKReceiver extends RouteBuilder {
 		// timed actions
 		from("timer://declination?fixedRate=true&period=10000").process(new DeclinationProcessor()).to("log:nz.co.fortytwo.signalk.model.update?level=INFO").end();
 		from("timer://wind?fixedRate=true&period=1000").process(new WindProcessor()).to("log:nz.co.fortytwo.signalk.model.update?level=INFO").end();
-		from("timer://signalkAll?fixedRate=true&period=1000").process(new SignalkModelExportProcessor()).to("log:nz.co.fortytwo.signalk.model.signalkAll?level=INFO")
+		from("timer://signalkAll?fixedRate=true&period=1000")
+			.process(new DeltaExportProcessor()).split(body())
+			.to("log:nz.co.fortytwo.signalk.model.signalkAll?level=INFO")
 			.to(DIRECT_WEBSOCKETS).to(DIRECT_TCP).end();
 		
 		//react to changes
