@@ -27,8 +27,8 @@ public class WebsocketTest extends CamelTestSupport {
  
     private static Logger logger = Logger.getLogger(WebsocketTest.class);
 	private SignalKModel signalkModel=SignalKModelFactory.getInstance();
-	String jsonDiff = "{\"context\": \"vessels.self.navigation\",\"source\": {\"device\" : \"/dev/actisense\",\"timestamp\":\"2014-08-15T16:00:00.081+00:00\",\"src\":\"115\",\"pgn\":\"128267\"},\"values\": [{ \"path\": \"courseOverGroundTrue\",\"value\": 172.9 },{ \"path\": \"speedOverGround\",\"value\": 3.85 }]}";
-	String signalKModelStr="{\"vessels\":{\"self\":{\"navigation\":{\"courseOverGroundTrue\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":172.9},\"speedOverGround\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":3.85}}}}}";
+	String jsonDiff = "{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"courseOverGroundTrue\"},{\"value\":3.85,\"path\":\"speedOverGround\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081+00:00\",\"device\":\"/dev/actisense\",\"pgn\":\"128267\",\"src\":\"115\"}}],\"context\":\"vessels.self.navigation\"}";
+	
 	@Produce(uri = "direct:input")
     protected ProducerTemplate template;
 	
@@ -37,7 +37,7 @@ public class WebsocketTest extends CamelTestSupport {
 	@Test
     public void shouldUpdateAfterSendingMsg() throws Exception {
 		final List<String> received = new ArrayList<String>();
-	    final CountDownLatch latch = new CountDownLatch(4);
+	    final CountDownLatch latch = new CountDownLatch(1);
         final AsyncHttpClient c = new AsyncHttpClient();
 
         WebSocket websocket = c.prepareGet("ws://127.0.0.1:9292"+SIGNALK_WS).execute(
@@ -70,12 +70,14 @@ public class WebsocketTest extends CamelTestSupport {
 
 
         websocket.sendTextMessage(jsonDiff);
+      
         assertTrue(latch.await(10, TimeUnit.SECONDS));
 
-        assertEquals(4, received.size());
-        assertEquals(signalkModel.duplicate().toString(), received.get(1));
-        assertEquals(signalkModel.duplicate().toString(), received.get(2));
-
+        assertEquals(1, received.size());
+        			//{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"navigation.courseOverGroundTrue\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}],\"context\":\"vessels.self\"}
+        String sk = "{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"navigation.courseOverGroundTrue\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}},{\"values\":[{\"value\":3.85,\"path\":\"navigation.speedOverGround\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}],\"context\":\"vessels.self\"}";
+        assertEquals(sk , received.get(0));
+       
         websocket.close();
         c.close();
     }
@@ -83,7 +85,7 @@ public class WebsocketTest extends CamelTestSupport {
 	@Test
     public void shouldReceiveMsgs() throws Exception {
 		final List<String> received = new ArrayList<String>();
-	    final CountDownLatch latch = new CountDownLatch(4);
+	    final CountDownLatch latch = new CountDownLatch(1);
         
         AsyncHttpClient c = new AsyncHttpClient();
         WebSocket websocket = c.prepareGet("ws://127.0.0.1:9292"+SIGNALK_WS).execute(
@@ -113,14 +115,13 @@ public class WebsocketTest extends CamelTestSupport {
                             t.printStackTrace();
                         }
                     }).build()).get();
-
+        template.sendBody(SignalKReceiver.SEDA_INPUT,jsonDiff);
         assertTrue(latch.await(10, TimeUnit.SECONDS));
 
-        assertEquals(4, received.size());
-        String sk = "{\"vessels\":{\"self\":{}}}";
-        assertEquals(sk, received.get(1));
-        assertEquals(sk, received.get(2));
-
+        assertEquals(1, received.size());
+        String sk = "{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"navigation.courseOverGroundTrue\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}},{\"values\":[{\"value\":3.85,\"path\":\"navigation.speedOverGround\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}],\"context\":\"vessels.self\"}";
+        assertEquals(sk, received.get(0));
+        
         websocket.close();
         c.close();
     }
@@ -133,7 +134,7 @@ public class WebsocketTest extends CamelTestSupport {
 	    			SignalkRouteFactory.configureInputRoute(this, SignalKReceiver.SEDA_INPUT);
 	    			SignalkRouteFactory.configureWebsocketRxRoute(this, SignalKReceiver.SEDA_INPUT, 9292);
 	    			SignalkRouteFactory.configureWebsocketTxRoute(this,  SignalKReceiver.DIRECT_WEBSOCKETS, 9292,null);
-	    			from("timer://signalkAll?fixedRate=true&period=1000").process(new SignalkModelExportProcessor())
+	    			from("timer://signalkAll?fixedRate=true&period=1000").process(new DeltaExportProcessor()).split(body())
 	    				.to("log:nz.co.fortytwo.signalk.model.signalkAll?level=INFO")
 	    				.to(SignalKReceiver.DIRECT_WEBSOCKETS)
 	    				//.to(DIRECT_TCP)

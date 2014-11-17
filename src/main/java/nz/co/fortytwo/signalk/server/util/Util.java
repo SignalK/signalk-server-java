@@ -242,14 +242,7 @@ public class Util {
 	}
 	
 
-	/**
-	 * Creates an empty root node, with vessels.ownboat structure.
-	 * @return
-	 */
-	public static Json getEmptyRootNode(){
-		Json tempRootNode = Json.object().set(JsonConstants.VESSELS,Json.object().set(JsonConstants.SELF,Json.object()));
-		return tempRootNode;
-	}
+	
 
 	public static double kntToMs(double speed) {
 		return speed*0.51444;

@@ -250,6 +250,16 @@
   </dependencies>
   <build>
   	<plugins>
+		  	<plugin>
+			    <groupId>org.apache.maven.plugins</groupId>
+			    <artifactId>maven-surefire-plugin</artifactId>
+			   
+			    <configuration>
+			        <forkCount>1</forkCount>
+			        <reuseForks>false</reuseForks>
+			        <argLine>-Xmx512m -XX:MaxPermSize=32m</argLine>
+			    </configuration>
+		    </plugin>
 
 			<!-- Allows the example to be run via 'mvn compile exec:java' -->
 			<plugin>

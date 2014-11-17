@@ -32,6 +32,7 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 	public void shouldMerge() {
 		SignalKModel signalkModel=SignalKModelFactory.getInstance();
 		signalkModel.delete(signalkModel.self(), navigation);
+		signalkModel.delete(VESSELS, "366951720");
 		SignalkModelProcessor p = new SignalkModelProcessor();
 		assertEquals(signalkModel.duplicate().toString(),"{\"vessels\":{\"self\":{}}}");
 		
@@ -44,6 +45,7 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 	public void shouldNotMergeOtherJson() {
 		SignalKModel signalkModel=SignalKModelFactory.getInstance();
 		signalkModel.delete(signalkModel.self(), navigation);
+		signalkModel.delete(VESSELS, "366951720");
 		SignalkModelProcessor p = new SignalkModelProcessor();
 		assertEquals(signalkModel.duplicate().toString(),"{\"vessels\":{\"self\":{}}}");
 		
@@ -58,6 +60,7 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 	public void shouldNotMergeNmea() throws Exception {
 		SignalKModel signalkModel=SignalKModelFactory.getInstance();
 		signalkModel.delete(signalkModel.self(), navigation);
+		signalkModel.delete(VESSELS, "366951720");
 		SignalkModelProcessor p = new SignalkModelProcessor();
 		assertEquals(signalkModel.duplicate().toString(),"{\"vessels\":{\"self\":{}}}");
 		//make an exchange here
@@ -72,6 +75,7 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 	public void shouldNotMergeAis() throws Exception {
 		SignalKModel signalkModel=SignalKModelFactory.getInstance();
 		signalkModel.delete(signalkModel.self(), navigation);
+		signalkModel.delete(VESSELS, "366951720");
 		SignalkModelProcessor p = new SignalkModelProcessor();
 		assertEquals(signalkModel.duplicate().toString(),"{\"vessels\":{\"self\":{}}}");
 		//make an exchange here
@@ -86,6 +90,7 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 	public void shouldHandleNull() throws Exception{
 		SignalKModel signalkModel=SignalKModelFactory.getInstance();
 		signalkModel.delete(signalkModel.self(), navigation);
+		signalkModel.delete(VESSELS, "366951720");
 		SignalkModelProcessor p = new SignalkModelProcessor();
 		assertEquals(signalkModel.duplicate().toString(),"{\"vessels\":{\"self\":{}}}");
 		//make an exchange here

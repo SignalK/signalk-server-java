@@ -98,12 +98,13 @@ public class DeltaImportProcessor extends FreeboardProcessor implements Processo
 		if(node.has(CONTEXT)){
 			logger.debug("processing delta  "+node );
 			//process it
-			Json temp = Util.getEmptyRootNode();
+			Json temp = signalkModel.getEmptyRootNode();
 			
 			//go to context
 			String path = node.at(CONTEXT).asString();
 			Json pathNode = signalkModel.addNode(temp, path);
 			Json updates = node.at(UPDATES);
+			if(updates==null)return temp;
 			if(updates.isArray()){
 				for(Json update: updates.asJsonList()){
 					parseUpdate(temp, update, pathNode);

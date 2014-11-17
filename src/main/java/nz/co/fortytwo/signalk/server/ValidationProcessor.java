@@ -54,7 +54,7 @@ public class ValidationProcessor extends FreeboardProcessor implements Processor
 	public void validate(Json node){
 		//is this a leaf?
 		logger.debug(node.toString());
-		if(node.isNull()||node.isPrimitive())return;
+		if(node.isNull()||!node.isObject())return;
 		if(node.has("value")){
 			//it should have timestamp and source
 			if(!node.has("timestamp"))node.set("timestamp",new DateTime().toString());

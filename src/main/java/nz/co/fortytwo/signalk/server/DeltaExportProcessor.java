@@ -110,21 +110,12 @@ public class DeltaExportProcessor extends FreeboardProcessor implements Processo
 		String path = getPath(j);
 		logger.debug("Delta for:"+path);
 		String vessel = getVessel(path);
-		path=path.substring(vessel.length()+1);
+		if(vessel==null)return;
 		
-		Json entry = Json.object();
-		Json source = Json.object();
-		source.set(SOURCE, j.at(SOURCE).getValue());
-		source.set(TIMESTAMP, j.at(TIMESTAMP).getValue());
-		entry.set(SOURCE, source);
+		//recurse the objects to the leafs
+		Json updates = Json.array();
+		getEntries(updates, j, vessel);
 		
-		Json value = Json.object();
-		value.set(PATH,path);
-		value.set(VALUE, j.at(VALUE).getValue());
-		
-		Json values = Json.array();
-		values.add(value);
-		entry.set(VALUES, values);
 		synchronized (map) {
 			Json delta = map.get(vessel);
 			if(delta==null){
@@ -132,14 +123,47 @@ public class DeltaExportProcessor extends FreeboardProcessor implements Processo
 				delta.set("context",vessel);
 				map.put(vessel, delta);
 			}
-			delta.at(UPDATES).add(entry);
+			delta.set(UPDATES,updates);
 		}
 	}
 	
+	private void getEntries(Json updates, Json j, String vessel) {
+		if(!j.isObject())return;
+		//recurse objects
+		if( j.has(VALUE)){
+			String path = getPath(j);
+			path=path.substring(vessel.length()+1);
+			
+			Json entry = Json.object();
+			Json source = Json.object();
+			source.set(SOURCE, j.at(SOURCE).getValue());
+			source.set(TIMESTAMP, j.at(TIMESTAMP).getValue());
+			entry.set(SOURCE, source);
+			
+			Json value = Json.object();
+			value.set(PATH,path);
+			value.set(VALUE, j.at(VALUE).getValue());
+			
+			Json values = Json.array();
+			values.add(value);
+			entry.set(VALUES, values);
+			
+			updates.add(entry);
+		}else{
+			for (Json child : j.asJsonMap().values()){
+				getEntries(updates, child, vessel);
+			}
+		}
+		
+	}
 	private String getVessel(String path) {
 		if(!path.startsWith(VESSELS)) return null;
 		int pos=path.indexOf(".")+1;
+		//could be just one .\dot. vessels.123456789
+		if(pos<0)return null;
+		
 		pos=path.indexOf(".",pos);
+		if(pos<0)return path;
 		return path.substring(0,pos);
 	}
 	
@@ -161,8 +185,7 @@ public class DeltaExportProcessor extends FreeboardProcessor implements Processo
 	private Json getEmptyDelta(){
 		Json delta = Json.object();
 		//delta.set("context","vessels.motu.navigation");
-		Json updates = Json.array();
-		delta.set("updates",updates);
+		
 		return delta;
 	}
 	
