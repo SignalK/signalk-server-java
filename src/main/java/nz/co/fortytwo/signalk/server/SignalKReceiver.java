@@ -135,9 +135,6 @@ public class SignalKReceiver extends RouteBuilder {
 		SignalkRouteFactory.configureOutputTimer(this, "timer://signalkAll?fixedRate=true&period=1000");
 		
 		
-		//react to changes
-		//from("seda.output").
-		
 	}
 
 	/**
