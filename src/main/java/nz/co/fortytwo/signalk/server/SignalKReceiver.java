@@ -53,7 +53,7 @@ import org.apache.camel.component.restlet.RestletConstants;
 public class SignalKReceiver extends RouteBuilder {
 	public static final String SEDA_INPUT = "seda:input";
 	public static final String DIRECT_WEBSOCKETS = "direct:websockets";
-	private static final String DIRECT_TCP = "direct:tcp";
+	public static final String DIRECT_TCP = "direct:tcp";
 	private int wsPort = 9292;
 	private int restPort = 9290;
 	private String streamUrl;
@@ -130,12 +130,10 @@ public class SignalKReceiver extends RouteBuilder {
 		SignalkRouteFactory.configureAuthRoute(this, "restlet:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_AUTH);
 		
 		// timed actions
-		from("timer://declination?fixedRate=true&period=10000").process(new DeclinationProcessor()).to("log:nz.co.fortytwo.signalk.model.update?level=INFO").end();
-		from("timer://wind?fixedRate=true&period=1000").process(new WindProcessor()).to("log:nz.co.fortytwo.signalk.model.update?level=INFO").end();
-		from("timer://signalkAll?fixedRate=true&period=1000")
-			.process(new DeltaExportProcessor()).split(body())
-			.to("log:nz.co.fortytwo.signalk.model.signalkAll?level=INFO")
-			.to(DIRECT_WEBSOCKETS).to(DIRECT_TCP).end();
+		SignalkRouteFactory.configureDeclinationTimer(this, "timer://declination?fixedRate=true&period=10000");
+		SignalkRouteFactory.configureWindTimer(this, "timer://wind?fixedRate=true&period=1000");
+		SignalkRouteFactory.configureOutputTimer(this, "timer://signalkAll?fixedRate=true&period=1000");
+		
 		
 		//react to changes
 		//from("seda.output").

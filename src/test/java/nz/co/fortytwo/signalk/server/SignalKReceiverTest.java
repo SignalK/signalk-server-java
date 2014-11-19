@@ -108,7 +108,6 @@ public class SignalKReceiverTest extends CamelTestSupport {
 	    protected RouteBuilder createRouteBuilder() {
 	        return new RouteBuilder(){
 	            public void configure() {
-	            
 	    			SignalkRouteFactory.configureInputRoute(this, "direct:input");
 	            	
 	            }

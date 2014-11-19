@@ -1,6 +1,7 @@
 package nz.co.fortytwo.signalk.model;
 
 import nz.co.fortytwo.signalk.server.AISProcessor;
+import nz.co.fortytwo.signalk.server.DeclinationProcessor;
 import nz.co.fortytwo.signalk.server.DeltaExportProcessor;
 import nz.co.fortytwo.signalk.server.InputFilterProcessor;
 import nz.co.fortytwo.signalk.server.NMEAProcessor;
@@ -8,9 +9,11 @@ import nz.co.fortytwo.signalk.server.OutputFilterProcessor;
 import nz.co.fortytwo.signalk.server.RestAuthProcessor;
 import nz.co.fortytwo.signalk.server.RestProcessor;
 import nz.co.fortytwo.signalk.server.DeltaImportProcessor;
+import nz.co.fortytwo.signalk.server.SignalKReceiver;
 import nz.co.fortytwo.signalk.server.SignalkModelProcessor;
 import nz.co.fortytwo.signalk.server.TcpServer;
 import nz.co.fortytwo.signalk.server.ValidationProcessor;
+import nz.co.fortytwo.signalk.server.WindProcessor;
 import nz.co.fortytwo.signalk.server.util.JsonConstants;
 
 import org.apache.camel.ExchangePattern;
@@ -93,4 +96,17 @@ public class SignalkRouteFactory {
 			.setExchangePattern(ExchangePattern.InOut)
 			.process(new RestAuthProcessor());
 		}
+	
+	public static void configureDeclinationTimer(RouteBuilder routeBuilder ,String input){
+		routeBuilder.from(input).process(new DeclinationProcessor()).to("log:nz.co.fortytwo.signalk.model.update?level=INFO").end();
+	}
+	public static void configureWindTimer(RouteBuilder routeBuilder ,String input){
+		routeBuilder.from("timer://wind?fixedRate=true&period=1000").process(new WindProcessor()).to("log:nz.co.fortytwo.signalk.model.update?level=INFO").end();
+	}
+	public static void configureOutputTimer(RouteBuilder routeBuilder ,String input){
+		routeBuilder.from("timer://signalkAll?fixedRate=true&period=1000")
+		.process(new DeltaExportProcessor()).split(routeBuilder.body())
+		.to("log:nz.co.fortytwo.signalk.model.output?level=INFO")
+		.to(SignalKReceiver.DIRECT_WEBSOCKETS).to(SignalKReceiver.DIRECT_TCP).end();
+	}
 }

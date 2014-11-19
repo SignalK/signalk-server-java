@@ -134,11 +134,8 @@ public class WebsocketTest extends CamelTestSupport {
 	    			SignalkRouteFactory.configureInputRoute(this, SignalKReceiver.SEDA_INPUT);
 	    			SignalkRouteFactory.configureWebsocketRxRoute(this, SignalKReceiver.SEDA_INPUT, 9292);
 	    			SignalkRouteFactory.configureWebsocketTxRoute(this,  SignalKReceiver.DIRECT_WEBSOCKETS, 9292,null);
-	    			from("timer://signalkAll?fixedRate=true&period=1000").process(new DeltaExportProcessor()).split(body())
-	    				.to("log:nz.co.fortytwo.signalk.model.signalkAll?level=INFO")
-	    				.to(SignalKReceiver.DIRECT_WEBSOCKETS)
-	    				//.to(DIRECT_TCP)
-	    				.end();
+	    			SignalkRouteFactory.configureOutputTimer(this, "timer://signalkAll?fixedRate=true&period=1000");
+	    			
 	            }
 	        };
 	    }
