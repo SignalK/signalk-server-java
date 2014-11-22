@@ -20,11 +20,12 @@ package nz.co.fortytwo.signalk.server;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.server.util.JsonConstants;
-import nz.co.fortytwo.signalk.server.util.Magfield;
+import nz.co.fortytwo.signalk.server.util.TSAGeoMag;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
 
 /**
  * Processes messages, if it finds a Magnetic bearing, and has seen a LAT and LON, it calculates declination,
@@ -37,6 +38,8 @@ import org.apache.log4j.Logger;
 public class DeclinationProcessor extends FreeboardProcessor implements Processor {
 
 	private static Logger logger = Logger.getLogger(DeclinationProcessor.class);
+	
+	private TSAGeoMag geoMag = new TSAGeoMag();
 	
 	public void process(Exchange exchange) throws Exception {
 		
@@ -57,9 +60,9 @@ public class DeclinationProcessor extends FreeboardProcessor implements Processo
 		
 		if (lat!=null && lon!=null) {
 			logger.debug("Declination  for "+lat.at("value")+", "+lon.at("value") );
-			double declination = -1
-					* Magfield.SGMagVar(Magfield.deg_to_rad(lat.at("value").asDouble()), -1 * Magfield.deg_to_rad(lon.at("value").asDouble()), 0, Magfield.yymmdd_to_julian_days(13, 1, 1), 7, new double[6]);
-			declination = Magfield.rad_to_deg(declination) * -1;// declination is positive when true N is west of MagN, eg subtract the declination
+			
+			double declination = geoMag.getDeclination(lat.at("value").asDouble(), lon.at("value").asDouble(), DateTime.now().getYear(), 0.0d);
+			
 			declination = round(declination, 1);
 			logger.debug("Declination = " + declination);
 			signalkModel.putWith(signalkModel.self(), JsonConstants.nav_magneticVariation, declination, JsonConstants.SELF);	
