@@ -2070,12 +2070,12 @@ public class Json
 		}		
 	}
 	
-	static class ObjectJson extends Json
+	public static class ObjectJson extends Json
 	{
-		Map<String, Json> object = new HashMap<String, Json>();
+		protected Map<String, Json> object = new HashMap<String, Json>();
 		
-		ObjectJson() { }
-		ObjectJson(Json e) { super(e); }
+		protected ObjectJson() { }
+		protected ObjectJson(Json e) { super(e); }
 
 		public Json dup() 
 		{ 

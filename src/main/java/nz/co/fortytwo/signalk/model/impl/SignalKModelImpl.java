@@ -25,11 +25,11 @@ package nz.co.fortytwo.signalk.model.impl;
 
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 import mjson.Json;
+import mjson.Json.ObjectJson;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.event.JsonEvent;
 import nz.co.fortytwo.signalk.model.event.JsonEvent.EventType;
@@ -42,7 +42,7 @@ import org.joda.time.format.ISODateTimeFormat;
 
 import com.google.common.eventbus.EventBus;
 
-public class SignalKModelImpl extends Json implements SignalKModel{
+public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 	
 	private static Logger logger = Logger.getLogger(SignalKModelImpl.class);
 	private static DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
@@ -50,6 +50,7 @@ public class SignalKModelImpl extends Json implements SignalKModel{
 	private EventBus eventBus = new EventBus();
 	
 	protected SignalKModelImpl(){
+		super();
 		this.set(VESSELS,Json.object().set(SELF,Json.object()));
 	}
 	
@@ -390,12 +391,9 @@ public class SignalKModelImpl extends Json implements SignalKModel{
 	public EventBus getEventBus() {
 		return eventBus;
 	}
-	//Below here from mJson src - because I cant extend ObjectJson
 	
-	Map<String, Json> object = new HashMap<String, Json>();
-	private Escaper escaper = new Escaper(false);
-
 	SignalKModelImpl(Json e) { super(e); }
+	
 
 	public Json dup() 
 	{ 
@@ -409,103 +407,6 @@ public class SignalKModelImpl extends Json implements SignalKModel{
 	    return j;
 	}
 	
-	public boolean has(String property)
-	{
-		return object.containsKey(property);
-	}
-	
-	public boolean is(String property, Object value) 
-	{ 
-	    Json p = object.get(property);
-	    if (p == null)
-	        return false;
-	    else
-	        return p.equals(make(value));
-	}		
-	
-	public Json at(String property)
-	{
-		return object.get(property);
-	}
-
-	public Json with(Json x)
-	{
-		if (x == null) return this;			
-		if (!x.isObject())
-			throw new UnsupportedOperationException();
-		object.putAll(((SignalKModelImpl)x).object);
-		return this;
-	}
-	
-	public Json set(String property, Json el)
-	{
-		if (property == null)
-			throw new IllegalArgumentException("Null property names are not allowed, value is " + el);
-		el.attachTo(this);
-		el.setParentKey(property);
-		object.put(property, el);
-		return this;
-	}
-
-	public Json atDel(String property) 
-	{
-		Json el = object.remove(property);
-		if (el != null)
-			el.attachTo(null);
-		return el;
-	}
-	
-	public Json delAt(String property) 
-	{
-		Json el = object.remove(property);
-		if (el != null)
-			el.attachTo(null);
-		return this;
-	}
-	
-	public Object getValue() { return asMap(); }
-	public boolean isObject() { return true; }
-	public Map<String, Object> asMap() 
-	{
-		HashMap<String, Object> m = new HashMap<String, Object>();
-		for (Map.Entry<String, Json> e : object.entrySet())
-			m.put(e.getKey(), e.getValue().getValue());
-		return m; 
-	}
-	@Override
-	public Map<String, Json> asJsonMap() { return object; }
-	
-	public String toString()
-	{
-		return toString(Integer.MAX_VALUE);
-	}
-	
-	public String toString(int maxCharacters)
-	{
-		StringBuilder sb = new StringBuilder("{");
-		for (Iterator<Map.Entry<String, Json>> i = object.entrySet().iterator(); i.hasNext(); )
-		{
-			Map.Entry<String, Json> x  = i.next();
-			sb.append('"');				
-			sb.append(escaper.escapeJsonString(x.getKey()));
-			sb.append('"');
-			sb.append(":");
-			String s = x.getValue().toString(maxCharacters);
-			if (sb.length() + s.length() > maxCharacters)
-				s = s.substring(0, Math.max(0, maxCharacters - sb.length()));
-			sb.append(s);
-			if (i.hasNext())
-				sb.append(",");
-			if (sb.length() >= maxCharacters)
-			{
-				sb.append("...");
-				break;
-			}
-		}
-		sb.append("}");
-		return sb.toString();
-	}
-	public int hashCode() { return object.hashCode(); }
 	public boolean equals(Object x)
 	{			
 		return x instanceof SignalKModelImpl && ((SignalKModelImpl)x).object.equals(object); 
