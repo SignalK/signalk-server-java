@@ -22,11 +22,11 @@
  *
  */
 
-package nz.co.fortytwo.signalk.server;
+package nz.co.fortytwo.signalk.processor;
 
 import static org.junit.Assert.*;
 import mjson.Json;
-import nz.co.fortytwo.signalk.server.AISProcessor;
+import nz.co.fortytwo.signalk.processor.AISProcessor;
 
 import org.apache.log4j.Logger;
 import org.junit.Test;

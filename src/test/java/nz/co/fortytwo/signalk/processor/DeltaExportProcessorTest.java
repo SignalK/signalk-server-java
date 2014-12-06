@@ -21,7 +21,7 @@
  * limitations under the License.
  *
  */
-package nz.co.fortytwo.signalk.server;
+package nz.co.fortytwo.signalk.processor;
 
 import static org.junit.Assert.*;
 
@@ -33,6 +33,7 @@ import nz.co.fortytwo.signalk.model.event.JsonEvent;
 import nz.co.fortytwo.signalk.model.event.JsonEvent.EventType;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelImpl;
+import nz.co.fortytwo.signalk.processor.DeltaExportProcessor;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;
 
 import org.apache.camel.CamelContext;

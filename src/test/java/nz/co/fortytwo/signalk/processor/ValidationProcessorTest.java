@@ -21,11 +21,11 @@
  * limitations under the License.
  *
  */
-package nz.co.fortytwo.signalk.server;
+package nz.co.fortytwo.signalk.processor;
 
 import static org.junit.Assert.*;
 import mjson.Json;
-import nz.co.fortytwo.signalk.server.ValidationProcessor;
+import nz.co.fortytwo.signalk.processor.ValidationProcessor;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;
 
 import org.apache.log4j.Logger;

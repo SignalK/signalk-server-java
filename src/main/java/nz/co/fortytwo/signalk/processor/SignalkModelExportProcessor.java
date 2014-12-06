@@ -21,36 +21,31 @@
  * limitations under the License.
  *
  */
-
-package nz.co.fortytwo.signalk.server;
-
-import mjson.Json;
-import nz.co.fortytwo.signalk.server.util.JsonConstants;
+package nz.co.fortytwo.signalk.processor;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.log4j.Logger;
 
 /**
- * Converts the hashmap of key/values back to a string
+ * Exports the signalkModel as a json object
+ * 
  * @author robert
- *
+ * 
  */
-public class OutputFilterProcessor extends FreeboardProcessor implements Processor {
+public class SignalkModelExportProcessor extends FreeboardProcessor implements Processor{
 
-	private static Logger logger = Logger.getLogger(OutputFilterProcessor.class);
+	private static Logger logger = Logger.getLogger(SignalkModelExportProcessor.class);
 	
 	public void process(Exchange exchange) throws Exception {
-		if (exchange.getIn().getBody()==null)
-			return;
-		//TODO: add more filters here
-		Json json = (Json)exchange.getIn().getBody();
-		//remove _arduino
-		json.at(JsonConstants.VESSELS).at(JsonConstants.SELF).delAt("_arduino");
-		//remove _config
-		json.at(JsonConstants.VESSELS).at(JsonConstants.SELF).delAt("_config");
 		
-		exchange.getIn().setBody(json.toString());
+		try {
+			//exchange.getIn().setBody(signalkModel.safeDuplicate());
+		} catch (Exception e) {
+			logger.error(e.getMessage(),e);
+		}
 	}
+
+	
 
 }

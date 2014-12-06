@@ -23,20 +23,20 @@
  */
 package nz.co.fortytwo.signalk.model;
 
-import nz.co.fortytwo.signalk.server.AISProcessor;
-import nz.co.fortytwo.signalk.server.DeclinationProcessor;
-import nz.co.fortytwo.signalk.server.DeltaExportProcessor;
-import nz.co.fortytwo.signalk.server.InputFilterProcessor;
-import nz.co.fortytwo.signalk.server.NMEAProcessor;
-import nz.co.fortytwo.signalk.server.OutputFilterProcessor;
-import nz.co.fortytwo.signalk.server.RestAuthProcessor;
-import nz.co.fortytwo.signalk.server.RestProcessor;
-import nz.co.fortytwo.signalk.server.DeltaImportProcessor;
+import nz.co.fortytwo.signalk.processor.AISProcessor;
+import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
+import nz.co.fortytwo.signalk.processor.DeltaExportProcessor;
+import nz.co.fortytwo.signalk.processor.DeltaImportProcessor;
+import nz.co.fortytwo.signalk.processor.InputFilterProcessor;
+import nz.co.fortytwo.signalk.processor.NMEAProcessor;
+import nz.co.fortytwo.signalk.processor.OutputFilterProcessor;
+import nz.co.fortytwo.signalk.processor.RestAuthProcessor;
+import nz.co.fortytwo.signalk.processor.RestProcessor;
+import nz.co.fortytwo.signalk.processor.SignalkModelProcessor;
+import nz.co.fortytwo.signalk.processor.ValidationProcessor;
+import nz.co.fortytwo.signalk.processor.WindProcessor;
 import nz.co.fortytwo.signalk.server.SignalKReceiver;
-import nz.co.fortytwo.signalk.server.SignalkModelProcessor;
 import nz.co.fortytwo.signalk.server.TcpServer;
-import nz.co.fortytwo.signalk.server.ValidationProcessor;
-import nz.co.fortytwo.signalk.server.WindProcessor;
 import nz.co.fortytwo.signalk.server.util.JsonConstants;
 
 import org.apache.camel.ExchangePattern;

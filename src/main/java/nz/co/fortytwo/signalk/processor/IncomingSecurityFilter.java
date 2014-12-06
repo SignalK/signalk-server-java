@@ -21,7 +21,7 @@
  * limitations under the License.
  *
  */
-package nz.co.fortytwo.signalk.server;
+package nz.co.fortytwo.signalk.processor;
 
 import java.util.ArrayList;
 import java.util.List;

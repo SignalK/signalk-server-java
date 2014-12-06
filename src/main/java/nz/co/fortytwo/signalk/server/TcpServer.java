@@ -41,6 +41,9 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
+import nz.co.fortytwo.signalk.processor.FreeboardProcessor;
+import nz.co.fortytwo.signalk.processor.InputFilterProcessor;
+
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.log4j.Logger;

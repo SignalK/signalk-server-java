@@ -22,7 +22,7 @@
  *
  */
 
-package nz.co.fortytwo.signalk.server;
+package nz.co.fortytwo.signalk.processor;
 
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.SELF;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.VESSELS;
@@ -42,7 +42,7 @@ import java.util.HashMap;
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
-import nz.co.fortytwo.signalk.server.NMEAProcessor;
+import nz.co.fortytwo.signalk.processor.NMEAProcessor;
 import nz.co.fortytwo.signalk.server.util.Constants;
 import nz.co.fortytwo.signalk.server.util.Util;
 

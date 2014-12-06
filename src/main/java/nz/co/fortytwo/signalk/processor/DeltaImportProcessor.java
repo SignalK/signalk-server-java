@@ -21,7 +21,7 @@
  * limitations under the License.
  *
  */
-package nz.co.fortytwo.signalk.server;
+package nz.co.fortytwo.signalk.processor;
 
 import mjson.Json;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;

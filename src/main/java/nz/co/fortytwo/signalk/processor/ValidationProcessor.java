@@ -21,48 +21,54 @@
  * limitations under the License.
  *
  */
-package nz.co.fortytwo.signalk.server;
+package nz.co.fortytwo.signalk.processor;
 
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.VESSELS;
 import mjson.Json;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
 
 /**
- * Updates the signalkModel with the current json
+ * Validate the signalkModel json.
+ * Make sure it has timestamp and source
  * 
  * @author robert
  * 
  */
-public class SignalkModelProcessor extends FreeboardProcessor implements Processor{
+public class ValidationProcessor extends FreeboardProcessor implements Processor{
 
-	private static Logger logger = Logger.getLogger(SignalkModelProcessor.class);
-	
-
-	public void init() {
-		this.producer = CamelContextFactory.getInstance().createProducerTemplate();
-		producer.setDefaultEndpointUri("direct:command");
-	}
+	private static Logger logger = Logger.getLogger(ValidationProcessor.class);
 	
 	public void process(Exchange exchange) throws Exception {
 		
 		try {
-			if(exchange.getIn().getBody()==null ||!(exchange.getIn().getBody() instanceof Json)) return;
-			
-			handle(exchange.getIn().getBody(Json.class));
+			if(!(exchange.getIn().getBody() instanceof Json)){
+				logger.debug("Invalid object found:" + exchange.getIn().getBody());
+				exchange.getIn().setBody(null);
+				return;
+			}
+			validate(exchange.getIn().getBody(Json.class));
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
 		}
 	}
 
-	//@Override
-	public void handle(Json node) {
-		if(!(node.has(VESSELS)))return;
-		logger.debug("SignalkModelProcessor  updating "+node );
-		signalkModel.merge(node);
-		
+	
+	public void validate(Json node){
+		//is this a leaf?
+		logger.debug(node.toString());
+		if(node.isNull()||!node.isObject())return;
+		if(node.has("value")){
+			//it should have timestamp and source
+			if(!node.has("timestamp"))node.set("timestamp",new DateTime().toString());
+			if(!node.has("source"))node.set("source","unknown");
+		}else{
+			for(Json n : node.asJsonMap().values()){
+				validate(n);
+			}
+		}
 	}
 
 }

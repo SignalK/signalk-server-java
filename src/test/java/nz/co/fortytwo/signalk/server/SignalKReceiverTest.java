@@ -32,8 +32,8 @@ import static nz.co.fortytwo.signalk.server.util.JsonConstants.nav_position_lati
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.SignalkRouteFactory;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
-import nz.co.fortytwo.signalk.server.DeclinationProcessor;
-import nz.co.fortytwo.signalk.server.WindProcessor;
+import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
+import nz.co.fortytwo.signalk.processor.WindProcessor;
 
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;

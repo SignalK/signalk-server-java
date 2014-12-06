@@ -21,31 +21,49 @@
  * limitations under the License.
  *
  */
-package nz.co.fortytwo.signalk.server;
+package nz.co.fortytwo.signalk.processor;
+
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.VESSELS;
+import mjson.Json;
+import nz.co.fortytwo.signalk.server.CamelContextFactory;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.log4j.Logger;
 
 /**
- * Exports the signalkModel as a json object
+ * Updates the signalkModel with the current json
  * 
  * @author robert
  * 
  */
-public class SignalkModelExportProcessor extends FreeboardProcessor implements Processor{
+public class SignalkModelProcessor extends FreeboardProcessor implements Processor{
 
-	private static Logger logger = Logger.getLogger(SignalkModelExportProcessor.class);
+	private static Logger logger = Logger.getLogger(SignalkModelProcessor.class);
+	
+
+	public void init() {
+		this.producer = CamelContextFactory.getInstance().createProducerTemplate();
+		producer.setDefaultEndpointUri("direct:command");
+	}
 	
 	public void process(Exchange exchange) throws Exception {
 		
 		try {
-			//exchange.getIn().setBody(signalkModel.safeDuplicate());
+			if(exchange.getIn().getBody()==null ||!(exchange.getIn().getBody() instanceof Json)) return;
+			
+			handle(exchange.getIn().getBody(Json.class));
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
 		}
 	}
 
-	
+	//@Override
+	public void handle(Json node) {
+		if(!(node.has(VESSELS)))return;
+		logger.debug("SignalkModelProcessor  updating "+node );
+		signalkModel.merge(node);
+		
+	}
 
 }

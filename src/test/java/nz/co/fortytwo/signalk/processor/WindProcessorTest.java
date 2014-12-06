@@ -22,10 +22,10 @@
  *
  */
 
-package nz.co.fortytwo.signalk.server;
+package nz.co.fortytwo.signalk.processor;
 
 import static org.junit.Assert.assertEquals;
-import nz.co.fortytwo.signalk.server.WindProcessor;
+import nz.co.fortytwo.signalk.processor.WindProcessor;
 
 import org.junit.After;
 import org.junit.Before;

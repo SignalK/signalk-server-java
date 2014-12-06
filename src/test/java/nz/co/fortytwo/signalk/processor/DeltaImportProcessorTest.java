@@ -21,12 +21,13 @@
  * limitations under the License.
  *
  */
-package nz.co.fortytwo.signalk.server;
+package nz.co.fortytwo.signalk.processor;
 
 import static org.junit.Assert.*;
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelImpl;
+import nz.co.fortytwo.signalk.processor.DeltaImportProcessor;
 import nz.co.fortytwo.signalk.server.util.Util;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;
 

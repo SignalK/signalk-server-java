@@ -21,54 +21,36 @@
  * limitations under the License.
  *
  */
-package nz.co.fortytwo.signalk.server;
+
+package nz.co.fortytwo.signalk.processor;
 
 import mjson.Json;
+import nz.co.fortytwo.signalk.server.util.JsonConstants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.log4j.Logger;
-import org.joda.time.DateTime;
 
 /**
- * Validate the signalkModel json.
- * Make sure it has timestamp and source
- * 
+ * Converts the hashmap of key/values back to a string
  * @author robert
- * 
+ *
  */
-public class ValidationProcessor extends FreeboardProcessor implements Processor{
+public class OutputFilterProcessor extends FreeboardProcessor implements Processor {
 
-	private static Logger logger = Logger.getLogger(ValidationProcessor.class);
+	private static Logger logger = Logger.getLogger(OutputFilterProcessor.class);
 	
 	public void process(Exchange exchange) throws Exception {
+		if (exchange.getIn().getBody()==null)
+			return;
+		//TODO: add more filters here
+		Json json = (Json)exchange.getIn().getBody();
+		//remove _arduino
+		json.at(JsonConstants.VESSELS).at(JsonConstants.SELF).delAt("_arduino");
+		//remove _config
+		json.at(JsonConstants.VESSELS).at(JsonConstants.SELF).delAt("_config");
 		
-		try {
-			if(!(exchange.getIn().getBody() instanceof Json)){
-				logger.debug("Invalid object found:" + exchange.getIn().getBody());
-				exchange.getIn().setBody(null);
-				return;
-			}
-			validate(exchange.getIn().getBody(Json.class));
-		} catch (Exception e) {
-			logger.error(e.getMessage(),e);
-		}
-	}
-
-	
-	public void validate(Json node){
-		//is this a leaf?
-		logger.debug(node.toString());
-		if(node.isNull()||!node.isObject())return;
-		if(node.has("value")){
-			//it should have timestamp and source
-			if(!node.has("timestamp"))node.set("timestamp",new DateTime().toString());
-			if(!node.has("source"))node.set("source","unknown");
-		}else{
-			for(Json n : node.asJsonMap().values()){
-				validate(n);
-			}
-		}
+		exchange.getIn().setBody(json.toString());
 	}
 
 }

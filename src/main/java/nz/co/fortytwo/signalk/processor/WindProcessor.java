@@ -21,7 +21,7 @@
  * limitations under the License.
  *
  */
-package nz.co.fortytwo.signalk.server;
+package nz.co.fortytwo.signalk.processor;
 
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.SELF;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.env_wind_directionApparent;
