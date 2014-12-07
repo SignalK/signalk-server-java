@@ -64,7 +64,7 @@ public class WebsocketTest extends CamelTestSupport {
 	    final CountDownLatch latch = new CountDownLatch(1);
         final AsyncHttpClient c = new AsyncHttpClient();
 
-        WebSocket websocket = c.prepareConnect("ws://127.0.0.1:9292"+SIGNALK_WS).execute(
+        WebSocket websocket = c.prepareGet("ws://127.0.0.1:9292"+SIGNALK_WS).execute(
                 new WebSocketUpgradeHandler.Builder()
                     .addWebSocketListener(new WebSocketTextListener() {
                         @Override
