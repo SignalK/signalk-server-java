@@ -51,7 +51,7 @@ import com.google.common.eventbus.Subscribe;
  * @author robert
  * 
  */
-public class DeltaExportProcessor extends FreeboardProcessor implements Processor{
+public class DeltaExportProcessor extends SignalkProcessor implements Processor{
 
 	private static Logger logger = Logger.getLogger(DeltaExportProcessor.class);
 

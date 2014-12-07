@@ -25,6 +25,7 @@ package nz.co.fortytwo.signalk.server;
 
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -63,7 +64,7 @@ public class WebsocketTest extends CamelTestSupport {
 	    final CountDownLatch latch = new CountDownLatch(1);
         final AsyncHttpClient c = new AsyncHttpClient();
 
-        WebSocket websocket = c.prepareGet("ws://127.0.0.1:9292"+SIGNALK_WS).execute(
+        WebSocket websocket = c.prepareConnect("ws://127.0.0.1:9292"+SIGNALK_WS).execute(
                 new WebSocketUpgradeHandler.Builder()
                     .addWebSocketListener(new WebSocketTextListener() {
                         @Override
@@ -127,6 +128,7 @@ public class WebsocketTest extends CamelTestSupport {
 
                         @Override
                         public void onOpen(WebSocket websocket) {
+                        	
                         }
 
                         @Override
@@ -138,7 +140,8 @@ public class WebsocketTest extends CamelTestSupport {
                             t.printStackTrace();
                         }
                     }).build()).get();
-        template.sendBody(SignalKReceiver.SEDA_INPUT,jsonDiff);
+        //template.sendBody(SignalKReceiver.SEDA_INPUT,jsonDiff);
+        websocket.sendTextMessage(jsonDiff);
         assertTrue(latch.await(10, TimeUnit.SECONDS));
 
         assertEquals(1, received.size());
@@ -156,7 +159,7 @@ public class WebsocketTest extends CamelTestSupport {
 	            public void configure() {
 	    			SignalkRouteFactory.configureInputRoute(this, SignalKReceiver.SEDA_INPUT);
 	    			SignalkRouteFactory.configureWebsocketRxRoute(this, SignalKReceiver.SEDA_INPUT, 9292);
-	    			SignalkRouteFactory.configureWebsocketTxRoute(this,  SignalKReceiver.DIRECT_WEBSOCKETS, 9292,null);
+	    			SignalkRouteFactory.configureWebsocketTxRoute(this,  SignalKReceiver.DIRECT_WEBSOCKETS, 9292, null);
 	    			SignalkRouteFactory.configureOutputTimer(this, "timer://signalkAll?fixedRate=true&period=1000");
 	    			
 	            }

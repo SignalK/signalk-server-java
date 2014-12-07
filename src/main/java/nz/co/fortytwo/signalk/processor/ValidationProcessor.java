@@ -37,7 +37,7 @@ import org.joda.time.DateTime;
  * @author robert
  * 
  */
-public class ValidationProcessor extends FreeboardProcessor implements Processor{
+public class ValidationProcessor extends SignalkProcessor implements Processor{
 
 	private static Logger logger = Logger.getLogger(ValidationProcessor.class);
 	

@@ -44,7 +44,7 @@ import org.restlet.data.Status;
  * @author robert
  *
  */
-public class RestProcessor extends FreeboardProcessor implements Processor{
+public class RestProcessor extends SignalkProcessor implements Processor{
 
 	private static Logger logger = Logger.getLogger(RestProcessor.class);
 	@Override

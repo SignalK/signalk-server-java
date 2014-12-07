@@ -33,7 +33,7 @@ import org.apache.log4j.Logger;
  * @author robert
  * 
  */
-public class SignalkModelExportProcessor extends FreeboardProcessor implements Processor{
+public class SignalkModelExportProcessor extends SignalkProcessor implements Processor{
 
 	private static Logger logger = Logger.getLogger(SignalkModelExportProcessor.class);
 	

@@ -76,7 +76,7 @@ import org.apache.log4j.Logger;
  * @author robert
  * 
  */
-public class NMEAProcessor extends FreeboardProcessor implements Processor {
+public class NMEAProcessor extends SignalkProcessor implements Processor {
 
 	private static Logger logger = Logger.getLogger(NMEAProcessor.class);
 	private static final String DISPATCH_ALL = "DISPATCH_ALL";

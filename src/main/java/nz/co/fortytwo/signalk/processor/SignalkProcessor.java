@@ -26,11 +26,14 @@ package nz.co.fortytwo.signalk.processor;
 
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
+import nz.co.fortytwo.signalk.server.SignalKServerFactory;
+import nz.co.fortytwo.signalk.server.util.JsonConstants;
 import nz.co.fortytwo.signalk.server.util.Util;
 
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.log4j.Logger;
+import org.eclipse.jetty.server.session.HashSessionManager;
 
 
 /**
@@ -38,16 +41,17 @@ import org.apache.log4j.Logger;
  * @author robert
  *
  */
-public class FreeboardProcessor {
+public class SignalkProcessor {
 	
-	private static Logger logger = Logger.getLogger(FreeboardProcessor.class);
+	private static Logger logger = Logger.getLogger(SignalkProcessor.class);
 	static protected SignalKModel signalkModel = SignalKModelFactory.getInstance();
 	
 	@Produce(uri = "seda:nmeaOutput")
     ProducerTemplate producer;
 	
-	public FreeboardProcessor() {
 	
+	public SignalkProcessor() {
+		
 	}
 	
 	/**
@@ -70,5 +74,12 @@ public class FreeboardProcessor {
 		return Util.round(val, places);
 	}
 	
-	
+	/**
+	 * Gets the global web session manager
+	 * @return
+	 * @throws Exception
+	 */
+	protected HashSessionManager getSessionManager() throws Exception{
+		return SignalKServerFactory.getInstance(null).getSessionManager();
+	}
 }

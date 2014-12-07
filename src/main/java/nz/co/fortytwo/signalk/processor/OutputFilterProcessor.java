@@ -36,7 +36,7 @@ import org.apache.log4j.Logger;
  * @author robert
  *
  */
-public class OutputFilterProcessor extends FreeboardProcessor implements Processor {
+public class OutputFilterProcessor extends SignalkProcessor implements Processor {
 
 	private static Logger logger = Logger.getLogger(OutputFilterProcessor.class);
 	
@@ -46,9 +46,13 @@ public class OutputFilterProcessor extends FreeboardProcessor implements Process
 		//TODO: add more filters here
 		Json json = (Json)exchange.getIn().getBody();
 		//remove _arduino
-		json.at(JsonConstants.VESSELS).at(JsonConstants.SELF).delAt("_arduino");
+		try{
+			json.at(JsonConstants.VESSELS).at(JsonConstants.SELF).delAt("_arduino");
+		}catch(NullPointerException npe){}
 		//remove _config
-		json.at(JsonConstants.VESSELS).at(JsonConstants.SELF).delAt("_config");
+		try{
+			json.at(JsonConstants.VESSELS).at(JsonConstants.SELF).delAt("_config");
+		}catch(NullPointerException npe){}
 		
 		exchange.getIn().setBody(json.toString());
 	}

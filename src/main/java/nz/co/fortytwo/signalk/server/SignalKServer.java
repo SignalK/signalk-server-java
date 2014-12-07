@@ -34,6 +34,7 @@ import org.apache.camel.main.Main;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.session.HashSessionManager;
 
 public class SignalKServer {
 
@@ -43,11 +44,10 @@ public class SignalKServer {
 	
 	private Properties config=null;
 	
+	private HashSessionManager sessionManager=new HashSessionManager();
 	
 		
-	
-	
-	public SignalKServer(String configDir) throws Exception {
+	protected SignalKServer(String configDir) throws Exception {
 		
 		config=Util.getConfig(configDir);
 		//make sure we have all the correct dirs and files now
@@ -83,7 +83,7 @@ public class SignalKServer {
 
 		// and run, which keeps blocking until we terminate the JVM (or stop CamelContext)
 		main.run();
-		
+	
 		//so now shutdown serial reader and server
 		
 		route.stopSerial();
@@ -115,8 +115,13 @@ public class SignalKServer {
 				conf=conf+"/";
 			}
 		}
-		new SignalKServer(conf);
+		SignalKServerFactory.getInstance(conf);
 		
 	}
 
+	public HashSessionManager getSessionManager() {
+		return sessionManager;
+	}
+
+	
 }

@@ -44,7 +44,7 @@ import com.google.common.eventbus.Subscribe;
  * @author robert
  * 
  */
-public class DeltaImportProcessor extends FreeboardProcessor implements Processor{
+public class DeltaImportProcessor extends SignalkProcessor implements Processor{
 
 	private static Logger logger = Logger.getLogger(DeltaImportProcessor.class);
 	private static DateTimeFormatter fmt = ISODateTimeFormat.dateTime();

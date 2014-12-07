@@ -40,7 +40,7 @@ import org.joda.time.DateTime;
  * @author robert
  * 
  */
-public class IncomingSecurityFilter extends FreeboardProcessor implements Processor{
+public class IncomingSecurityFilter extends SignalkProcessor implements Processor{
 
 	private static Logger logger = Logger.getLogger(IncomingSecurityFilter.class);
 	private List<String> acceptList = new ArrayList<String>();

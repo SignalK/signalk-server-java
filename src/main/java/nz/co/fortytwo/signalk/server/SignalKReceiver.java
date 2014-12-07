@@ -139,7 +139,6 @@ public class SignalKReceiver extends RouteBuilder {
 		SignalkRouteFactory.configureWindTimer(this, "timer://wind?fixedRate=true&period=1000");
 		SignalkRouteFactory.configureOutputTimer(this, "timer://signalkAll?fixedRate=true&period=1000");
 		
-		
 	}
 
 	/**

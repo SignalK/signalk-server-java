@@ -24,6 +24,7 @@
 package nz.co.fortytwo.signalk.processor;
 
 import mjson.Json;
+import nz.co.fortytwo.signalk.server.SignalKServerFactory;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -44,7 +45,7 @@ import org.restlet.data.Status;
  * @author robert
  *
  */
-public class RestAuthProcessor extends FreeboardProcessor implements Processor{
+public class RestAuthProcessor extends SignalkProcessor implements Processor{
 
 	private static Logger logger = Logger.getLogger(RestAuthProcessor.class);
 	@Override
@@ -69,6 +70,8 @@ public class RestAuthProcessor extends FreeboardProcessor implements Processor{
         path=path.substring(request.getRootRef().getPath().length());
       
         logger.debug("We are processing the extension:"+path);
+       
+      
         response.setEntity("OK",MediaType.TEXT_PLAIN);
         CookieSetting cookieSetting = new CookieSetting(0, "signalk.auth", path);
         cookieSetting.setPath("/signalk/");

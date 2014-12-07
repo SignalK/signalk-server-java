@@ -36,7 +36,7 @@ import org.apache.log4j.Logger;
  * @author robert
  *
  */
-public class InputFilterProcessor extends FreeboardProcessor implements Processor {
+public class InputFilterProcessor extends SignalkProcessor implements Processor {
 	private static Logger logger = Logger.getLogger(InputFilterProcessor.class);
 
 	

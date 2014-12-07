@@ -40,7 +40,7 @@ import org.joda.time.DateTime;
  * @author robert
  * 
  */
-public class DeclinationProcessor extends FreeboardProcessor implements Processor {
+public class DeclinationProcessor extends SignalkProcessor implements Processor {
 
 	private static Logger logger = Logger.getLogger(DeclinationProcessor.class);
 	

@@ -23,6 +23,9 @@
  */
 package nz.co.fortytwo.signalk.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import nz.co.fortytwo.signalk.processor.AISProcessor;
 import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
 import nz.co.fortytwo.signalk.processor.DeltaExportProcessor;
@@ -35,14 +38,27 @@ import nz.co.fortytwo.signalk.processor.RestProcessor;
 import nz.co.fortytwo.signalk.processor.SignalkModelProcessor;
 import nz.co.fortytwo.signalk.processor.ValidationProcessor;
 import nz.co.fortytwo.signalk.processor.WindProcessor;
+import nz.co.fortytwo.signalk.processor.WsSessionOutProcessor;
+import nz.co.fortytwo.signalk.processor.WsSessionProcessor;
 import nz.co.fortytwo.signalk.server.SignalKReceiver;
 import nz.co.fortytwo.signalk.server.TcpServer;
 import nz.co.fortytwo.signalk.server.util.JsonConstants;
 
+import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePattern;
+import org.apache.camel.Expression;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.websocket.WebsocketEndpoint;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.SessionManager;
+import org.eclipse.jetty.server.session.HashSessionManager;
+import org.eclipse.jetty.server.session.SessionHandler;
+import org.eclipse.jetty.webapp.WebAppContext;
+
+import com.ning.http.client.websocket.WebSocket;
 
 
 
@@ -59,7 +75,8 @@ public class SignalkRouteFactory {
 	 */
 	public static void configureInputRoute(RouteBuilder routeBuilder,String input) {
 		routeBuilder.from(input).onException(Exception.class).handled(true).maximumRedeliveries(0)
-		.to("log:nz.co.fortytwo.signalk.model.receive?level=ERROR&showException=true&showStackTrace=true").end()
+			.to("log:nz.co.fortytwo.signalk.model.receive?level=ERROR&showException=true&showStackTrace=true").end()
+		.process(new WsSessionProcessor())
 		// dump misc rubbish
 		.process(new InputFilterProcessor())
 		//convert NMEA to signalk
@@ -81,27 +98,35 @@ public class SignalkRouteFactory {
 	 * @param input
 	 */
 	public static void configureWebsocketTxRoute(RouteBuilder routeBuilder ,String input, int port, String staticResources){
-		if(StringUtils.isBlank(staticResources)){
-			routeBuilder.from(input).onException(Exception.class).handled(true).maximumRedeliveries(0)
-			.process(new OutputFilterProcessor())
-			.to("log:nz.co.fortytwo.signalk.model.websocket.tx?level=ERROR&showException=true&showStackTrace=true").end()
-			.to("websocket://0.0.0.0:"+port+JsonConstants.SIGNALK_WS+"?sendToAll=true");
-		}else{
-			routeBuilder.from(input).onException(Exception.class).handled(true).maximumRedeliveries(0)
-			.process(new OutputFilterProcessor())
-			.to("log:nz.co.fortytwo.signalk.model.websocket.tx?level=ERROR&showException=true&showStackTrace=true").end()
-			.to("websocket://0.0.0.0:"+port+JsonConstants.SIGNALK_WS+"?sendToAll=true&staticResources="+staticResources);
+		String serveResources = "";
+		if(StringUtils.isNotBlank(staticResources)){
+			serveResources = "?staticResources="+staticResources;
 		}
+			routeBuilder.from(input)
+				//.onException(Exception.class)
+				//.handled(true).maximumRedeliveries(0)
+				//.to("log:nz.co.fortytwo.signalk.model.websocket.tx?level=ERROR&showException=true&showStackTrace=true").end()
+			.process(new OutputFilterProcessor())
+			.process(new WsSessionOutProcessor());
+			//.to("websocket://0.0.0.0:"+port+JsonConstants.SIGNALK_WS+serveResources);
+		
 	}
 	/**
 	 * Configures the route for input to websockets
 	 * @param routeBuilder
 	 * @param input
+	 * @throws Exception 
 	 */
-	public static void configureWebsocketRxRoute(RouteBuilder routeBuilder ,String input, int port){
-		routeBuilder.from("websocket://0.0.0.0:"+port+JsonConstants.SIGNALK_WS).onException(Exception.class).handled(true).maximumRedeliveries(0)
-		.to("log:nz.co.fortytwo.signalk.model.websocket.rx?level=ERROR&showException=true&showStackTrace=true").end()
+	public static void configureWebsocketRxRoute(RouteBuilder routeBuilder ,String input, int port) {
+		routeBuilder.from("websocket://0.0.0.0:"+port+JsonConstants.SIGNALK_WS)
+			//.onException(Exception.class)
+			//.handled(true).maximumRedeliveries(0)
+			//.to("log:nz.co.fortytwo.signalk.model.websocket.rx?level=ERROR&showException=true&showStackTrace=true")
+			//.end()
+		.process(new WsSessionProcessor())
+		.to("log:nz.co.fortytwo.signalk.model.websocket.rx?level=INFO&showException=true&showStackTrace=true")
 		.to(input);
+		
 	}
 	public static void configureTcpServerRoute(RouteBuilder routeBuilder ,String input, TcpServer tcpServer){
 	// push NMEA out via TCPServer.
@@ -130,6 +155,9 @@ public class SignalkRouteFactory {
 		routeBuilder.from("timer://signalkAll?fixedRate=true&period=1000")
 		.process(new DeltaExportProcessor()).split(routeBuilder.body())
 		.to("log:nz.co.fortytwo.signalk.model.output?level=INFO")
-		.to(SignalKReceiver.DIRECT_WEBSOCKETS).to(SignalKReceiver.DIRECT_TCP).end();
+		.multicast()
+			.to(SignalKReceiver.DIRECT_TCP)
+			.to(SignalKReceiver.DIRECT_WEBSOCKETS)
+		.end();
 	}
 }

@@ -64,7 +64,7 @@ import dk.dma.ais.sentence.SentenceException;
  * @author robert
  * 
  */
-public class AISProcessor extends FreeboardProcessor implements Processor {
+public class AISProcessor extends SignalkProcessor implements Processor {
 
 
 	private static Logger logger = Logger.getLogger(AISProcessor.class);
