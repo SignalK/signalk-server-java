@@ -89,7 +89,7 @@ public class DeltaExportProcessorTest {
 		assertNotNull(ex.getOut());
 		List<?> delta = ex.getIn().getBody(List.class);
 		logger.debug(delta.toString());
-		String expected = "[{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"navigation.courseOverGroundTrue\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}],\"context\":\"vessels.self\"}]";
+		String expected = "[{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"navigation.courseOverGroundTrue\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}],\"context\":\"vessels."+SELF+"\"}]";
 		assertEquals(expected, delta.toString());
 	}
 	
@@ -100,7 +100,7 @@ public class DeltaExportProcessorTest {
 	
 	private Json getJsonForEvent(){
 		SignalKModel model = SignalKModelFactory.getCleanInstance();
-		Json json = Json.read("{\"vessels\":{\"self\":{\"navigation\":{\"courseOverGroundTrue\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":172.9},\"speedOverGround\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":3.85}}}}}");
+		Json json = Json.read("{\"vessels\":{\""+SELF+"\":{\"navigation\":{\"courseOverGroundTrue\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":172.9},\"speedOverGround\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":3.85}}}}}");
 		model.merge(json);
 		return model.atPath(VESSELS,SELF,nav_courseOverGroundTrue);
 	}

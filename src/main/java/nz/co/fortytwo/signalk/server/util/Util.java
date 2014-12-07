@@ -132,6 +132,7 @@ public class Util {
 	 */
 	public static void setDefaults(Properties props) {
 		//populate sensible defaults here
+		props.setProperty(Constants.SELF,"self");
 		props.setProperty(Constants.WEBSOCKET_PORT,"9292");
 		props.setProperty(Constants.REST_PORT,"9290");
 		props.setProperty(Constants.CFG_DIR,"./conf/");
@@ -254,5 +255,14 @@ public class Util {
 	}
 	public static double msToKnts(double speed) {
 		return speed*1.943844492;
+	}
+
+	public static String getConfigProperty(String prop) {
+		try {
+			return getConfig(null).getProperty(prop);
+		} catch (Exception e) {
+			logger.error(e.getMessage(),e);
+		}
+		return "self";
 	}
 }

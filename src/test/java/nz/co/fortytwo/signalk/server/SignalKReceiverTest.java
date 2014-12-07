@@ -84,7 +84,7 @@ public class SignalKReceiverTest extends CamelTestSupport {
 	@Test
     public void shouldProcessTwoMessages() throws Exception {
         assertNotNull(template);
-        String jStr = "{\"vessels\":{\"self\":{\"environment\":{\"wind\":{\"directionApparent\":{\"value\":90.0000000000},\"directionTrue\":{\"value\":0.0000000000},\"speedApparent\":{\"value\":20.0000000000},\"speedTrue\":{\"value\":0.0000000000}}}}}}";
+        String jStr = "{\"vessels\":{\""+SELF+"\":{\"environment\":{\"wind\":{\"directionApparent\":{\"value\":90.0000000000},\"directionTrue\":{\"value\":0.0000000000},\"speedApparent\":{\"value\":20.0000000000},\"speedTrue\":{\"value\":0.0000000000}}}}}}";
         template.sendBody("direct:input","$GPRMC,144629.20,A,5156.91111,N,00434.80385,E,0.295,,011113,,,A*78");
         template.sendBody("direct:input",jStr);
         
@@ -98,7 +98,7 @@ public class SignalKReceiverTest extends CamelTestSupport {
 	@Test
     public void shouldProcessWindTrue() throws Exception {
         assertNotNull(template);
-        String jStr = "{\"vessels\":{\"self\":{\"environment\":{\"wind\":{\"directionApparent\":{\"value\":90.0000000000},\"directionTrue\":{\"value\":0.0000000000},\"speedApparent\":{\"value\":20.0000000000},\"speedTrue\":{\"value\":0.0000000000}}}}}}";
+        String jStr = "{\"vessels\":{\""+SELF+"\":{\"environment\":{\"wind\":{\"directionApparent\":{\"value\":90.0000000000},\"directionTrue\":{\"value\":0.0000000000},\"speedApparent\":{\"value\":20.0000000000},\"speedTrue\":{\"value\":0.0000000000}}}}}}";
         template.sendBody("direct:input","$GPRMC,144629.20,A,5156.91111,N,00434.80385,E,0.295,,011113,,,A*78");
         template.sendBody("direct:input",jStr);
         
@@ -114,7 +114,7 @@ public class SignalKReceiverTest extends CamelTestSupport {
 	@Test
     public void shouldProcessDeclination() throws Exception {
         assertNotNull(template);
-        String jStr = "{\"vessels\":{\"self\":{\"environment\":{\"wind\":{\"directionApparent\":{\"value\":90.0000000000},\"directionTrue\":{\"value\":0.0000000000},\"speedApparent\":{\"value\":20.0000000000},\"speedTrue\":{\"value\":0.0000000000}}}}}}";
+        String jStr = "{\"vessels\":{\""+SELF+"\":{\"environment\":{\"wind\":{\"directionApparent\":{\"value\":90.0000000000},\"directionTrue\":{\"value\":0.0000000000},\"speedApparent\":{\"value\":20.0000000000},\"speedTrue\":{\"value\":0.0000000000}}}}}}";
         template.sendBody("direct:input","$GPRMC,144629.20,A,5156.91111,N,00434.80385,E,0.295,,011113,,,A*78");
         template.sendBody("direct:input",jStr);
         

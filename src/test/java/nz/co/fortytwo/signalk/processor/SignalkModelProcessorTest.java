@@ -58,9 +58,9 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 		signalkModel.delete(signalkModel.self(), navigation);
 		signalkModel.delete(VESSELS, "366951720");
 		SignalkModelProcessor p = new SignalkModelProcessor();
-		assertEquals(signalkModel.duplicate().toString(),"{\"vessels\":{\"self\":{}}}");
+		assertEquals(signalkModel.duplicate().toString(),"{\"vessels\":{\""+SELF+"\":{}}}");
 		
-		Json json = Json.read("{\"vessels\":{\"self\":{\"navigation\":{\"courseOverGroundTrue\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":172.9},\"speedOverGround\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":3.85}}}}}");
+		Json json = Json.read("{\"vessels\":{\""+SELF+"\":{\"navigation\":{\"courseOverGroundTrue\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":172.9},\"speedOverGround\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":3.85}}}}}");
 		p.handle(json);
 		Json cog = signalkModel.findValue(signalkModel.self(),nav_courseOverGroundTrue);
 		assertEquals(172.9,cog.asDouble(), 0.001);
@@ -71,13 +71,13 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 		signalkModel.delete(signalkModel.self(), navigation);
 		signalkModel.delete(VESSELS, "366951720");
 		SignalkModelProcessor p = new SignalkModelProcessor();
-		assertEquals(signalkModel.duplicate().toString(),"{\"vessels\":{\"self\":{}}}");
+		assertEquals(signalkModel.duplicate().toString(),"{\"vessels\":{\""+SELF+"\":{}}}");
 		
-		Json json = Json.read("{\"invalid\":{\"self\":{\"navigation\":{\"courseOverGroundTrue\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":172.9},\"speedOverGround\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":3.85}}}}}");
+		Json json = Json.read("{\"invalid\":{\""+SELF+"\":{\"navigation\":{\"courseOverGroundTrue\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":172.9},\"speedOverGround\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":3.85}}}}}");
 		p.handle(json);
 		Json cog = signalkModel.findValue(signalkModel.self(),nav_courseOverGroundTrue);
 		assertNull(cog);
-		assertEquals(signalkModel.duplicate().toString(),"{\"vessels\":{\"self\":{}}}");
+		assertEquals(signalkModel.duplicate().toString(),"{\"vessels\":{\""+SELF+"\":{}}}");
 		
 	}
 	@Test
@@ -86,13 +86,13 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 		signalkModel.delete(signalkModel.self(), navigation);
 		signalkModel.delete(VESSELS, "366951720");
 		SignalkModelProcessor p = new SignalkModelProcessor();
-		assertEquals(signalkModel.duplicate().toString(),"{\"vessels\":{\"self\":{}}}");
+		assertEquals(signalkModel.duplicate().toString(),"{\"vessels\":{\""+SELF+"\":{}}}");
 		//make an exchange here
 		CamelContext ctx = new DefaultCamelContext(); 
 	    Exchange ex = new DefaultExchange(ctx);
 	    ex.getIn().setBody("$GPRMC,144629.30,A,5156.91115,N,00434.80383,E,1.689,,011113,,,A*73");
 	    p.process(ex);
-		assertEquals(signalkModel.duplicate().toString(),"{\"vessels\":{\"self\":{}}}");
+		assertEquals(signalkModel.duplicate().toString(),"{\"vessels\":{\""+SELF+"\":{}}}");
 		
 	}
 	@Test
@@ -101,13 +101,13 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 		signalkModel.delete(signalkModel.self(), navigation);
 		signalkModel.delete(VESSELS, "366951720");
 		SignalkModelProcessor p = new SignalkModelProcessor();
-		assertEquals(signalkModel.duplicate().toString(),"{\"vessels\":{\"self\":{}}}");
+		assertEquals(signalkModel.duplicate().toString(),"{\"vessels\":{\""+SELF+"\":{}}}");
 		//make an exchange here
 		CamelContext ctx = new DefaultCamelContext(); 
 	    Exchange ex = new DefaultExchange(ctx);
 	    ex.getIn().setBody("!AIVDM,1,1,,B,15MwkRUOidG?GElEa<iQk1JV06Jd,0*6D");
 	    p.process(ex);
-		assertEquals(signalkModel.duplicate().toString(),"{\"vessels\":{\"self\":{}}}");
+		assertEquals(signalkModel.duplicate().toString(),"{\"vessels\":{\""+SELF+"\":{}}}");
 		
 	}
 	@Test
@@ -116,13 +116,13 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 		signalkModel.delete(signalkModel.self(), navigation);
 		signalkModel.delete(VESSELS, "366951720");
 		SignalkModelProcessor p = new SignalkModelProcessor();
-		assertEquals(signalkModel.duplicate().toString(),"{\"vessels\":{\"self\":{}}}");
+		assertEquals(signalkModel.duplicate().toString(),"{\"vessels\":{\""+SELF+"\":{}}}");
 		//make an exchange here
 		CamelContext ctx = new DefaultCamelContext(); 
 	    Exchange ex = new DefaultExchange(ctx);
 	    ex.getIn().setBody(null);
 	    p.process(ex);
-		assertEquals(signalkModel.duplicate().toString(),"{\"vessels\":{\"self\":{}}}");
+		assertEquals(signalkModel.duplicate().toString(),"{\"vessels\":{\""+SELF+"\":{}}}");
 	}
 	
 	

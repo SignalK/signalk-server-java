@@ -27,6 +27,7 @@ package nz.co.fortytwo.signalk.server.util;
 public class JsonConstants {
 
 	
+	
 	public static final String MSG_TYPE = "MSG_TYPE";
 	public static final String SERIAL = "SERIAL";
 	public static final String EXTERNAL_IP = "EXTERNAL_IP";
@@ -36,7 +37,7 @@ public class JsonConstants {
 	public static final Object REQUIRED = "REQUIRED";
 	
 	public static final String VESSELS = "vessels";
-	public static final String SELF = "self";
+	public static final String SELF = Util.getConfigProperty(Constants.SELF);
 	public static final String CONTEXT = "context";
 	public static final String UPDATES = "updates";
 	public static final String SOURCE = "source";
@@ -251,7 +252,9 @@ public class JsonConstants {
 	
 	
 	
-	
+	public JsonConstants() {
+		// TODO Auto-generated constructor stub
+	}
 	
 
 

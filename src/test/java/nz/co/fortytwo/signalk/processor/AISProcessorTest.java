@@ -27,6 +27,7 @@ package nz.co.fortytwo.signalk.processor;
 import static org.junit.Assert.*;
 import mjson.Json;
 import nz.co.fortytwo.signalk.processor.AISProcessor;
+import nz.co.fortytwo.signalk.server.util.JsonConstants;
 
 import org.apache.log4j.Logger;
 import org.junit.Test;
@@ -45,7 +46,7 @@ public class AISProcessorTest{
 	
 	@Test
 	public void shouldPassJson(){
-		 String jStr = "{\"vessels\":{\"self\":{\"environment\":{\"wind\":{\"directionApparent\":0.0000000000,\"directionTrue\":0.0000000000,\"speedApparent\":0.0000000000,\"speedTrue\":20.0000000000}}}}}";
+		 String jStr = "{\"vessels\":{\""+JsonConstants.SELF+"\":{\"environment\":{\"wind\":{\"directionApparent\":0.0000000000,\"directionTrue\":0.0000000000,\"speedApparent\":0.0000000000,\"speedTrue\":20.0000000000}}}}}";
 		 AISProcessor processor = new AISProcessor();
 		
 		 String json = (String) processor.handle(jStr);

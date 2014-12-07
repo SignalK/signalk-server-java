@@ -75,7 +75,7 @@ public class NMEAProcessorTest {
 	}
 	@Test
 	public void shouldPassJson(){
-		 String jStr = "{\"vessels\":{\"self\":{\"environment\":{\"wind\":{\"directionApparent\":0.0000000000,\"directionTrue\":0.0000000000,\"speedApparent\":0.0000000000,\"speedTrue\":20.0000000000}}}}}";
+		 String jStr = "{\"vessels\":{\""+SELF+"\":{\"environment\":{\"wind\":{\"directionApparent\":0.0000000000,\"directionTrue\":0.0000000000,\"speedApparent\":0.0000000000,\"speedTrue\":20.0000000000}}}}}";
 		 NMEAProcessor processor = new NMEAProcessor();
 		
 		 String json = (String) processor.handle(jStr);
