@@ -21,7 +21,7 @@
  * limitations under the License.
  *
  */
-package nz.co.fortytwo.signalk.model;
+package nz.co.fortytwo.signalk.server;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,25 +40,18 @@ import nz.co.fortytwo.signalk.processor.ValidationProcessor;
 import nz.co.fortytwo.signalk.processor.WindProcessor;
 import nz.co.fortytwo.signalk.processor.WsSessionOutProcessor;
 import nz.co.fortytwo.signalk.processor.WsSessionProcessor;
-import nz.co.fortytwo.signalk.server.SignalKReceiver;
-import nz.co.fortytwo.signalk.server.TcpServer;
 import nz.co.fortytwo.signalk.server.util.JsonConstants;
 
-import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePattern;
-import org.apache.camel.Expression;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.websocket.WebsocketEndpoint;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.SessionManager;
 import org.eclipse.jetty.server.session.HashSessionManager;
 import org.eclipse.jetty.server.session.SessionHandler;
-import org.eclipse.jetty.webapp.WebAppContext;
-
-import com.ning.http.client.websocket.WebSocket;
+import org.eclipse.jetty.websocket.WebSocketServlet;
 
 
 
@@ -76,7 +69,6 @@ public class SignalkRouteFactory {
 	public static void configureInputRoute(RouteBuilder routeBuilder,String input) {
 		routeBuilder.from(input).onException(Exception.class).handled(true).maximumRedeliveries(0)
 			.to("log:nz.co.fortytwo.signalk.model.receive?level=ERROR&showException=true&showStackTrace=true").end()
-		.process(new WsSessionProcessor())
 		// dump misc rubbish
 		.process(new InputFilterProcessor())
 		//convert NMEA to signalk
@@ -118,7 +110,10 @@ public class SignalkRouteFactory {
 	 * @throws Exception 
 	 */
 	public static void configureWebsocketRxRoute(RouteBuilder routeBuilder ,String input, int port) {
-		routeBuilder.from("websocket://0.0.0.0:"+port+JsonConstants.SIGNALK_WS)
+		
+		WebsocketEndpoint wsEndpoint = (WebsocketEndpoint) routeBuilder.getContext().getEndpoint("websocket://0.0.0.0:"+port+JsonConstants.SIGNALK_WS);
+		wsEndpoint.setSessionSupport(true);
+		routeBuilder.from(wsEndpoint)
 			//.onException(Exception.class)
 			//.handled(true).maximumRedeliveries(0)
 			//.to("log:nz.co.fortytwo.signalk.model.websocket.rx?level=ERROR&showException=true&showStackTrace=true")

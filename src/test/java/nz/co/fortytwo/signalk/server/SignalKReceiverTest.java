@@ -30,7 +30,6 @@ import static nz.co.fortytwo.signalk.server.util.JsonConstants.env_wind_speedTru
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.nav_magneticVariation;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.nav_position_latitude;
 import nz.co.fortytwo.signalk.model.SignalKModel;
-import nz.co.fortytwo.signalk.model.SignalkRouteFactory;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
 import nz.co.fortytwo.signalk.processor.WindProcessor;

@@ -82,7 +82,7 @@ public class DeltaImportProcessorTest {
 
 	@Test
 	public void shouldIgnoreSignalKJson() {
-		Json diff = SignalKModelFactory.getInstance().getEmptyRootNode();
+		Json diff = (Json) SignalKModelFactory.getCleanInstance();
 		DeltaImportProcessor processor = new DeltaImportProcessor();
 		Json output = processor.handle(diff);
 		logger.debug(output);

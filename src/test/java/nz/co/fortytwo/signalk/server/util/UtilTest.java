@@ -48,7 +48,7 @@ public class UtilTest {
 	@Test
 	public void shouldMakeNode() {
 		SignalKModel signalkModel = SignalKModelFactory.getInstance();
-		Json root = signalkModel.getEmptyRootNode();
+		Json root = (Json) SignalKModelFactory.getCleanInstance();
 		//Json position = signalkModel.addNode(root, VESSELS+"."+SELF+"."+nav_anchor_position_latitude);
 		//System.out.println(position);
 		System.out.println(signalkModel.putWith(root,VESSELS+"."+SELF+"."+nav_anchor_position_latitude, 23.07d, "nmea"));

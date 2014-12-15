@@ -23,7 +23,7 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.VESSELS;
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;
 import mjson.Json;
 import nz.co.fortytwo.signalk.server.CamelContextFactory;
 
@@ -62,6 +62,7 @@ public class SignalkModelProcessor extends SignalkProcessor implements Processor
 	public void handle(Json node) {
 		if(!(node.has(VESSELS)))return;
 		logger.debug("SignalkModelProcessor  updating "+node );
+		
 		signalkModel.merge(node);
 		
 	}

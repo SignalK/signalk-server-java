@@ -6,8 +6,9 @@
   <name>signalk-server</name>
   <properties>
 		<!-- <bundle.name>nsb-${project.version}</bundle.name> -->
-		<jetty.version>7.6.13.v20130916</jetty.version>
-		<camel.version>2.12.1</camel.version>
+		<jetty.version>8.1.15.v20140411</jetty.version>
+		<camel.version>2.14.0</camel.version>
+		<camel.core.version>2.14.0</camel.core.version>
 		<jna.version>3.6.0-SNAPSHOT</jna.version>
 	</properties>
   <licenses>
@@ -44,6 +45,11 @@
 			<name>DMA AisLib Repository</name>
 			<url>http://repository-dma.forge.cloudbees.com/release</url>
 		</repository>
+		<repository>
+		   <id>maven-restlet</id>
+		   <name>Public online Restlet repository</name>
+		   <url>http://maven.restlet.com</url>
+		</repository> 
 	</repositories>
 	<pluginRepositories>
 		<pluginRepository>
@@ -54,6 +60,7 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</pluginRepository>
+
 	</pluginRepositories>
 	
   <dependencies>
@@ -76,12 +83,12 @@
 		<dependency>
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-core</artifactId>
-			<version>${camel.version}</version>
+			<version>${camel.core.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-websocket</artifactId>
-			<version>${camel.version}</version>
+			<version>${camel.core.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.camel</groupId>

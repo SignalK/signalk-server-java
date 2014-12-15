@@ -39,6 +39,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import mjson.Json;
+import nz.co.fortytwo.signalk.model.SignalKModel;
+import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.server.ais.AisVesselInfo;
 import nz.co.fortytwo.signalk.server.util.Util;
 
@@ -132,8 +134,8 @@ public class AISProcessor extends SignalkProcessor implements Processor {
 							vInfo=new AisVesselInfo((AisMessage18) message);
 						}
 						if(vInfo!=null){
-							Json json = signalkModel.getEmptyRootNode();
-							Json aisVessel  = signalkModel.addNode(json, VESSELS+"."+String.valueOf(vInfo.getUserId()));
+							SignalKModel json = SignalKModelFactory.getCleanInstance();
+							Json aisVessel  = signalkModel.addNode(signalkModel.atPath(VESSELS), String.valueOf(vInfo.getUserId()));
 						
 							aisVessel.set(name, vInfo.getName());
 							aisVessel.set(mmsi, String.valueOf(vInfo.getUserId()));

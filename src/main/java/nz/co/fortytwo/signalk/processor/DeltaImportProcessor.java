@@ -26,6 +26,7 @@ package nz.co.fortytwo.signalk.processor;
 import mjson.Json;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;
 import nz.co.fortytwo.signalk.model.event.JsonEvent;
+import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.server.util.Util;
 
 import org.apache.camel.Exchange;
@@ -103,7 +104,7 @@ public class DeltaImportProcessor extends SignalkProcessor implements Processor{
 		if(node.has(CONTEXT)){
 			logger.debug("processing delta  "+node );
 			//process it
-			Json temp = signalkModel.getEmptyRootNode();
+			Json temp = (Json) SignalKModelFactory.getCleanInstance();
 			
 			//go to context
 			String path = node.at(CONTEXT).asString();

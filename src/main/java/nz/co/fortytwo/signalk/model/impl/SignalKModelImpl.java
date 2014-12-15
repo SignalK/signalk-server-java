@@ -86,7 +86,7 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 		while (fieldNames.hasNext()) {
 
 			String fieldName = fieldNames.next();
-			//logger.debug("Merge " + fieldName);
+			logger.debug("Merge " + fieldName);
 			Json json = mainNode.at(fieldName);
 			// if field exists and is an embedded object
 			if (json != null && json.isArray()) {
@@ -101,7 +101,7 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 					//logger.debug(fieldName + "=" + value);
 					mainNode.set(fieldName, value);
 					eventBus.post(new JsonEvent(mainNode.up(), EventType.EDIT));
-					//logger.debug(fieldName + "=" + value);
+					logger.debug(fieldName + "=" + value);
 				}
 			}
 
@@ -379,14 +379,6 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 		
 	}
 	
-	/**
-	 * Creates an empty root node, with vessels.ownboat structure.
-	 * @return
-	 */
-	public Json getEmptyRootNode(){
-		Json tempRootNode = this.set(VESSELS,Json.object().set(SELF,Json.object()));
-		return tempRootNode;
-	}
 	
 	public EventBus getEventBus() {
 		return eventBus;
@@ -397,7 +389,7 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 
 	public Json dup() 
 	{ 
-		SignalKModelImpl j = new SignalKModelImpl();
+		SignalKModelImpl j = (SignalKModelImpl) SignalKModelFactory.getCleanInstance();
 	    for (Map.Entry<String, Json> e : object.entrySet())
 	    {
 	        Json v = e.getValue().dup();

@@ -23,17 +23,16 @@
  */
 package nz.co.fortytwo.signalk.server;
 
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.SIGNALK_WS;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import nz.co.fortytwo.signalk.model.SignalKModel;
-import nz.co.fortytwo.signalk.model.SignalkRouteFactory;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
+import nz.co.fortytwo.signalk.server.util.JsonConstants;
 
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
@@ -62,9 +61,13 @@ public class WebsocketTest extends CamelTestSupport {
     public void shouldUpdateAfterSendingMsg() throws Exception {
 		final List<String> received = new ArrayList<String>();
 	    final CountDownLatch latch = new CountDownLatch(1);
+	    final CountDownLatch latch2 = new CountDownLatch(1);
         final AsyncHttpClient c = new AsyncHttpClient();
-
-        WebSocket websocket = c.prepareGet("ws://127.0.0.1:9292"+SIGNALK_WS).execute(
+        //get a sessionid
+        c.prepareGet("http://localhost:9290/signalk/auth/demoPass").execute().get();
+        latch2.await(5, TimeUnit.SECONDS);
+        
+        WebSocket websocket = c.prepareGet("ws://127.0.0.1:9292"+SIGNALK_WS+"?test=1234").execute(
                 new WebSocketUpgradeHandler.Builder()
                     .addWebSocketListener(new WebSocketTextListener() {
                         @Override
@@ -95,7 +98,7 @@ public class WebsocketTest extends CamelTestSupport {
 
         websocket.sendTextMessage(jsonDiff);
       
-        assertTrue(latch.await(10, TimeUnit.SECONDS));
+        assertTrue(latch.await(200, TimeUnit.SECONDS));
 
         assertEquals(1, received.size());
         			//{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"navigation.courseOverGroundTrue\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}],\"context\":\"vessels.self\"}
@@ -158,6 +161,8 @@ public class WebsocketTest extends CamelTestSupport {
 	        return new RouteBuilder(){
 	            public void configure() {
 	    			SignalkRouteFactory.configureInputRoute(this, SignalKReceiver.SEDA_INPUT);
+	    			SignalkRouteFactory.configureRestRoute(this, "restlet:http://0.0.0.0:9290" + JsonConstants.SIGNALK_API);
+	    			SignalkRouteFactory.configureAuthRoute(this, "restlet:http://0.0.0.0:9290" + JsonConstants.SIGNALK_AUTH);
 	    			SignalkRouteFactory.configureWebsocketRxRoute(this, SignalKReceiver.SEDA_INPUT, 9292);
 	    			SignalkRouteFactory.configureWebsocketTxRoute(this,  SignalKReceiver.DIRECT_WEBSOCKETS, 9292, null);
 	    			SignalkRouteFactory.configureOutputTimer(this, "timer://signalkAll?fixedRate=true&period=1000");

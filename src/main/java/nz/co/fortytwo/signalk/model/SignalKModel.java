@@ -156,11 +156,6 @@ public interface SignalKModel{
 		public  Json putWith(Json node, String fullPath, Object value);
 		public  Json putWith(Json node, String fullPath, Object value, String source);
 		public  Json putWith(Json node, String fullPath, Object value, String source, DateTime dateTime);
-		/**
-		 * Creates an empty root node, with vessels.ownboat structure.
-		 * @return
-		 */
-		public  Json getEmptyRootNode();
 		
 		/**
 		 * Recursive findNode(), which returns the "value" object

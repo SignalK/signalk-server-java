@@ -60,6 +60,7 @@ import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.SentenceId;
 import net.sf.marineapi.nmea.sentence.VHWSentence;
+import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.server.util.Util;
 
 import org.apache.camel.Exchange;
@@ -108,7 +109,7 @@ public class NMEAProcessor extends SignalkProcessor implements Processor {
 			try {
 				logger.debug("Processing NMEA:" + bodyStr);
 				Sentence sentence = SentenceFactory.getInstance().createParser(bodyStr);
-				json = signalkModel.getEmptyRootNode();
+				json = (Json) SignalKModelFactory.getCleanInstance();
 				fireSentenceEvent(json, sentence);
 				return json;
 			} catch (Exception e) {

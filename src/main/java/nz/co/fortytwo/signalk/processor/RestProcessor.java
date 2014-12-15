@@ -89,6 +89,7 @@ public class RestProcessor extends SignalkProcessor implements Processor{
 	private void processGet(Request request, Exchange exchange) {
 		// use Restlet API to create the response
         Response response = exchange.getIn().getHeader(RestletConstants.RESTLET_RESPONSE, Response.class);
+        logger.debug("Root path:"+request.getRootRef().getPath());
         String path =  request.getOriginalRef().getPath();
         logger.debug("We are processing the restlet:"+path);
         int len = request.getRootRef().getPath().length();

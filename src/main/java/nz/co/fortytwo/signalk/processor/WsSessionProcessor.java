@@ -27,7 +27,10 @@ package nz.co.fortytwo.signalk.processor;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.websocket.WebsocketConstants;
+import org.apache.camel.component.websocket.WebsocketEndpoint;
 import org.apache.log4j.Logger;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.session.SessionHandler;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -40,7 +43,25 @@ public class WsSessionProcessor extends SignalkProcessor implements Processor {
 	@Override
 	public void process(Exchange exchange) throws Exception {
 		String connectionKey = exchange.getIn().getHeader(WebsocketConstants.CONNECTION_KEY, String.class);
-		logger.info("WS session key is " + connectionKey);
+		logger.info("WS connection key is " + connectionKey);
+		//for(Handler sh : ((WebsocketEndpoint)exchange.getFromEndpoint()).getHandlers()){
+		//	logger.info("Handler is :"+sh);
+		//}
+		
+		for(String key : exchange.getIn().getHeaders().keySet()){
+			logger.info("In headers = :"+key);
+		}
+		for(String key : exchange.getProperties().keySet()){
+			logger.info("props = :"+key);
+		}
+		//logger.info("SessionHandler is :"+sh);
+		//logger.info("SessionManager is :"+sh.getSessionManager());
+		
+		//for(s:sh.getSessionManager().getHttpSession(connectionKey))
+		//WebsocketEndpoint wsEndpoint = (WebsocketEndpoint)exchange.getFromEndpoint();
+		//WebSocketListener ws = 
+		//wsEndpoint.getComponent()getSessionManager()
+		//logger.info("SessionHandler is :"+exchange.);
 		if(!subscriptionMap.containsKey(connectionKey)){
 			subscriptionMap.put(connectionKey, "ALL");
 		}
