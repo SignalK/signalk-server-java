@@ -337,6 +337,18 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 		return mainNode;
 	}
 	
+	public  Json addNode(String fullPath) {
+		return addNode(this,fullPath);
+	}
+	public  Json putWith(String fullPath, Object value){
+		return putWith(this,fullPath, value);
+	}
+	public  Json putWith(String fullPath, Object value, String source){
+		return putWith(this,fullPath, value, source);
+	}
+	public  Json putWith(String fullPath, Object value, String source, DateTime dateTime){
+		return putWith(this,fullPath, value,source,dateTime);
+	}
 	/**
 	 * Recursive addNode()
 	 * Same as findNode, but will make a new node if any node on the path is empty

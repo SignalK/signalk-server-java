@@ -23,13 +23,16 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import static org.junit.Assert.*;
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.SELF;
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.SOURCE;
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.TIMESTAMP;
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.VALUE;
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.VESSELS;
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.navigation;
+import static org.junit.Assert.assertEquals;
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelImpl;
-import nz.co.fortytwo.signalk.processor.DeltaImportProcessor;
-import nz.co.fortytwo.signalk.server.util.Util;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;
 
 import org.apache.log4j.Logger;
 import org.junit.After;

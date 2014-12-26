@@ -39,6 +39,11 @@ import org.apache.camel.Predicate;
 import org.apache.camel.builder.PredicateBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.restlet.RestletConstants;
+import org.apache.camel.impl.DefaultCamelContext;
+import org.apache.camel.impl.JndiRegistry;
+import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry;
+import org.apache.camel.impl.SimpleRegistry;
+import org.eclipse.jetty.server.handler.ResourceHandler;
 
 /**
  * Main camel route definition to handle input to signalk
@@ -54,9 +59,9 @@ import org.apache.camel.component.restlet.RestletConstants;
  * @author robert
  * 
  */
-public class SignalKReceiver extends RouteBuilder {
+public class RouteManager extends RouteBuilder {
 	public static final String SEDA_INPUT = "seda:input";
-	public static final String DIRECT_WEBSOCKETS = "direct:websockets";
+	public static final String SEDA_WEBSOCKETS = "seda:websockets";
 	public static final String DIRECT_TCP = "direct:tcp";
 	private int wsPort = 9292;
 	private int restPort = 9290;
@@ -69,7 +74,7 @@ public class SignalKReceiver extends RouteBuilder {
 	private SignalKModel signalkModel=SignalKModelFactory.getInstance();
 	private TcpServer tcpServer;
 
-	public SignalKReceiver(Properties config) {
+	protected RouteManager(Properties config) {
 		this.config = config;
 	}
 
@@ -126,18 +131,26 @@ public class SignalKReceiver extends RouteBuilder {
 		File htmlRoot = new File(config.getProperty(Constants.STATIC_DIR));
 		log.info("Serving static files from "+htmlRoot.getAbsolutePath());
 		
-		SignalkRouteFactory.configureWebsocketTxRoute(this, DIRECT_WEBSOCKETS, wsPort, "file://"+htmlRoot.getAbsolutePath());
+		SignalkRouteFactory.configureWebsocketTxRoute(this, SEDA_WEBSOCKETS, wsPort);
 		SignalkRouteFactory.configureWebsocketRxRoute(this, SEDA_INPUT, wsPort);
 		SignalkRouteFactory.configureTcpServerRoute(this, DIRECT_TCP, tcpServer);
 		//restlet
-		SignalkRouteFactory.configureRestRoute(this, "restlet:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_API);
-		SignalkRouteFactory.configureAuthRoute(this, "restlet:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_AUTH);
+		ResourceHandler staticHandler = new ResourceHandler();
+		staticHandler.setResourceBase(config.getProperty(Constants.STATIC_DIR));
+	
+		
+		PropertyPlaceholderDelegateRegistry registry = (PropertyPlaceholderDelegateRegistry) CamelContextFactory.getInstance().getRegistry(); 
+		//((JndiRegistry)registry.getRegistry()).bind("staticHandler",staticHandler);
+		
+		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true");//&handlers=#staticHandler
+		SignalkRouteFactory.configureAuthRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_AUTH+"?sessionSupport=true&matchOnUriPrefix=true");
+		SignalkRouteFactory.configureSubscribeRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_SUBSCRIBE+"?sessionSupport=true&matchOnUriPrefix=true");
 		
 		// timed actions
-		//SignalkRouteFactory.configureDeclinationTimer(this, "timer://declination?fixedRate=true&period=10000");
-		//SignalkRouteFactory.configureWindTimer(this, "timer://wind?fixedRate=true&period=1000");
-		//SignalkRouteFactory.configureOutputTimer(this, "timer://signalkAll?fixedRate=true&period=1000");
-		
+		SignalkRouteFactory.configureDeclinationTimer(this, "timer://declination?fixedRate=true&period=10000");
+		SignalkRouteFactory.configureWindTimer(this, "timer://wind?fixedRate=true&period=1000");
+		SignalkRouteFactory.configureOutputTimer(this, "timer://signalkAll?fixedRate=true&period=1000");
+		//SignalkRouteFactory.configureOutputTimer(this, "timer://subscribe"++"?fixedRate=true&period="+period,wsSession);
 	}
 
 	/**

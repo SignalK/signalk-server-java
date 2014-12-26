@@ -33,8 +33,13 @@ import nz.co.fortytwo.signalk.server.util.Util;
 import org.apache.camel.main.Main;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.server.session.HashSessionManager;
+import org.eclipse.jetty.servlet.DefaultServlet;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 
 public class SignalKServer {
 
@@ -43,8 +48,6 @@ public class SignalKServer {
 	private static Logger logger = Logger.getLogger(SignalKServer.class);
 	
 	private Properties config=null;
-	
-	private HashSessionManager sessionManager=new HashSessionManager();
 	
 		
 	protected SignalKServer(String configDir) throws Exception {
@@ -60,33 +63,53 @@ public class SignalKServer {
 		
 		// create a new Camel Main so we can easily start Camel
 		Main main = new Main();
-
+		
 		// enable hangup support which mean we detect when the JVM terminates, and stop Camel graceful
 		main.enableHangupSupport();
 
-		SignalKReceiver route = new SignalKReceiver(config);
+		RouteManager routeManager = RouteManagerFactory.getInstance(config);
 		//must do this early!
-		CamelContextFactory.setContext(route);
+		CamelContextFactory.setContext(routeManager);
 		// web socket on port 9090
 		logger.info("  Websocket port:"+config.getProperty(Constants.WEBSOCKET_PORT));
-		route.setWsPort(Integer.valueOf(config.getProperty(Constants.WEBSOCKET_PORT)));
+		routeManager.setWsPort(Integer.valueOf(config.getProperty(Constants.WEBSOCKET_PORT)));
 		logger.info("  Signalk REST API port:"+config.getProperty(Constants.REST_PORT));
-		route.setRestPort(Integer.valueOf(config.getProperty(Constants.REST_PORT)));
+		routeManager.setRestPort(Integer.valueOf(config.getProperty(Constants.REST_PORT)));
 		
 		//are we running demo?
 		if (Boolean.valueOf(config.getProperty(Constants.DEMO))) {
 			logger.info("  Demo streaming url:"+config.getProperty(Constants.STREAM_URL));
-			route.setStreamUrl(config.getProperty(Constants.STREAM_URL));
+			routeManager.setStreamUrl(config.getProperty(Constants.STREAM_URL));
 		}
 		// add our routes to Camel
-		main.addRouteBuilder(route);
+		main.addRouteBuilder(routeManager);
+		
+		/*Connector connector = new SelectChannelConnector();
+		logger.info("  Webserver http port:"+config.getProperty(Constants.REST_PORT));
+		connector.setPort(Integer.valueOf(config.getProperty(Constants.REST_PORT)));
 
+		server = new Server();
+		server.addConnector(connector);
+		//serve tracks
+		ServletContextHandler trackContext = new ServletContextHandler();
+		logger.info("  Tracks url:"+config.getProperty(Constants.STATIC_DIR));
+		trackContext.setContextPath(config.getProperty(Constants.STATIC_DIR));
+		logger.info("  Tracks resource:"+config.getProperty(Constants.STATIC_DIR));
+		trackContext.setResourceBase(config.getProperty(Constants.STATIC_DIR));
+		trackContext.addServlet(DefaultServlet.class, "/dist/*");
+
+		HandlerList handlers = new HandlerList();
+		
+		handlers.addHandler(trackContext);
+		server.setHandler(handlers);
+		server.start();
+		*/
 		// and run, which keeps blocking until we terminate the JVM (or stop CamelContext)
 		main.run();
 	
 		//so now shutdown serial reader and server
 		
-		route.stopSerial();
+		routeManager.stopSerial();
 		server.stop();
 		System.exit(0);
 	}
@@ -117,10 +140,6 @@ public class SignalKServer {
 		}
 		SignalKServerFactory.getInstance(conf);
 		
-	}
-
-	public HashSessionManager getSessionManager() {
-		return sessionManager;
 	}
 
 	

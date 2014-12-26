@@ -24,10 +24,13 @@
 
 package nz.co.fortytwo.signalk.processor;
 
+import java.util.Set;
+
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
-import nz.co.fortytwo.signalk.server.SignalKServerFactory;
-import nz.co.fortytwo.signalk.server.util.JsonConstants;
+import nz.co.fortytwo.signalk.server.CamelContextFactory;
+import nz.co.fortytwo.signalk.server.SessionManager;
+import nz.co.fortytwo.signalk.server.SessionManagerFactory;
 import nz.co.fortytwo.signalk.server.util.Util;
 
 import org.apache.camel.Produce;
@@ -45,7 +48,7 @@ public class SignalkProcessor {
 	
 	private static Logger logger = Logger.getLogger(SignalkProcessor.class);
 	static protected SignalKModel signalkModel = SignalKModelFactory.getInstance();
-	
+	static protected  SessionManager manager = SessionManagerFactory.getInstance();
 	@Produce(uri = "seda:nmeaOutput")
     ProducerTemplate producer;
 	
@@ -53,6 +56,7 @@ public class SignalkProcessor {
 	public SignalkProcessor() {
 		
 	}
+	
 	
 	/**
 	 * If a processor generates an NMEA string, then this method is a convenient way to send it to the NMEA stream
@@ -74,12 +78,5 @@ public class SignalkProcessor {
 		return Util.round(val, places);
 	}
 	
-	/**
-	 * Gets the global web session manager
-	 * @return
-	 * @throws Exception
-	 */
-	protected HashSessionManager getSessionManager() throws Exception{
-		return SignalKServerFactory.getInstance(null).getSessionManager();
-	}
+	
 }

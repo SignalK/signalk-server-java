@@ -51,6 +51,7 @@ public class Constants {
 	public static final String SEND_MESSAGE = "signalk.debug.sendMessage";
 	public static final String STATIC_DIR = "signalk.static.files.dir";
 	public static final String SELF = "signalk.vessel.self";
+//	public static final String SESSIONID = "signalk.session";
 	
 	public Constants() {
 		// TODO Auto-generated constructor stub

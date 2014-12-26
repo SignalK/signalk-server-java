@@ -27,44 +27,34 @@ package nz.co.fortytwo.signalk.processor;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.websocket.WebsocketConstants;
-import org.apache.camel.component.websocket.WebsocketEndpoint;
 import org.apache.log4j.Logger;
-import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.session.SessionHandler;
-
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
 
 public class WsSessionProcessor extends SignalkProcessor implements Processor {
 
 	private static Logger logger = Logger.getLogger(WsSessionProcessor.class);
-	protected static ListMultimap<String, String> subscriptionMap = ArrayListMultimap.create();
+	
 
 	@Override
 	public void process(Exchange exchange) throws Exception {
 		String connectionKey = exchange.getIn().getHeader(WebsocketConstants.CONNECTION_KEY, String.class);
 		logger.info("WS connection key is " + connectionKey);
-		//for(Handler sh : ((WebsocketEndpoint)exchange.getFromEndpoint()).getHandlers()){
-		//	logger.info("Handler is :"+sh);
-		//}
 		
 		for(String key : exchange.getIn().getHeaders().keySet()){
-			logger.info("In headers = :"+key);
+			logger.info("In headers = "+key+"="+exchange.getIn().getHeader(key));
 		}
 		for(String key : exchange.getProperties().keySet()){
-			logger.info("props = :"+key);
+			logger.info("props = "+key);
 		}
-		//logger.info("SessionHandler is :"+sh);
-		//logger.info("SessionManager is :"+sh.getSessionManager());
 		
-		//for(s:sh.getSessionManager().getHttpSession(connectionKey))
-		//WebsocketEndpoint wsEndpoint = (WebsocketEndpoint)exchange.getFromEndpoint();
-		//WebSocketListener ws = 
-		//wsEndpoint.getComponent()getSessionManager()
-		//logger.info("SessionHandler is :"+exchange.);
-		if(!subscriptionMap.containsKey(connectionKey)){
-			subscriptionMap.put(connectionKey, "ALL");
-		}
+		//String sessionId = exchange.getProperty(Constants.SESSIONID, String.class);
+		
+		String breadcrumb = exchange.getIn().getHeader(Exchange.BREADCRUMB_ID,String.class);
+	    breadcrumb = breadcrumb.substring(0,breadcrumb.lastIndexOf("-",breadcrumb.lastIndexOf("-")));
+	    logger.info("Found breadcrumb = "+breadcrumb);
+	    String sessionId = manager.getWsSession(breadcrumb);
+	    logger.info("Found sessionId session = "+breadcrumb+","+sessionId);
+		manager.add(sessionId, connectionKey);
+		logger.info("Added session = "+sessionId+","+connectionKey);
 		
 	}
 

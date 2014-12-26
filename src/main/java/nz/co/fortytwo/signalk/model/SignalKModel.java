@@ -147,6 +147,7 @@ public interface SignalKModel{
 		/**
 		 * Recursive addNode()
 		 * Same as findNode, but will make a new node if any node on the path is empty
+		 * Assumes path is relative from 'node'.
 		 * @param node
 		 * @param fullPath
 		 * @param value 
@@ -157,6 +158,18 @@ public interface SignalKModel{
 		public  Json putWith(Json node, String fullPath, Object value, String source);
 		public  Json putWith(Json node, String fullPath, Object value, String source, DateTime dateTime);
 		
+		
+		/**
+		 * Recursive addNode()
+		 * Same as findNode, but will make a new node if any node on the path is empty
+		 * Assumes path is relative from root node
+		 * @param fullPath
+		 * @return
+		 */
+		public  Json addNode(String fullPath) ;
+		public  Json putWith(String fullPath, Object value);
+		public  Json putWith(String fullPath, Object value, String source);
+		public  Json putWith(String fullPath, Object value, String source, DateTime dateTime);
 		/**
 		 * Recursive findNode(), which returns the "value" object
 		 * @param fullPath

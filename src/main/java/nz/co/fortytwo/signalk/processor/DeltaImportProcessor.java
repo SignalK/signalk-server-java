@@ -23,11 +23,20 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.CONTEXT;
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.DEVICE;
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.PATH;
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.PGN;
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.SOURCE;
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.SRC;
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.TIMESTAMP;
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.UPDATES;
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.VALUE;
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.VALUES;
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.VESSELS;
 import mjson.Json;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;
-import nz.co.fortytwo.signalk.model.event.JsonEvent;
+import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
-import nz.co.fortytwo.signalk.server.util.Util;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -35,9 +44,6 @@ import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-
-import com.google.common.eventbus.DeadEvent;
-import com.google.common.eventbus.Subscribe;
 
 /**
  * Updates the signalkModel with the current json
@@ -104,13 +110,13 @@ public class DeltaImportProcessor extends SignalkProcessor implements Processor{
 		if(node.has(CONTEXT)){
 			logger.debug("processing delta  "+node );
 			//process it
-			Json temp = (Json) SignalKModelFactory.getCleanInstance();
+			SignalKModel temp =  SignalKModelFactory.getCleanInstance();
 			
 			//go to context
 			String path = node.at(CONTEXT).asString();
-			Json pathNode = signalkModel.addNode(temp, path);
+			Json pathNode = temp.addNode(path);
 			Json updates = node.at(UPDATES);
-			if(updates==null)return temp;
+			if(updates==null)return (Json) temp;
 			if(updates.isArray()){
 				for(Json update: updates.asJsonList()){
 					parseUpdate(temp, update, pathNode);
@@ -120,13 +126,13 @@ public class DeltaImportProcessor extends SignalkProcessor implements Processor{
 			}
 			
 			logger.debug("SignalkModelProcessor processed diff  "+temp );
-			return temp;
+			return (Json) temp;
 		}
 		return node;
 		
 	}
 
-	private void parseUpdate(Json temp, Json update, Json pathNode) {
+	private void parseUpdate(SignalKModel temp, Json update, Json pathNode) {
 		String device = update.at(SOURCE).at(DEVICE).asString();
 		String ts = update.at(SOURCE).at(TIMESTAMP).asString();
 		
@@ -138,11 +144,11 @@ public class DeltaImportProcessor extends SignalkProcessor implements Processor{
 		Json array = update.at(VALUES);
 		for(Json e : array.asJsonList()){
 			String key = e.at(PATH).asString();
-			Json n = signalkModel.addNode(pathNode, key);
+			Json n = temp.addNode(pathNode, key);
 			int pos = key.lastIndexOf(".");
 			if(pos>0)
 			key = key.substring(pos+1);
-			signalkModel.putWith(n.up(),key, e.at(VALUE).getValue(),device,timestamp);
+			temp.putWith(n.up(),key, e.at(VALUE).getValue(),device,timestamp);
 		}
 		
 	}

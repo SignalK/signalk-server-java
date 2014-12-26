@@ -19,7 +19,6 @@
 package mjson;
 
 import java.io.IOException;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
@@ -36,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 /**
@@ -2072,7 +2072,7 @@ public class Json
 	
 	public static class ObjectJson extends Json
 	{
-		protected Map<String, Json> object = new HashMap<String, Json>();
+		protected Map<String, Json> object = new ConcurrentHashMap<String, Json>();
 		
 		protected ObjectJson() { }
 		protected ObjectJson(Json e) { super(e); }

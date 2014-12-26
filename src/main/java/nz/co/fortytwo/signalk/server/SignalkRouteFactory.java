@@ -33,30 +33,32 @@ import nz.co.fortytwo.signalk.processor.DeltaImportProcessor;
 import nz.co.fortytwo.signalk.processor.InputFilterProcessor;
 import nz.co.fortytwo.signalk.processor.NMEAProcessor;
 import nz.co.fortytwo.signalk.processor.OutputFilterProcessor;
+import nz.co.fortytwo.signalk.processor.RestApiProcessor;
 import nz.co.fortytwo.signalk.processor.RestAuthProcessor;
-import nz.co.fortytwo.signalk.processor.RestProcessor;
 import nz.co.fortytwo.signalk.processor.SignalkModelProcessor;
+import nz.co.fortytwo.signalk.processor.SubscribeProcessor;
 import nz.co.fortytwo.signalk.processor.ValidationProcessor;
 import nz.co.fortytwo.signalk.processor.WindProcessor;
-import nz.co.fortytwo.signalk.processor.WsSessionOutProcessor;
 import nz.co.fortytwo.signalk.processor.WsSessionProcessor;
 import nz.co.fortytwo.signalk.server.util.JsonConstants;
 
+import org.antlr.v4.runtime.misc.Array2DHashSet;
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.restlet.RestletEndpoint;
+import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.camel.component.websocket.WebsocketEndpoint;
+import org.apache.camel.model.ProcessorDefinition;
+import org.apache.camel.model.RouteDefinition;
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.SessionManager;
-import org.eclipse.jetty.server.session.HashSessionManager;
-import org.eclipse.jetty.server.session.SessionHandler;
-import org.eclipse.jetty.websocket.WebSocketServlet;
+import org.apache.log4j.Logger;
 
 
 
 public class SignalkRouteFactory {
 
+	private static Logger logger = Logger.getLogger(SignalkRouteFactory.class);
 	/**
 	 * Configures a route for all input traffic, which will parse the traffic and update the signalk model
 	 * @param routeBuilder
@@ -89,18 +91,15 @@ public class SignalkRouteFactory {
 	 * @param routeBuilder
 	 * @param input
 	 */
-	public static void configureWebsocketTxRoute(RouteBuilder routeBuilder ,String input, int port, String staticResources){
-		String serveResources = "";
-		if(StringUtils.isNotBlank(staticResources)){
-			serveResources = "?staticResources="+staticResources;
-		}
+	public static void configureWebsocketTxRoute(RouteBuilder routeBuilder ,String input, int port){
+		
+		//from SEDA_WEBSOCKETS
 			routeBuilder.from(input)
 				//.onException(Exception.class)
 				//.handled(true).maximumRedeliveries(0)
 				//.to("log:nz.co.fortytwo.signalk.model.websocket.tx?level=ERROR&showException=true&showStackTrace=true").end()
 			.process(new OutputFilterProcessor())
-			.process(new WsSessionOutProcessor());
-			//.to("websocket://0.0.0.0:"+port+JsonConstants.SIGNALK_WS+serveResources);
+			.to("websocket://0.0.0.0:"+port+JsonConstants.SIGNALK_WS);
 		
 	}
 	/**
@@ -124,14 +123,14 @@ public class SignalkRouteFactory {
 		
 	}
 	public static void configureTcpServerRoute(RouteBuilder routeBuilder ,String input, TcpServer tcpServer){
-	// push NMEA out via TCPServer.
+		// push NMEA out via TCPServer.
 		routeBuilder.from(input).process((Processor) tcpServer).end();
 	}
 	
 	public static void configureRestRoute(RouteBuilder routeBuilder ,String input){
 		routeBuilder.from(input)
 			.setExchangePattern(ExchangePattern.InOut)
-			.process(new RestProcessor());
+			.process(new RestApiProcessor());
 		}
 	
 	public static void configureAuthRoute(RouteBuilder routeBuilder ,String input){
@@ -147,12 +146,55 @@ public class SignalkRouteFactory {
 		routeBuilder.from("timer://wind?fixedRate=true&period=1000").process(new WindProcessor()).to("log:nz.co.fortytwo.signalk.model.update?level=INFO").end();
 	}
 	public static void configureOutputTimer(RouteBuilder routeBuilder ,String input){
-		routeBuilder.from("timer://signalkAll?fixedRate=true&period=1000")
+		routeBuilder.from(input)
 		.process(new DeltaExportProcessor()).split(routeBuilder.body())
-		.to("log:nz.co.fortytwo.signalk.model.output?level=INFO")
+		.setHeader(WebsocketConstants.SEND_TO_ALL, routeBuilder.constant(true))
+		.to("log:nz.co.fortytwo.signalk.model.output.all?level=INFO")
 		.multicast()
-			.to(SignalKReceiver.DIRECT_TCP)
-			.to(SignalKReceiver.DIRECT_WEBSOCKETS)
+			.to(RouteManager.SEDA_WEBSOCKETS)
+			.to(RouteManager.DIRECT_TCP)
 		.end();
 	}
+	public static void configureSubscribeTimer(RouteBuilder routeBuilder ,Subscription sub){
+		String input = "timer://signalk"+sub.getWsSession()+"?fixedRate=true&period="+sub.getPeriod();
+		ProcessorDefinition<?> route = routeBuilder.from(input)
+		.process(new DeltaExportProcessor()).split(routeBuilder.body())
+		.setHeader(WebsocketConstants.CONNECTION_KEY, routeBuilder.constant(sub.getWsSession()))
+		.to("log:nz.co.fortytwo.signalk.model.output."+sub.getWsSession()+"?level=INFO")
+		.to(RouteManager.SEDA_WEBSOCKETS)
+		.end();
+		route.setId("subscribe:"+sub.getWsSession()+":"+sub.getPath());
+	}
+
+	public static void configureSubscribeRoute(RouteBuilder routeBuilder, String input) {
+		routeBuilder.from(input)
+		.setExchangePattern(ExchangePattern.InOut)
+		.process(new SubscribeProcessor());
+	}
+
+	public static void removeSubscribeTimers(RouteManager routeManager, List<Subscription> subs) {
+		for(Subscription sub : subs){
+			SignalkRouteFactory.removeSubscribeTimer(routeManager, sub);
+		}
+		
+	}
+	
+	public static void removeSubscribeTimer(RouteManager routeManager, Subscription sub) {
+		
+			logger.debug("Removing sub "+sub);
+			List<RouteDefinition> removals = new ArrayList<RouteDefinition>();
+			
+			for(RouteDefinition route : routeManager.getRouteCollection().getRoutes()){
+				logger.debug("Checking route "+route.getId());
+				if(route.getId().startsWith("subscribe:"+sub.getWsSession()+":"+sub.getPath())){
+					route.stop();
+					removals.add(route);
+					logger.debug("Stopped route "+route.getId());
+				}
+			}
+			routeManager.getRouteCollection().getRoutes().removeAll(removals);
+		
+	}
+		
+	
 }

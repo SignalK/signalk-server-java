@@ -23,8 +23,6 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.SELF;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.VESSELS;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.env_depth_belowTransducer;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.env_wind_directionApparent;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.env_wind_speedApparent;
@@ -60,6 +58,7 @@ import net.sf.marineapi.nmea.sentence.RMCSentence;
 import net.sf.marineapi.nmea.sentence.Sentence;
 import net.sf.marineapi.nmea.sentence.SentenceId;
 import net.sf.marineapi.nmea.sentence.VHWSentence;
+import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.server.util.Util;
 
@@ -104,12 +103,12 @@ public class NMEAProcessor extends SignalkProcessor implements Processor {
 
 	// @Override
 	public Object handle(String bodyStr) {
-		Json json = null;
+		SignalKModel json = null;
 		if (StringUtils.isNotBlank(bodyStr)&& bodyStr.startsWith("$")) {
 			try {
 				logger.debug("Processing NMEA:" + bodyStr);
 				Sentence sentence = SentenceFactory.getInstance().createParser(bodyStr);
-				json = (Json) SignalKModelFactory.getCleanInstance();
+				json = SignalKModelFactory.getCleanInstance();
 				fireSentenceEvent(json, sentence);
 				return json;
 			} catch (Exception e) {
@@ -183,7 +182,7 @@ public class NMEAProcessor extends SignalkProcessor implements Processor {
 	 * @param sentence
 	 *            sentence string.
 	 */
-	private void fireSentenceEvent(Json json, Sentence sentence) {
+	private void fireSentenceEvent(SignalKModel json, Sentence sentence) {
 		if (!sentence.isValid()) {
 			logger.warn("NMEA Sentence is invalid:" + sentence.toSentence());
 			return;
@@ -245,8 +244,8 @@ public class NMEAProcessor extends SignalkProcessor implements Processor {
 			static final double ALPHA = 1 - 1.0 / 6;
 
 			public void sentenceRead(SentenceEvent evt) {
-				Json json = (Json) evt.getSource();
-				json=json.at(VESSELS).at(SELF);
+				SignalKModel sk = (SignalKModel) evt.getSource();
+				Json  json=sk.self();
 				try{
 					if (evt.getSentence() instanceof PositionSentence) {
 						PositionSentence sen = (PositionSentence) evt.getSentence();
@@ -257,14 +256,14 @@ public class NMEAProcessor extends SignalkProcessor implements Processor {
 						}
 						previousLat = Util.movingAverage(ALPHA, previousLat, sen.getPosition().getLatitude());
 						logger.debug("lat position:" + sen.getPosition().getLatitude() + ", hemi=" + sen.getPosition().getLatitudeHemisphere());
-						signalkModel.putWith(json, nav_position_latitude , previousLat, "nmea");
+						sk.putWith(json, nav_position_latitude , previousLat, "nmea");
 	
 						if (startLon) {
 							previousLon = sen.getPosition().getLongitude();
 							startLon = false;
 						}
 						previousLon = Util.movingAverage(ALPHA, previousLon, sen.getPosition().getLongitude());
-						signalkModel.putWith(json, nav_position_longitude , previousLon, "nmea");
+						sk.putWith(json, nav_position_longitude , previousLon, "nmea");
 					}
 	
 					if (evt.getSentence() instanceof HeadingSentence) {
@@ -276,14 +275,14 @@ public class NMEAProcessor extends SignalkProcessor implements Processor {
 							if (sen.isTrue()) {
 								try {
 									
-									signalkModel.putWith(json, nav_courseOverGroundTrue , sen.getHeading(), "nmea");
+									sk.putWith(json, nav_courseOverGroundTrue , sen.getHeading(), "nmea");
 									
 								} catch (Exception e) {
 									logger.error(e.getMessage());
 								}
 							} else {
 								
-								signalkModel.putWith(json, nav_courseOverGroundMagnetic , sen.getHeading(), "nmea");
+								sk.putWith(json, nav_courseOverGroundMagnetic , sen.getHeading(), "nmea");
 							}
 						}
 					}
@@ -292,20 +291,20 @@ public class NMEAProcessor extends SignalkProcessor implements Processor {
 						RMCSentence sen = (RMCSentence) evt.getSentence();
 						Util.checkTime(sen);
 						previousSpeed = Util.movingAverage(ALPHA, previousSpeed, Util.kntToMs(sen.getSpeed()));
-						signalkModel.putWith(json, nav_speedOverGround , Util.kntToMs(sen.getSpeed()), "nmea");
+						sk.putWith(json, nav_speedOverGround , Util.kntToMs(sen.getSpeed()), "nmea");
 					}
 					if (evt.getSentence() instanceof VHWSentence) {
 						VHWSentence sen = (VHWSentence) evt.getSentence();
 						//VHW sentence types have both, but true can be empty
 						try {
-							signalkModel.putWith(json, nav_courseOverGroundMagnetic , sen.getMagneticHeading(), "nmea");
-							signalkModel.putWith(json, nav_courseOverGroundTrue , sen.getHeading(), "nmea");
+							sk.putWith(json, nav_courseOverGroundMagnetic , sen.getMagneticHeading(), "nmea");
+							sk.putWith(json, nav_courseOverGroundTrue , sen.getHeading(), "nmea");
 							
 						} catch (DataNotAvailableException e) {
 							logger.error(e.getMessage());
 						}
 						previousSpeed = Util.movingAverage(ALPHA, previousSpeed, Util.kntToMs(sen.getSpeedKnots()));
-						signalkModel.putWith(json, nav_speedOverGround , previousSpeed, "nmea");
+						sk.putWith(json, nav_speedOverGround , previousSpeed, "nmea");
 						
 					}
 	
@@ -317,8 +316,8 @@ public class NMEAProcessor extends SignalkProcessor implements Processor {
 						//TODO: check relative to bow or compass + sen.getSpeedUnit()
 						// relative to bow
 						double angle = sen.getAngle();
-						signalkModel.putWith(json, env_wind_directionApparent , angle, "nmea");
-						signalkModel.putWith(json, env_wind_speedApparent , Util.kntToMs(sen.getSpeed()), "nmea");
+						sk.putWith(json, env_wind_directionApparent , angle, "nmea");
+						sk.putWith(json, env_wind_speedApparent , Util.kntToMs(sen.getSpeed()), "nmea");
 						
 					}
 					// Cruzpro BVE sentence
@@ -326,30 +325,30 @@ public class NMEAProcessor extends SignalkProcessor implements Processor {
 					if (evt.getSentence() instanceof BVESentence) {
 						BVESentence sen = (BVESentence) evt.getSentence();
 						if (sen.isFuelGuage()) {
-							signalkModel.putWith(json, tanks_level , sen.getFuelRemaining(), "nmea");
-							signalkModel.putWith(json, propulsion_fuelUsageRate , sen.getFuelUseRateUnitsPerHour(), "nmea");
+							sk.putWith(json, tanks_level , sen.getFuelRemaining(), "nmea");
+							sk.putWith(json, propulsion_fuelUsageRate , sen.getFuelUseRateUnitsPerHour(), "nmea");
 							
 							// map.put(Constants.FUEL_USED, sen.getFuelUsedOnTrip());
-							// signalkModel.putWith(tempSelfNode, JsonConstants.tank_level, sen.getFuelRemaining(), "nmea");
+							// sk.putWith(tempSelfNode, JsonConstants.tank_level, sen.getFuelRemaining(), "nmea");
 						}
 						if (sen.isEngineRpm()) {
-							signalkModel.putWith(json, propulsion_rpm , sen.getEngineRpm(), "nmea");
+							sk.putWith(json, propulsion_rpm , sen.getEngineRpm(), "nmea");
 							// map.put(Constants.ENGINE_HOURS, sen.getEngineHours());
-							//signalkModel.putWith(tempSelfNode, JsonConstants.propulsion_hours, sen.getEngineHours(), "nmea");
+							//sk.putWith(tempSelfNode, JsonConstants.propulsion_hours, sen.getEngineHours(), "nmea");
 							// map.put(Constants.ENGINE_MINUTES, sen.getEngineMinutes());
-							//signalkModel.putWith(tempSelfNode, JsonConstants.propulsion_minutes, sen.getEngineMinutes(), "nmea");
+							//sk.putWith(tempSelfNode, JsonConstants.propulsion_minutes, sen.getEngineMinutes(), "nmea");
 	
 						}
 						if (sen.isTempGuage()) {
-							signalkModel.putWith(json, propulsion_engineTemperature , sen.getEngineTemp(), "nmea");
+							sk.putWith(json, propulsion_engineTemperature , sen.getEngineTemp(), "nmea");
 							// map.put(Constants.ENGINE_VOLTS, sen.getVoltage());
-							//signalkModel.putWith(tempSelfNode, JsonConstants.propulsion_engineVolts, sen.getVoltage(), "nmea");
+							//sk.putWith(tempSelfNode, JsonConstants.propulsion_engineVolts, sen.getVoltage(), "nmea");
 							// map.put(Constants.ENGINE_TEMP_HIGH_ALARM, sen.getHighTempAlarmValue());
 							// map.put(Constants.ENGINE_TEMP_LOW_ALARM, sen.getLowTempAlarmValue());
 	
 						}
 						if (sen.isPressureGuage()) {
-							signalkModel.putWith(json, propulsion_oilPressure , sen.getPressure(), "nmea");
+							sk.putWith(json, propulsion_oilPressure , sen.getPressure(), "nmea");
 							// map.put(Constants.ENGINE_PRESSURE_HIGH_ALARM, sen.getHighPressureAlarmValue());
 							// map.put(Constants.ENGINE_PRESSURE_LOW_ALARM, sen.getLowPressureAlarmValue());
 	
@@ -359,7 +358,7 @@ public class NMEAProcessor extends SignalkProcessor implements Processor {
 					if (evt.getSentence() instanceof DepthSentence) {
 						DepthSentence sen = (DepthSentence) evt.getSentence();
 						// in meters
-						signalkModel.putWith(json, env_depth_belowTransducer , sen.getDepth(), "nmea");
+						sk.putWith(json, env_depth_belowTransducer , sen.getDepth(), "nmea");
 						
 					}
 				}catch (DataNotAvailableException e){

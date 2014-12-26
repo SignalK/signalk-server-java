@@ -117,7 +117,7 @@ public class DeltaExportProcessor extends SignalkProcessor implements Processor{
 		String vessel = getVessel(path);
 		if(vessel==null)return;
 		
-		//recurse the objects to the leafs
+		//recurse the objects to the leaves
 		Json updates = Json.array();
 		getEntries(updates, j, vessel);
 		
