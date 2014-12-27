@@ -27,11 +27,11 @@ package nz.co.fortytwo.signalk.server;
 
 public class SessionManagerFactory {
 
-	private static SessionManager manager = null;
+	private static SubscriptionManager manager = null;
 	
-	public static SessionManager getInstance(){
+	public static SubscriptionManager getInstance(){
 		if(manager==null){
-			manager=new SessionManager();
+			manager=new SubscriptionManager();
 		}
 		return manager;
 	}

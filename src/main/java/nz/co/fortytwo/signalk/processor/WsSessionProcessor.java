@@ -26,7 +26,9 @@ package nz.co.fortytwo.signalk.processor;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.apache.camel.component.websocket.WebsocketComponent;
 import org.apache.camel.component.websocket.WebsocketConstants;
+import org.apache.camel.component.websocket.WebsocketEndpoint;
 import org.apache.log4j.Logger;
 
 public class WsSessionProcessor extends SignalkProcessor implements Processor {

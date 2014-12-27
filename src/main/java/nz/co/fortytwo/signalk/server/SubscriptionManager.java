@@ -29,23 +29,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import nz.co.fortytwo.signalk.server.util.JsonConstants;
-
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
 /**
- * Track and manage the sessionId's and corresponding webSocket identifiers for a consumer
+ * Track and manage the sessionId's and corresponding webSocket identifiers and subscriptions for a consumer
+ *
  * @author robert
  *
  */
-public class SessionManager {
+public class SubscriptionManager {
 	//hold sessionid <> wsSessionId
 	BiMap<String, String> wsSessionMap = HashBiMap.create();
 	//wsSessionId>Subscription
 	List<Subscription> subscriptions = new ArrayList<Subscription>();
 	
-	public void addSubscription(Subscription sub){
+	public void addSubscription(Subscription sub) throws Exception{
 		if(!subscriptions.contains(sub)){
 			subscriptions.add(sub);
 			//create a new route if we have too
@@ -57,7 +56,7 @@ public class SessionManager {
 		
 	}
 	
-	public void removeSubscription(Subscription sub){
+	public void removeSubscription(Subscription sub) throws Exception{
 			subscriptions.remove(sub);
 			if(sub.isActive()){
 				RouteManager routeManager = RouteManagerFactory.getInstance(null);
@@ -94,8 +93,9 @@ public class SessionManager {
 	 * Swaps the wsSessionId for any any inactive sessions that have been entered with sessionId, sessionId
 	 * @param sessionId
 	 * @param wsSession
+	 * @throws Exception 
 	 */
-	public void add(String sessionId, String wsSession){
+	public void add(String sessionId, String wsSession) throws Exception{
 		wsSessionMap.put(sessionId, wsSession);
 		//now update any subscriptions for sessionId
 		List<Subscription> subs = new ArrayList<Subscription>();
@@ -115,7 +115,7 @@ public class SessionManager {
 			}
 		}
 	}
-	public void removeSessionId(String sessionId){
+	public void removeSessionId(String sessionId) throws Exception{
 		String wsSession = wsSessionMap.get(sessionId);
 		wsSessionMap.remove(sessionId);
 		//remove all subscriptions
@@ -126,7 +126,7 @@ public class SessionManager {
 		
 		
 	}
-	public void removeWsSession(String wsSession){
+	public void removeWsSession(String wsSession) throws Exception{
 		wsSessionMap.inverse().remove(wsSession);
 		//remove all subscriptions
 		RouteManager routeManager = RouteManagerFactory.getInstance(null);

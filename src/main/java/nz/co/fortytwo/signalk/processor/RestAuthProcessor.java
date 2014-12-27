@@ -64,7 +64,7 @@ public class RestAuthProcessor extends SignalkProcessor implements Processor{
         }
 	}
 
-	private void processGet(HttpServletRequest request, Exchange exchange) {
+	private void processGet(HttpServletRequest request, Exchange exchange) throws Exception {
 		// use Restlet API to create the response
 		
         HttpServletResponse response = exchange.getIn(HttpMessage.class).getResponse();

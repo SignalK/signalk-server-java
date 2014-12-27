@@ -30,13 +30,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import nz.co.fortytwo.signalk.server.Subscription;
-import nz.co.fortytwo.signalk.server.util.Constants;
 import nz.co.fortytwo.signalk.server.util.JsonConstants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.http.HttpMessage;
-import org.apache.camel.component.restlet.RestletConstants;
 import org.apache.log4j.Logger;
 
 
@@ -67,7 +65,7 @@ public class SubscribeProcessor extends SignalkProcessor implements Processor {
 
 	
 
-	private void processGet(HttpServletRequest request, Exchange exchange) {
+	private void processGet(HttpServletRequest request, Exchange exchange) throws Exception {
 		// use Restlet API to create the response
 		HttpServletResponse response = exchange.getIn(HttpMessage.class).getResponse();
         
@@ -91,26 +89,26 @@ public class SubscribeProcessor extends SignalkProcessor implements Processor {
         int status = subscribe(path, period, sessionId);
         
         // SEND RESPONSE
-        exchange.getOut().setBody("");
+        //exchange.getOut().setBody("");
         response.setStatus(status);
 		
 	}
 
-	protected int subscribe(String path, long period, String sessionId) {
-		//String path =  request.getOriginalRef().getPath();
+	protected int subscribe(String path, long period, String sessionId) throws Exception {
         logger.debug("We are processing the path = "+path);
-        int len = JsonConstants.SIGNALK_SUBSCRIBE.length();
+        logger.debug("sessionId = "+sessionId);
+        logger.debug("wsSession = "+manager.getWsSession(sessionId));
         //check valid request.
         
-        if(path.length()<len || !path.startsWith(JsonConstants.SIGNALK_SUBSCRIBE+JsonConstants.VESSELS)){
+        if( !path.startsWith(JsonConstants.VESSELS)){
         	return HttpServletResponse.SC_BAD_REQUEST;
         }
-        path=path.substring(JsonConstants.SIGNALK_SUBSCRIBE.length());
+        
        //TODO: add decent Client Info here
         Subscription sub = new Subscription(manager.getWsSession(sessionId), path, period);
-        if(sessionId.equals(manager.getWsSession(sessionId))){
-        	sub.setActive(false);
-        }
+       // if(sessionId.equals(manager.getWsSession(sessionId))){
+       // 	sub.setActive(false);
+       // }
         manager.addSubscription(sub);
         logger.debug("Subscribed  = "+sub.toString());
         return HttpServletResponse.SC_ACCEPTED;

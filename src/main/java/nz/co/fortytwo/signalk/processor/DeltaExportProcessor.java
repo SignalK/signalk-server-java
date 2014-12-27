@@ -64,7 +64,7 @@ public class DeltaExportProcessor extends SignalkProcessor implements Processor{
 	public void process(Exchange exchange) throws Exception {
 		
 		try {
-			logger.debug("process delta queue");
+			logger.debug("process delta queue ("+map.size()+") for "+this.hashCode());
 			//get the accumulated delta nodes.
 			List<Json> deltas = null;
 			synchronized (map) {
@@ -197,7 +197,7 @@ public class DeltaExportProcessor extends SignalkProcessor implements Processor{
 
 	@Subscribe
 	public void recordEvent(JsonEvent jsonEvent){
-		logger.debug("Received event"+jsonEvent.getJson().toString());
+		logger.debug(this.hashCode()+ " received event "+jsonEvent.getJson().toString());
 		if(jsonEvent.getJson()==null)return;
 		createDelta(jsonEvent.getJson());
 	}

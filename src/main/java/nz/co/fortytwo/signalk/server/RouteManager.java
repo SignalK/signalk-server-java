@@ -39,10 +39,8 @@ import org.apache.camel.Predicate;
 import org.apache.camel.builder.PredicateBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.restlet.RestletConstants;
-import org.apache.camel.impl.DefaultCamelContext;
-import org.apache.camel.impl.JndiRegistry;
-import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry;
-import org.apache.camel.impl.SimpleRegistry;
+import org.apache.camel.component.websocket.WebsocketEndpoint;
+import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 
 /**
@@ -60,6 +58,8 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
  * 
  */
 public class RouteManager extends RouteBuilder {
+	private static Logger logger = Logger.getLogger(RouteManager.class);
+	
 	public static final String SEDA_INPUT = "seda:input";
 	public static final String SEDA_WEBSOCKETS = "seda:websockets";
 	public static final String DIRECT_TCP = "direct:tcp";
@@ -76,6 +76,11 @@ public class RouteManager extends RouteBuilder {
 
 	protected RouteManager(Properties config) {
 		this.config = config;
+		// web socket on port 9090
+		logger.info("  Websocket port:"+config.getProperty(Constants.WEBSOCKET_PORT));
+		setWsPort(Integer.valueOf(config.getProperty(Constants.WEBSOCKET_PORT)));
+		logger.info("  Signalk REST API port:"+config.getProperty(Constants.REST_PORT));
+		setRestPort(Integer.valueOf(config.getProperty(Constants.REST_PORT)));
 	}
 
 	public int getWsPort() {
@@ -115,9 +120,9 @@ public class RouteManager extends RouteBuilder {
 		Predicate stopNull = PredicateBuilder.and(predicates);
 		intercept().when(stopNull).stop();
 
-		if (Boolean.valueOf(config.getProperty(Constants.DEMO))) {
-			from("stream:file?fileName=" + streamUrl).to(SEDA_INPUT);
-		}
+		//if (Boolean.valueOf(config.getProperty(Constants.DEMO))) {
+		//("stream:file?fileName=" + streamUrl).to(SEDA_INPUT);
+		//}
 		tcpServer = new TcpServer();
 		tcpServer.start();
 		// start a serial port manager
@@ -137,10 +142,7 @@ public class RouteManager extends RouteBuilder {
 		//restlet
 		ResourceHandler staticHandler = new ResourceHandler();
 		staticHandler.setResourceBase(config.getProperty(Constants.STATIC_DIR));
-	
-		
-		PropertyPlaceholderDelegateRegistry registry = (PropertyPlaceholderDelegateRegistry) CamelContextFactory.getInstance().getRegistry(); 
-		//((JndiRegistry)registry.getRegistry()).bind("staticHandler",staticHandler);
+		//TODO: bind in registry
 		
 		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true");//&handlers=#staticHandler
 		SignalkRouteFactory.configureAuthRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_AUTH+"?sessionSupport=true&matchOnUriPrefix=true");
@@ -151,6 +153,9 @@ public class RouteManager extends RouteBuilder {
 		SignalkRouteFactory.configureWindTimer(this, "timer://wind?fixedRate=true&period=1000");
 		SignalkRouteFactory.configureOutputTimer(this, "timer://signalkAll?fixedRate=true&period=1000");
 		//SignalkRouteFactory.configureOutputTimer(this, "timer://subscribe"++"?fixedRate=true&period="+period,wsSession);
+		
+		//WebsocketEndpoint wsEndpoint = (WebsocketEndpoint) getContext().getEndpoint("websocket://0.0.0.0:"+wsPort+JsonConstants.SIGNALK_WS);
+		
 	}
 
 	/**

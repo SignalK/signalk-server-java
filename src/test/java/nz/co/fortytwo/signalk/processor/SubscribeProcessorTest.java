@@ -34,7 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import nz.co.fortytwo.signalk.server.RouteManager;
 import nz.co.fortytwo.signalk.server.RouteManagerFactory;
-import nz.co.fortytwo.signalk.server.SessionManager;
+import nz.co.fortytwo.signalk.server.SubscriptionManager;
 import nz.co.fortytwo.signalk.server.SessionManagerFactory;
 import nz.co.fortytwo.signalk.server.SignalkRouteFactory;
 import nz.co.fortytwo.signalk.server.Subscription;
@@ -60,8 +60,8 @@ public class SubscribeProcessorTest {
 	}
 
 	@Test
-	public void shouldSubscribeWithSessionId() {
-		SessionManager manager = SessionManagerFactory.getInstance();
+	public void shouldSubscribeWithSessionId() throws Exception {
+		SubscriptionManager manager = SessionManagerFactory.getInstance();
 		manager.removeSessionId("sessionId1");
 		SubscribeProcessor subscribe = new SubscribeProcessor();
 		subscribe.subscribe(JsonConstants.SIGNALK_SUBSCRIBE+"vessels/"+SELF+"/navigation",1000,"sessionId1");
@@ -71,8 +71,8 @@ public class SubscribeProcessorTest {
 		assertEquals("Subscription [wsSession=sessionId1, path=vessels/"+SELF+"/navigation, period=1000, active=false]", s.toString());
 	}
 	@Test
-	public void shouldRemoveSubsWithSessionId() {
-		SessionManager manager = SessionManagerFactory.getInstance();
+	public void shouldRemoveSubsWithSessionId()  throws Exception {
+		SubscriptionManager manager = SessionManagerFactory.getInstance();
 		manager.removeSessionId("sessionId2");
 		SubscribeProcessor subscribe = new SubscribeProcessor();
 		subscribe.subscribe(JsonConstants.SIGNALK_SUBSCRIBE+"vessels/"+SELF+"/navigation",500,"sessionId2");
@@ -85,8 +85,8 @@ public class SubscribeProcessorTest {
 		assertEquals(0, subs.size());
 	}
 	@Test
-	public void shouldSubscribeWithPeriod() {
-		SessionManager manager = SessionManagerFactory.getInstance();
+	public void shouldSubscribeWithPeriod()  throws Exception {
+		SubscriptionManager manager = SessionManagerFactory.getInstance();
 		manager.removeSessionId("sessionId3");
 		SubscribeProcessor subscribe = new SubscribeProcessor();
 		subscribe.subscribe(JsonConstants.SIGNALK_SUBSCRIBE+"vessels/"+SELF+"/navigation",500,"sessionId3");
@@ -97,8 +97,8 @@ public class SubscribeProcessorTest {
 	}
 
 	@Test
-	public void shouldSubscribeWithWsSession() {
-		SessionManager manager = SessionManagerFactory.getInstance();
+	public void shouldSubscribeWithWsSession()  throws Exception {
+		SubscriptionManager manager = SessionManagerFactory.getInstance();
 		manager.removeSessionId("sessionId4");
 		manager.add("sessionId4", "wsSession1");
 		SubscribeProcessor subscribe = new SubscribeProcessor();
@@ -114,8 +114,8 @@ public class SubscribeProcessorTest {
 	}
 	
 	@Test
-	public void shouldSubscribeAndUpdateId() {
-		SessionManager manager = SessionManagerFactory.getInstance();
+	public void shouldSubscribeAndUpdateId() throws Exception {
+		SubscriptionManager manager = SessionManagerFactory.getInstance();
 		manager.removeSessionId("sessionId5");
 		SubscribeProcessor subscribe = new SubscribeProcessor();
 		subscribe.subscribe(JsonConstants.SIGNALK_SUBSCRIBE+"vessels/"+SELF+"/navigation",1000,"sessionId5");
@@ -137,8 +137,8 @@ public class SubscribeProcessorTest {
 	}
 	
 	@Test
-	public void shouldUnSubscribe() {
-		SessionManager manager = SessionManagerFactory.getInstance();
+	public void shouldUnSubscribe()  throws Exception {
+		SubscriptionManager manager = SessionManagerFactory.getInstance();
 		manager.removeSessionId("sessionId3");
 		//now add webSocket
 		manager.add("sessionId3", "wsSession4");
@@ -161,8 +161,8 @@ public class SubscribeProcessorTest {
 	}
 	
 	@Test
-	public void shouldUnSubscribeOne() {
-		SessionManager manager = SessionManagerFactory.getInstance();
+	public void shouldUnSubscribeOne()  throws Exception {
+		SubscriptionManager manager = SessionManagerFactory.getInstance();
 		manager.removeSessionId("sessionId3");
 		//now add webSocket
 		manager.add("sessionId3", "wsSession4");
@@ -187,8 +187,8 @@ public class SubscribeProcessorTest {
 		assertEquals(1,routeManager.getRouteCollection().getRoutes().size());
 	}
 	@Test
-	public void shouldUnSubscribeAllByWsSession() {
-		SessionManager manager = SessionManagerFactory.getInstance();
+	public void shouldUnSubscribeAllByWsSession()  throws Exception {
+		SubscriptionManager manager = SessionManagerFactory.getInstance();
 		manager.removeSessionId("sessionId3");
 		//now add webSocket
 		manager.add("sessionId3", "wsSession4");
@@ -212,8 +212,8 @@ public class SubscribeProcessorTest {
 	}
 	
 	@Test
-	public void shouldUnSubscribeAllBySessionId() {
-		SessionManager manager = SessionManagerFactory.getInstance();
+	public void shouldUnSubscribeAllBySessionId()  throws Exception {
+		SubscriptionManager manager = SessionManagerFactory.getInstance();
 		manager.removeSessionId("sessionId3");
 		//now add webSocket
 		manager.add("sessionId3", "wsSession4");
@@ -237,7 +237,7 @@ public class SubscribeProcessorTest {
 	}
 	
 	@Test
-	public void shouldFailOnBadPath1() {
+	public void shouldFailOnBadPath1()  throws Exception {
 		SubscribeProcessor subscribe = new SubscribeProcessor();
 		int status = subscribe.subscribe(JsonConstants.SIGNALK_SUBSCRIBE+""+SELF+"/navigation",1000,"sessionId");
 		assertEquals(HttpServletResponse.SC_BAD_REQUEST, status);

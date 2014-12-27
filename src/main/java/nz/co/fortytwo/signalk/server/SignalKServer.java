@@ -30,16 +30,11 @@ import java.util.Properties;
 import nz.co.fortytwo.signalk.server.util.Constants;
 import nz.co.fortytwo.signalk.server.util.Util;
 
+import org.apache.camel.component.websocket.WebsocketComponentServlet;
 import org.apache.camel.main.Main;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.HandlerList;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
-import org.eclipse.jetty.server.session.HashSessionManager;
-import org.eclipse.jetty.servlet.DefaultServlet;
-import org.eclipse.jetty.servlet.ServletContextHandler;
 
 public class SignalKServer {
 
@@ -68,13 +63,6 @@ public class SignalKServer {
 		main.enableHangupSupport();
 
 		RouteManager routeManager = RouteManagerFactory.getInstance(config);
-		//must do this early!
-		CamelContextFactory.setContext(routeManager);
-		// web socket on port 9090
-		logger.info("  Websocket port:"+config.getProperty(Constants.WEBSOCKET_PORT));
-		routeManager.setWsPort(Integer.valueOf(config.getProperty(Constants.WEBSOCKET_PORT)));
-		logger.info("  Signalk REST API port:"+config.getProperty(Constants.REST_PORT));
-		routeManager.setRestPort(Integer.valueOf(config.getProperty(Constants.REST_PORT)));
 		
 		//are we running demo?
 		if (Boolean.valueOf(config.getProperty(Constants.DEMO))) {

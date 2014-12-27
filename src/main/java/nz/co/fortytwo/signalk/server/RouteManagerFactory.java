@@ -29,11 +29,15 @@ import java.util.Properties;
 
 public class RouteManagerFactory {
 
+	//private static Logger logger = Logger.getLogger(RouteManagerFactory.class);
 	private static RouteManager manager = null;
 	
 	public static RouteManager getInstance(Properties config){
 		if(manager==null){
 			manager=new RouteManager(config);
+			//must do this early!
+			CamelContextFactory.setContext(manager);
+			
 		}
 		return manager;
 	}

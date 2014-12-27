@@ -7,8 +7,8 @@
   <properties>
 		<!-- <bundle.name>nsb-${project.version}</bundle.name> -->
 		<jetty.version>8.1.15.v20140411</jetty.version>
-		<camel.version>2.14.0</camel.version>
-		<camel.core.version>2.14.0</camel.core.version>
+		<camel.version>2.14.1</camel.version>
+		<camel.core.version>2.14.1</camel.core.version>
 		<jna.version>3.6.0-SNAPSHOT</jna.version>
 	</properties>
   <licenses>
