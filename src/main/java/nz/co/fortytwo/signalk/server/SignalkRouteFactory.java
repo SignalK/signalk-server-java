@@ -95,7 +95,7 @@ public class SignalkRouteFactory {
 				//.handled(true).maximumRedeliveries(0)
 				.to("log:nz.co.fortytwo.signalk.model.websocket.tx?level=ERROR&showException=true&showStackTrace=true")
 			.process(new OutputFilterProcessor())
-			.to("websocket://0.0.0.0:"+port+JsonConstants.SIGNALK_WS);
+			.to("skWebsocket://0.0.0.0:"+port+JsonConstants.SIGNALK_WS);
 		
 	}
 	/**
@@ -104,11 +104,12 @@ public class SignalkRouteFactory {
 	 * @param input
 	 * @throws Exception 
 	 */
-	public static void configureWebsocketRxRoute(RouteBuilder routeBuilder ,String input, int port) {
+	public static void configureWebsocketRxRoute(RouteBuilder routeBuilder ,String input, int port)  {
 		
-		WebsocketEndpoint wsEndpoint = (WebsocketEndpoint) routeBuilder.getContext().getEndpoint("websocket://0.0.0.0:"+port+JsonConstants.SIGNALK_WS);
+		WebsocketEndpoint wsEndpoint = (WebsocketEndpoint) routeBuilder.getContext().getEndpoint("skWebsocket://0.0.0.0:"+port+JsonConstants.SIGNALK_WS);
 		
 		wsEndpoint.setSessionSupport(true);
+		
 		routeBuilder.from(wsEndpoint)
 			//.onException(Exception.class)
 			//.handled(true).maximumRedeliveries(0)

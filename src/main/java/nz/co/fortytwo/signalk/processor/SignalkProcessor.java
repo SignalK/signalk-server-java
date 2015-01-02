@@ -30,7 +30,7 @@ import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.server.CamelContextFactory;
 import nz.co.fortytwo.signalk.server.SubscriptionManager;
-import nz.co.fortytwo.signalk.server.SessionManagerFactory;
+import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
 import nz.co.fortytwo.signalk.server.util.Util;
 
 import org.apache.camel.Produce;
@@ -48,7 +48,7 @@ public class SignalkProcessor {
 	
 	private static Logger logger = Logger.getLogger(SignalkProcessor.class);
 	static protected SignalKModel signalkModel = SignalKModelFactory.getInstance();
-	static protected  SubscriptionManager manager = SessionManagerFactory.getInstance();
+	static protected  SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
 	@Produce(uri = "seda:nmeaOutput")
     ProducerTemplate producer;
 	

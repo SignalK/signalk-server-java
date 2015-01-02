@@ -35,7 +35,7 @@ import javax.servlet.http.HttpServletResponse;
 import nz.co.fortytwo.signalk.server.RouteManager;
 import nz.co.fortytwo.signalk.server.RouteManagerFactory;
 import nz.co.fortytwo.signalk.server.SubscriptionManager;
-import nz.co.fortytwo.signalk.server.SessionManagerFactory;
+import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
 import nz.co.fortytwo.signalk.server.SignalkRouteFactory;
 import nz.co.fortytwo.signalk.server.Subscription;
 import nz.co.fortytwo.signalk.server.util.JsonConstants;
@@ -61,7 +61,7 @@ public class SubscribeProcessorTest {
 
 	@Test
 	public void shouldSubscribeWithSessionId() throws Exception {
-		SubscriptionManager manager = SessionManagerFactory.getInstance();
+		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
 		manager.removeSessionId("sessionId1");
 		SubscribeProcessor subscribe = new SubscribeProcessor();
 		subscribe.subscribe(JsonConstants.SIGNALK_SUBSCRIBE+"vessels/"+SELF+"/navigation",1000,"sessionId1");
@@ -72,7 +72,7 @@ public class SubscribeProcessorTest {
 	}
 	@Test
 	public void shouldRemoveSubsWithSessionId()  throws Exception {
-		SubscriptionManager manager = SessionManagerFactory.getInstance();
+		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
 		manager.removeSessionId("sessionId2");
 		SubscribeProcessor subscribe = new SubscribeProcessor();
 		subscribe.subscribe(JsonConstants.SIGNALK_SUBSCRIBE+"vessels/"+SELF+"/navigation",500,"sessionId2");
@@ -86,7 +86,7 @@ public class SubscribeProcessorTest {
 	}
 	@Test
 	public void shouldSubscribeWithPeriod()  throws Exception {
-		SubscriptionManager manager = SessionManagerFactory.getInstance();
+		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
 		manager.removeSessionId("sessionId3");
 		SubscribeProcessor subscribe = new SubscribeProcessor();
 		subscribe.subscribe(JsonConstants.SIGNALK_SUBSCRIBE+"vessels/"+SELF+"/navigation",500,"sessionId3");
@@ -98,7 +98,7 @@ public class SubscribeProcessorTest {
 
 	@Test
 	public void shouldSubscribeWithWsSession()  throws Exception {
-		SubscriptionManager manager = SessionManagerFactory.getInstance();
+		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
 		manager.removeSessionId("sessionId4");
 		manager.add("sessionId4", "wsSession1");
 		SubscribeProcessor subscribe = new SubscribeProcessor();
@@ -115,7 +115,7 @@ public class SubscribeProcessorTest {
 	
 	@Test
 	public void shouldSubscribeAndUpdateId() throws Exception {
-		SubscriptionManager manager = SessionManagerFactory.getInstance();
+		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
 		manager.removeSessionId("sessionId5");
 		SubscribeProcessor subscribe = new SubscribeProcessor();
 		subscribe.subscribe(JsonConstants.SIGNALK_SUBSCRIBE+"vessels/"+SELF+"/navigation",1000,"sessionId5");
@@ -138,7 +138,7 @@ public class SubscribeProcessorTest {
 	
 	@Test
 	public void shouldUnSubscribe()  throws Exception {
-		SubscriptionManager manager = SessionManagerFactory.getInstance();
+		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
 		manager.removeSessionId("sessionId3");
 		//now add webSocket
 		manager.add("sessionId3", "wsSession4");
@@ -162,7 +162,7 @@ public class SubscribeProcessorTest {
 	
 	@Test
 	public void shouldUnSubscribeOne()  throws Exception {
-		SubscriptionManager manager = SessionManagerFactory.getInstance();
+		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
 		manager.removeSessionId("sessionId3");
 		//now add webSocket
 		manager.add("sessionId3", "wsSession4");
@@ -188,7 +188,7 @@ public class SubscribeProcessorTest {
 	}
 	@Test
 	public void shouldUnSubscribeAllByWsSession()  throws Exception {
-		SubscriptionManager manager = SessionManagerFactory.getInstance();
+		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
 		manager.removeSessionId("sessionId3");
 		//now add webSocket
 		manager.add("sessionId3", "wsSession4");
@@ -213,7 +213,7 @@ public class SubscribeProcessorTest {
 	
 	@Test
 	public void shouldUnSubscribeAllBySessionId()  throws Exception {
-		SubscriptionManager manager = SessionManagerFactory.getInstance();
+		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
 		manager.removeSessionId("sessionId3");
 		//now add webSocket
 		manager.add("sessionId3", "wsSession4");

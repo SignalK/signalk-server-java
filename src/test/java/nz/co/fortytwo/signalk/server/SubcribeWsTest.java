@@ -73,7 +73,7 @@ public class SubcribeWsTest extends CamelTestSupport {
         
         
       //await messages
-        WebSocket websocket = c.prepareGet("ws://127.0.0.1:9292"+SIGNALK_WS+"?test=1234").execute(
+        WebSocket websocket = c.prepareGet("ws://127.0.0.1:9292"+SIGNALK_WS+"?test=1234").setCookies(r1.getCookies()).execute(
                 new WebSocketUpgradeHandler.Builder()
                     .addWebSocketListener(new WebSocketTextListener() {
                         @Override
@@ -101,7 +101,7 @@ public class SubcribeWsTest extends CamelTestSupport {
                         }
                     }).build()).get();
 
-        websocket.sendTextMessage(jsonDiff);
+        //websocket.sendTextMessage(jsonDiff);
         latch4.await(2, TimeUnit.SECONDS);
       //subscribe
         Response reponse = c.prepareGet("http://localhost:9290/signalk/subscribe/vessels/motu/navigation").setCookies(r1.getCookies()).execute().get();

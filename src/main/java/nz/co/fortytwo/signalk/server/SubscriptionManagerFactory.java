@@ -25,7 +25,7 @@
  */
 package nz.co.fortytwo.signalk.server;
 
-public class SessionManagerFactory {
+public class SubscriptionManagerFactory {
 
 	private static SubscriptionManager manager = null;
 	

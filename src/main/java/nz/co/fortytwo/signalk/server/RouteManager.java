@@ -39,7 +39,9 @@ import org.apache.camel.Predicate;
 import org.apache.camel.builder.PredicateBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.restlet.RestletConstants;
-import org.apache.camel.component.websocket.WebsocketEndpoint;
+import org.apache.camel.component.websocket.SignalkWebsocketComponent;
+import org.apache.camel.impl.JndiRegistry;
+import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 
@@ -118,7 +120,7 @@ public class RouteManager extends RouteBuilder {
 		predicates.add(header(RestletConstants.RESTLET_REQUEST).isNull());
 		predicates.add(body().isNull());
 		Predicate stopNull = PredicateBuilder.and(predicates);
-		intercept().when(stopNull).stop();
+		//intercept().when(stopNull).stop();
 
 		//if (Boolean.valueOf(config.getProperty(Constants.DEMO))) {
 		//("stream:file?fileName=" + streamUrl).to(SEDA_INPUT);
@@ -136,13 +138,18 @@ public class RouteManager extends RouteBuilder {
 		File htmlRoot = new File(config.getProperty(Constants.STATIC_DIR));
 		log.info("Serving static files from "+htmlRoot.getAbsolutePath());
 		
-		SignalkRouteFactory.configureWebsocketTxRoute(this, SEDA_WEBSOCKETS, wsPort);
-		SignalkRouteFactory.configureWebsocketRxRoute(this, SEDA_INPUT, wsPort);
-		SignalkRouteFactory.configureTcpServerRoute(this, DIRECT_TCP, tcpServer);
 		//restlet
 		ResourceHandler staticHandler = new ResourceHandler();
 		staticHandler.setResourceBase(config.getProperty(Constants.STATIC_DIR));
-		//TODO: bind in registry
+		//bind in registry
+		PropertyPlaceholderDelegateRegistry registry = (PropertyPlaceholderDelegateRegistry) CamelContextFactory.getInstance().getRegistry(); 
+		((JndiRegistry)registry.getRegistry()).bind("staticHandler",staticHandler);
+		
+		CamelContextFactory.getInstance().addComponent("skWebsocket", new SignalkWebsocketComponent());
+		
+		SignalkRouteFactory.configureWebsocketTxRoute(this, SEDA_WEBSOCKETS, wsPort);
+		SignalkRouteFactory.configureWebsocketRxRoute(this, SEDA_INPUT, wsPort);
+		SignalkRouteFactory.configureTcpServerRoute(this, DIRECT_TCP, tcpServer);
 		
 		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true");//&handlers=#staticHandler
 		SignalkRouteFactory.configureAuthRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_AUTH+"?sessionSupport=true&matchOnUriPrefix=true");
