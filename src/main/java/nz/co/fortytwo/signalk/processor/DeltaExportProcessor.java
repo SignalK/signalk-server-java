@@ -36,6 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.event.JsonEvent;
+import nz.co.fortytwo.signalk.server.Subscription;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -54,10 +55,11 @@ import com.google.common.eventbus.Subscribe;
 public class DeltaExportProcessor extends SignalkProcessor implements Processor{
 
 	private static Logger logger = Logger.getLogger(DeltaExportProcessor.class);
-
+	protected String wsSession = null;
 	protected ConcurrentHashMap<String, Json> map = new ConcurrentHashMap<String, Json>();
-	public DeltaExportProcessor(){
+	public DeltaExportProcessor(String wsSession){
 		super();
+		this.wsSession=wsSession;
 		signalkModel.getEventBus().register(this);
 		
 	}
@@ -71,6 +73,7 @@ public class DeltaExportProcessor extends SignalkProcessor implements Processor{
 				deltas = ImmutableList.copyOf(map.values());
 				map.clear();
 			}
+			//dont send empty updates
 			exchange.getIn().setBody(deltas);
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
@@ -120,6 +123,7 @@ public class DeltaExportProcessor extends SignalkProcessor implements Processor{
 		//recurse the objects to the leaves
 		Json updates = Json.array();
 		getEntries(updates, j, vessel);
+		if(updates.asList().size()==0)return;
 		
 		synchronized (map) {
 			Json delta = map.get(vessel);
@@ -137,6 +141,19 @@ public class DeltaExportProcessor extends SignalkProcessor implements Processor{
 		//recurse objects
 		if( j.has(VALUE)){
 			String path = getPath(j);
+			//do we want this one
+			boolean ok= false;
+			logger.debug("Checking subs for session="+wsSession+" for:"+path);
+			for(Subscription s: manager.getSubscriptions(wsSession)){
+				logger.debug("Checking prefix="+s.getPath()+" for:"+path);
+				if(path.startsWith(s.getPath())){
+					//we want it
+					logger.debug("OK for:"+path);
+					ok=true;
+					break;
+				}
+			}
+			if(!ok)return;
 			path=path.substring(vessel.length()+1);
 			
 			Json entry = Json.object();
@@ -164,10 +181,11 @@ public class DeltaExportProcessor extends SignalkProcessor implements Processor{
 	private String getVessel(String path) {
 		if(!path.startsWith(VESSELS)) return null;
 		int pos=path.indexOf(".")+1;
-		//could be just one .\dot. vessels.123456789
-		if(pos<0)return null;
+		//could be just 'vessels'
+		if(pos<1)return path;
 		
 		pos=path.indexOf(".",pos);
+		//could be just one .\dot. vessels.123456789
 		if(pos<0)return path;
 		return path.substring(0,pos);
 	}

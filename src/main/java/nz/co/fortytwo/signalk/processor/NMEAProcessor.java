@@ -23,19 +23,7 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.env_depth_belowTransducer;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.env_wind_directionApparent;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.env_wind_speedApparent;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.nav_courseOverGroundMagnetic;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.nav_courseOverGroundTrue;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.nav_position_latitude;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.nav_position_longitude;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.nav_speedOverGround;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.propulsion_engineTemperature;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.propulsion_fuelUsageRate;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.propulsion_oilPressure;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.propulsion_rpm;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.tanks_level;
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;
 
 import java.util.HashSet;
 import java.util.List;
@@ -316,7 +304,7 @@ public class NMEAProcessor extends SignalkProcessor implements Processor {
 						//TODO: check relative to bow or compass + sen.getSpeedUnit()
 						// relative to bow
 						double angle = sen.getAngle();
-						sk.putWith(json, env_wind_directionApparent , angle, "nmea");
+						sk.putWith(json, env_wind_angleApparent , angle, "nmea");
 						sk.putWith(json, env_wind_speedApparent , Util.kntToMs(sen.getSpeed()), "nmea");
 						
 					}
@@ -325,14 +313,14 @@ public class NMEAProcessor extends SignalkProcessor implements Processor {
 					if (evt.getSentence() instanceof BVESentence) {
 						BVESentence sen = (BVESentence) evt.getSentence();
 						if (sen.isFuelGuage()) {
-							sk.putWith(json, tanks_level , sen.getFuelRemaining(), "nmea");
-							sk.putWith(json, propulsion_fuelUsageRate , sen.getFuelUseRateUnitsPerHour(), "nmea");
+							sk.putWith(json, tanks_id_level , sen.getFuelRemaining(), "nmea");
+							sk.putWith(json, propulsion_id_fuelUsageRate , sen.getFuelUseRateUnitsPerHour(), "nmea");
 							
 							// map.put(Constants.FUEL_USED, sen.getFuelUsedOnTrip());
 							// sk.putWith(tempSelfNode, JsonConstants.tank_level, sen.getFuelRemaining(), "nmea");
 						}
 						if (sen.isEngineRpm()) {
-							sk.putWith(json, propulsion_rpm , sen.getEngineRpm(), "nmea");
+							sk.putWith(json, propulsion_id_rpm , sen.getEngineRpm(), "nmea");
 							// map.put(Constants.ENGINE_HOURS, sen.getEngineHours());
 							//sk.putWith(tempSelfNode, JsonConstants.propulsion_hours, sen.getEngineHours(), "nmea");
 							// map.put(Constants.ENGINE_MINUTES, sen.getEngineMinutes());
@@ -340,7 +328,7 @@ public class NMEAProcessor extends SignalkProcessor implements Processor {
 	
 						}
 						if (sen.isTempGuage()) {
-							sk.putWith(json, propulsion_engineTemperature , sen.getEngineTemp(), "nmea");
+							sk.putWith(json, propulsion_id_engineTemperature , sen.getEngineTemp(), "nmea");
 							// map.put(Constants.ENGINE_VOLTS, sen.getVoltage());
 							//sk.putWith(tempSelfNode, JsonConstants.propulsion_engineVolts, sen.getVoltage(), "nmea");
 							// map.put(Constants.ENGINE_TEMP_HIGH_ALARM, sen.getHighTempAlarmValue());
@@ -348,7 +336,7 @@ public class NMEAProcessor extends SignalkProcessor implements Processor {
 	
 						}
 						if (sen.isPressureGuage()) {
-							sk.putWith(json, propulsion_oilPressure , sen.getPressure(), "nmea");
+							sk.putWith(json, propulsion_id_oilPressure , sen.getPressure(), "nmea");
 							// map.put(Constants.ENGINE_PRESSURE_HIGH_ALARM, sen.getHighPressureAlarmValue());
 							// map.put(Constants.ENGINE_PRESSURE_LOW_ALARM, sen.getLowPressureAlarmValue());
 	

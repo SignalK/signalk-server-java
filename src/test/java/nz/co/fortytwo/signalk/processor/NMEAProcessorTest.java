@@ -28,9 +28,9 @@ import static nz.co.fortytwo.signalk.server.util.JsonConstants.SELF;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.VESSELS;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.env_depth_belowTransducer;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.nav_position_latitude;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.propulsion_engineTemperature;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.propulsion_oilPressure;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.propulsion_rpm;
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.propulsion_id_engineTemperature;
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.propulsion_id_oilPressure;
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.propulsion_id_rpm;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -75,7 +75,7 @@ public class NMEAProcessorTest {
 	}
 	@Test
 	public void shouldPassJson(){
-		 String jStr = "{\"vessels\":{\""+SELF+"\":{\"environment\":{\"wind\":{\"directionApparent\":0.0000000000,\"directionTrue\":0.0000000000,\"speedApparent\":0.0000000000,\"speedTrue\":20.0000000000}}}}}";
+		 String jStr = "{\"vessels\":{\""+SELF+"\":{\"environment\":{\"wind\":{\"angleApparent\":0.0000000000,\"directionTrue\":0.0000000000,\"speedApparent\":0.0000000000,\"speedTrue\":20.0000000000}}}}}";
 		 NMEAProcessor processor = new NMEAProcessor();
 		
 		 String json = (String) processor.handle(jStr);
@@ -102,11 +102,11 @@ public class NMEAProcessorTest {
 		NMEAProcessor processor = new NMEAProcessor();
 		Json json = (Json) processor.handle("$YXXDR,G,0004,,G,12.27,,G,,,G,003.3,,G,0012,,MaxVu110*4E");
 		//RPM,EVV,DBT,EPP,ETT
-		assertEquals(4.0,signalkModel.findValue(json, propulsion_rpm).asDouble(),0.0001);
+		assertEquals(4.0,signalkModel.findValue(json, propulsion_id_rpm).asDouble(),0.0001);
 		//assertEquals(12.27,signalkModel.findValue(json, propulsion_).asDouble());
 		assertEquals(null,signalkModel.findValue(json, env_depth_belowTransducer));
-		assertEquals(3.3,signalkModel.findValue(json, propulsion_oilPressure).asDouble(),0.0001);
-		assertEquals(12.0,signalkModel.findValue(json, propulsion_engineTemperature).asDouble(),0.0001);
+		assertEquals(3.3,signalkModel.findValue(json, propulsion_id_oilPressure).asDouble(),0.0001);
+		assertEquals(12.0,signalkModel.findValue(json, propulsion_id_engineTemperature).asDouble(),0.0001);
 	}
 	
 	@Test
@@ -119,11 +119,11 @@ public class NMEAProcessorTest {
 		
 		Json json = (Json) processor.handle("$YXXDR,G,0004,,G,12.27,,G,,,G,003.3,,G,0012,,MaxVu110*4E");
 		//RPM,EVV,DBT,EPP,ETT
-		assertEquals(4.0,signalkModel.findValue(json, propulsion_rpm).asDouble(),0.0001);
+		assertEquals(4.0,signalkModel.findValue(json, propulsion_id_rpm).asDouble(),0.0001);
 		//assertEquals(12.27,map.get(Constants.ENGINE_VOLTS));
 		assertTrue(signalkModel.findValue(json, env_depth_belowTransducer)==null);
-		assertEquals(3.3,signalkModel.findValue(json, propulsion_oilPressure).asDouble(),0.0001);
-		assertEquals(12.0,signalkModel.findValue(json, propulsion_engineTemperature).asDouble(),0.0001);
+		assertEquals(3.3,signalkModel.findValue(json, propulsion_id_oilPressure).asDouble(),0.0001);
+		assertEquals(12.0,signalkModel.findValue(json, propulsion_id_engineTemperature).asDouble(),0.0001);
 	}
 	@Test
 	@Ignore
@@ -135,11 +135,11 @@ public class NMEAProcessorTest {
 		//map.put(Constants.NMEA, "$YXXDR,G,0004,,G,12.27,,G,,,G,003.3,,G,0012,,MaxVu110*4E");
 		Json json = (Json) processor.handle("$YXXDR,G,0004,,G,12.27,,G,,,G,003.3,,G,0012,,MaxVu110*4E");
 		//RPM,EVV,DBT,EPP,ETT
-		assertTrue(signalkModel.findValue(json, propulsion_rpm)==null);
+		assertTrue(signalkModel.findValue(json, propulsion_id_rpm)==null);
 		//assertTrue(signalkModel.findValue(json, propulsion_rpm)==null);
 		assertTrue(signalkModel.findValue(json, env_depth_belowTransducer)==null);
-		assertTrue(signalkModel.findValue(json, propulsion_oilPressure)==null);
-		assertTrue(signalkModel.findValue(json, propulsion_engineTemperature)==null);
+		assertTrue(signalkModel.findValue(json, propulsion_id_oilPressure)==null);
+		assertTrue(signalkModel.findValue(json, propulsion_id_engineTemperature)==null);
 	}
 
 }

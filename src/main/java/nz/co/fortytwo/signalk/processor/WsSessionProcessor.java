@@ -50,13 +50,13 @@ public class WsSessionProcessor extends SignalkProcessor implements Processor {
 		
 		//String sessionId = exchange.getProperty(Constants.SESSIONID, String.class);
 		
-		String breadcrumb = exchange.getIn().getHeader(Exchange.BREADCRUMB_ID,String.class);
-	    breadcrumb = breadcrumb.substring(0,breadcrumb.lastIndexOf("-",breadcrumb.lastIndexOf("-")));
-	    logger.info("Found breadcrumb = "+breadcrumb);
-	    String sessionId = manager.getWsSession(breadcrumb);
-	    logger.info("Found sessionId session = "+breadcrumb+","+sessionId);
-		manager.add(sessionId, connectionKey);
-		logger.info("Added session = "+sessionId+","+connectionKey);
+		//String breadcrumb = exchange.getIn().getHeader(Exchange.BREADCRUMB_ID,String.class);
+	    //breadcrumb = breadcrumb.substring(0,breadcrumb.lastIndexOf("-",breadcrumb.lastIndexOf("-")));
+	    //logger.info("Found breadcrumb = "+breadcrumb);
+	    //String sessionId = manager.getWsSession(breadcrumb);
+	    logger.info("Found sessionId session = "+connectionKey+","+manager.getSessionId(connectionKey));
+		//manager.add(sessionId, connectionKey);
+		//logger.info("Added session = "+sessionId+","+connectionKey);
 		
 	}
 

@@ -52,8 +52,7 @@ public class SubscribeProcessor extends SignalkProcessor implements Processor {
 	@Override
 	public void process(Exchange exchange) throws Exception {
 		HttpServletRequest request = exchange.getIn(HttpMessage.class).getRequest();
-		 HttpSession session = request.getSession();
-		 logger.debug("Session:"+session.getId());
+		 logger.debug("Session:"+request.getRequestedSessionId());
        if(request.getSession()!=null){
 	        if(request.getMethod().equals("GET")) processGet(request, exchange);
        }else{
@@ -73,11 +72,12 @@ public class SubscribeProcessor extends SignalkProcessor implements Processor {
         logger.debug("We are processing the path = "+path);
         
         //check valid request.
-        if(path.length()<JsonConstants.SIGNALK_SUBSCRIBE.length()){
+        if(path.length() < JsonConstants.SIGNALK_SUBSCRIBE.length()){
         	response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        	logger.debug("Returning SC_BAD_REQUEST");
         	return;
         }
-        path=path.substring(JsonConstants.SIGNALK_SUBSCRIBE.length());
+        
         //get period, default 1000.
         long period = 1000;
         if(exchange.getIn().getHeader("period")!=null){
@@ -95,20 +95,21 @@ public class SubscribeProcessor extends SignalkProcessor implements Processor {
 	}
 
 	protected int subscribe(String path, long period, String sessionId) throws Exception {
-        logger.debug("We are processing the path = "+path);
+		path=path.substring(JsonConstants.SIGNALK_SUBSCRIBE.length()-1);
+        logger.debug("We are processing trimmed path = "+path);
         logger.debug("sessionId = "+sessionId);
         logger.debug("wsSession = "+manager.getWsSession(sessionId));
         //check valid request.
         
-        if( !path.startsWith(JsonConstants.VESSELS)){
+        if( !path.startsWith("/"+JsonConstants.VESSELS)){
         	return HttpServletResponse.SC_BAD_REQUEST;
         }
         
        //TODO: add decent Client Info here
-        Subscription sub = new Subscription(manager.getWsSession(sessionId), path, period);
-       // if(sessionId.equals(manager.getWsSession(sessionId))){
-       // 	sub.setActive(false);
-       // }
+       Subscription sub = new Subscription(manager.getWsSession(sessionId), path, period);
+       if(sessionId.equals(manager.getWsSession(sessionId))){
+        	sub.setActive(false);
+        }
         manager.addSubscription(sub);
         logger.debug("Subscribed  = "+sub.toString());
         return HttpServletResponse.SC_ACCEPTED;

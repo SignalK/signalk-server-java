@@ -24,7 +24,7 @@
 package nz.co.fortytwo.signalk.processor;
 
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.SELF;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.env_wind_directionApparent;
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.env_wind_angleApparent;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.env_wind_directionTrue;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.env_wind_speedApparent;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.env_wind_speedTrue;
@@ -64,7 +64,7 @@ public class WindProcessor extends SignalkProcessor implements Processor{
 		try {
 
 			Json vesselSpeed =  signalkModel.findValue(signalkModel.self(), nav_speedOverGround);
-			Json apparentDirection = signalkModel.findValue(signalkModel.self(), env_wind_directionApparent);
+			Json apparentDirection = signalkModel.findValue(signalkModel.self(), env_wind_angleApparent);
 			Json apparentWindSpeed =signalkModel.findValue(signalkModel.self(), env_wind_speedApparent);
 			if (apparentWindSpeed !=null && apparentDirection!=null && vesselSpeed!=null) {
 				// now calc and add to body

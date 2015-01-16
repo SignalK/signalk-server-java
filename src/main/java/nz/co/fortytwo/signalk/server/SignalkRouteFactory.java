@@ -145,7 +145,7 @@ public class SignalkRouteFactory {
 	}
 	public static void configureOutputTimer(RouteBuilder routeBuilder ,String input){
 		routeBuilder.from(input)
-		.process(new DeltaExportProcessor())
+		.process(new DeltaExportProcessor(null))
 		.split(routeBuilder.body())
 		.setHeader(WebsocketConstants.SEND_TO_ALL, routeBuilder.constant(true))
 		.to("log:nz.co.fortytwo.signalk.model.output.all?level=INFO")
@@ -155,20 +155,24 @@ public class SignalkRouteFactory {
 		.end();
 	}
 	public static void configureSubscribeTimer(RouteBuilder routeBuilder ,Subscription sub) throws Exception{
-		String input = "timer://sub_"+sub.getWsSession()+"_"+sub.getPath()+"?fixedRate=true&period="+sub.getPeriod();
+		String input = "timer://"+getRouteId(sub)+"?fixedRate=true&period="+sub.getPeriod();
 		logger.debug("Configuring route "+input);
 		String wsSession = sub.getWsSession();
 		RouteDefinition route = routeBuilder.from(input);
-			route.process(new DeltaExportProcessor())
+			route.process(new DeltaExportProcessor(wsSession))
 			.split(routeBuilder.body())
 			.setHeader(WebsocketConstants.CONNECTION_KEY, routeBuilder.constant(wsSession))
 			.to("log:nz.co.fortytwo.signalk.model.output.wsSession?level=INFO")
 			.to(RouteManager.SEDA_WEBSOCKETS)
 			.end();
-		route.setId("sub_"+sub.getWsSession()+"_"+sub.getPath());
+		route.setId(getRouteId(sub));
 		((DefaultCamelContext)CamelContextFactory.getInstance()).addRouteDefinition(route);
 		((DefaultCamelContext)CamelContextFactory.getInstance()).startRoute(route.getId());
 		//routeBuilder.getContext().startAllRoutes();
+	}
+
+	private static String getRouteId(Subscription sub) {
+		return "sub_"+sub.getWsSession()+"_"+sub.getPath();
 	}
 
 	public static void configureSubscribeRoute(RouteBuilder routeBuilder, String input) {
@@ -185,11 +189,13 @@ public class SignalkRouteFactory {
 	}
 	
 	public static void removeSubscribeTimer(RouteManager routeManager, Subscription sub) throws Exception {
-		
-			logger.debug("Removing sub "+sub);
-			((DefaultCamelContext)CamelContextFactory.getInstance()).stopRoute("sub_"+sub.getWsSession()+"_"+sub.getPath());
-			((DefaultCamelContext)CamelContextFactory.getInstance()).removeRoute("sub_"+sub.getWsSession()+"_"+sub.getPath());
-		
+			RouteDefinition routeDef = ((DefaultCamelContext)routeManager.getContext()).getRouteDefinition(getRouteId(sub));
+			logger.debug("Stopping sub "+getRouteId(sub)+","+routeDef);
+			((DefaultCamelContext)routeManager.getContext()).stopRoute(routeDef);
+			logger.debug("Removing sub "+getRouteId(sub));
+			((DefaultCamelContext)routeManager.getContext()).removeRouteDefinition(routeDef);
+			
+			logger.debug("Done removing sub "+getRouteId(sub));
 	}
 		
 	

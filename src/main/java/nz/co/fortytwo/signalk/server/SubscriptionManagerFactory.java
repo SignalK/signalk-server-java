@@ -35,4 +35,8 @@ public class SubscriptionManagerFactory {
 		}
 		return manager;
 	}
+	
+	public static void clear(){
+		manager=null;
+	}
 }

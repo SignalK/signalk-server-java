@@ -55,7 +55,7 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 	@Test
 	public void shouldMerge() {
 		SignalKModel signalkModel=SignalKModelFactory.getInstance();
-		signalkModel.delete(signalkModel.self(), navigation);
+		signalkModel.delete(signalkModel.self(), nav);
 		signalkModel.delete(VESSELS, "366951720");
 		SignalkModelProcessor p = new SignalkModelProcessor();
 		assertEquals(signalkModel.duplicate().toString(),"{\"vessels\":{\""+SELF+"\":{}}}");
@@ -68,7 +68,7 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 	@Test
 	public void shouldNotMergeOtherJson() {
 		SignalKModel signalkModel=SignalKModelFactory.getInstance();
-		signalkModel.delete(signalkModel.self(), navigation);
+		signalkModel.delete(signalkModel.self(), nav);
 		signalkModel.delete(VESSELS, "366951720");
 		SignalkModelProcessor p = new SignalkModelProcessor();
 		assertEquals(signalkModel.duplicate().toString(),"{\"vessels\":{\""+SELF+"\":{}}}");
@@ -83,7 +83,7 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 	@Test
 	public void shouldNotMergeNmea() throws Exception {
 		SignalKModel signalkModel=SignalKModelFactory.getInstance();
-		signalkModel.delete(signalkModel.self(), navigation);
+		signalkModel.delete(signalkModel.self(), nav);
 		signalkModel.delete(VESSELS, "366951720");
 		SignalkModelProcessor p = new SignalkModelProcessor();
 		assertEquals(signalkModel.duplicate().toString(),"{\"vessels\":{\""+SELF+"\":{}}}");
@@ -98,7 +98,7 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 	@Test
 	public void shouldNotMergeAis() throws Exception {
 		SignalKModel signalkModel=SignalKModelFactory.getInstance();
-		signalkModel.delete(signalkModel.self(), navigation);
+		signalkModel.delete(signalkModel.self(), nav);
 		signalkModel.delete(VESSELS, "366951720");
 		SignalkModelProcessor p = new SignalkModelProcessor();
 		assertEquals(signalkModel.duplicate().toString(),"{\"vessels\":{\""+SELF+"\":{}}}");
@@ -113,7 +113,7 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 	@Test
 	public void shouldHandleNull() throws Exception{
 		SignalKModel signalkModel=SignalKModelFactory.getInstance();
-		signalkModel.delete(signalkModel.self(), navigation);
+		signalkModel.delete(signalkModel.self(), nav);
 		signalkModel.delete(VESSELS, "366951720");
 		SignalkModelProcessor p = new SignalkModelProcessor();
 		assertEquals(signalkModel.duplicate().toString(),"{\"vessels\":{\""+SELF+"\":{}}}");

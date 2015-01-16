@@ -46,7 +46,7 @@ public class AISProcessorTest{
 	
 	@Test
 	public void shouldPassJson(){
-		 String jStr = "{\"vessels\":{\""+JsonConstants.SELF+"\":{\"environment\":{\"wind\":{\"directionApparent\":0.0000000000,\"directionTrue\":0.0000000000,\"speedApparent\":0.0000000000,\"speedTrue\":20.0000000000}}}}}";
+		 String jStr = "{\"vessels\":{\""+JsonConstants.SELF+"\":{\"environment\":{\"wind\":{\"angleApparent\":0.0000000000,\"directionTrue\":0.0000000000,\"speedApparent\":0.0000000000,\"speedTrue\":20.0000000000}}}}}";
 		 AISProcessor processor = new AISProcessor();
 		
 		 String json = (String) processor.handle(jStr);

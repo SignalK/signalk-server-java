@@ -25,7 +25,16 @@ package nz.co.fortytwo.signalk.server.signalk.json;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import mjson.Json;
 
@@ -36,6 +45,9 @@ import org.junit.Test;
 
 public class GetSignalkKeysTest {
 
+	private SortedSet<String> strings = new TreeSet<String>();
+	private Map<String, String> keys = new TreeMap<String,String>();
+	
 	@Before
 	public void setUp() throws Exception {
 	}
@@ -46,7 +58,7 @@ public class GetSignalkKeysTest {
 
 	@Test
 	public void printKeys() throws IOException{
-		
+
 		getAlarmKeys();
 		getCommunicationKeys();
 		getEnvironmentKeys();
@@ -56,6 +68,15 @@ public class GetSignalkKeysTest {
 		getSensorsKeys();
 		getSteeringKeys();
 		getTanksKeys();
+		for(String str: strings){
+			System.out.println(str.toUpperCase()+" = \""+str+"\"");
+		}
+		for(String keyName: keys.keySet()){
+			String constantName = keyName.replaceAll("\\.", "_");
+			constantName=constantName.replaceAll("environment_", "env_");
+			constantName=constantName.replaceAll("navigation_", "nav_");
+			System.out.println(constantName.toUpperCase()+" = \""+keyName+"\"");
+		}
 	}
 	
 	public void getEnvironmentKeys() throws IOException {
@@ -136,6 +157,9 @@ public class GetSignalkKeysTest {
 		while (fieldNames.hasNext()) {
 
 			String fieldName = fieldNames.next();
+			if(!strings.contains(fieldName)){
+				strings.add(fieldName);
+			}
 			//ignore stuff here
 			if("id".equals(fieldName))continue;
 			if("title".equals(fieldName))continue;
@@ -146,14 +170,36 @@ public class GetSignalkKeysTest {
 			if("enum".equals(fieldName))continue;
 			if("example".equals(fieldName))continue;
 			if(fieldName.indexOf("$")>=0)continue;
+			if(fieldName.indexOf("patternProperties")>=0)continue;
 			if(!"properties".equals(fieldName)){
 				String keyName = path+"."+fieldName;
+				String type = null;
+				if( schema.at(fieldName)!=null && schema.at(fieldName).isObject() && schema.at(fieldName).at("type")!=null){
+					type = schema.at(fieldName).at("type").toString();
+					type=type.replace('"', ' ').trim();
+				}
+				if(type==null){
+					if( schema.at(fieldName)!=null && schema.at(fieldName).isObject() && schema.at(fieldName).at("$ref")!=null){
+						type = schema.at(fieldName).at("$ref").toString();
+						if(type.contains("numberValue"))type="number";
+						if(type.contains("stringValue"))type="string";
+						if(type.contains("version"))type="string";
+						if(type.contains("mmsi"))type="string";
+						if(type.contains("uuid"))type="string";
+						if(type.contains("version"))type="string";
+						if(type.contains("floatValue"))type="float";
+						if(type.contains("timestamp"))type="timestamp";
+						if(type.contains("nullValue"))type="null";
+						if(type.contains("alarmValue"))type="alarmValue";
+						if(type.contains("alarmMethod"))type="alarmMethod";
+					}
+				}
 				keyName=keyName.replaceAll(".properties","");
 				keyName=keyName.replaceAll(".additionalProperties","");
-				String constantName = keyName.replaceAll("\\.", "_");
-				constantName=constantName.replaceAll("environment_", "env_");
-				constantName=constantName.replaceAll("navigation_", "nav_");
-				System.out.println("public static final String "+constantName+ " = \"" + keyName+"\";");
+				
+				keys.put(keyName, type);
+				//System.out.println("public static final String "+constantName.toUpperCase()+ " = \"" + keyName+"\";");
+				//System.out.println("public static final "+type+" "+keyName+"=null;");
 			}
 			
 			Json json = schema.at(fieldName);

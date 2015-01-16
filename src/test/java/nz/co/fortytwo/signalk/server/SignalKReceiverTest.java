@@ -83,7 +83,7 @@ public class SignalKReceiverTest extends CamelTestSupport {
 	@Test
     public void shouldProcessTwoMessages() throws Exception {
         assertNotNull(template);
-        String jStr = "{\"vessels\":{\""+SELF+"\":{\"environment\":{\"wind\":{\"directionApparent\":{\"value\":90.0000000000},\"directionTrue\":{\"value\":0.0000000000},\"speedApparent\":{\"value\":20.0000000000},\"speedTrue\":{\"value\":0.0000000000}}}}}}";
+        String jStr = "{\"vessels\":{\""+SELF+"\":{\"environment\":{\"wind\":{\"angleApparent\":{\"value\":90.0000000000},\"directionTrue\":{\"value\":0.0000000000},\"speedApparent\":{\"value\":20.0000000000},\"speedTrue\":{\"value\":0.0000000000}}}}}}";
         template.sendBody("direct:input","$GPRMC,144629.20,A,5156.91111,N,00434.80385,E,0.295,,011113,,,A*78");
         template.sendBody("direct:input",jStr);
         
@@ -97,7 +97,7 @@ public class SignalKReceiverTest extends CamelTestSupport {
 	@Test
     public void shouldProcessWindTrue() throws Exception {
         assertNotNull(template);
-        String jStr = "{\"vessels\":{\""+SELF+"\":{\"environment\":{\"wind\":{\"directionApparent\":{\"value\":90.0000000000},\"directionTrue\":{\"value\":0.0000000000},\"speedApparent\":{\"value\":20.0000000000},\"speedTrue\":{\"value\":0.0000000000}}}}}}";
+        String jStr = "{\"vessels\":{\""+SELF+"\":{\"environment\":{\"wind\":{\"angleApparent\":{\"value\":90.0000000000},\"directionTrue\":{\"value\":0.0000000000},\"speedApparent\":{\"value\":20.0000000000},\"speedTrue\":{\"value\":0.0000000000}}}}}}";
         template.sendBody("direct:input","$GPRMC,144629.20,A,5156.91111,N,00434.80385,E,0.295,,011113,,,A*78");
         template.sendBody("direct:input",jStr);
         
@@ -113,7 +113,7 @@ public class SignalKReceiverTest extends CamelTestSupport {
 	@Test
     public void shouldProcessDeclination() throws Exception {
         assertNotNull(template);
-        String jStr = "{\"vessels\":{\""+SELF+"\":{\"environment\":{\"wind\":{\"directionApparent\":{\"value\":90.0000000000},\"directionTrue\":{\"value\":0.0000000000},\"speedApparent\":{\"value\":20.0000000000},\"speedTrue\":{\"value\":0.0000000000}}}}}}";
+        String jStr = "{\"vessels\":{\""+SELF+"\":{\"environment\":{\"wind\":{\"angleApparent\":{\"value\":90.0000000000},\"directionTrue\":{\"value\":0.0000000000},\"speedApparent\":{\"value\":20.0000000000},\"speedTrue\":{\"value\":0.0000000000}}}}}}";
         template.sendBody("direct:input","$GPRMC,144629.20,A,5156.91111,N,00434.80385,E,0.295,,011113,,,A*78");
         template.sendBody("direct:input",jStr);
         
@@ -122,7 +122,7 @@ public class SignalKReceiverTest extends CamelTestSupport {
 		 //assertEquals(51.9485185d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF), nav_magneticVariation).asDouble(),0.00001);
 		// assertEquals(20.0d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF),env_wind_speedApparent ).asDouble(),0.00001);
 		 declinationProcessor.handle();
-		 assertEquals(0.4d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF),nav_magneticVariation ).asDouble(),0.00001);
+		 assertEquals(0.5d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF),nav_magneticVariation ).asDouble(),0.00001);
       
     }
 	

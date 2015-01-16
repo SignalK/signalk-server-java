@@ -27,18 +27,35 @@ package nz.co.fortytwo.signalk.server;
 
 import java.util.Properties;
 
+import nz.co.fortytwo.signalk.server.util.Util;
+
+import org.apache.log4j.Logger;
+
 public class RouteManagerFactory {
 
-	//private static Logger logger = Logger.getLogger(RouteManagerFactory.class);
+	private static Logger logger = Logger.getLogger(RouteManagerFactory.class);
 	private static RouteManager manager = null;
 	
 	public static RouteManager getInstance(Properties config){
 		if(manager==null){
+			if(config==null)
+				try {
+					config=Util.getConfig(null);
+				} catch (Exception e) {
+					logger.error(e);
+				} 
 			manager=new RouteManager(config);
 			//must do this early!
 			CamelContextFactory.setContext(manager);
 			
 		}
 		return manager;
+	}
+	
+	/**
+	 * For testing
+	 */
+	public static void clear(){
+		manager = null;
 	}
 }

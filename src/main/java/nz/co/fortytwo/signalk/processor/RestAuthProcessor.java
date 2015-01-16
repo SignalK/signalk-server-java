@@ -23,14 +23,9 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import java.util.UUID;
-
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
-import nz.co.fortytwo.signalk.server.util.Constants;
 import nz.co.fortytwo.signalk.server.util.JsonConstants;
 
 import org.apache.camel.Exchange;
@@ -54,8 +49,9 @@ public class RestAuthProcessor extends SignalkProcessor implements Processor{
 	public void process(Exchange exchange) throws Exception {
 		// the Restlet request should be available if neeeded
 		HttpServletRequest request = exchange.getIn(HttpMessage.class).getRequest();
-		 HttpSession session = request.getSession();
-		 logger.debug("Session = "+session.getId());
+		
+		 //HttpSession session = request.getSession();
+		 logger.debug("Session = "+request.getRequestedSessionId());
        // Request request = exchange.getIn().getHeader(RestletConstants.RESTLET_REQUEST, Request.class);
         if("GET"==request.getMethod()){
         	processGet(request, exchange);
@@ -86,11 +82,11 @@ public class RestAuthProcessor extends SignalkProcessor implements Processor{
         //Cookie cookie = new Cookie(Constants.SESSIONID, uuid);
        // cookie.setPath("/signalk/");
        // response.addCookie(cookie);
-        String breadcrumb = exchange.getIn().getHeader(Exchange.BREADCRUMB_ID,String.class);
-        breadcrumb = breadcrumb.substring(0,breadcrumb.lastIndexOf("-",breadcrumb.lastIndexOf("-")));
+        //String breadcrumb = exchange.getIn().getHeader(Exchange.BREADCRUMB_ID,String.class);
+        //breadcrumb = breadcrumb.substring(0,breadcrumb.lastIndexOf("-",breadcrumb.lastIndexOf("-")));
         //manager.add(cookieSetting.getValue(), cookieSetting.getValue());
-        logger.info("Adding breadcrumb = "+breadcrumb+","+request.getSession().getId());
-        manager.add(breadcrumb, request.getSession().getId());
+        logger.info("Adding session = "+request.getSession().getId());
+        manager.add(request.getRequestedSessionId(), request.getRequestedSessionId());
        
         // SEND RESPONSE
         //exchange.getOut().setBody(response.getEntityAsText());

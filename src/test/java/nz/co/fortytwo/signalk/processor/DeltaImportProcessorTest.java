@@ -28,7 +28,7 @@ import static nz.co.fortytwo.signalk.server.util.JsonConstants.SOURCE;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.TIMESTAMP;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.VALUE;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.VESSELS;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.navigation;
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.nav;
 import static org.junit.Assert.assertEquals;
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
@@ -60,13 +60,13 @@ public class DeltaImportProcessorTest {
 		DeltaImportProcessor processor = new DeltaImportProcessor();
 		Json output = processor.handle(diff);
 		logger.debug(output);
-		assertEquals(172.9, output.at(VESSELS).at(SELF).at(navigation).at("courseOverGroundTrue").at(VALUE).asDouble(),001);
-		assertEquals("2014-08-15T16:00:00.081Z", output.at(VESSELS).at(SELF).at(navigation).at("courseOverGroundTrue").at(TIMESTAMP).asString());
-		assertEquals("/dev/actisense-N2K-115-128267", output.at(VESSELS).at(SELF).at(navigation).at("courseOverGroundTrue").at(SOURCE).asString());
+		assertEquals(172.9, output.at(VESSELS).at(SELF).at(nav).at("courseOverGroundTrue").at(VALUE).asDouble(),001);
+		assertEquals("2014-08-15T16:00:00.081Z", output.at(VESSELS).at(SELF).at(nav).at("courseOverGroundTrue").at(TIMESTAMP).asString());
+		assertEquals("/dev/actisense-N2K-115-128267", output.at(VESSELS).at(SELF).at(nav).at("courseOverGroundTrue").at(SOURCE).asString());
 		
-		assertEquals(3.85, output.at(VESSELS).at(SELF).at(navigation).at("speedOverGround").at(VALUE).asDouble(),001);
-		assertEquals("2014-08-15T16:00:00.081Z", output.at(VESSELS).at(SELF).at(navigation).at("speedOverGround").at(TIMESTAMP).asString());
-		assertEquals("/dev/actisense-N2K-115-128267", output.at(VESSELS).at(SELF).at(navigation).at("speedOverGround").at(SOURCE).asString());
+		assertEquals(3.85, output.at(VESSELS).at(SELF).at(nav).at("speedOverGround").at(VALUE).asDouble(),001);
+		assertEquals("2014-08-15T16:00:00.081Z", output.at(VESSELS).at(SELF).at(nav).at("speedOverGround").at(TIMESTAMP).asString());
+		assertEquals("/dev/actisense-N2K-115-128267", output.at(VESSELS).at(SELF).at(nav).at("speedOverGround").at(SOURCE).asString());
 	}
 	@Test
 	public void shouldProcessDiff3() {
@@ -74,13 +74,13 @@ public class DeltaImportProcessorTest {
 		DeltaImportProcessor processor = new DeltaImportProcessor();
 		Json output = processor.handle(diff);
 		logger.debug(output);
-		assertEquals(172.9, output.at(VESSELS).at(SELF).at(navigation).at("courseOverGroundTrue").at(VALUE).asDouble(),001);
-		assertEquals("2014-08-15T16:00:00.081Z", output.at(VESSELS).at(SELF).at(navigation).at("courseOverGroundTrue").at(TIMESTAMP).asString());
-		assertEquals("/dev/actisense-N2K-115-128267", output.at(VESSELS).at(SELF).at(navigation).at("courseOverGroundTrue").at(SOURCE).asString());
+		assertEquals(172.9, output.at(VESSELS).at(SELF).at(nav).at("courseOverGroundTrue").at(VALUE).asDouble(),001);
+		assertEquals("2014-08-15T16:00:00.081Z", output.at(VESSELS).at(SELF).at(nav).at("courseOverGroundTrue").at(TIMESTAMP).asString());
+		assertEquals("/dev/actisense-N2K-115-128267", output.at(VESSELS).at(SELF).at(nav).at("courseOverGroundTrue").at(SOURCE).asString());
 		
-		assertEquals(3.85, output.at(VESSELS).at(SELF).at(navigation).at("speedOverGround").at(VALUE).asDouble(),001);
-		assertEquals("2014-08-15T16:00:00.081Z", output.at(VESSELS).at(SELF).at(navigation).at("speedOverGround").at(TIMESTAMP).asString());
-		assertEquals("/dev/actisense-N2K-115-128267", output.at(VESSELS).at(SELF).at(navigation).at("speedOverGround").at(SOURCE).asString());
+		assertEquals(3.85, output.at(VESSELS).at(SELF).at(nav).at("speedOverGround").at(VALUE).asDouble(),001);
+		assertEquals("2014-08-15T16:00:00.081Z", output.at(VESSELS).at(SELF).at(nav).at("speedOverGround").at(TIMESTAMP).asString());
+		assertEquals("/dev/actisense-N2K-115-128267", output.at(VESSELS).at(SELF).at(nav).at("speedOverGround").at(SOURCE).asString());
 	}
 
 	@Test
@@ -105,13 +105,13 @@ public class DeltaImportProcessorTest {
 		DeltaImportProcessor processor = new DeltaImportProcessor();
 		Json output = processor.handle(diff);
 		logger.debug(output);
-		assertEquals(172.9, output.at(VESSELS).at(SELF).at(navigation).at("courseOverGroundTrue").at(VALUE).asDouble(),001);
-		assertEquals("2014-08-15T16:00:00.081Z", output.at(VESSELS).at(SELF).at(navigation).at("courseOverGroundTrue").at(TIMESTAMP).asString());
-		assertEquals("/dev/actisense-N2K-115-128267", output.at(VESSELS).at(SELF).at(navigation).at("courseOverGroundTrue").at(SOURCE).asString());
+		assertEquals(172.9, output.at(VESSELS).at(SELF).at(nav).at("courseOverGroundTrue").at(VALUE).asDouble(),001);
+		assertEquals("2014-08-15T16:00:00.081Z", output.at(VESSELS).at(SELF).at(nav).at("courseOverGroundTrue").at(TIMESTAMP).asString());
+		assertEquals("/dev/actisense-N2K-115-128267", output.at(VESSELS).at(SELF).at(nav).at("courseOverGroundTrue").at(SOURCE).asString());
 		
-		assertEquals(3.85, output.at(VESSELS).at(SELF).at(navigation).at("speedOverGround").at(VALUE).asDouble(),001);
-		assertEquals("2014-08-15T16:00:00.081Z", output.at(VESSELS).at(SELF).at(navigation).at("speedOverGround").at(TIMESTAMP).asString());
-		assertEquals("/dev/actisense-N2K-115-128267", output.at(VESSELS).at(SELF).at(navigation).at("speedOverGround").at(SOURCE).asString());
+		assertEquals(3.85, output.at(VESSELS).at(SELF).at(nav).at("speedOverGround").at(VALUE).asDouble(),001);
+		assertEquals("2014-08-15T16:00:00.081Z", output.at(VESSELS).at(SELF).at(nav).at("speedOverGround").at(TIMESTAMP).asString());
+		assertEquals("/dev/actisense-N2K-115-128267", output.at(VESSELS).at(SELF).at(nav).at("speedOverGround").at(SOURCE).asString());
 	}
 	
 	@Test
@@ -120,20 +120,20 @@ public class DeltaImportProcessorTest {
 		DeltaImportProcessor processor = new DeltaImportProcessor();
 		Json output = processor.handle(diff);
 		logger.debug(output);
-		assertEquals(172.9, output.at(VESSELS).at(SELF).at(navigation).at("courseOverGroundTrue").at(VALUE).asDouble(),001);
-		assertEquals("2014-08-15T16:00:00.081Z", output.at(VESSELS).at(SELF).at(navigation).at("courseOverGroundTrue").at(TIMESTAMP).asString());
-		assertEquals("/dev/actisense-N2K-115-128267", output.at(VESSELS).at(SELF).at(navigation).at("courseOverGroundTrue").at(SOURCE).asString());
+		assertEquals(172.9, output.at(VESSELS).at(SELF).at(nav).at("courseOverGroundTrue").at(VALUE).asDouble(),001);
+		assertEquals("2014-08-15T16:00:00.081Z", output.at(VESSELS).at(SELF).at(nav).at("courseOverGroundTrue").at(TIMESTAMP).asString());
+		assertEquals("/dev/actisense-N2K-115-128267", output.at(VESSELS).at(SELF).at(nav).at("courseOverGroundTrue").at(SOURCE).asString());
 		
-		assertEquals(3.85, output.at(VESSELS).at(SELF).at(navigation).at("speedOverGround").at(VALUE).asDouble(),001);
-		assertEquals("2014-08-15T16:00:00.081Z", output.at(VESSELS).at(SELF).at(navigation).at("speedOverGround").at(TIMESTAMP).asString());
-		assertEquals("/dev/actisense-N2K-115-128267", output.at(VESSELS).at(SELF).at(navigation).at("speedOverGround").at(SOURCE).asString());
+		assertEquals(3.85, output.at(VESSELS).at(SELF).at(nav).at("speedOverGround").at(VALUE).asDouble(),001);
+		assertEquals("2014-08-15T16:00:00.081Z", output.at(VESSELS).at(SELF).at(nav).at("speedOverGround").at(TIMESTAMP).asString());
+		assertEquals("/dev/actisense-N2K-115-128267", output.at(VESSELS).at(SELF).at(nav).at("speedOverGround").at(SOURCE).asString());
 		
-		assertEquals(152.9, output.at(VESSELS).at(SELF).at(navigation).at("courseOverGroundMagnetic").at(VALUE).asDouble(),001);
-		assertEquals("2014-08-15T16:00:00.081Z", output.at(VESSELS).at(SELF).at(navigation).at("courseOverGroundMagnetic").at(TIMESTAMP).asString());
-		assertEquals("/dev/ttyUSB0-N2K-115-128267", output.at(VESSELS).at(SELF).at(navigation).at("courseOverGroundMagnetic").at(SOURCE).asString());
+		assertEquals(152.9, output.at(VESSELS).at(SELF).at(nav).at("courseOverGroundMagnetic").at(VALUE).asDouble(),001);
+		assertEquals("2014-08-15T16:00:00.081Z", output.at(VESSELS).at(SELF).at(nav).at("courseOverGroundMagnetic").at(TIMESTAMP).asString());
+		assertEquals("/dev/ttyUSB0-N2K-115-128267", output.at(VESSELS).at(SELF).at(nav).at("courseOverGroundMagnetic").at(SOURCE).asString());
 		
-		assertEquals(2.85, output.at(VESSELS).at(SELF).at(navigation).at("speedOverWater").at(VALUE).asDouble(),001);
-		assertEquals("2014-08-15T16:00:00.081Z", output.at(VESSELS).at(SELF).at(navigation).at("speedOverWater").at(TIMESTAMP).asString());
-		assertEquals("/dev/ttyUSB0-N2K-115-128267", output.at(VESSELS).at(SELF).at(navigation).at("speedOverWater").at(SOURCE).asString());
+		assertEquals(2.85, output.at(VESSELS).at(SELF).at(nav).at("speedOverWater").at(VALUE).asDouble(),001);
+		assertEquals("2014-08-15T16:00:00.081Z", output.at(VESSELS).at(SELF).at(nav).at("speedOverWater").at(TIMESTAMP).asString());
+		assertEquals("/dev/ttyUSB0-N2K-115-128267", output.at(VESSELS).at(SELF).at(nav).at("speedOverWater").at(SOURCE).asString());
 	}
 }

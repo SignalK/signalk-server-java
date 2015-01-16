@@ -61,7 +61,7 @@ public class DeltaExportProcessorTest {
 	@Test
 	public void shouldHandleEventsFromBus() throws Exception {
 		
-		DeltaExportProcessor processor = new DeltaExportProcessor();
+		DeltaExportProcessor processor = new DeltaExportProcessor("wsSession1");
 		assertEquals(0, processor.map.size());
 		EventBus bus = new EventBus();
 		bus.register(processor);
@@ -74,7 +74,7 @@ public class DeltaExportProcessorTest {
 
 	@Test
 	public void shouldCreateDelta() throws Exception {
-		DeltaExportProcessor processor = new DeltaExportProcessor();
+		DeltaExportProcessor processor = new DeltaExportProcessor("wsSession1");
 		assertEquals(0, processor.map.size());
 		EventBus bus = new EventBus();
 		bus.register(processor);
@@ -89,8 +89,9 @@ public class DeltaExportProcessorTest {
 		assertNotNull(ex.getOut());
 		List<?> delta = ex.getIn().getBody(List.class);
 		logger.debug(delta.toString());
-		String expected = "[{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"navigation.courseOverGroundTrue\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}],\"context\":\"vessels."+SELF+"\"}]";
-		assertEquals(expected, delta.toString());
+		Json json = (Json) delta.get(0);
+		Json expected = Json.read("{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"navigation.courseOverGroundTrue\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}],\"context\":\"vessels."+SELF+"\"}");
+		assertEquals(expected, json);
 	}
 	
 	@Test

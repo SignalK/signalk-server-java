@@ -29,6 +29,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import nz.co.fortytwo.signalk.server.util.JsonConstants;
+
+import org.jboss.netty.util.VirtualExecutorService;
+
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
@@ -44,6 +48,11 @@ public class SubscriptionManager {
 	//wsSessionId>Subscription
 	List<Subscription> subscriptions = new ArrayList<Subscription>();
 	
+	/**
+	 * Add a new subscription.
+	 * @param sub
+	 * @throws Exception
+	 */
 	public void addSubscription(Subscription sub) throws Exception{
 		if(!subscriptions.contains(sub)){
 			subscriptions.add(sub);
@@ -91,6 +100,7 @@ public class SubscriptionManager {
 	/**
 	 * Inserts the sessionId, wsSession pair.
 	 * Swaps the wsSessionId for any any inactive sessions that have been entered with sessionId, sessionId
+	 * If this is a new connection with no subs then nothing will be tx'd
 	 * @param sessionId
 	 * @param wsSession
 	 * @throws Exception 
@@ -104,15 +114,17 @@ public class SubscriptionManager {
 				subs.add(s);
 			}
 		}
+
 		for (Subscription s: subs){
 			if(s.getWsSession().equals(sessionId)){
 				subscriptions.remove(s);
 				s.setWsSession(wsSession);
-				s.setActive(true);
 				subscriptions.add(s);
-				RouteManager routeManager = RouteManagerFactory.getInstance(null);
-				SignalkRouteFactory.configureSubscribeTimer(routeManager, s);
 			}
+			s.setActive(true);
+			RouteManager routeManager = RouteManagerFactory.getInstance(null);
+			SignalkRouteFactory.configureSubscribeTimer(routeManager, s);
+			
 		}
 	}
 	public void removeSessionId(String sessionId) throws Exception{

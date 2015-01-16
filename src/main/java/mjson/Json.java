@@ -1030,7 +1030,8 @@ public class Json
     }
     
     public static Schema schema(URI uri)
-    {
+    {	
+    	System.out.println(uri.toASCIIString());
     	try { return new DefaultSchema(uri, Json.read(Json.fetchContent(uri.toURL()))); }
     	catch (Exception ex) { throw new RuntimeException(ex); }
     }

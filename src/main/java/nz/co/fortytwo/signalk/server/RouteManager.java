@@ -144,7 +144,6 @@ public class RouteManager extends RouteBuilder {
 		//bind in registry
 		PropertyPlaceholderDelegateRegistry registry = (PropertyPlaceholderDelegateRegistry) CamelContextFactory.getInstance().getRegistry(); 
 		((JndiRegistry)registry.getRegistry()).bind("staticHandler",staticHandler);
-		
 		CamelContextFactory.getInstance().addComponent("skWebsocket", new SignalkWebsocketComponent());
 		
 		SignalkRouteFactory.configureWebsocketTxRoute(this, SEDA_WEBSOCKETS, wsPort);
@@ -158,7 +157,7 @@ public class RouteManager extends RouteBuilder {
 		// timed actions
 		SignalkRouteFactory.configureDeclinationTimer(this, "timer://declination?fixedRate=true&period=10000");
 		SignalkRouteFactory.configureWindTimer(this, "timer://wind?fixedRate=true&period=1000");
-		SignalkRouteFactory.configureOutputTimer(this, "timer://signalkAll?fixedRate=true&period=1000");
+		//SignalkRouteFactory.configureOutputTimer(this, "timer://signalkAll?fixedRate=true&period=1000");
 		//SignalkRouteFactory.configureOutputTimer(this, "timer://subscribe"++"?fixedRate=true&period="+period,wsSession);
 		
 		//WebsocketEndpoint wsEndpoint = (WebsocketEndpoint) getContext().getEndpoint("websocket://0.0.0.0:"+wsPort+JsonConstants.SIGNALK_WS);

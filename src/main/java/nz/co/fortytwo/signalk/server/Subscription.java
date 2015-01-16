@@ -41,6 +41,8 @@ public class Subscription {
 
 	public Subscription(String wsSession, String path, long period){
 		this.wsSession=wsSession;
+		path=path.replace('/', '.');
+		if(path.startsWith("."))path = path.substring(1);
 		this.path=path;
 		this.period=period;
 	}
@@ -93,6 +95,8 @@ public class Subscription {
 	}
 
 	public void setPath(String path) {
+		path=path.replace('/', '.');
+		if(path.startsWith("."))path = path.substring(1);
 		this.path = path;
 	}
 

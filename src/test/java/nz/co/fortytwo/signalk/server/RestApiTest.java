@@ -39,6 +39,7 @@ import nz.co.fortytwo.signalk.server.util.JsonConstants;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.websocket.SignalkWebsocketComponent;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.apache.log4j.Logger;
 import org.junit.Test;
@@ -71,13 +72,14 @@ public class RestApiTest extends CamelTestSupport {
         c.prepareGet("http://localhost:9290/signalk/auth/demoPass").execute().get();
         latch2.await(3, TimeUnit.SECONDS);
         
-        Response reponse = c.prepareGet("http://localhost:9290/signalk/api/vessels").execute().get();
+        Response reponse = c.prepareGet("http://localhost:9290/signalk/api/vessels/"+SELF).execute().get();
         latch.await(3, TimeUnit.SECONDS);
         logger.debug(reponse.getResponseBody());
         assertEquals(200, reponse.getStatusCode());
         			//{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"navigation.courseOverGroundTrue\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}],\"context\":\"vessels.self\"}
-        Json sk = Json.read("{\"motu\":{\"navigation\":{\"courseOverGroundTrue\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":172.9},\"speedOverGround\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":3.85}}}}");
-        assertEquals(sk , Json.read(reponse.getResponseBody()));
+        Json sk = Json.read("{\"navigation\":{\"courseOverGroundTrue\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":172.9},\"speedOverGround\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":3.85}}}");
+        Json resp = Json.read(reponse.getResponseBody());
+        assertEquals(172.9 , resp.at("navigation").at("courseOverGroundTrue").at("value").asFloat(),0.001);
      
         reponse = c.prepareGet("http://localhost:9290/signalk/api/vessels/motu/navigation").execute().get();
         latch.await(3, TimeUnit.SECONDS);
@@ -85,7 +87,8 @@ public class RestApiTest extends CamelTestSupport {
         assertEquals(200, reponse.getStatusCode());
         			//{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"navigation.courseOverGroundTrue\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}],\"context\":\"vessels.self\"}
         sk = Json.read("{\"courseOverGroundTrue\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":172.9},\"speedOverGround\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":3.85}}");
-        assertEquals(sk , Json.read(reponse.getResponseBody()));
+        resp = Json.read(reponse.getResponseBody());
+        assertEquals(172.9 , resp.at("courseOverGroundTrue").at("value").asFloat(),0.001);
         c.close();
     }
 	
@@ -95,6 +98,8 @@ public class RestApiTest extends CamelTestSupport {
 	    protected RouteBuilder createRouteBuilder() {
 	        return new RouteBuilder(){
 	            public void configure() {
+	            	CamelContextFactory.setContext(this);
+	            	CamelContextFactory.getInstance().addComponent("skWebsocket", new SignalkWebsocketComponent());
 	    			SignalkRouteFactory.configureInputRoute(this, RouteManager.SEDA_INPUT);
 	    			from(RouteManager.DIRECT_TCP).to("log:nz.co.fortytwo.signalk.model.output.tcp").end();
 	    			SignalkRouteFactory.configureWebsocketRxRoute(this, RouteManager.SEDA_INPUT, 9292);
