@@ -23,6 +23,7 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
+import javax.activation.MimeType;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -34,6 +35,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.http.HttpMessage;
 import org.apache.camel.component.restlet.RestletConstants;
+import org.apache.http.entity.mime.MIME;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.http.MimeTypes;
 
@@ -89,7 +91,8 @@ public class RestApiProcessor extends SignalkProcessor implements Processor{
         }
         
         logger.debug("Returning:"+json);
-        response.setContentType(MimeTypes.TEXT_JSON);
+        
+        response.setContentType("application/json");
         
         // SEND RESPONSE
         exchange.getIn().setBody(json);
