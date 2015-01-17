@@ -25,7 +25,7 @@ Use the startpc.bat file to launch.
 You should now have a SignalK server running a webserver on `http://localhost:9290` and websockets on `http://localhost:9292`. It will be streaming a demo file and dumping logging to screen. Control logging by editing conf/log4j.properties.
 
 Try http://localhost:9290/signalk/api/vessels to see some output. You can drill down by adding json fields, eg http://localhost:9290/signalk/api/vessels/367153070 
-The content type is text/json, your browser may not display it directly.
+The content mime type is application/json, your browser may not display it directly. On firefox just install https://addons.mozilla.org/en-us/firefox/addon/jsonovich/?src=search
 
 It currently streams out a demo file taken from a boat sailing in a race in San Francisco. The output includes AIS data. 
 If you edit the conf/signalk.cfg file and make "signalk.demo=false" (default=true), then it will stop doing that.
