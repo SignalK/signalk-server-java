@@ -34,7 +34,12 @@ import org.apache.camel.component.websocket.WebsocketComponentServlet;
 import org.apache.camel.main.Main;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.server.nio.SelectChannelConnector;
+import org.eclipse.jetty.servlet.DefaultServlet;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 
 public class SignalKServer {
 
@@ -62,16 +67,6 @@ public class SignalKServer {
 		// enable hangup support which mean we detect when the JVM terminates, and stop Camel graceful
 		main.enableHangupSupport();
 
-		RouteManager routeManager = RouteManagerFactory.getInstance(config);
-		
-		//are we running demo?
-		if (Boolean.valueOf(config.getProperty(Constants.DEMO))) {
-			logger.info("  Demo streaming url:"+config.getProperty(Constants.STREAM_URL));
-			routeManager.setStreamUrl(config.getProperty(Constants.STREAM_URL));
-		}
-		// add our routes to Camel
-		main.addRouteBuilder(routeManager);
-		
 		/*Connector connector = new SelectChannelConnector();
 		logger.info("  Webserver http port:"+config.getProperty(Constants.REST_PORT));
 		connector.setPort(Integer.valueOf(config.getProperty(Constants.REST_PORT)));
@@ -90,8 +85,14 @@ public class SignalKServer {
 		
 		handlers.addHandler(trackContext);
 		server.setHandler(handlers);
-		server.start();
-		*/
+		server.start();*/
+		
+		
+		RouteManager routeManager = RouteManagerFactory.getInstance(config);
+		
+		// add our routes to Camel
+		main.addRouteBuilder(routeManager);
+		
 		// and run, which keeps blocking until we terminate the JVM (or stop CamelContext)
 		main.run();
 	

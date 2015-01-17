@@ -66,17 +66,22 @@ public class DeltaExportProcessor extends SignalkProcessor implements Processor{
 	public void process(Exchange exchange) throws Exception {
 		
 		try {
-			logger.debug("process delta queue ("+map.size()+") for "+this.hashCode());
+			logger.info("process delta queue ("+map.size()+") for "+this.hashCode());
 			//get the accumulated delta nodes.
 			List<Json> deltas = null;
 			synchronized (map) {
 				deltas = ImmutableList.copyOf(map.values());
 				map.clear();
 			}
-			//dont send empty updates
-			exchange.getIn().setBody(deltas);
+			if(deltas.size()>0){
+				//dont send empty updates
+				exchange.getIn().setBody(deltas);
+			}else{
+				exchange.getIn().setBody(null);
+			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
+			throw e;
 		}
 	}
 
@@ -143,14 +148,18 @@ public class DeltaExportProcessor extends SignalkProcessor implements Processor{
 			String path = getPath(j);
 			//do we want this one
 			boolean ok= false;
-			logger.debug("Checking subs for session="+wsSession+" for:"+path);
-			for(Subscription s: manager.getSubscriptions(wsSession)){
-				logger.debug("Checking prefix="+s.getPath()+" for:"+path);
-				if(path.startsWith(s.getPath())){
-					//we want it
-					logger.debug("OK for:"+path);
-					ok=true;
-					break;
+			if(wsSession==null){
+				ok=true;
+			}else{
+				logger.debug("Checking subs for session="+wsSession+" for:"+path);
+				for(Subscription s: manager.getSubscriptions(wsSession)){
+					logger.debug("Checking prefix="+s.getPath()+" for:"+path);
+					if(path.startsWith(s.getPath())){
+						//we want it
+						logger.debug("OK for:"+path);
+						ok=true;
+						break;
+					}
 				}
 			}
 			if(!ok)return;
@@ -196,7 +205,7 @@ public class DeltaExportProcessor extends SignalkProcessor implements Processor{
 		path.insert(0,tmp );
 
 		while ((j=j.up())!=null){
-			logger.trace(j.toString());
+			if(logger.isTraceEnabled())logger.trace(j.toString());
 			tmp=j.getParentKey();
 			if(tmp!=null && tmp.length()>1){
 				path.insert(0,tmp+".");
@@ -215,7 +224,7 @@ public class DeltaExportProcessor extends SignalkProcessor implements Processor{
 
 	@Subscribe
 	public void recordEvent(JsonEvent jsonEvent){
-		logger.debug(this.hashCode()+ " received event "+jsonEvent.getJson().toString());
+		if(logger.isDebugEnabled()) logger.debug(this.hashCode()+ " received event "+jsonEvent.getJson().toString());
 		if(jsonEvent.getJson()==null)return;
 		createDelta(jsonEvent.getJson());
 	}

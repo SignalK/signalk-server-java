@@ -65,8 +65,10 @@ public class SignalkRouteFactory {
 	 * @param signalkModelProcessor
 	 */
 	public static void configureInputRoute(RouteBuilder routeBuilder,String input) {
-		routeBuilder.from(input).onException(Exception.class).handled(true).maximumRedeliveries(0)
-			.to("log:nz.co.fortytwo.signalk.model.receive?level=ERROR&showException=true&showStackTrace=true").end()
+		routeBuilder.from(input)
+			.onException(Exception.class).handled(true).maximumRedeliveries(0)
+			//.to("log:nz.co.fortytwo.signalk.model.receive?level=ERROR&showException=true&showStackTrace=true")
+			.end()
 		// dump misc rubbish
 		.process(new InputFilterProcessor())
 		//convert NMEA to signalk
@@ -91,9 +93,11 @@ public class SignalkRouteFactory {
 		
 		//from SEDA_WEBSOCKETS
 			routeBuilder.from(input)
-				//.onException(Exception.class)
-				//.handled(true).maximumRedeliveries(0)
-				.to("log:nz.co.fortytwo.signalk.model.websocket.tx?level=ERROR&showException=true&showStackTrace=true")
+				.onException(Exception.class)
+				.handled(true)
+				.maximumRedeliveries(0)
+				.end()
+				//.to("log:nz.co.fortytwo.signalk.model.websocket.tx?level=ERROR&showException=true&showStackTrace=true")
 			.process(new OutputFilterProcessor())
 			.to("skWebsocket://0.0.0.0:"+port+JsonConstants.SIGNALK_WS);
 		
@@ -111,18 +115,23 @@ public class SignalkRouteFactory {
 		wsEndpoint.setSessionSupport(true);
 		
 		routeBuilder.from(wsEndpoint)
-			//.onException(Exception.class)
-			//.handled(true).maximumRedeliveries(0)
-			//.to("log:nz.co.fortytwo.signalk.model.websocket.rx?level=ERROR&showException=true&showStackTrace=true")
-			//.end()
+			.onException(Exception.class)
+			.handled(true).maximumRedeliveries(0)
+			.to("log:nz.co.fortytwo.signalk.model.websocket.rx?level=ERROR&showException=true&showStackTrace=true")
+			.end()
 		.process(new WsSessionProcessor())
-		.to("log:nz.co.fortytwo.signalk.model.websocket.rx?level=INFO&showException=true&showStackTrace=true")
+		//.to("log:nz.co.fortytwo.signalk.model.websocket.rx?level=INFO&showException=true&showStackTrace=true")
 		.to(input);
 		
 	}
 	public static void configureTcpServerRoute(RouteBuilder routeBuilder ,String input, TcpServer tcpServer){
 		// push NMEA out via TCPServer.
-		routeBuilder.from(input).process((Processor) tcpServer).end();
+		routeBuilder.from(input)
+			.onException(Exception.class)
+			.handled(true)
+			.maximumRedeliveries(0)
+			.end()
+		.process((Processor) tcpServer).end();
 	}
 	
 	public static void configureRestRoute(RouteBuilder routeBuilder ,String input){
@@ -145,13 +154,15 @@ public class SignalkRouteFactory {
 	}
 	public static void configureOutputTimer(RouteBuilder routeBuilder ,String input){
 		routeBuilder.from(input)
+			.onException(Exception.class).handled(true).maximumRedeliveries(0)
+			.to("log:nz.co.fortytwo.signalk.model.output.all?level=ERROR")
+			.end()
 		.process(new DeltaExportProcessor(null))
 		.split(routeBuilder.body())
 		.setHeader(WebsocketConstants.SEND_TO_ALL, routeBuilder.constant(true))
 		.to("log:nz.co.fortytwo.signalk.model.output.all?level=INFO")
-		.multicast()
-			.to(RouteManager.SEDA_WEBSOCKETS)
-			.to(RouteManager.DIRECT_TCP)
+		.multicast().parallelProcessing()
+			.to(RouteManager.DIRECT_TCP,RouteManager.SEDA_WEBSOCKETS)
 		.end();
 	}
 	public static void configureSubscribeTimer(RouteBuilder routeBuilder ,Subscription sub) throws Exception{
@@ -161,9 +172,9 @@ public class SignalkRouteFactory {
 		RouteDefinition route = routeBuilder.from(input);
 			route.process(new DeltaExportProcessor(wsSession))
 			.split(routeBuilder.body())
-			.setHeader(WebsocketConstants.CONNECTION_KEY, routeBuilder.constant(wsSession))
-			.to("log:nz.co.fortytwo.signalk.model.output.wsSession?level=INFO")
-			.to(RouteManager.SEDA_WEBSOCKETS)
+				.setHeader(WebsocketConstants.CONNECTION_KEY, routeBuilder.constant(wsSession))
+				.to("log:nz.co.fortytwo.signalk.model.output.wsSession?level=ERROR")
+				.to(RouteManager.SEDA_WEBSOCKETS)
 			.end();
 		route.setId(getRouteId(sub));
 		((DefaultCamelContext)CamelContextFactory.getInstance()).addRouteDefinition(route);

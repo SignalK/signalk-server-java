@@ -2,20 +2,18 @@ Signal K java server
 =================================================
 
 An example Signal K server using java
-
-Currently this is GPL until I get a better understanding of its direction. It uses technology from, and will become the core of the freeboard project ( http://www.42.co.nz/freeboard ) 
-If you need something more liberal pls raise an issue.
+Now under Apache licence
 
 Installation
 ------------
 
-You will need Java 1.7+ installed.
+You will need Java 1.7+ installed. You need to be able to type 'java' on the command line and get java responding, or you need to edit the JAVA_HOME variable in start.sh or start.bat.
 
 ```shell
 $ git clone https://github.com/SignalK/signalk-java-server.git
 ```
 
-Then
+Then on Linux:
 
 ```shell
 $ cd Signalk-server
@@ -25,9 +23,12 @@ NOTE: Windows users - DONT put any of this in directories with spaces or anythin
 Use the startpc.bat file to launch. 
 
 You should now have a SignalK server running a webserver and websockets on `http://localhost:9292`. It wont do much until you feed it data, or add clients.
+
+It currently only sends output in signalk delta format to subscribed clients, so clients MUST subscribe using the REST API. 
+ 
 If you edit the conf/signalk.cfg file and make "signalk.demo=true" (default=false), then it will stream out a demo file taken from a boat sailing in a race in San Francisco. The output includes AIS data. 
 
-* Signal K data is output on TCP port 5555. On linux you can watch this with '$ ncat localhost 5555'
+* Signal K data is also streamed on on TCP port 5555. On linux you can watch this with '$ ncat localhost 5555'
 * The REST api is on localhost:9290/signalk/api/ (Browse to localhost:9290/signalk/api/vessels to see the json output, you need auth first)
 * The Security api is on localhost:9290/signalk/auth (Browse to localhost:9290/signalk/auth/demoPass to get 'logged in')
 

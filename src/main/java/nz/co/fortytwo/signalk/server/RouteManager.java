@@ -62,8 +62,8 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 public class RouteManager extends RouteBuilder {
 	private static Logger logger = Logger.getLogger(RouteManager.class);
 	
-	public static final String SEDA_INPUT = "seda:input";
-	public static final String SEDA_WEBSOCKETS = "seda:websockets";
+	public static final String SEDA_INPUT = "seda:inputData?purgeWhenStopping=true&size=100";
+	public static final String SEDA_WEBSOCKETS = "seda:websockets?purgeWhenStopping=true&size=100";
 	public static final String DIRECT_TCP = "direct:tcp";
 	private int wsPort = 9292;
 	private int restPort = 9290;
@@ -83,6 +83,11 @@ public class RouteManager extends RouteBuilder {
 		setWsPort(Integer.valueOf(config.getProperty(Constants.WEBSOCKET_PORT)));
 		logger.info("  Signalk REST API port:"+config.getProperty(Constants.REST_PORT));
 		setRestPort(Integer.valueOf(config.getProperty(Constants.REST_PORT)));
+		//are we running demo?
+		if (Boolean.valueOf(config.getProperty(Constants.DEMO))) {
+			logger.info("  Demo streaming url:"+config.getProperty(Constants.STREAM_URL));
+			setStreamUrl(config.getProperty(Constants.STREAM_URL));
+		}
 	}
 
 	public int getWsPort() {
@@ -121,10 +126,7 @@ public class RouteManager extends RouteBuilder {
 		predicates.add(body().isNull());
 		Predicate stopNull = PredicateBuilder.and(predicates);
 		//intercept().when(stopNull).stop();
-
-		//if (Boolean.valueOf(config.getProperty(Constants.DEMO))) {
-		//("stream:file?fileName=" + streamUrl).to(SEDA_INPUT);
-		//}
+		
 		tcpServer = new TcpServer();
 		tcpServer.start();
 		// start a serial port manager
@@ -132,7 +134,7 @@ public class RouteManager extends RouteBuilder {
 		new Thread(serialPortManager).start();
 		
 		// main input to destination route
-		// send input to listeners
+		// put all input into signalk model 
 		SignalkRouteFactory.configureInputRoute(this, SEDA_INPUT);
 		
 		File htmlRoot = new File(config.getProperty(Constants.STATIC_DIR));
@@ -150,18 +152,23 @@ public class RouteManager extends RouteBuilder {
 		SignalkRouteFactory.configureWebsocketRxRoute(this, SEDA_INPUT, wsPort);
 		SignalkRouteFactory.configureTcpServerRoute(this, DIRECT_TCP, tcpServer);
 		
-		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true");//&handlers=#staticHandler
+		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true&handlers=#staticHandler");//&handlers=#staticHandler
 		SignalkRouteFactory.configureAuthRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_AUTH+"?sessionSupport=true&matchOnUriPrefix=true");
 		SignalkRouteFactory.configureSubscribeRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_SUBSCRIBE+"?sessionSupport=true&matchOnUriPrefix=true");
 		
 		// timed actions
 		SignalkRouteFactory.configureDeclinationTimer(this, "timer://declination?fixedRate=true&period=10000");
 		SignalkRouteFactory.configureWindTimer(this, "timer://wind?fixedRate=true&period=1000");
-		//SignalkRouteFactory.configureOutputTimer(this, "timer://signalkAll?fixedRate=true&period=1000");
-		//SignalkRouteFactory.configureOutputTimer(this, "timer://subscribe"++"?fixedRate=true&period="+period,wsSession);
+		SignalkRouteFactory.configureOutputTimer(this, "timer://signalkAll?fixedRate=true&period=1000");
 		
 		//WebsocketEndpoint wsEndpoint = (WebsocketEndpoint) getContext().getEndpoint("websocket://0.0.0.0:"+wsPort+JsonConstants.SIGNALK_WS);
-		
+		if (Boolean.valueOf(config.getProperty(Constants.DEMO))) {
+			from("stream:file?fileName=" + streamUrl)
+				.onException(Exception.class).handled(true).maximumRedeliveries(0)
+				.end()
+			.throttle(50).timePeriodMillis(1000).asyncDelayed().to(SEDA_INPUT).end();
+			
+		}
 	}
 
 	/**

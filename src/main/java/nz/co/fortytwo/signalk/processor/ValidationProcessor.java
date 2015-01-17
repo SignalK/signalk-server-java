@@ -58,7 +58,7 @@ public class ValidationProcessor extends SignalkProcessor implements Processor{
 	
 	public void validate(Json node){
 		//is this a leaf?
-		logger.debug(node.toString());
+		if(logger.isDebugEnabled())	logger.debug(node.toString());
 		if(node.isNull()||!node.isObject())return;
 		if(node.has("value")){
 			//it should have timestamp and source
