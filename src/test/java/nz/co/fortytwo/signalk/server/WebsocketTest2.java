@@ -24,6 +24,7 @@
 package nz.co.fortytwo.signalk.server;
 
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.SELF;
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.SIGNALK_SUBSCRIBE;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.SIGNALK_WS;
 
 import java.io.FileNotFoundException;
@@ -85,7 +86,7 @@ public class WebsocketTest2 extends CamelTestSupport {
         latch2.await(5, TimeUnit.SECONDS);
         
         //subscribe
-        Response reponse = c.prepareGet("http://localhost:9290/signalk/subscribe/vessels/"+SELF).setCookies(cookies).execute().get();
+        Response reponse = c.prepareGet("http://localhost:9290"+SIGNALK_SUBSCRIBE+"/vessels/"+SELF).setCookies(cookies).execute().get();
         latch3.await(2, TimeUnit.SECONDS);
         logger.debug(reponse.getResponseBody());
         assertEquals(202, reponse.getStatusCode());

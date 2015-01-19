@@ -29,6 +29,8 @@ import nz.co.fortytwo.signalk.server.CamelContextFactory;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.apache.camel.Produce;
+import org.apache.camel.ProducerTemplate;
 import org.apache.log4j.Logger;
 
 /**
@@ -41,11 +43,6 @@ public class SignalkModelProcessor extends SignalkProcessor implements Processor
 
 	private static Logger logger = Logger.getLogger(SignalkModelProcessor.class);
 	
-
-	public void init() {
-		this.producer = CamelContextFactory.getInstance().createProducerTemplate();
-		producer.setDefaultEndpointUri("direct:command");
-	}
 	
 	public void process(Exchange exchange) throws Exception {
 		

@@ -104,7 +104,7 @@ public class SubcribeWsTest extends CamelTestSupport {
         //websocket.sendTextMessage(jsonDiff);
         latch4.await(2, TimeUnit.SECONDS);
       //subscribe
-        Response reponse = c.prepareGet("http://localhost:9290/signalk/subscribe/vessels/motu/navigation").setCookies(r1.getCookies()).execute().get();
+        Response reponse = c.prepareGet("http://localhost:9290"+SIGNALK_SUBSCRIBE+"/vessels/motu/navigation").setCookies(r1.getCookies()).execute().get();
         latch.await(2, TimeUnit.SECONDS);
         logger.debug(reponse.getResponseBody());
         assertEquals(202, reponse.getStatusCode());

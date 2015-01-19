@@ -44,9 +44,9 @@ import org.apache.log4j.Logger;
  * @author robert
  *
  */
-public class SubscribeProcessor extends SignalkProcessor implements Processor {
+public class RestSubscribeProcessor extends SignalkProcessor implements Processor {
 
-	private static Logger logger = Logger.getLogger(SubscribeProcessor.class);
+	private static Logger logger = Logger.getLogger(RestSubscribeProcessor.class);
 	
 	
 	@Override
@@ -64,15 +64,30 @@ public class SubscribeProcessor extends SignalkProcessor implements Processor {
 
 	
 
+	/**
+	 * <ul>
+    * <li> path=[path.to.key] is appended to the context to specify subsets of the context. The path value can use jsonPath syntax.
+    * <li> period=[millisecs] becomes the transmission rate, eg every period/1000 seconds.
+    * <li> format=[delta|full] specifies delta or full format. Delta format is provided by default
+    * <li> policy=[immediate|maximum|periodic]
+        immediate means send all changes as fast as they are received, but no faster than minPeriod. By default the reply to this policy will contain the current data for the subscription so that the client has an immediate copy of the current state of the server.
+        maximum means use immediate policy, but if no changes are received before period, then resend the last known values.
+        periodic means simply send the last known values every period. This is the default.
+    * <li> minPeriod=[millisecs] becomes the fastest transmission rate allowed, eg every minPeriod/1000 seconds. This is only relevant for policy='immediate' below to avoid swamping the client
+	* </ul>
+	 * @param request
+	 * @param exchange
+	 * @throws Exception
+	 */
 	private void processGet(HttpServletRequest request, Exchange exchange) throws Exception {
 		// use Restlet API to create the response
 		HttpServletResponse response = exchange.getIn(HttpMessage.class).getResponse();
         
-		String path =  exchange.getIn().getHeader(Exchange.HTTP_URI, String.class);
-        logger.debug("We are processing the path = "+path);
+		String context =  exchange.getIn().getHeader(Exchange.HTTP_URI, String.class);
+        logger.debug("We are processing the path = "+context);
         
         //check valid request.
-        if(path.length() < JsonConstants.SIGNALK_SUBSCRIBE.length()){
+        if(context.length() < JsonConstants.SIGNALK_SUBSCRIBE.length()){
         	response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         	logger.debug("Returning SC_BAD_REQUEST");
         	return;
@@ -83,10 +98,26 @@ public class SubscribeProcessor extends SignalkProcessor implements Processor {
         if(exchange.getIn().getHeader("period")!=null){
         	period = (long) exchange.getIn().getHeader("period");
         }
+        long minPeriod = 0;
+        if(exchange.getIn().getHeader("minPeriod")!=null){
+        	minPeriod = (long) exchange.getIn().getHeader("minPeriod");
+        }
+        String format = JsonConstants.FORMAT_DELTA;
+        if(exchange.getIn().getHeader("format")!=null){
+        	format = (String) exchange.getIn().getHeader("format");
+        }
+        String policy = JsonConstants.POLICY_FIXED;
+        if(exchange.getIn().getHeader("policy")!=null){
+        	policy = (String) exchange.getIn().getHeader("policy");
+        }
+        String path = null;
+        if(exchange.getIn().getHeader("path")!=null){
+        	policy = (String) exchange.getIn().getHeader("policy");
+        }
         
         String sessionId = request.getSession().getId();
         
-        int status = subscribe(path, period, sessionId);
+        int status = subscribe(context, period, minPeriod, format, policy, sessionId);
         
         // SEND RESPONSE
         //exchange.getOut().setBody("");
@@ -94,7 +125,7 @@ public class SubscribeProcessor extends SignalkProcessor implements Processor {
 		
 	}
 
-	protected int subscribe(String path, long period, String sessionId) throws Exception {
+	protected int subscribe(String path, long period, long minPeriod, String format, String policy, String sessionId) throws Exception {
 		path=path.substring(JsonConstants.SIGNALK_SUBSCRIBE.length()-1);
         logger.debug("We are processing trimmed path = "+path);
         logger.debug("sessionId = "+sessionId);
@@ -106,7 +137,7 @@ public class SubscribeProcessor extends SignalkProcessor implements Processor {
         }
         
        //TODO: add decent Client Info here
-       Subscription sub = new Subscription(manager.getWsSession(sessionId), path, period);
+       Subscription sub = new Subscription(manager.getWsSession(sessionId), path, period, minPeriod,format, policy);
        if(sessionId.equals(manager.getWsSession(sessionId))){
         	sub.setActive(false);
         }

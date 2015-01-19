@@ -29,8 +29,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import nz.co.fortytwo.signalk.processor.JsonSubscribeProcessor;
 import nz.co.fortytwo.signalk.server.util.JsonConstants;
 
+import org.apache.log4j.Logger;
 import org.jboss.netty.util.VirtualExecutorService;
 
 import com.google.common.collect.BiMap;
@@ -43,6 +45,9 @@ import com.google.common.collect.HashBiMap;
  *
  */
 public class SubscriptionManager {
+	
+	private static Logger logger = Logger.getLogger(SubscriptionManager.class);
+	
 	//hold sessionid <> wsSessionId
 	BiMap<String, String> wsSessionMap = HashBiMap.create();
 	//wsSessionId>Subscription
@@ -55,12 +60,14 @@ public class SubscriptionManager {
 	 */
 	public void addSubscription(Subscription sub) throws Exception{
 		if(!subscriptions.contains(sub)){
+			logger.debug("Adding sub "+sub);
 			subscriptions.add(sub);
 			//create a new route if we have too
 			if(sub.isActive()){
 				RouteManager routeManager = RouteManagerFactory.getInstance(null);
 				SignalkRouteFactory.configureSubscribeTimer(routeManager, sub);
 			}
+			logger.debug("Subs size ="+subscriptions.size());
 		}
 		
 	}
@@ -93,6 +100,7 @@ public class SubscriptionManager {
 		if(!wsSessionMap.containsKey(sessionId))return sessionId;
 		return wsSessionMap.get(sessionId);
 	}
+	
 	public String getSessionId(String wsSession){
 		return wsSessionMap.inverse().get(wsSession);
 	}

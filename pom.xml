@@ -126,6 +126,12 @@
 			<version>${camel.version}</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+		    <groupId>org.apache.camel</groupId>
+		    <artifactId>camel-netty4</artifactId>
+		    <version>${camel.version}</version>
+		    <!-- use the same version as your Camel core version -->
+		</dependency>
 		<!--  <dependency>
 		    <groupId>org.apache.camel</groupId>
 		    <artifactId>camel-quartz2</artifactId>

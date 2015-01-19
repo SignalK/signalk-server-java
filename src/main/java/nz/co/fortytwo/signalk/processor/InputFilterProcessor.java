@@ -51,12 +51,12 @@ public class InputFilterProcessor extends SignalkProcessor implements Processor 
 			if(msg.startsWith("!AIVDM")){
 				//AIS
 				//!AIVDM,1,1,,B,15MwkRUOidG?GElEa<iQk1JV06Jd,0*6D
-				//exchange.getIn().setBody(stringToHashMap(msg));
+				sendNmea(msg);
 				ok = true;
 			}else if(msg.startsWith("$")){
 				//NMEA - good
 				//System.out.println(msg);
-				//exchange.getIn().setBody(stringToHashMap(msg));
+				sendNmea(msg);
 				ok = true;
 			}else if(msg.startsWith("{")&& msg.endsWith("}")){
 				//json

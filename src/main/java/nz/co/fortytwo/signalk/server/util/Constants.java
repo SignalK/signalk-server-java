@@ -52,6 +52,8 @@ public class Constants {
 	public static final String STATIC_DIR = "signalk.static.files.dir";
 	public static final String SELF = "signalk.vessel.self";
 //	public static final String SESSIONID = "signalk.session";
+	public static final String TCP_PORT = "signalk.tcp.port";
+	public static final String UDP_PORT = "signalk.udp.port";
 	
 	public Constants() {
 		// TODO Auto-generated constructor stub

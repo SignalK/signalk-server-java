@@ -38,13 +38,19 @@ public class Subscription {
 	String path = null;
 	long period = -1;
 	boolean active = true;
+	private long minPeriod;
+	private String format;
+	private String policy;
 
-	public Subscription(String wsSession, String path, long period){
+	public Subscription(String wsSession, String path, long period, long minPeriod, String format, String policy){
 		this.wsSession=wsSession;
 		path=path.replace('/', '.');
 		if(path.startsWith("."))path = path.substring(1);
 		this.path=path;
 		this.period=period;
+		this.minPeriod=minPeriod;
+		this.format=format;
+		this.policy=policy;
 	}
 	@Override
 	public int hashCode() {

@@ -64,7 +64,10 @@ public class RouteManager extends RouteBuilder {
 	
 	public static final String SEDA_INPUT = "seda:inputData?purgeWhenStopping=true&size=100";
 	public static final String SEDA_WEBSOCKETS = "seda:websockets?purgeWhenStopping=true&size=100";
-	public static final String DIRECT_TCP = "direct:tcp";
+	public static final String DIRECT_TCP = "seda:tcp?purgeWhenStopping=true&size=100";
+	public static final String REMOTE_ADDRESS = "remote.address";
+	public static final String SEDA_NMEA = "seda:nmeaOutput?purgeWhenStopping=true&size=100";
+	
 	private int wsPort = 9292;
 	private int restPort = 9290;
 	private String streamUrl;
@@ -74,7 +77,9 @@ public class RouteManager extends RouteBuilder {
 	
 	private Properties config;
 	private SignalKModel signalkModel=SignalKModelFactory.getInstance();
-	private TcpServer tcpServer;
+	
+	private NettyServer skServer;
+	private NettyServer nmeaServer;
 
 	protected RouteManager(Properties config) {
 		this.config = config;
@@ -127,8 +132,14 @@ public class RouteManager extends RouteBuilder {
 		Predicate stopNull = PredicateBuilder.and(predicates);
 		//intercept().when(stopNull).stop();
 		
-		tcpServer = new TcpServer();
-		tcpServer.start();
+		
+		skServer = new NettyServer(null);
+		skServer.run();
+		
+		nmeaServer = new NettyServer(null);
+		nmeaServer.setPort(nmeaServer.getPort()+1);
+		nmeaServer.run();
+		
 		// start a serial port manager
 		serialPortManager = new SerialPortManager();
 		new Thread(serialPortManager).start();
@@ -150,7 +161,8 @@ public class RouteManager extends RouteBuilder {
 		
 		SignalkRouteFactory.configureWebsocketTxRoute(this, SEDA_WEBSOCKETS, wsPort);
 		SignalkRouteFactory.configureWebsocketRxRoute(this, SEDA_INPUT, wsPort);
-		SignalkRouteFactory.configureTcpServerRoute(this, DIRECT_TCP, tcpServer);
+		SignalkRouteFactory.configureTcpServerRoute(this, DIRECT_TCP, skServer);
+		SignalkRouteFactory.configureTcpServerRoute(this, SEDA_NMEA, nmeaServer);
 		
 		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true&handlers=#staticHandler");//&handlers=#staticHandler
 		SignalkRouteFactory.configureAuthRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_AUTH+"?sessionSupport=true&matchOnUriPrefix=true");

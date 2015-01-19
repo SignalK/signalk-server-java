@@ -35,7 +35,8 @@ import nz.co.fortytwo.signalk.processor.OutputFilterProcessor;
 import nz.co.fortytwo.signalk.processor.RestApiProcessor;
 import nz.co.fortytwo.signalk.processor.RestAuthProcessor;
 import nz.co.fortytwo.signalk.processor.SignalkModelProcessor;
-import nz.co.fortytwo.signalk.processor.SubscribeProcessor;
+import nz.co.fortytwo.signalk.processor.RestSubscribeProcessor;
+import nz.co.fortytwo.signalk.processor.JsonSubscribeProcessor;
 import nz.co.fortytwo.signalk.processor.ValidationProcessor;
 import nz.co.fortytwo.signalk.processor.WindProcessor;
 import nz.co.fortytwo.signalk.processor.WsSessionProcessor;
@@ -75,6 +76,8 @@ public class SignalkRouteFactory {
 		.process(new NMEAProcessor())
 		//convert AIS to signalk
 		.process(new AISProcessor())
+		//handle subscribe messages
+		.process(new JsonSubscribeProcessor())
 		//deal with diff format
 		.process(new DeltaImportProcessor())
 		//make sure we have timestamp/source
@@ -124,14 +127,16 @@ public class SignalkRouteFactory {
 		.to(input);
 		
 	}
-	public static void configureTcpServerRoute(RouteBuilder routeBuilder ,String input, TcpServer tcpServer){
-		// push NMEA out via TCPServer.
+	public static void configureTcpServerRoute(RouteBuilder routeBuilder ,String input, NettyServer nettyServer) throws Exception{
+		// push out via TCPServer.
 		routeBuilder.from(input)
 			.onException(Exception.class)
 			.handled(true)
 			.maximumRedeliveries(0)
 			.end()
-		.process((Processor) tcpServer).end();
+		
+		.process((Processor) nettyServer).end();
+			
 	}
 	
 	public static void configureRestRoute(RouteBuilder routeBuilder ,String input){
@@ -149,9 +154,11 @@ public class SignalkRouteFactory {
 	public static void configureDeclinationTimer(RouteBuilder routeBuilder ,String input){
 		routeBuilder.from(input).process(new DeclinationProcessor()).to("log:nz.co.fortytwo.signalk.model.update?level=INFO").end();
 	}
+	
 	public static void configureWindTimer(RouteBuilder routeBuilder ,String input){
 		routeBuilder.from("timer://wind?fixedRate=true&period=1000").process(new WindProcessor()).to("log:nz.co.fortytwo.signalk.model.update?level=INFO").end();
 	}
+	
 	public static void configureOutputTimer(RouteBuilder routeBuilder ,String input){
 		routeBuilder.from(input)
 			.onException(Exception.class).handled(true).maximumRedeliveries(0)
@@ -159,12 +166,13 @@ public class SignalkRouteFactory {
 			.end()
 		.process(new DeltaExportProcessor(null))
 		.split(routeBuilder.body())
-		.setHeader(WebsocketConstants.SEND_TO_ALL, routeBuilder.constant(true))
+		.setHeader(WebsocketConstants.CONNECTION_KEY, routeBuilder.constant(WebsocketConstants.SEND_TO_ALL))
 		.to("log:nz.co.fortytwo.signalk.model.output.all?level=INFO")
 		.multicast().parallelProcessing()
 			.to(RouteManager.DIRECT_TCP,RouteManager.SEDA_WEBSOCKETS)
 		.end();
 	}
+	
 	public static void configureSubscribeTimer(RouteBuilder routeBuilder ,Subscription sub) throws Exception{
 		String input = "timer://"+getRouteId(sub)+"?fixedRate=true&period="+sub.getPeriod();
 		logger.debug("Configuring route "+input);
@@ -189,7 +197,7 @@ public class SignalkRouteFactory {
 	public static void configureSubscribeRoute(RouteBuilder routeBuilder, String input) {
 		routeBuilder.from(input)
 		.setExchangePattern(ExchangePattern.InOut)
-		.process(new SubscribeProcessor());
+		.process(new RestSubscribeProcessor());
 	}
 
 	public static void removeSubscribeTimers(RouteManager routeManager, List<Subscription> subs) throws Exception {

@@ -145,6 +145,8 @@ public class Util {
 			props.setProperty(Constants.SERIAL_PORTS,"COM1,COM2,COM3,COM4");
 		}
 		props.setProperty(Constants.SERIAL_PORT_BAUD,"38400");
+		props.setProperty(Constants.TCP_PORT,"5555");
+		props.setProperty(Constants.UDP_PORT,"5555");
 	}
 	
 

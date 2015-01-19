@@ -24,19 +24,19 @@
 
 package nz.co.fortytwo.signalk.processor;
 
-import java.util.Set;
-
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.server.CamelContextFactory;
+import nz.co.fortytwo.signalk.server.RouteManager;
 import nz.co.fortytwo.signalk.server.SubscriptionManager;
 import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
 import nz.co.fortytwo.signalk.server.util.Util;
 
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
+import org.apache.camel.component.websocket.WebsocketConstants;
+import org.apache.camel.impl.DefaultProducerTemplate;
 import org.apache.log4j.Logger;
-import org.eclipse.jetty.server.session.HashSessionManager;
 
 
 /**
@@ -49,12 +49,18 @@ public class SignalkProcessor {
 	private static Logger logger = Logger.getLogger(SignalkProcessor.class);
 	static protected SignalKModel signalkModel = SignalKModelFactory.getInstance();
 	static protected  SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
-	@Produce(uri = "seda:nmeaOutput")
-    ProducerTemplate producer;
+	//@Produce(uri = RouteManager.SEDA_NMEA )
+    ProducerTemplate nmeaproducer;
 	
 	
-	public SignalkProcessor() {
-		
+	public SignalkProcessor(){
+		nmeaproducer= new DefaultProducerTemplate(CamelContextFactory.getInstance());
+		nmeaproducer.setDefaultEndpointUri(RouteManager.SEDA_NMEA );
+		try {
+			nmeaproducer.start();
+		} catch (Exception e) {
+			logger.error(e.getMessage(),e);
+		}
 	}
 	
 	
@@ -64,7 +70,7 @@ public class SignalkProcessor {
 	 * @param nmea
 	 */
 	public void sendNmea(String nmea){
-		producer.sendBody(nmea);
+		nmeaproducer.sendBodyAndHeader(nmea, WebsocketConstants.CONNECTION_KEY, WebsocketConstants.SEND_TO_ALL);
 	}
 
 
