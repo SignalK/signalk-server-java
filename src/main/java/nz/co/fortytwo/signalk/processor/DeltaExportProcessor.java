@@ -23,6 +23,7 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.CONTEXT;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.PATH;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.SOURCE;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.TIMESTAMP;
@@ -134,10 +135,16 @@ public class DeltaExportProcessor extends SignalkProcessor implements Processor{
 			Json delta = map.get(vessel);
 			if(delta==null){
 				delta=getEmptyDelta();
-				delta.set("context",vessel);
+				delta.set(CONTEXT,vessel);
 				map.put(vessel, delta);
 			}
-			delta.set(UPDATES,updates);
+			if(delta.has(UPDATES)){
+				for(Json update:updates.asJsonList()){
+					delta.at(UPDATES).add(update);
+				}
+			}else{
+				delta.set(UPDATES,updates);
+			}
 		}
 	}
 	
@@ -146,7 +153,8 @@ public class DeltaExportProcessor extends SignalkProcessor implements Processor{
 		//recurse objects
 		if( j.has(VALUE)){
 			String path = getPath(j);
-			//do we want this one
+			//do we want this one, remember we may have a wildcard subscribe
+			
 			boolean ok= false;
 			if(wsSession==null){
 				ok=true;
@@ -154,7 +162,7 @@ public class DeltaExportProcessor extends SignalkProcessor implements Processor{
 				logger.debug("Checking subs for session="+wsSession+" for:"+path);
 				for(Subscription s: manager.getSubscriptions(wsSession)){
 					logger.debug("Checking prefix="+s.getPath()+" for:"+path);
-					if(path.startsWith(s.getPath())){
+					if(s.isSubscribed(path)){
 						//we want it
 						logger.debug("OK for:"+path);
 						ok=true;

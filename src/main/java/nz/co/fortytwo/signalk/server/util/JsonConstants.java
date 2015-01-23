@@ -60,6 +60,9 @@ public class JsonConstants {
 	public static final String POLICY_INSTANT = "instant";
 	public static final String POLICY_IDEAL = "ideal";
 	
+	public static final String N2K_MESSAGE = "N2K_MESSAGE";
+	
+	
 	//public static final String name = "name";
 	//public static final String mmsi = "mmsi";
 	public static final String source = "source";
@@ -289,6 +292,7 @@ public class JsonConstants {
 	public static final String tanks_id_capacity="tanks.UUID.capacity";
 	public static final String tanks_id_level="tanks.UUID.level";
 	public static final String tanks_id_tankType="tanks.UUID.tankType";
+	
 	
 	
 	

@@ -23,11 +23,16 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
+import java.util.regex.Pattern;
+
 import mjson.Json;
+import nz.co.fortytwo.signalk.server.util.JsonConstants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.log4j.Logger;
+
+import com.jayway.jsonpath.JsonPath;
 
 /**
  * Churns through incoming nav data and filters out misc debug and unnecessary messages from the other devices
@@ -38,7 +43,6 @@ import org.apache.log4j.Logger;
  */
 public class InputFilterProcessor extends SignalkProcessor implements Processor {
 	private static Logger logger = Logger.getLogger(InputFilterProcessor.class);
-
 	
 	public InputFilterProcessor(){
 		
@@ -59,8 +63,13 @@ public class InputFilterProcessor extends SignalkProcessor implements Processor 
 				sendNmea(msg);
 				ok = true;
 			}else if(msg.startsWith("{")&& msg.endsWith("}")){
+				Json json = Json.read(msg);
+				//n2k
+				if(json.has(JsonConstants.PGN)){
+					exchange.getIn().setHeader(JsonConstants.N2K_MESSAGE, msg);
+				}
 				//json
-				exchange.getIn().setBody(Json.read(msg));
+				exchange.getIn().setBody(json);
 				ok = true;
 			}
 			if(ok){

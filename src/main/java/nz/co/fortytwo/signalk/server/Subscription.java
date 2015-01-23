@@ -25,6 +25,10 @@
  */
 package nz.co.fortytwo.signalk.server;
 
+import java.util.regex.Pattern;
+
+import nz.co.fortytwo.signalk.server.util.JsonConstants;
+
 /**
  * Holds subscription data, wsSessionId, path, period
  * If a subscription is made before the websocket is started then the wsSocket will hold the sessionId.
@@ -34,6 +38,8 @@ package nz.co.fortytwo.signalk.server;
  *
  */
 public class Subscription {
+	private static final String VESSELS_DOT_SELF = JsonConstants.VESSELS+".self";
+	private static final String DOT = ".";
 	String wsSession = null;
 	String path = null;
 	long period = -1;
@@ -41,16 +47,27 @@ public class Subscription {
 	private long minPeriod;
 	private String format;
 	private String policy;
+	private Pattern pattern = null;
 
 	public Subscription(String wsSession, String path, long period, long minPeriod, String format, String policy){
 		this.wsSession=wsSession;
-		path=path.replace('/', '.');
-		if(path.startsWith("."))path = path.substring(1);
-		this.path=path;
+		
+		this.path=sanitizePath(path);
 		this.period=period;
 		this.minPeriod=minPeriod;
 		this.format=format;
 		this.policy=policy;
+	}
+	private String sanitizePath(String newPath) {
+		newPath=newPath.replace('/', '.');
+		if(newPath.startsWith(DOT))newPath = newPath.substring(1);
+		if(VESSELS_DOT_SELF.equals(newPath))newPath=JsonConstants.VESSELS+DOT+JsonConstants.SELF;
+		newPath=newPath.replace(VESSELS_DOT_SELF+DOT,JsonConstants.VESSELS+DOT+JsonConstants.SELF+DOT);
+		
+		//regex it
+	    String regex = newPath.replaceAll(".", "[$0]").replace("[*]", ".*");
+		pattern = Pattern.compile(regex);
+		return newPath;
 	}
 	@Override
 	public int hashCode() {
@@ -101,9 +118,7 @@ public class Subscription {
 	}
 
 	public void setPath(String path) {
-		path=path.replace('/', '.');
-		if(path.startsWith("."))path = path.substring(1);
-		this.path = path;
+		this.path = sanitizePath(path);
 	}
 
 	public long getPeriod() {
@@ -122,6 +137,16 @@ public class Subscription {
 	}
 	public void setActive(boolean active) {
 		this.active = active;
+	}
+	/**
+	 * Returns true if this subscription is interested in this path
+	 * 
+	 * @param key
+	 * @return
+	 */
+	public boolean isSubscribed(String key) {
+		if(pattern.matcher(key).find())return true;
+		return false;
 	}
 	
 	

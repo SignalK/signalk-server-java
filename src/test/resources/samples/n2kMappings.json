@@ -1,0 +1,171 @@
+{
+    "126992": [
+        {
+            "source": "Date",
+            "node": "environment.date"
+        },
+        {
+            "source": "Time",
+            "node": "environment.time"
+        }
+    ],
+    "128267": [
+        {
+            "source": "Depth",
+            "node": "environment.depth.belowTransducer"
+        }
+    ],
+    "128275": [
+        {
+            "source": "Trip_Log",
+            "node": "navigation.logTrip"
+        },
+        {
+            "source": "Log",
+            "node": "navigation.log"
+        }
+    ],
+    "129026": [
+        {
+            "source": "SOG",
+            "node": "navigation.speedOverGround"
+        },
+        {
+            "source": "COG",
+            "node": "navigation.courseOverGroundTrue",
+            "filter": "$.fields[?(@.COG_Reference=='True')]"
+        },
+        {
+            "source": "COG",
+            "node": "navigation.courseOverGroundMagnetic",
+            "filter": "$.fields[?(@.COG_Reference=='Magnetic')]"
+        }
+    ],
+    "129025": [
+        {
+            "source": "Longitude",
+             "node": "navigation.position.longitude"
+         },
+         {
+            "latitude": "Latitude",
+            "node": "navigation.position.latitude"
+        }
+    ],
+    "127250": [
+        {
+            "source": "Heading",
+            "node": "navigation.headingMagnetic",
+            "filter": "$.fields[?(@.Reference=='Magnetic' && @.Heading)]"
+        },
+        {
+            "source": "Variation",
+            "node": "navigation.magneticVariation",
+            "filter": "$.fields[?(@.Variation)]"
+        }
+    ],
+    "127245": [
+        {
+            "source": "Position",
+            "node": "steering.rudderAngle",
+            "filter": "$.fields[?(@.Position)]"
+        }
+    ],
+    "127257": [
+        {
+            "source": "Yaw",
+            "node": "navigation.yaw"
+        },
+        {
+            "source": "Pitch",
+            "node": "navigation.pitch"
+        },
+        {
+            "source": "Roll",
+            "node": "navigation.roll"
+        }
+    ],
+    "130306": [
+        {
+            "source": "WindSpeed",
+            "node": "environment.wind.speedApparent",
+            "filter": "$.fields[?(@.Reference=='Apparent')]"
+        },
+        {
+            "source": "WindSpeed",
+            "node": "environment.wind.speedTrue",
+            "filter":"$.fields[?(@.Reference=='True_(boat_referenced)')]"
+        },
+        {
+            "source": "WindSpeed",
+            "node": "environment.wind.speedOverGround",
+            "filter": "$.fields[?(@.Reference=='True_(ground_referenced_to_North)')]"
+        },
+        {
+            "source": "WindAngle",
+            "node": "environment.wind.angleApparent",
+            "filter": "$.fields[?(@.Reference=='Apparent')]"
+        },
+        {
+            "source": "WindAngle",
+            "node": "environment.wind.angleTrue",
+            "filter": "$.fields[?(@.Reference=='True_(boat_referenced)')]"
+        },
+        {
+            "source": "WindAngle",
+            "node": "environment.wind.directionTrue",
+            "filter": "$.fields[?(@.Reference=='True_(ground_referenced_to_North)')]"
+        }
+    ],
+    "127251": [
+        {
+            "source": "Rate",
+            "node": "navigation.rateOfTurn"
+        }
+    ],
+    "127258": [
+        {
+            "source": "Variation",
+            "node": "navigation.position.variation"
+        }
+    ],
+    "128259": [
+        {
+            "source": "SpeedWaterReferenced",
+            "node": "navigation.speedThroughWater"
+        }
+    ],
+    "130577": [
+        {
+            "source": "COG",
+            "node": "navigation.courseOverGroundTrue",
+            "filter": "$.fields[?(@.COGReference=='True')]"
+            
+        },
+        {
+            "source": "SOG",
+            "node": "navigation.speedOverGround"
+        },
+        {
+            "source": "Set",
+            "node": "navigation.current.setTrue",
+            "filter": "$.fields[?(@.COGReference=='True' && @.Set)]"
+        },
+        {
+            "source": "Drift",
+            "node": "navigation.current.drift"
+       
+        }
+    ],
+    "129291": [
+        {
+            "source": "Set",
+            "node": "navigation.current.setTrue",
+            "filter": "$.fields[?(@.SetReference=='True')]"
+        },
+        {
+            "source": "Drift",
+            "node": "navigation.current.drift"
+            
+        }
+    ]
+}

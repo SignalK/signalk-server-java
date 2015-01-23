@@ -67,6 +67,7 @@ public class RouteManager extends RouteBuilder {
 	public static final String DIRECT_TCP = "seda:tcp?purgeWhenStopping=true&size=100";
 	public static final String REMOTE_ADDRESS = "remote.address";
 	public static final String SEDA_NMEA = "seda:nmeaOutput?purgeWhenStopping=true&size=100";
+	public static final String DIRECT_HEARTBEAT = "direct:heartbeat";
 	
 	private int wsPort = 9292;
 	private int restPort = 9290;
@@ -164,6 +165,8 @@ public class RouteManager extends RouteBuilder {
 		SignalkRouteFactory.configureTcpServerRoute(this, DIRECT_TCP, skServer);
 		SignalkRouteFactory.configureTcpServerRoute(this, SEDA_NMEA, nmeaServer);
 		
+		SignalkRouteFactory.configureHeartbeatRoute(this,"timer://heartbeat?fixedRate=true&period=1000");
+		
 		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true&handlers=#staticHandler");//&handlers=#staticHandler
 		SignalkRouteFactory.configureAuthRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_AUTH+"?sessionSupport=true&matchOnUriPrefix=true");
 		SignalkRouteFactory.configureSubscribeRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_SUBSCRIBE+"?sessionSupport=true&matchOnUriPrefix=true");
@@ -171,7 +174,7 @@ public class RouteManager extends RouteBuilder {
 		// timed actions
 		SignalkRouteFactory.configureDeclinationTimer(this, "timer://declination?fixedRate=true&period=10000");
 		SignalkRouteFactory.configureWindTimer(this, "timer://wind?fixedRate=true&period=1000");
-		SignalkRouteFactory.configureOutputTimer(this, "timer://signalkAll?fixedRate=true&period=1000");
+		//SignalkRouteFactory.configureOutputTimer(this, "timer://signalkAll?fixedRate=true&period=1000");
 		
 		//WebsocketEndpoint wsEndpoint = (WebsocketEndpoint) getContext().getEndpoint("websocket://0.0.0.0:"+wsPort+JsonConstants.SIGNALK_WS);
 		if (Boolean.valueOf(config.getProperty(Constants.DEMO))) {

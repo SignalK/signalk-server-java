@@ -52,6 +52,7 @@ public class SubscriptionManager {
 	BiMap<String, String> wsSessionMap = HashBiMap.create();
 	//wsSessionId>Subscription
 	List<Subscription> subscriptions = new ArrayList<Subscription>();
+	List<String> heartbeats = new ArrayList<String>();
 	
 	/**
 	 * Add a new subscription.
@@ -66,6 +67,7 @@ public class SubscriptionManager {
 			if(sub.isActive()){
 				RouteManager routeManager = RouteManagerFactory.getInstance(null);
 				SignalkRouteFactory.configureSubscribeTimer(routeManager, sub);
+				heartbeats.remove(sub.getWsSession());
 			}
 			logger.debug("Subs size ="+subscriptions.size());
 		}
@@ -77,6 +79,10 @@ public class SubscriptionManager {
 			if(sub.isActive()){
 				RouteManager routeManager = RouteManagerFactory.getInstance(null);
 				SignalkRouteFactory.removeSubscribeTimer(routeManager, sub);
+			}
+			//if we have no subs, then we should put a sub for empty updates as heartbeat
+			if(getSubscriptions(sub.getWsSession()).size()==0){
+				heartbeats.add(sub.getWsSession());
 			}
 	}
 	
@@ -116,12 +122,7 @@ public class SubscriptionManager {
 	public void add(String sessionId, String wsSession) throws Exception{
 		wsSessionMap.put(sessionId, wsSession);
 		//now update any subscriptions for sessionId
-		List<Subscription> subs = new ArrayList<Subscription>();
-		for (Subscription s: subscriptions){
-			if(s.getWsSession().equals(sessionId)){
-				subs.add(s);
-			}
-		}
+		List<Subscription> subs = getSubscriptions(sessionId);
 
 		for (Subscription s: subs){
 			if(s.getWsSession().equals(sessionId)){
@@ -134,7 +135,13 @@ public class SubscriptionManager {
 			SignalkRouteFactory.configureSubscribeTimer(routeManager, s);
 			
 		}
+		//if we have no subs, then we should put a sub for empty updates as heartbeat
+		if(getSubscriptions(wsSession).size()==0){
+			heartbeats.add(wsSession);
+		}
 	}
+
+
 	public void removeSessionId(String sessionId) throws Exception{
 		String wsSession = wsSessionMap.get(sessionId);
 		wsSessionMap.remove(sessionId);
@@ -143,7 +150,7 @@ public class SubscriptionManager {
 		SignalkRouteFactory.removeSubscribeTimers(routeManager, getSubscriptions(wsSession));
 		subscriptions.removeAll(getSubscriptions(wsSession));
 		subscriptions.removeAll(getSubscriptions(sessionId));
-		
+		heartbeats.remove(wsSession);
 		
 	}
 	public void removeWsSession(String wsSession) throws Exception{
@@ -152,6 +159,7 @@ public class SubscriptionManager {
 		RouteManager routeManager = RouteManagerFactory.getInstance(null);
 		SignalkRouteFactory.removeSubscribeTimers(routeManager, getSubscriptions(wsSession));
 		subscriptions.removeAll(getSubscriptions(wsSession));
+		heartbeats.remove(wsSession);
 	}
 
 	/**
@@ -174,6 +182,10 @@ public class SubscriptionManager {
 	public boolean isValid(String sessionId) {
 		if(wsSessionMap.containsKey(sessionId))return true;
 		return false;
+	}
+
+	public List<String> getHeartbeats() {
+		return heartbeats;
 	}
 	
 }

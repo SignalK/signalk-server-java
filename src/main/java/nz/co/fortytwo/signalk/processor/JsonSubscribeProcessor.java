@@ -84,7 +84,10 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
                     "policy": "fixed"
                 }
         ]
-}</pre>
+}
+
+{"context":"vessels.*","subscribe":[{"path":"navigation.position","period":120000,"format":"full","policy":"fixed"},{"path":"navigation.courseOverGround","period":120000,"format":"full","policy":"fixed"}]}
+</pre>
 */
 	 
 	//@Override
@@ -97,7 +100,7 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
 			
 			//go to context
 			String context = node.at(CONTEXT).asString();
-			//TODO: is the context and path valid? A DOS attack is possible if we allow numerous crapbad paths?
+			//TODO: is the context and path valid? A DOS attack is possible if we allow numerous crap/bad paths?
 			
 			Json subscriptions = node.at(SUBSCRIBE);
 			if(subscriptions==null){

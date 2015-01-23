@@ -29,6 +29,7 @@ import nz.co.fortytwo.signalk.processor.AISProcessor;
 import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
 import nz.co.fortytwo.signalk.processor.DeltaExportProcessor;
 import nz.co.fortytwo.signalk.processor.DeltaImportProcessor;
+import nz.co.fortytwo.signalk.processor.HeartbeatProcessor;
 import nz.co.fortytwo.signalk.processor.InputFilterProcessor;
 import nz.co.fortytwo.signalk.processor.NMEAProcessor;
 import nz.co.fortytwo.signalk.processor.OutputFilterProcessor;
@@ -215,6 +216,20 @@ public class SignalkRouteFactory {
 			((DefaultCamelContext)routeManager.getContext()).removeRouteDefinition(routeDef);
 			
 			logger.debug("Done removing sub "+getRouteId(sub));
+	}
+
+	public static void configureHeartbeatRoute(RouteManager routeBuilder, String input) {
+		
+		routeBuilder.from(RouteManager.DIRECT_HEARTBEAT)
+			.multicast().parallelProcessing()
+				.to(RouteManager.DIRECT_TCP,RouteManager.SEDA_WEBSOCKETS)
+			.end();
+		routeBuilder.from(input)
+			.onException(Exception.class).handled(true).maximumRedeliveries(0)
+			.to("log:nz.co.fortytwo.signalk.model.output.all?level=ERROR")
+			.end()
+		.process(new HeartbeatProcessor());
+		
 	}
 		
 	
