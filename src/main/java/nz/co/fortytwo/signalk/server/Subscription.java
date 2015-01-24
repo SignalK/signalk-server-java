@@ -25,8 +25,11 @@
  */
 package nz.co.fortytwo.signalk.server;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
+import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.server.util.JsonConstants;
 
 /**
@@ -65,7 +68,7 @@ public class Subscription {
 		newPath=newPath.replace(VESSELS_DOT_SELF+DOT,JsonConstants.VESSELS+DOT+JsonConstants.SELF+DOT);
 		
 		//regex it
-	    String regex = newPath.replaceAll(".", "[$0]").replace("[*]", ".*");
+	    String regex = newPath.replaceAll(".", "[$0]").replace("[*]", ".*").replace("[?]", ".");
 		pattern = Pattern.compile(regex);
 		return newPath;
 	}
@@ -147,6 +150,22 @@ public class Subscription {
 	public boolean isSubscribed(String key) {
 		if(pattern.matcher(key).find())return true;
 		return false;
+	}
+	public long getMinPeriod() {
+		return minPeriod;
+	}
+	public String getFormat() {
+		return format;
+	}
+	public String getPolicy() {
+		return policy;
+	}
+	public List<String> getSubscribed(String key) {
+		List<String> paths = new ArrayList<String>();
+		for(String p : SignalKModelFactory.getInstance().getFullPaths()){
+			if(p.startsWith(key) && isSubscribed(p))paths.add(key);
+		}
+		return paths;
 	}
 	
 	

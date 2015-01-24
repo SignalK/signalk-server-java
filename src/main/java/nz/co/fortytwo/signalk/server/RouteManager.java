@@ -67,7 +67,8 @@ public class RouteManager extends RouteBuilder {
 	public static final String DIRECT_TCP = "seda:tcp?purgeWhenStopping=true&size=100";
 	public static final String REMOTE_ADDRESS = "remote.address";
 	public static final String SEDA_NMEA = "seda:nmeaOutput?purgeWhenStopping=true&size=100";
-	public static final String DIRECT_HEARTBEAT = "direct:heartbeat";
+
+	public static final String SEDA_COMMON_OUT = "seda:commonOut?purgeWhenStopping=true&size=100";
 	
 	private int wsPort = 9292;
 	private int restPort = 9290;
@@ -163,7 +164,10 @@ public class RouteManager extends RouteBuilder {
 		SignalkRouteFactory.configureWebsocketTxRoute(this, SEDA_WEBSOCKETS, wsPort);
 		SignalkRouteFactory.configureWebsocketRxRoute(this, SEDA_INPUT, wsPort);
 		SignalkRouteFactory.configureTcpServerRoute(this, DIRECT_TCP, skServer);
+		
 		SignalkRouteFactory.configureTcpServerRoute(this, SEDA_NMEA, nmeaServer);
+		
+		SignalkRouteFactory.configureCommonOut(this);
 		
 		SignalkRouteFactory.configureHeartbeatRoute(this,"timer://heartbeat?fixedRate=true&period=1000");
 		
@@ -174,7 +178,6 @@ public class RouteManager extends RouteBuilder {
 		// timed actions
 		SignalkRouteFactory.configureDeclinationTimer(this, "timer://declination?fixedRate=true&period=10000");
 		SignalkRouteFactory.configureWindTimer(this, "timer://wind?fixedRate=true&period=1000");
-		//SignalkRouteFactory.configureOutputTimer(this, "timer://signalkAll?fixedRate=true&period=1000");
 		
 		//WebsocketEndpoint wsEndpoint = (WebsocketEndpoint) getContext().getEndpoint("websocket://0.0.0.0:"+wsPort+JsonConstants.SIGNALK_WS);
 		if (Boolean.valueOf(config.getProperty(Constants.DEMO))) {

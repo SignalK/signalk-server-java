@@ -58,7 +58,7 @@ public class HeartbeatProcessor extends SignalkProcessor implements Processor{
 	
 	public HeartbeatProcessor(){
 		producer= new DefaultProducerTemplate(CamelContextFactory.getInstance());
-		producer.setDefaultEndpointUri(RouteManager.DIRECT_HEARTBEAT );
+		producer.setDefaultEndpointUri(RouteManager.SEDA_COMMON_OUT );
 		try {
 			producer.start();
 		} catch (Exception e) {

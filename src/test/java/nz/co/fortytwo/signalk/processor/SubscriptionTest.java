@@ -57,6 +57,14 @@ public class SubscriptionTest {
 	}
 	
 	@Test
+	public void shouldBeCharWildcardSubscribed() {
+		Subscription sub = new Subscription("wsSession", "vessels.motu?.navigation", 10, 1000, JsonConstants.FORMAT_FULL, JsonConstants.POLICY_FIXED);
+		assertFalse(sub.isSubscribed("vessels.motu.navigation.courseOverGroundTrue"));
+		assertFalse(sub.isSubscribed("vessels.Motu.navigation.courseOverGroundTrue"));
+		assertTrue(sub.isSubscribed("vessels.motux.navigation.courseOverGroundTrue"));
+	}
+	
+	@Test
 	public void shouldBePartialWildcardSubscribed() {
 		Subscription sub = new Subscription("wsSession", "vessels.*.navigation.course*True", 10, 1000, JsonConstants.FORMAT_FULL, JsonConstants.POLICY_FIXED);
 		assertTrue(sub.isSubscribed("vessels.motu.navigation.courseOverGroundTrue"));

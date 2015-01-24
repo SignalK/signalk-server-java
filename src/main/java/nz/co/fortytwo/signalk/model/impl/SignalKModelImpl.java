@@ -26,7 +26,10 @@ package nz.co.fortytwo.signalk.model.impl;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import mjson.Json;
 import mjson.Json.ObjectJson;
@@ -46,12 +49,14 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 	
 	private static Logger logger = Logger.getLogger(SignalKModelImpl.class);
 	private static DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
+	private static ConcurrentHashMap<String, Json> nodeMap = new ConcurrentHashMap<String, Json>();
 	//private Json this;
 	private EventBus eventBus = new EventBus();
 	
 	protected SignalKModelImpl(){
 		super();
 		this.set(VESSELS,Json.object().set(SELF,Json.object()));
+		addToNodeMap(this);
 	}
 	
 	public Json self(){
@@ -100,6 +105,7 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 					Json value = updateNode.at(fieldName);
 					//logger.debug(fieldName + "=" + value);
 					mainNode.set(fieldName, value);
+					addToNodeMap(mainNode);
 					eventBus.post(new JsonEvent(mainNode.up(), EventType.EDIT));
 					logger.debug(fieldName + "=" + value);
 				}
@@ -271,6 +277,7 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 		json.set(TIMESTAMP,timestamp.toString());
 		json.set(SOURCE,source);
 		json.set(VALUE,value);
+		addToNodeMap(json);
 		eventBus.post(new JsonEvent(json, EventType.EDIT));
 		return json;
 	}
@@ -366,7 +373,7 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 			if(node==null){
 				node = lastNode.set(path,Json.object());
 				node = node.at(path);
-				
+				addToNodeMap(node);
 			}
 			lastNode=node;
 		}
@@ -382,16 +389,54 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 	}
 	public  Json putWith(Json node, String fullPath, Object value, String source, DateTime dateTime) {
 		node=addNode(node,fullPath);
-		
 		node.set(VALUE,value);
 		node.set(TIMESTAMP,dateTime.toDateTime(DateTimeZone.UTC).toString(fmt));
 		node.set(SOURCE,source);
+		addToNodeMap(node);
 		eventBus.post(new JsonEvent(node, EventType.EDIT));
 		return node;
 		
 	}
 	
+	/**
+	 * Retrieve the node by fullPath.
+	 * @param node
+	 */
+	public Json getFromNodeMap(String fullPath) {
+		Json json = nodeMap.get(fullPath);
+		if(json==null)removeFromNodeMap(fullPath);
+		return json;
+	}
 	
+	/**
+	 * Get a full list of paths.
+	 * @param node
+	 */
+	public Set<String> getFullPaths() {
+		return nodeMap.keySet();
+	}
+	
+	/**
+	 * Remove the node by fullPath.
+	 * @param node
+	 */
+	public void removeFromNodeMap(String fullPath) {
+		nodeMap.remove(fullPath);
+	}
+	/**
+	 * Adds the given node to the nodeMap, so we can retrieve by fullPath.
+	 * @param node
+	 */
+	public void addToNodeMap(Json node) {
+		//recursively add to nodeMap
+		if(node==null)return;
+		nodeMap.put(node.getPath(), node);
+		if(!node.isObject())return;
+		for(Json n : node.asJsonMap().values()){
+			addToNodeMap(n);
+		}
+	}
+
 	public EventBus getEventBus() {
 		return eventBus;
 	}

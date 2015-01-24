@@ -23,24 +23,24 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.CONTEXT;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.PATH;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.SOURCE;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.TIMESTAMP;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.UPDATES;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.VALUE;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.VALUES;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.VESSELS;
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.event.JsonEvent;
+import nz.co.fortytwo.signalk.server.CamelContextFactory;
+import nz.co.fortytwo.signalk.server.RouteManager;
 import nz.co.fortytwo.signalk.server.Subscription;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.apache.camel.Producer;
+import org.apache.camel.ProducerTemplate;
+import org.apache.camel.component.websocket.WebsocketConstants;
+import org.apache.camel.impl.DefaultProducerTemplate;
 import org.apache.log4j.Logger;
 
 import com.google.common.collect.ImmutableList;
@@ -58,10 +58,20 @@ public class DeltaExportProcessor extends SignalkProcessor implements Processor{
 	private static Logger logger = Logger.getLogger(DeltaExportProcessor.class);
 	protected String wsSession = null;
 	protected ConcurrentHashMap<String, Json> map = new ConcurrentHashMap<String, Json>();
+	private ProducerTemplate exportProducer = null;
+	
 	public DeltaExportProcessor(String wsSession){
 		super();
 		this.wsSession=wsSession;
+		exportProducer= new DefaultProducerTemplate(CamelContextFactory.getInstance());
+		exportProducer.setDefaultEndpointUri(RouteManager.SEDA_COMMON_OUT);
+		try {
+			exportProducer.start();
+		} catch (Exception e) {
+			logger.error(e.getMessage(),e);
+		}
 		signalkModel.getEventBus().register(this);
+		
 		
 	}
 	public void process(Exchange exchange) throws Exception {
@@ -69,6 +79,7 @@ public class DeltaExportProcessor extends SignalkProcessor implements Processor{
 		try {
 			logger.info("process delta queue ("+map.size()+") for "+this.hashCode());
 			//get the accumulated delta nodes.
+			createDelta(signalkModel.atPath(VESSELS));
 			List<Json> deltas = null;
 			synchronized (map) {
 				deltas = ImmutableList.copyOf(map.values());
@@ -119,16 +130,18 @@ public class DeltaExportProcessor extends SignalkProcessor implements Processor{
 	      
 	}
 */
+	
 	private void createDelta(Json j) {
+		if(j==null)return;
 		// create element
-		String path = getPath(j);
+		String path = j.getPath();
 		logger.debug("Delta for:"+path);
 		String vessel = getVessel(path);
 		if(vessel==null)return;
 		
 		//recurse the objects to the leaves
 		Json updates = Json.array();
-		getEntries(updates, j, vessel);
+		getEntries(updates, j);
 		if(updates.asList().size()==0)return;
 		
 		synchronized (map) {
@@ -148,49 +161,48 @@ public class DeltaExportProcessor extends SignalkProcessor implements Processor{
 		}
 	}
 	
-	private void getEntries(Json updates, Json j, String vessel) {
+	private void getEntries(Json updates, Json j) {
 		if(!j.isObject())return;
-		//recurse objects
-		if( j.has(VALUE)){
-			String path = getPath(j);
-			//do we want this one, remember we may have a wildcard subscribe
-			
-			boolean ok= false;
-			if(wsSession==null){
-				ok=true;
-			}else{
-				logger.debug("Checking subs for session="+wsSession+" for:"+path);
-				for(Subscription s: manager.getSubscriptions(wsSession)){
-					logger.debug("Checking prefix="+s.getPath()+" for:"+path);
-					if(s.isSubscribed(path)){
-						//we want it
-						logger.debug("OK for:"+path);
-						ok=true;
-						break;
-					}
-				}
+		String path = j.getPath();
+		//do we want this one, remember we may have a wildcard subscribe
+		List<String> pathList = new ArrayList<String>();
+		logger.debug("Checking subs for session="+wsSession+" for:"+path);
+		for(Subscription s: manager.getSubscriptions(wsSession)){
+			logger.debug("Checking prefix="+s.getPath()+" for:"+path);
+			if(s.isActive()){
+				pathList.addAll(s.getSubscribed(path));
+				logger.debug("Found for:"+s);
 			}
-			if(!ok)return;
-			path=path.substring(vessel.length()+1);
-			
-			Json entry = Json.object();
-			Json source = Json.object();
-			source.set(SOURCE, j.at(SOURCE).getValue());
-			source.set(TIMESTAMP, j.at(TIMESTAMP).getValue());
-			entry.set(SOURCE, source);
-			
-			Json value = Json.object();
-			value.set(PATH,path);
-			value.set(VALUE, j.at(VALUE).getValue());
-			
-			Json values = Json.array();
-			values.add(value);
-			entry.set(VALUES, values);
-			
-			updates.add(entry);
-		}else{
-			for (Json child : j.asJsonMap().values()){
-				getEntries(updates, child, vessel);
+		}
+		
+		if(pathList.size()==0)return;
+		//load objects
+		
+		for(String p: pathList){
+			Json js = signalkModel.getFromNodeMap(path); 
+			if(js==null)continue;
+			if( js.has(VALUE)){
+				//path=path.substring(vessel.length()+1);
+				
+				Json entry = Json.object();
+				Json source = Json.object();
+				if(js.has(SOURCE)){
+					source.set(SOURCE, js.at(SOURCE).getValue());
+				}
+				if(js.has(TIMESTAMP)){
+					source.set(TIMESTAMP, js.at(TIMESTAMP).getValue());
+				}
+				entry.set(SOURCE, source);
+				
+				Json value = Json.object();
+				value.set(PATH,path);
+				value.set(VALUE, js.at(VALUE).getValue());
+				
+				Json values = Json.array();
+				values.add(value);
+				entry.set(VALUES, values);
+				
+				updates.add(entry);
 			}
 		}
 		
@@ -207,20 +219,7 @@ public class DeltaExportProcessor extends SignalkProcessor implements Processor{
 		return path.substring(0,pos);
 	}
 	
-	private String getPath(Json j) {
-		StringBuffer path = new StringBuffer();
-		String tmp = j.getParentKey();
-		path.insert(0,tmp );
-
-		while ((j=j.up())!=null){
-			if(logger.isTraceEnabled())logger.trace(j.toString());
-			tmp=j.getParentKey();
-			if(tmp!=null && tmp.length()>1){
-				path.insert(0,tmp+".");
-			}
-		}
-		return path.toString();
-	}
+	
 	
 	private Json getEmptyDelta(){
 		Json delta = Json.object();
@@ -232,14 +231,41 @@ public class DeltaExportProcessor extends SignalkProcessor implements Processor{
 
 	@Subscribe
 	public void recordEvent(JsonEvent jsonEvent){
-		if(logger.isDebugEnabled()) logger.debug(this.hashCode()+ " received event "+jsonEvent.getJson().toString());
+		if(jsonEvent==null)return;
 		if(jsonEvent.getJson()==null)return;
-		createDelta(jsonEvent.getJson());
+		if(logger.isDebugEnabled()) logger.debug(this.hashCode()+ " received event "+jsonEvent.getJson().toString());
+		
+		//do we care?
+		for(Subscription s: manager.getSubscriptions(wsSession)){
+			if(s.isActive() && !POLICY_FIXED.equals(s.getPolicy())){
+				createDelta(jsonEvent.getJson());
+				break;
+			}
+		}
+		//now send
+		List<Json> deltas = null;
+		synchronized (map) {
+			deltas = ImmutableList.copyOf(map.values());
+			map.clear();
+		}
+		if(deltas.size()>0){
+			//dont send empty updates
+			for(Json d:deltas){
+				exportProducer.sendBodyAndHeader(d, WebsocketConstants.CONNECTION_KEY, wsSession);
+			}
+		}
 	}
 	
 	@Subscribe
 	public void recordEvent(DeadEvent e){
 		logger.debug("Received dead event"+e);
+	}
+	
+	public ProducerTemplate getExportProducer(){
+		return exportProducer;
+	}
+	public void setExportProducer(ProducerTemplate exportProducer) {
+		this.exportProducer = exportProducer;
 	}
 	
 }

@@ -23,6 +23,8 @@
  */
 package nz.co.fortytwo.signalk.model;
 
+import java.util.Set;
+
 import mjson.Json;
 
 import org.joda.time.DateTime;
@@ -200,5 +202,27 @@ public interface SignalKModel{
 		
 		public EventBus getEventBus();
 	
+		/**
+		 * Retrieve the node by fullPath.
+		 * @param node
+		 */
+		public Json getFromNodeMap(String fullPath) ;
+		
+		/**
+		 * Get a full list of paths.
+		 * @param node
+		 */
+		public Set<String> getFullPaths() ;
+		
+		/**
+		 * Remove the node by fullPath.
+		 * @param node
+		 */
+		public void removeFromNodeMap(String fullPath) ;
+		/**
+		 * Adds the given node to the nodeMap, so we can retrieve by fullPath.
+		 * @param node
+		 */
+		public void addToNodeMap(Json node) ;
 
 }

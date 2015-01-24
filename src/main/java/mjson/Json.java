@@ -1252,10 +1252,33 @@ public class Json
 
 	Json enclosing = null;
 	String parentKey = null;
+	String fullPath=null;
 	
 	protected Json() { }
-	protected Json(Json enclosing) { this.enclosing = enclosing; this.parentKey=null;}
+	protected Json(Json enclosing) { this.enclosing = enclosing; this.parentKey=null;this.fullPath=null;}
 	
+	/**
+	 * Returns the full path in dot-notation to the root object
+	 * 
+	 * @return
+	 */
+	public String getPath() {
+		if(fullPath!=null)return fullPath;
+		StringBuffer path = new StringBuffer();
+		Json j = this;
+		String tmp = j.getParentKey();
+		path.insert(0,tmp );
+		
+		while ((j=j.up())!=null){
+			//if(logger.isTraceEnabled())logger.trace(j.toString());
+			tmp=j.getParentKey();
+			if(tmp!=null && tmp.length()>1){
+				path.insert(0,tmp+".");
+			}
+		}
+		this.fullPath=path.toString();
+		return fullPath;
+	}
 	/**
 	 * <p>Return a string representation of <code>this</code> that does 
 	 * not exceed a certain maximum length. This is useful in constructing
@@ -1290,7 +1313,7 @@ public class Json
 	 *  
 	 * @param enclosing The parent element.
 	 */
-	public void attachTo(Json enclosing) { this.enclosing = enclosing; this.parentKey=null;}
+	public void attachTo(Json enclosing) { this.enclosing = enclosing; this.parentKey=null;this.fullPath=null;}
 	
 	/**
 	 * <p>Return the <code>Json</code> entity, if any, enclosing this 
@@ -2085,6 +2108,7 @@ public class Json
 		    {
 		        Json v = e.getValue().dup();
 		        v.enclosing = j;
+		        v.parentKey = e.getKey();
 		        j.object.put(e.getKey(), v);
 		    }
 		    return j;
@@ -2165,6 +2189,8 @@ public class Json
 			Json el = object.remove(property);
 			if (el != null)
 				el.enclosing = null;
+				el.parentKey = null;
+				el.fullPath = null;
 			return el;
 		}
 		
@@ -2173,6 +2199,8 @@ public class Json
 			Json el = object.remove(property);
 			if (el != null)
 				el.enclosing = null;
+				el.parentKey = null;
+				el.fullPath = null;
 			return this;
 		}
 		

@@ -51,11 +51,12 @@ public class SignalkProcessor {
 	static protected  SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
 	//@Produce(uri = RouteManager.SEDA_NMEA )
     ProducerTemplate nmeaproducer;
+    
 	
 	
 	public SignalkProcessor(){
 		nmeaproducer= new DefaultProducerTemplate(CamelContextFactory.getInstance());
-		nmeaproducer.setDefaultEndpointUri(RouteManager.SEDA_NMEA );
+		nmeaproducer.setDefaultEndpointUri(RouteManager.SEDA_COMMON_OUT );
 		try {
 			nmeaproducer.start();
 		} catch (Exception e) {

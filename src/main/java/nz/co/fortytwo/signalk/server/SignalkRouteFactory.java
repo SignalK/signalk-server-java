@@ -160,6 +160,16 @@ public class SignalkRouteFactory {
 		routeBuilder.from("timer://wind?fixedRate=true&period=1000").process(new WindProcessor()).to("log:nz.co.fortytwo.signalk.model.update?level=INFO").end();
 	}
 	
+	public static void configureCommonOut(RouteBuilder routeBuilder ){
+		routeBuilder.from(RouteManager.SEDA_COMMON_OUT)
+			.onException(Exception.class).handled(true).maximumRedeliveries(0)
+			.to("log:nz.co.fortytwo.signalk.model.output?level=ERROR")
+			.end()
+		.multicast().parallelProcessing()
+			.to(RouteManager.DIRECT_TCP,RouteManager.SEDA_WEBSOCKETS)
+			.to("log:nz.co.fortytwo.signalk.model.output?level=DEBUG")
+		.end();
+	}
 	public static void configureOutputTimer(RouteBuilder routeBuilder ,String input){
 		routeBuilder.from(input)
 			.onException(Exception.class).handled(true).maximumRedeliveries(0)
@@ -168,10 +178,7 @@ public class SignalkRouteFactory {
 		.process(new DeltaExportProcessor(null))
 		.split(routeBuilder.body())
 		.setHeader(WebsocketConstants.CONNECTION_KEY, routeBuilder.constant(WebsocketConstants.SEND_TO_ALL))
-		.to("log:nz.co.fortytwo.signalk.model.output.all?level=INFO")
-		.multicast().parallelProcessing()
-			.to(RouteManager.DIRECT_TCP,RouteManager.SEDA_WEBSOCKETS)
-		.end();
+		.to(RouteManager.SEDA_COMMON_OUT);
 	}
 	
 	public static void configureSubscribeTimer(RouteBuilder routeBuilder ,Subscription sub) throws Exception{
@@ -180,10 +187,12 @@ public class SignalkRouteFactory {
 		String wsSession = sub.getWsSession();
 		RouteDefinition route = routeBuilder.from(input);
 			route.process(new DeltaExportProcessor(wsSession))
+				.onException(Exception.class).handled(true).maximumRedeliveries(0)
+				.to("log:nz.co.fortytwo.signalk.model.output.subscribe?level=ERROR")
+				.end()
 			.split(routeBuilder.body())
 				.setHeader(WebsocketConstants.CONNECTION_KEY, routeBuilder.constant(wsSession))
-				.to("log:nz.co.fortytwo.signalk.model.output.wsSession?level=ERROR")
-				.to(RouteManager.SEDA_WEBSOCKETS)
+				.to(RouteManager.SEDA_COMMON_OUT)
 			.end();
 		route.setId(getRouteId(sub));
 		((DefaultCamelContext)CamelContextFactory.getInstance()).addRouteDefinition(route);
@@ -220,10 +229,6 @@ public class SignalkRouteFactory {
 
 	public static void configureHeartbeatRoute(RouteManager routeBuilder, String input) {
 		
-		routeBuilder.from(RouteManager.DIRECT_HEARTBEAT)
-			.multicast().parallelProcessing()
-				.to(RouteManager.DIRECT_TCP,RouteManager.SEDA_WEBSOCKETS)
-			.end();
 		routeBuilder.from(input)
 			.onException(Exception.class).handled(true).maximumRedeliveries(0)
 			.to("log:nz.co.fortytwo.signalk.model.output.all?level=ERROR")
