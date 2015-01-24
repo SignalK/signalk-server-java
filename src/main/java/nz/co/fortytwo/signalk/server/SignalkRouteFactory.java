@@ -69,7 +69,7 @@ public class SignalkRouteFactory {
 	public static void configureInputRoute(RouteBuilder routeBuilder,String input) {
 		routeBuilder.from(input)
 			.onException(Exception.class).handled(true).maximumRedeliveries(0)
-			//.to("log:nz.co.fortytwo.signalk.model.receive?level=ERROR&showException=true&showStackTrace=true")
+			.to("log:nz.co.fortytwo.signalk.model.receive?level=ERROR&showException=true&showStackTrace=true")
 			.end()
 		// dump misc rubbish
 		.process(new InputFilterProcessor())
@@ -201,7 +201,7 @@ public class SignalkRouteFactory {
 	}
 
 	private static String getRouteId(Subscription sub) {
-		return "sub_"+sub.getWsSession()+"_"+sub.getPath();
+		return "sub_"+sub.getWsSession();
 	}
 
 	public static void configureSubscribeRoute(RouteBuilder routeBuilder, String input) {
@@ -219,6 +219,7 @@ public class SignalkRouteFactory {
 	
 	public static void removeSubscribeTimer(RouteManager routeManager, Subscription sub) throws Exception {
 			RouteDefinition routeDef = ((DefaultCamelContext)routeManager.getContext()).getRouteDefinition(getRouteId(sub));
+			if(routeDef==null)return;
 			logger.debug("Stopping sub "+getRouteId(sub)+","+routeDef);
 			((DefaultCamelContext)routeManager.getContext()).stopRoute(routeDef);
 			logger.debug("Removing sub "+getRouteId(sub));

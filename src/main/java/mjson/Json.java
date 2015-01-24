@@ -2187,20 +2187,22 @@ public class Json
 		public Json atDel(String property) 
 		{
 			Json el = object.remove(property);
-			if (el != null)
+			if (el != null){
 				el.enclosing = null;
 				el.parentKey = null;
 				el.fullPath = null;
+			}
 			return el;
 		}
 		
 		public Json delAt(String property) 
 		{
 			Json el = object.remove(property);
-			if (el != null)
+			if (el != null){
 				el.enclosing = null;
 				el.parentKey = null;
 				el.fullPath = null;
+			}
 			return this;
 		}
 		

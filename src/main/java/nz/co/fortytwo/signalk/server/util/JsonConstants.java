@@ -69,9 +69,9 @@ public class JsonConstants {
 	public static final String timezone = "timezone";
 	
 
-	public static final String SIGNALK_AUTH = "/signalk/auth/";
-	public static final String SIGNALK_API = "/signalk/api/";
-	public static final String SIGNALK_SUBSCRIBE = "/signalk/stream/";
+	public static final String SIGNALK_AUTH = "/signalk/auth";
+	public static final String SIGNALK_API = "/signalk/api";
+	public static final String SIGNALK_SUBSCRIBE = "/signalk/stream";
 	public static final String SIGNALK_WS = "/signalk/stream";
 	
 	public static final String resources="resources";

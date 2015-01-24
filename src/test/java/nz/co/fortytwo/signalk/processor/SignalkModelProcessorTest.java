@@ -28,6 +28,7 @@ import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.processor.SignalkModelProcessor;
+import nz.co.fortytwo.signalk.server.RouteManagerFactory;
 import nz.co.fortytwo.signalk.server.SignalkRouteFactory;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;
 
@@ -46,6 +47,7 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 
 	@Before
 	public void setUp() throws Exception {
+		RouteManagerFactory.getInstance(null);
 	}
 
 	@After

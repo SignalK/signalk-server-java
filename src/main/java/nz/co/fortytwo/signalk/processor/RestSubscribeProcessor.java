@@ -126,7 +126,7 @@ public class RestSubscribeProcessor extends SignalkProcessor implements Processo
 	}
 
 	protected int subscribe(String path, long period, long minPeriod, String format, String policy, String sessionId) throws Exception {
-		path=path.substring(JsonConstants.SIGNALK_SUBSCRIBE.length()-1);
+		path=path.substring(JsonConstants.SIGNALK_SUBSCRIBE.length());
         logger.debug("We are processing trimmed path = "+path);
         logger.debug("sessionId = "+sessionId);
         logger.debug("wsSession = "+manager.getWsSession(sessionId));

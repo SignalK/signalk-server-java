@@ -27,9 +27,11 @@ package nz.co.fortytwo.signalk.processor;
 import static org.junit.Assert.*;
 import mjson.Json;
 import nz.co.fortytwo.signalk.processor.AISProcessor;
+import nz.co.fortytwo.signalk.server.RouteManagerFactory;
 import nz.co.fortytwo.signalk.server.util.JsonConstants;
 
 import org.apache.log4j.Logger;
+import org.junit.Before;
 import org.junit.Test;
 
 //public class AISProcessorTest extends CamelTestSupport {
@@ -43,6 +45,11 @@ public class AISProcessorTest{
 	@Produce(uri = "direct:start")
 	protected ProducerTemplate template;
 */
+	
+	@Before
+	public void setUp() throws Exception {
+		RouteManagerFactory.getInstance(null);
+	}
 	
 	@Test
 	public void shouldPassJson(){

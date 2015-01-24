@@ -34,9 +34,9 @@ import nz.co.fortytwo.signalk.server.util.JsonConstants;
 
 /**
  * Holds subscription data, wsSessionId, path, period
- * If a subscription is made before the websocket is started then the wsSocket will hold the sessionId.
+ * If a subscription is made via REST before the websocket is started then the wsSocket will hold the sessionId.
  * This must be swapped for the wsSessionId when the websocket starts.
- * The subscription will be in an inactive state when it holds a sessionId
+ * The subscription will be in an inactive state when submitted by REST if wsSession = sessionId
  * @author robert
  *
  */
@@ -140,6 +140,27 @@ public class Subscription {
 	}
 	public void setActive(boolean active) {
 		this.active = active;
+	}
+	
+	public boolean isSameRoute(Subscription sub){
+		if (period != sub.period)
+			return false;
+		if (wsSession == null) {
+			if (sub.wsSession != null)
+				return false;
+		} else if (!wsSession.equals(sub.wsSession))
+			return false;
+		if (format == null) {
+			if (sub.format != null)
+				return false;
+		} else if (!format.equals(sub.format))
+			return false;
+		if (policy == null) {
+			if (sub.policy != null)
+				return false;
+		} else if (!policy.equals(sub.policy))
+			return false;
+		return true;
 	}
 	/**
 	 * Returns true if this subscription is interested in this path

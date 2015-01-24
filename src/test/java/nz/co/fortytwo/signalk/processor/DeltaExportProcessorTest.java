@@ -79,19 +79,7 @@ public class DeltaExportProcessorTest {
 	public void tearDown() throws Exception {
 	}
 
-	@Test
-	public void shouldHandleEventsFromBus() throws Exception {
-
-		DeltaExportProcessor processor = new DeltaExportProcessor("wsSession1");
-		assertEquals(0, processor.map.size());
-		EventBus bus = new EventBus();
-		bus.register(processor);
-
-		JsonEvent event = new JsonEvent(getJsonForEvent( SELF, nav_courseOverGroundTrue), EventType.EDIT);
-		bus.post(event);
-		assertEquals(1, processor.map.size());
-
-	}
+	
 
 	@Test
 	public void shouldCreateInstantDelta() throws Exception {

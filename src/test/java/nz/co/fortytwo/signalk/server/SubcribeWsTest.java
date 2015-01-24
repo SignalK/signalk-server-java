@@ -73,7 +73,7 @@ public class SubcribeWsTest extends CamelTestSupport {
         
         
       //await messages
-        WebSocket websocket = c.prepareGet("ws://127.0.0.1:9292"+SIGNALK_WS+"?test=1234").setCookies(r1.getCookies()).execute(
+        WebSocket websocket = c.prepareGet("ws://127.0.0.1:9292"+SIGNALK_WS).setCookies(r1.getCookies()).execute(
                 new WebSocketUpgradeHandler.Builder()
                     .addWebSocketListener(new WebSocketTextListener() {
                         @Override

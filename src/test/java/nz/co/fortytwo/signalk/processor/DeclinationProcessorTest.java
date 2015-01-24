@@ -28,6 +28,7 @@ import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
+import nz.co.fortytwo.signalk.server.RouteManagerFactory;
 import nz.co.fortytwo.signalk.server.util.JsonConstants;
 
 import org.junit.After;
@@ -38,8 +39,8 @@ public class DeclinationProcessorTest {
 
 	@Before
 	public void setUp() throws Exception {
+		RouteManagerFactory.getInstance(null);
 	}
-
 	@After
 	public void tearDown() throws Exception {
 	}

@@ -33,6 +33,7 @@ import static org.junit.Assert.assertEquals;
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelImpl;
+import nz.co.fortytwo.signalk.server.RouteManagerFactory;
 
 import org.apache.log4j.Logger;
 import org.junit.After;
@@ -48,6 +49,7 @@ public class DeltaImportProcessorTest {
 	private static Logger logger = Logger.getLogger(SignalKModelImpl.class);
 	@Before
 	public void setUp() throws Exception {
+		RouteManagerFactory.getInstance(null);
 	}
 
 	@After

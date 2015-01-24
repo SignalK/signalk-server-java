@@ -43,6 +43,7 @@ import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.processor.NMEAProcessor;
+import nz.co.fortytwo.signalk.server.RouteManagerFactory;
 import nz.co.fortytwo.signalk.server.util.Constants;
 import nz.co.fortytwo.signalk.server.util.Util;
 
@@ -59,6 +60,8 @@ public class NMEAProcessorTest {
 	
 	@Before
 	public void setUp() throws Exception {
+		RouteManagerFactory.getInstance(null);
+	
 	
 		File jsonFile = new File("./conf/self.json");
 		System.out.println(jsonFile.getAbsolutePath());

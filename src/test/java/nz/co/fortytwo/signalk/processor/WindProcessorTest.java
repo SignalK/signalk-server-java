@@ -26,6 +26,8 @@ package nz.co.fortytwo.signalk.processor;
 
 import static org.junit.Assert.assertEquals;
 import nz.co.fortytwo.signalk.processor.WindProcessor;
+import nz.co.fortytwo.signalk.server.RouteManager;
+import nz.co.fortytwo.signalk.server.RouteManagerFactory;
 
 import org.junit.After;
 import org.junit.Before;
@@ -35,6 +37,7 @@ public class WindProcessorTest {
 
 	@Before
 	public void setUp() throws Exception {
+		RouteManagerFactory.getInstance(null);
 	}
 
 	@After

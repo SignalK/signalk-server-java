@@ -26,6 +26,7 @@ package nz.co.fortytwo.signalk.processor;
 import static org.junit.Assert.*;
 import mjson.Json;
 import nz.co.fortytwo.signalk.processor.ValidationProcessor;
+import nz.co.fortytwo.signalk.server.RouteManagerFactory;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;
 
 import org.apache.log4j.Logger;
@@ -39,6 +40,7 @@ public class ValidationProcessorTest {
 	
 	@Before
 	public void setUp() throws Exception {
+		RouteManagerFactory.getInstance(null);
 	}
 
 	@After
