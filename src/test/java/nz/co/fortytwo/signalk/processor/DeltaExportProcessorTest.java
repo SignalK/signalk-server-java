@@ -33,6 +33,7 @@ import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.event.JsonEvent;
 import nz.co.fortytwo.signalk.model.event.JsonEvent.EventType;
+import nz.co.fortytwo.signalk.model.event.PathEvent;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelImpl;
 import nz.co.fortytwo.signalk.processor.DeltaExportProcessor;
@@ -116,7 +117,7 @@ public class DeltaExportProcessorTest {
 		event.add(getJsonForEvent(SELF, nav_courseOverGroundTrue));
 		event.add(getJsonForEvent("other", env_wind_angleApparent));
 		testScenario(UUID.randomUUID().toString(), "vessels.*.environment", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 1, 0, 0, event);
-		testScenario(UUID.randomUUID().toString(), "vessels.*", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 2, 0, 0, event);
+		testScenario(UUID.randomUUID().toString(), "vessels.*", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 1, 0, 0, event);
 		
 		final CountDownLatch latch = new CountDownLatch(1);
 		latch.await(10, TimeUnit.SECONDS);
@@ -153,22 +154,22 @@ public class DeltaExportProcessorTest {
 			}
 			processor.setExportProducer(exportProducer);
 
-			assertEquals(mapSizeBefore, processor.map.size());
+			assertEquals(mapSizeBefore, processor.queue.size());
 			EventBus bus = new EventBus();
 			bus.register(processor);
 
 			if(jsonEvent.isArray()){
 				for(Json event : jsonEvent.asJsonList()){
-					bus.post(new JsonEvent(event, EventType.EDIT));
+					bus.post(new PathEvent(event.getPath(), nz.co.fortytwo.signalk.model.event.PathEvent.EventType.ADD));
 				}
 			}else{
-				JsonEvent event = new JsonEvent(jsonEvent, EventType.EDIT);
+				PathEvent event = new PathEvent(jsonEvent.getPath(), nz.co.fortytwo.signalk.model.event.PathEvent.EventType.ADD);
 				bus.post(event);
 			}
 			resultEndpoint.assertIsSatisfied();
 			assertEquals(rcvdCounter, resultEndpoint.getReceivedCounter());
 			resultEndpoint.reset();
-			assertEquals(mapSizeAfter, processor.map.size());
+			assertEquals(mapSizeAfter, processor.queue.size());
 			SubscriptionManagerFactory.getInstance().removeSubscription(sub);
 		}
 	

@@ -100,7 +100,6 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 				//mergeArrays( json,  updateNode.at(fieldName));
 			} else if (json != null && json.isObject()) {
 				json = merge(json, updateNode.at(fieldName));
-				//eventBus.post(new JsonEvent(mainNode, EventType.EDIT));
 			} else {
 				if (mainNode.isObject()) {
 					// Overwrite field
@@ -108,7 +107,7 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 					logger.debug(fieldName + "=" + value);
 					mainNode.set(fieldName, value);
 					addToNodeMap(value);
-					eventBus.post(new JsonEvent(mainNode, EventType.EDIT));
+					//eventBus.post(new JsonEvent(mainNode, EventType.EDIT));
 					logger.debug(fieldName + "=" + value);
 				}
 			}
@@ -280,7 +279,7 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 		json.set(SOURCE,source);
 		json.set(VALUE,value);
 		addToNodeMap(json);
-		eventBus.post(new JsonEvent(json, EventType.EDIT));
+		//eventBus.post(new JsonEvent(json, EventType.EDIT));
 		return json;
 	}
 
@@ -397,7 +396,7 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 		node.set(TIMESTAMP,dateTime.toDateTime(DateTimeZone.UTC).toString(fmt));
 		node.set(SOURCE,source);
 		addToNodeMap(node);
-		eventBus.post(new JsonEvent(node, EventType.EDIT));
+		//eventBus.post(new JsonEvent(node, EventType.EDIT));
 		return node;
 		
 	}
