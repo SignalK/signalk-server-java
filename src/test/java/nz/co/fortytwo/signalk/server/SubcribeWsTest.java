@@ -80,6 +80,8 @@ public class SubcribeWsTest extends CamelTestSupport {
                         public void onMessage(String message) {
                             received.add(message);
                             log.info("received --> " + message);
+                            //{"context":"vessels.self","updates":[]}
+                            if(message.startsWith("{\"context\":\"vessels.self\",\"updates\":[]}"))return; //heartbeats
                             latch3.countDown();
                         }
 
@@ -110,7 +112,7 @@ public class SubcribeWsTest extends CamelTestSupport {
         assertEquals(202, reponse.getStatusCode());
         
         websocket.sendTextMessage(jsonDiff);
-        latch4.await(4, TimeUnit.SECONDS);
+        latch3.await(6, TimeUnit.SECONDS);
         
         //assertTrue(latch3.await(15, TimeUnit.SECONDS));
         for(String msg : received){

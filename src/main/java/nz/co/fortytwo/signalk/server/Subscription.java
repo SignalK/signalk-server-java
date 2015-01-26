@@ -1,35 +1,48 @@
 /*
- *
+ * 
  * Copyright (C) 2012-2014 R T Huitema. All Rights Reserved.
  * Web: www.42.co.nz
  * Email: robert@42.co.nz
  * Author: R T Huitema
- *
+ * 
  * This file is part of the signalk-server-java project
- *
+ * 
  * This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
  * WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 package nz.co.fortytwo.signalk.server;
 
+import static nz.co.fortytwo.signalk.server.util.JsonConstants.VESSELS;
+import io.netty.util.internal.ConcurrentSet;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.eventbus.Subscribe;
+
+import mjson.Json;
+import nz.co.fortytwo.signalk.model.event.JsonEvent;
+import nz.co.fortytwo.signalk.model.event.PathEvent;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
+import nz.co.fortytwo.signalk.processor.DeltaExportProcessor;
 import nz.co.fortytwo.signalk.server.util.JsonConstants;
 
 /**
@@ -37,11 +50,13 @@ import nz.co.fortytwo.signalk.server.util.JsonConstants;
  * If a subscription is made via REST before the websocket is started then the wsSocket will hold the sessionId.
  * This must be swapped for the wsSessionId when the websocket starts.
  * The subscription will be in an inactive state when submitted by REST if wsSession = sessionId
+ * 
  * @author robert
- *
+ * 
  */
 public class Subscription {
-	private static final String VESSELS_DOT_SELF = JsonConstants.VESSELS+".self";
+	private static Logger logger = Logger.getLogger(Subscription.class);
+	private static final String VESSELS_DOT_SELF = JsonConstants.VESSELS + ".self";
 	private static final String DOT = ".";
 	String wsSession = null;
 	String path = null;
@@ -51,27 +66,40 @@ public class Subscription {
 	private String format;
 	private String policy;
 	private Pattern pattern = null;
+	private String vesselPath;
+	Set<String> subscribedPaths = new ConcurrentSet<String>();
+	private String routeId;
 
-	public Subscription(String wsSession, String path, long period, long minPeriod, String format, String policy){
-		this.wsSession=wsSession;
-		
-		this.path=sanitizePath(path);
-		this.period=period;
-		this.minPeriod=minPeriod;
-		this.format=format;
-		this.policy=policy;
+	public Subscription(String wsSession, String path, long period, long minPeriod, String format, String policy) {
+		this.wsSession = wsSession;
+
+		this.path = sanitizePath(path);
+		this.period = period;
+		this.minPeriod = minPeriod;
+		this.format = format;
+		this.policy = policy;
+		SignalKModelFactory.getInstance().getEventBus().register(this);
+		for(String p: ImmutableList.copyOf(SignalKModelFactory.getInstance().getFullPaths())){
+			if(isSubscribed(p)){
+				subscribedPaths.add(p);
+			}
+		}
 	}
+
 	private String sanitizePath(String newPath) {
-		newPath=newPath.replace('/', '.');
-		if(newPath.startsWith(DOT))newPath = newPath.substring(1);
-		if(VESSELS_DOT_SELF.equals(newPath))newPath=JsonConstants.VESSELS+DOT+JsonConstants.SELF;
-		newPath=newPath.replace(VESSELS_DOT_SELF+DOT,JsonConstants.VESSELS+DOT+JsonConstants.SELF+DOT);
-		
-		//regex it
-	    String regex = newPath.replaceAll(".", "[$0]").replace("[*]", ".*").replace("[?]", ".");
+		newPath = newPath.replace('/', '.');
+		if (newPath.startsWith(DOT))
+			newPath = newPath.substring(1);
+		if (VESSELS_DOT_SELF.equals(newPath))
+			newPath = JsonConstants.VESSELS + DOT + JsonConstants.SELF;
+		newPath = newPath.replace(VESSELS_DOT_SELF + DOT, JsonConstants.VESSELS + DOT + JsonConstants.SELF + DOT);
+
+		// regex it
+		String regex = newPath.replaceAll(".", "[$0]").replace("[*]", ".*").replace("[?]", ".");
 		pattern = Pattern.compile(regex);
 		return newPath;
 	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -105,8 +133,6 @@ public class Subscription {
 			return false;
 		return true;
 	}
-	
-	
 
 	public String getWsSession() {
 		return wsSession;
@@ -131,18 +157,21 @@ public class Subscription {
 	public void setPeriod(long period) {
 		this.period = period;
 	}
+
 	@Override
 	public String toString() {
 		return "Subscription [wsSession=" + wsSession + ", path=" + path + ", period=" + period + ", active=" + active + "]";
 	}
+
 	public boolean isActive() {
 		return active;
 	}
+
 	public void setActive(boolean active) {
 		this.active = active;
 	}
-	
-	public boolean isSameRoute(Subscription sub){
+
+	public boolean isSameRoute(Subscription sub) {
 		if (period != sub.period)
 			return false;
 		if (wsSession == null) {
@@ -162,6 +191,36 @@ public class Subscription {
 			return false;
 		return true;
 	}
+
+	public boolean isSameVessel(Subscription sub) {
+		if (getVesselPath() != null && getVesselPath().equals(sub.getVesselPath()))
+			return true;
+		return false;
+	}
+
+	/**
+	 * Gets the context path, eg vessels.motu, vessel.*, or vessels.2933??
+	 *  
+	 * @param path
+	 * @return
+	 */
+	public String getVesselPath() {
+		if (vesselPath == null) {
+			if (!path.startsWith(VESSELS))
+				return null;
+			int pos = path.indexOf(".") + 1;
+			// could be just 'vessels'
+			if (pos < 1)
+				return null;
+			pos = path.indexOf(".", pos);
+			// could be just one .\dot. vessels.123456789
+			if (pos < 0)
+				return path;
+			vesselPath = path.substring(0, pos);
+		}
+		return vesselPath;
+	}
+
 	/**
 	 * Returns true if this subscription is interested in this path
 	 * 
@@ -169,26 +228,69 @@ public class Subscription {
 	 * @return
 	 */
 	public boolean isSubscribed(String key) {
-		if(pattern.matcher(key).find())return true;
+		if (pattern.matcher(key).find())
+			return true;
 		return false;
 	}
+
 	public long getMinPeriod() {
 		return minPeriod;
 	}
+
 	public String getFormat() {
 		return format;
 	}
+
 	public String getPolicy() {
 		return policy;
 	}
+
+	/**
+	 * Returns a list of paths that this subscription is currently providing.
+	 * The list is filtered by the key if it is not null or empty in which case a full list is returned,
+	 * @param key
+	 * @return
+	 */
 	public List<String> getSubscribed(String key) {
+		if(StringUtils.isBlank(key)){
+			return ImmutableList.copyOf(subscribedPaths);
+		}
 		List<String> paths = new ArrayList<String>();
-		for(String p : SignalKModelFactory.getInstance().getFullPaths()){
-			if(p.startsWith(key) && isSubscribed(p))paths.add(key);
+		for (String p : subscribedPaths) {
+			if (p.startsWith(key)) {
+				logger.debug("Adding path:" + p);
+				paths.add(p);
+			}
 		}
 		return paths;
 	}
-	
+
+	/**
+	 * Listens for node changes in the server and adds them if they match the subscription
+	 * 
+	 * @param pathEvent
+	 */
+	@Subscribe
+	public void recordEvent(PathEvent pathEvent) {
+		if (pathEvent == null)
+			return;
+		if (pathEvent.getPath() == null)
+			return;
+		if (logger.isDebugEnabled())
+			logger.debug(this.hashCode() + " received event " + pathEvent.getPath());
+		if(isSubscribed(pathEvent.getPath())){
+			subscribedPaths.add(pathEvent.getPath());
+		}
+	}
+
+	public void setRouteId(String routeId) {
+		this.routeId=routeId;
+	}
+
+	public String getRouteId() {
+		return routeId;
+	}
+
 	
 
 }

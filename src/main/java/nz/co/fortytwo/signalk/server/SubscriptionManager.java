@@ -32,6 +32,7 @@ import java.util.Set;
 import nz.co.fortytwo.signalk.processor.JsonSubscribeProcessor;
 import nz.co.fortytwo.signalk.server.util.JsonConstants;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jboss.netty.util.VirtualExecutorService;
 
@@ -82,7 +83,10 @@ public class SubscriptionManager {
 	private boolean hasExistingRoute(Subscription sub) {
 		for(Subscription s: getSubscriptions(sub.getWsSession())){
 			if(sub.equals(s))continue;
-			if(sub.isSameRoute(s)&&s.isActive())return true;
+			if(sub.isSameRoute(s)&&s.isActive()){
+				sub.setRouteId(s.getRouteId());
+				return true;
+			}
 		};
 		return false;
 	}
@@ -139,6 +143,7 @@ public class SubscriptionManager {
 	 * @throws Exception 
 	 */
 	public void add(String sessionId, String wsSession) throws Exception{
+		if(StringUtils.isBlank(wsSession) ||  StringUtils.isBlank(sessionId))return; 
 		wsSessionMap.put(sessionId, wsSession);
 		//now update any subscriptions for sessionId
 		List<Subscription> subs = getSubscriptions(sessionId);

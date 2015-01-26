@@ -244,14 +244,14 @@ public class NMEAProcessor extends SignalkProcessor implements Processor {
 						}
 						previousLat = Util.movingAverage(ALPHA, previousLat, sen.getPosition().getLatitude());
 						logger.debug("lat position:" + sen.getPosition().getLatitude() + ", hemi=" + sen.getPosition().getLatitudeHemisphere());
-						sk.putWith(json, nav_position_latitude , previousLat, "nmea");
+						sk.putWith(json, nav_position_latitude , previousLat, "output");
 	
 						if (startLon) {
 							previousLon = sen.getPosition().getLongitude();
 							startLon = false;
 						}
 						previousLon = Util.movingAverage(ALPHA, previousLon, sen.getPosition().getLongitude());
-						sk.putWith(json, nav_position_longitude , previousLon, "nmea");
+						sk.putWith(json, nav_position_longitude , previousLon, "output");
 					}
 	
 					if (evt.getSentence() instanceof HeadingSentence) {
@@ -263,14 +263,14 @@ public class NMEAProcessor extends SignalkProcessor implements Processor {
 							if (sen.isTrue()) {
 								try {
 									
-									sk.putWith(json, nav_courseOverGroundTrue , sen.getHeading(), "nmea");
+									sk.putWith(json, nav_courseOverGroundTrue , sen.getHeading(), "output");
 									
 								} catch (Exception e) {
 									logger.error(e.getMessage());
 								}
 							} else {
 								
-								sk.putWith(json, nav_courseOverGroundMagnetic , sen.getHeading(), "nmea");
+								sk.putWith(json, nav_courseOverGroundMagnetic , sen.getHeading(), "output");
 							}
 						}
 					}
@@ -279,20 +279,20 @@ public class NMEAProcessor extends SignalkProcessor implements Processor {
 						RMCSentence sen = (RMCSentence) evt.getSentence();
 						Util.checkTime(sen);
 						previousSpeed = Util.movingAverage(ALPHA, previousSpeed, Util.kntToMs(sen.getSpeed()));
-						sk.putWith(json, nav_speedOverGround , Util.kntToMs(sen.getSpeed()), "nmea");
+						sk.putWith(json, nav_speedOverGround , Util.kntToMs(sen.getSpeed()), "output");
 					}
 					if (evt.getSentence() instanceof VHWSentence) {
 						VHWSentence sen = (VHWSentence) evt.getSentence();
 						//VHW sentence types have both, but true can be empty
 						try {
-							sk.putWith(json, nav_courseOverGroundMagnetic , sen.getMagneticHeading(), "nmea");
-							sk.putWith(json, nav_courseOverGroundTrue , sen.getHeading(), "nmea");
+							sk.putWith(json, nav_courseOverGroundMagnetic , sen.getMagneticHeading(), "output");
+							sk.putWith(json, nav_courseOverGroundTrue , sen.getHeading(), "output");
 							
 						} catch (DataNotAvailableException e) {
 							logger.error(e.getMessage());
 						}
 						previousSpeed = Util.movingAverage(ALPHA, previousSpeed, Util.kntToMs(sen.getSpeedKnots()));
-						sk.putWith(json, nav_speedOverGround , previousSpeed, "nmea");
+						sk.putWith(json, nav_speedOverGround , previousSpeed, "output");
 						
 					}
 	
@@ -304,8 +304,8 @@ public class NMEAProcessor extends SignalkProcessor implements Processor {
 						//TODO: check relative to bow or compass + sen.getSpeedUnit()
 						// relative to bow
 						double angle = sen.getAngle();
-						sk.putWith(json, env_wind_angleApparent , angle, "nmea");
-						sk.putWith(json, env_wind_speedApparent , Util.kntToMs(sen.getSpeed()), "nmea");
+						sk.putWith(json, env_wind_angleApparent , angle, "output");
+						sk.putWith(json, env_wind_speedApparent , Util.kntToMs(sen.getSpeed()), "output");
 						
 					}
 					// Cruzpro BVE sentence
@@ -313,30 +313,30 @@ public class NMEAProcessor extends SignalkProcessor implements Processor {
 					if (evt.getSentence() instanceof BVESentence) {
 						BVESentence sen = (BVESentence) evt.getSentence();
 						if (sen.isFuelGuage()) {
-							sk.putWith(json, tanks_id_level , sen.getFuelRemaining(), "nmea");
-							sk.putWith(json, propulsion_id_fuelUsageRate , sen.getFuelUseRateUnitsPerHour(), "nmea");
+							sk.putWith(json, tanks_id_level , sen.getFuelRemaining(), "output");
+							sk.putWith(json, propulsion_id_fuelUsageRate , sen.getFuelUseRateUnitsPerHour(), "output");
 							
 							// map.put(Constants.FUEL_USED, sen.getFuelUsedOnTrip());
-							// sk.putWith(tempSelfNode, JsonConstants.tank_level, sen.getFuelRemaining(), "nmea");
+							// sk.putWith(tempSelfNode, JsonConstants.tank_level, sen.getFuelRemaining(), "output");
 						}
 						if (sen.isEngineRpm()) {
-							sk.putWith(json, propulsion_id_rpm , sen.getEngineRpm(), "nmea");
+							sk.putWith(json, propulsion_id_rpm , sen.getEngineRpm(), "output");
 							// map.put(Constants.ENGINE_HOURS, sen.getEngineHours());
-							//sk.putWith(tempSelfNode, JsonConstants.propulsion_hours, sen.getEngineHours(), "nmea");
+							//sk.putWith(tempSelfNode, JsonConstants.propulsion_hours, sen.getEngineHours(), "output");
 							// map.put(Constants.ENGINE_MINUTES, sen.getEngineMinutes());
-							//sk.putWith(tempSelfNode, JsonConstants.propulsion_minutes, sen.getEngineMinutes(), "nmea");
+							//sk.putWith(tempSelfNode, JsonConstants.propulsion_minutes, sen.getEngineMinutes(), "output");
 	
 						}
 						if (sen.isTempGuage()) {
-							sk.putWith(json, propulsion_id_engineTemperature , sen.getEngineTemp(), "nmea");
+							sk.putWith(json, propulsion_id_engineTemperature , sen.getEngineTemp(), "output");
 							// map.put(Constants.ENGINE_VOLTS, sen.getVoltage());
-							//sk.putWith(tempSelfNode, JsonConstants.propulsion_engineVolts, sen.getVoltage(), "nmea");
+							//sk.putWith(tempSelfNode, JsonConstants.propulsion_engineVolts, sen.getVoltage(), "output");
 							// map.put(Constants.ENGINE_TEMP_HIGH_ALARM, sen.getHighTempAlarmValue());
 							// map.put(Constants.ENGINE_TEMP_LOW_ALARM, sen.getLowTempAlarmValue());
 	
 						}
 						if (sen.isPressureGuage()) {
-							sk.putWith(json, propulsion_id_oilPressure , sen.getPressure(), "nmea");
+							sk.putWith(json, propulsion_id_oilPressure , sen.getPressure(), "output");
 							// map.put(Constants.ENGINE_PRESSURE_HIGH_ALARM, sen.getHighPressureAlarmValue());
 							// map.put(Constants.ENGINE_PRESSURE_LOW_ALARM, sen.getLowPressureAlarmValue());
 	
@@ -346,7 +346,7 @@ public class NMEAProcessor extends SignalkProcessor implements Processor {
 					if (evt.getSentence() instanceof DepthSentence) {
 						DepthSentence sen = (DepthSentence) evt.getSentence();
 						// in meters
-						sk.putWith(json, env_depth_belowTransducer , sen.getDepth(), "nmea");
+						sk.putWith(json, env_depth_belowTransducer , sen.getDepth(), "output");
 						
 					}
 				}catch (DataNotAvailableException e){

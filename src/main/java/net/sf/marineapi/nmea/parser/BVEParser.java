@@ -129,7 +129,7 @@ public class BVEParser extends SentenceParser implements BVESentence {
 	/**
 	 * Constructor.
 	 * 
-	 * @param nmea
+	 * @param output
 	 *            BVE sentence string
 	 */
 	public BVEParser(String nmea) {

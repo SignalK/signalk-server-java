@@ -51,7 +51,7 @@ public class UtilTest {
 		Json root = (Json) SignalKModelFactory.getCleanInstance();
 		//Json position = signalkModel.addNode(root, VESSELS+"."+SELF+"."+nav_anchor_position_latitude);
 		//System.out.println(position);
-		System.out.println(signalkModel.putWith(root,VESSELS+"."+SELF+"."+nav_anchor_position_latitude, 23.07d, "nmea"));
+		System.out.println(signalkModel.putWith(root,VESSELS+"."+SELF+"."+nav_anchor_position_latitude, 23.07d, "output"));
 		System.out.println(root);
 		assertEquals(signalkModel.findValue(root,VESSELS+"."+SELF+"."+nav_anchor_position_latitude).asDouble(), 023.07d, 0.0002);
 	}

@@ -28,6 +28,7 @@ import static org.junit.Assert.*;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;
 
 import java.util.List;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -63,13 +64,14 @@ public class JsonSubscribeProcessorTest {
 	@Test
 	public void shouldSubscribeWithSessionId() throws Exception {
 		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
-		manager.removeSessionId("sessionId1");
+		String wsSession = UUID.randomUUID().toString();
+		manager.removeSessionId(wsSession);
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
-		subscribe.handle(getJson("vessels." + SELF,"navigation", 1000,0,FORMAT_DELTA, POLICY_FIXED), "sessionId1");
-		List<Subscription> subs = manager.getSubscriptions("sessionId1");
+		subscribe.handle(getJson("vessels." + SELF,"navigation", 1000,0,FORMAT_DELTA, POLICY_FIXED), wsSession);
+		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(1, subs.size());
 		Subscription s = subs.get(0);
-		assertEquals("Subscription [wsSession=sessionId1, path=vessels." + SELF + ".navigation, period=1000, active=true]", s.toString());
+		assertEquals("Subscription [wsSession="+wsSession+", path=vessels." + SELF + ".navigation, period=1000, active=true]", s.toString());
 	}
 
 	/**
@@ -119,42 +121,45 @@ public class JsonSubscribeProcessorTest {
 	@Test
 	public void shouldRemoveSubsWithSessionId() throws Exception {
 		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
-		manager.removeSessionId("sessionId2");
+		String wsSession = UUID.randomUUID().toString();
+		manager.removeSessionId(wsSession);
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
-		subscribe.handle(getJson("vessels." + SELF,"navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED),"sessionId2");
-		List<Subscription> subs = manager.getSubscriptions("sessionId2");
+		subscribe.handle(getJson("vessels." + SELF,"navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED),wsSession);
+		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(1, subs.size());
 		Subscription s = subs.get(0);
-		assertEquals("Subscription [wsSession=sessionId2, path=vessels." + SELF + ".navigation, period=500, active=true]", s.toString());
-		manager.removeSessionId("sessionId2");
-		subs = manager.getSubscriptions("sessionId2");
+		assertEquals("Subscription [wsSession="+wsSession+", path=vessels." + SELF + ".navigation, period=500, active=true]", s.toString());
+		manager.removeSessionId(wsSession);
+		subs = manager.getSubscriptions(wsSession);
 		assertEquals(0, subs.size());
 	}
 
 	@Test
 	public void shouldSubscribeWithPeriod() throws Exception {
 		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
-		manager.removeSessionId("sessionId3");
+		String wsSession = UUID.randomUUID().toString();
+		manager.removeSessionId(wsSession);
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
-		subscribe.handle(getJson("vessels." + SELF,"navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED),"sessionId3");
-		List<Subscription> subs = manager.getSubscriptions("sessionId3");
+		subscribe.handle(getJson("vessels." + SELF,"navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED),wsSession);
+		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(1, subs.size());
 		Subscription s = subs.get(0);
-		assertEquals("Subscription [wsSession=sessionId3, path=vessels." + SELF + ".navigation, period=500, active=true]", s.toString());
+		assertEquals("Subscription [wsSession="+wsSession+", path=vessels." + SELF + ".navigation, period=500, active=true]", s.toString());
 	}
 
 	@Test
 	public void shouldUnSubscribe() throws Exception {
 		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
-		manager.removeSessionId("wsSession4");
+		String wsSession = UUID.randomUUID().toString();
+		manager.removeSessionId(wsSession);
 		// now add webSocket
-		manager.add("wsSession4", "wsSession4");
+		manager.add(wsSession, wsSession);
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
-		subscribe.handle(getJson("vessels." + SELF,"navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED),"wsSession4");
-		List<Subscription> subs = manager.getSubscriptions("wsSession4");
+		subscribe.handle(getJson("vessels." + SELF,"navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED),wsSession);
+		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(1, subs.size());
 		Subscription s = subs.get(0);
-		assertEquals("Subscription [wsSession=wsSession4, path=vessels." + SELF + ".navigation, period=500, active=true]", s.toString());
+		assertEquals("Subscription [wsSession="+wsSession+", path=vessels." + SELF + ".navigation, period=500, active=true]", s.toString());
 		// see if its created a route
 		RouteManager routeManager = RouteManagerFactory.getInstance(null);
 		for (RouteDefinition route : routeManager.getRouteCollection().getRoutes()) {
@@ -162,22 +167,65 @@ public class JsonSubscribeProcessorTest {
 			// assertEquals("sub_wsSession4_/vessels/motu/navigation", route.getId());
 		}
 		manager.removeSubscription(s);
-		subs = manager.getSubscriptions("wsSession4");
+		subs = manager.getSubscriptions(wsSession);
 		assertEquals(0, subs.size());
 		// assertEquals(0,routeManager.getRouteCollection().getRoutes().size());
 	}
 
 	@Test
+	public void shouldCreateOneRoute() throws Exception {
+		
+		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
+		RouteManager routeManager = RouteManagerFactory.getInstance(null);
+		String wsSession = UUID.randomUUID().toString();
+		manager.removeSessionId(wsSession);
+		int routes = routeManager.getRouteCollection().getRoutes().size();
+		// now add webSocket
+		manager.add(wsSession, wsSession);
+		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
+		subscribe.handle(getJson("vessels." + SELF,"navigation", 500,0,FORMAT_DELTA, POLICY_FIXED), wsSession);
+		subscribe.handle(getJson("vessels." + SELF,"environment", 500, 0,FORMAT_DELTA, POLICY_FIXED),wsSession);
+		List<Subscription> subs = manager.getSubscriptions(wsSession);
+		assertEquals(2, subs.size());
+		// see if its created a route
+		
+		assertEquals(routes+1, routeManager.getRouteCollection().getRoutes().size());
+		manager.removeWsSession(wsSession);
+	}
+	
+	@Test
+	public void shouldCreateTwoRoutes() throws Exception {
+		
+		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
+		RouteManager routeManager = RouteManagerFactory.getInstance(null);
+		String wsSession = UUID.randomUUID().toString();
+		manager.removeSessionId(wsSession);
+		int routes = routeManager.getRouteCollection().getRoutes().size();
+		// now add webSocket
+		manager.add(wsSession, wsSession);
+		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
+		subscribe.handle(getJson("vessels." + SELF,"navigation", 500,0,FORMAT_DELTA, POLICY_FIXED), wsSession);
+		subscribe.handle(getJson("vessels." + SELF,"environment", 1500, 0,FORMAT_DELTA, POLICY_FIXED),wsSession);
+		List<Subscription> subs = manager.getSubscriptions(wsSession);
+		assertEquals(2, subs.size());
+		// see if its created a route
+		
+		assertEquals(routes+2, routeManager.getRouteCollection().getRoutes().size());
+		manager.removeWsSession(wsSession);
+	}
+	
+	@Test
 	public void shouldUnSubscribeOne() throws Exception {
 		
 		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
-		manager.removeSessionId("wsSession5");
+		String wsSession = UUID.randomUUID().toString();
+		manager.removeSessionId(wsSession);
 		// now add webSocket
-		manager.add("wsSession5", "wsSession5");
+		manager.add(wsSession, wsSession);
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
-		subscribe.handle(getJson("vessels." + SELF,"navigation", 500,0,FORMAT_DELTA, POLICY_FIXED), "wsSession5");
-		subscribe.handle(getJson("vessels." + SELF,"environment", 500, 0,FORMAT_DELTA, POLICY_FIXED),"wsSession5");
-		List<Subscription> subs = manager.getSubscriptions("wsSession5");
+		subscribe.handle(getJson("vessels." + SELF,"navigation", 500,0,FORMAT_DELTA, POLICY_FIXED), wsSession);
+		subscribe.handle(getJson("vessels." + SELF,"environment", 1500, 0,FORMAT_DELTA, POLICY_FIXED),wsSession);
+		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(2, subs.size());
 		// see if its created a route
 		RouteManager routeManager = RouteManagerFactory.getInstance(null);
@@ -189,7 +237,7 @@ public class JsonSubscribeProcessorTest {
 			// assertEquals("subscribe:wsSession5:vessels/motu/navigation", route.getId());
 		}
 		manager.removeSubscription(s);
-		subs = manager.getSubscriptions("wsSession5");
+		subs = manager.getSubscriptions(wsSession);
 		assertEquals(1, subs.size());
 		// assertEquals(1,routeManager.getRouteCollection().getRoutes().size());
 	}
@@ -198,15 +246,15 @@ public class JsonSubscribeProcessorTest {
 	public void shouldUnSubscribeAllByWsSession() throws Exception {
 		RouteManager routeManager = RouteManagerFactory.getInstance(null);
 		int routes = routeManager.getRouteCollection().getRoutes().size();
-
+		String wsSession = UUID.randomUUID().toString();
 		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
-		manager.removeSessionId("wsSession6");
+		manager.removeSessionId(wsSession);
 		// now add webSocket
-		manager.add("wsSession6", "wsSession6");
+		manager.add(wsSession, wsSession);
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
-		subscribe.handle(getJson("vessels." + SELF,"navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED),"wsSession6");
-		subscribe.handle(getJson("vessels." + SELF, "environment", 500, 0,FORMAT_DELTA, POLICY_FIXED),"wsSession6");
-		List<Subscription> subs = manager.getSubscriptions("wsSession6");
+		subscribe.handle(getJson("vessels." + SELF,"navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED),wsSession);
+		subscribe.handle(getJson("vessels." + SELF, "environment", 1000, 0,FORMAT_DELTA, POLICY_FIXED),wsSession);
+		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(2, subs.size());
 		// see if its created a route
 
@@ -216,8 +264,8 @@ public class JsonSubscribeProcessorTest {
 			logger.debug("Checking route " + route.getId());
 			// assertEquals("subscribe:wsSession6:vessels/motu/navigation", route.getId());
 		}
-		manager.removeWsSession("wsSession6");
-		subs = manager.getSubscriptions("wsSession6");
+		manager.removeWsSession(wsSession);
+		subs = manager.getSubscriptions(wsSession);
 		assertEquals(0, subs.size());
 		// assertEquals(routes,routeManager.getRouteCollection().getRoutes().size());
 	}
@@ -226,25 +274,25 @@ public class JsonSubscribeProcessorTest {
 	public void shouldUnSubscribeAllBySessionId() throws Exception {
 		RouteManager routeManager = RouteManagerFactory.getInstance(null);
 		int routes = routeManager.getRouteCollection().getRoutes().size();
-
+		String wsSession = UUID.randomUUID().toString();
 		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
-		manager.removeSessionId("wsSession7");
+		manager.removeSessionId(wsSession);
 		// now add webSocket
-		manager.add("wsSession7", "wsSession7");
+		manager.add(wsSession, wsSession);
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
-		subscribe.handle(getJson("vessels." + SELF,"navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED),"wsSession7");
-		subscribe.handle(getJson("vessels." + SELF,"environment", 500, 0,FORMAT_DELTA, POLICY_FIXED),"wsSession7");
-		List<Subscription> subs = manager.getSubscriptions("wsSession7");
+		subscribe.handle(getJson("vessels." + SELF,"navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED),wsSession);
+		subscribe.handle(getJson("vessels." + SELF,"environment", 500, 0,FORMAT_DELTA, POLICY_FIXED),wsSession);
+		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(2, subs.size());
 		// see if its created a route
-		assertEquals(routes + 2, routeManager.getRouteCollection().getRoutes().size());
+		assertEquals(routes + 1, routeManager.getRouteCollection().getRoutes().size());
 
 		for (RouteDefinition route : routeManager.getRouteCollection().getRoutes()) {
 			logger.debug("Checking route " + route.getId());
 			// assertEquals("subscribe:wsSession7:vessels/motu/navigation", route.getId());
 		}
-		manager.removeSessionId("wsSession7");
-		subs = manager.getSubscriptions("wsSession7");
+		manager.removeSessionId(wsSession);
+		subs = manager.getSubscriptions(wsSession);
 		assertEquals(0, subs.size());
 
 		// assertEquals(routes,routeManager.getRouteCollection().getRoutes().size());
@@ -254,15 +302,16 @@ public class JsonSubscribeProcessorTest {
 	@Ignore
 	public void shouldFailOnBadPath1() throws Exception {
 		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
-		manager.removeSessionId("sessionIdx");
+		String wsSession = UUID.randomUUID().toString();
+		manager.removeSessionId(wsSession);
 		// now add webSocket
-		manager.add("sessionIdx", "sessionIdx");
+		manager.add(wsSession, wsSession);
 		
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
 		Json sub = getJson("vess." + SELF,"navigation",1000,0,FORMAT_DELTA, POLICY_FIXED);
-		Json json = subscribe.handle(sub, "sessionIdx");
+		Json json = subscribe.handle(sub, wsSession);
 		assertEquals(sub, json);
-		List<Subscription> subs = manager.getSubscriptions("sessionIdx");
+		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(0, subs.size());
 	}
 

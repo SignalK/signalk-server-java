@@ -56,7 +56,7 @@ public class SignalkProcessor {
 	
 	public SignalkProcessor(){
 		nmeaproducer= new DefaultProducerTemplate(CamelContextFactory.getInstance());
-		nmeaproducer.setDefaultEndpointUri(RouteManager.SEDA_COMMON_OUT );
+		nmeaproducer.setDefaultEndpointUri(RouteManager.SEDA_NMEA );
 		try {
 			nmeaproducer.start();
 		} catch (Exception e) {
@@ -68,7 +68,7 @@ public class SignalkProcessor {
 	/**
 	 * If a processor generates an NMEA string, then this method is a convenient way to send it to the NMEA stream
 	 * 
-	 * @param nmea
+	 * @param output
 	 */
 	public void sendNmea(String nmea){
 		nmeaproducer.sendBodyAndHeader(nmea, WebsocketConstants.CONNECTION_KEY, WebsocketConstants.SEND_TO_ALL);

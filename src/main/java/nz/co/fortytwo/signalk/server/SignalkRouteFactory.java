@@ -195,6 +195,7 @@ public class SignalkRouteFactory {
 				.to(RouteManager.SEDA_COMMON_OUT)
 			.end();
 		route.setId(getRouteId(sub));
+		sub.setRouteId(getRouteId(sub));
 		((DefaultCamelContext)CamelContextFactory.getInstance()).addRouteDefinition(route);
 		((DefaultCamelContext)CamelContextFactory.getInstance()).startRoute(route.getId());
 		//routeBuilder.getContext().startAllRoutes();

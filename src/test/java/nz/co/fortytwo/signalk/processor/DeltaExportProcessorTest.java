@@ -26,6 +26,8 @@ import static org.junit.Assert.*;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
@@ -116,6 +118,8 @@ public class DeltaExportProcessorTest {
 		testScenario(UUID.randomUUID().toString(), "vessels.*.environment", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 1, 0, 0, event);
 		testScenario(UUID.randomUUID().toString(), "vessels.*", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 2, 0, 0, event);
 		
+		final CountDownLatch latch = new CountDownLatch(1);
+		latch.await(10, TimeUnit.SECONDS);
 	}
 	
 

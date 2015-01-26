@@ -82,7 +82,7 @@ public class CruzproXDRParser extends SentenceParser implements XDRSentence {
 	/**
 	 * Constructor.
 	 * 
-	 * @param nmea
+	 * @param output
 	 *            XDR sentence string
 	 */
 	public CruzproXDRParser(String nmea) {

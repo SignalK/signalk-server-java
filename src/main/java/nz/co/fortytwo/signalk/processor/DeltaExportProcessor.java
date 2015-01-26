@@ -26,11 +26,14 @@ package nz.co.fortytwo.signalk.processor;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import mjson.Json;
+import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.event.JsonEvent;
+import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.server.CamelContextFactory;
 import nz.co.fortytwo.signalk.server.RouteManager;
 import nz.co.fortytwo.signalk.server.Subscription;
@@ -44,6 +47,9 @@ import org.apache.camel.impl.DefaultProducerTemplate;
 import org.apache.log4j.Logger;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import com.google.common.collect.TreeMultimap;
 import com.google.common.eventbus.DeadEvent;
 import com.google.common.eventbus.Subscribe;
 
@@ -77,29 +83,44 @@ public class DeltaExportProcessor extends SignalkProcessor implements Processor{
 	public void process(Exchange exchange) throws Exception {
 		
 		try {
-			logger.info("process delta queue ("+map.size()+") for "+this.hashCode());
+			logger.info("process delta queue ("+map.size()+") for "+exchange.getFromRouteId());
 			//get the accumulated delta nodes.
-			createDelta(signalkModel.atPath(VESSELS));
-			List<Json> deltas = null;
-			synchronized (map) {
-				deltas = ImmutableList.copyOf(map.values());
-				map.clear();
-			}
-			if(deltas.size()>0){
-				//dont send empty updates
-				exchange.getIn().setBody(deltas);
-			}else{
-				exchange.getIn().setBody(null);
-			}
+			exchange.getIn().setBody(createTree(exchange.getFromRouteId()));
+			logger.debug("Body set to :"+exchange.getIn().getBody());
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
 			throw e;
 		}
 	}
+	
 
+	private SignalKModel createTree(String routeId) {
+		//we need the routeId.
+		//Multimap<String,String> vesselList = TreeMultimap.create();
+		SignalKModel temp = SignalKModelFactory.getCleanInstance();
+		for(Subscription sub : manager.getSubscriptions(wsSession)){
+			if(sub==null || !sub.isActive() || !routeId.equals(sub.getRouteId())) continue;
+			for(String p : sub.getSubscribed(null)){
+				Json node = signalkModel.findNode(p);
+				logger.debug("Found node:"+p+" = "+node);
+				if(node!=null){
+					Json n = temp.addNode((Json) temp, node.up().getPath());
+					if(node.isPrimitive()){
+						n.set(node.getParentKey(), node.getValue());
+					}else{
+						logger.debug("Object at end of path! : "+ node);
+					}
+				}
+			}
+		}
+		return temp;
+		
+	}
 	
 	/*
-	 *  {
+	 *  
+<pre>
+{
     "context": "vessels.motu.navigation",
     "updates":[
 	    	{
@@ -129,7 +150,10 @@ public class DeltaExportProcessor extends SignalkProcessor implements Processor{
 	    ]
 	      
 	}
+	</pre>
+	*
 */
+	
 	
 	private void createDelta(Json j) {
 		if(j==null)return;
@@ -171,7 +195,7 @@ public class DeltaExportProcessor extends SignalkProcessor implements Processor{
 			logger.debug("Checking prefix="+s.getPath()+" for:"+path);
 			if(s.isActive()){
 				pathList.addAll(s.getSubscribed(path));
-				logger.debug("Found for:"+s);
+				logger.debug("Found for:"+s + ", pathlist="+pathList.size());
 			}
 		}
 		
@@ -179,23 +203,24 @@ public class DeltaExportProcessor extends SignalkProcessor implements Processor{
 		//load objects
 		
 		for(String p: pathList){
-			Json js = signalkModel.getFromNodeMap(path); 
+			Json js = signalkModel.getFromNodeMap(p); 
+			logger.debug("Found path:"+p +" = "+js);
 			if(js==null)continue;
-			if( js.has(VALUE)){
+			if( js.isObject() && js.has(VALUE)){
 				//path=path.substring(vessel.length()+1);
-				
+				logger.debug("Found with value:"+js);
 				Json entry = Json.object();
 				Json source = Json.object();
-				if(js.has(SOURCE)){
-					source.set(SOURCE, js.at(SOURCE).getValue());
+				if(js.up().has(SOURCE)){
+					source.set(SOURCE, js.up().at(SOURCE).getValue());
 				}
-				if(js.has(TIMESTAMP)){
-					source.set(TIMESTAMP, js.at(TIMESTAMP).getValue());
+				if(js.up().has(TIMESTAMP)){
+					source.set(TIMESTAMP, js.up().at(TIMESTAMP).getValue());
 				}
 				entry.set(SOURCE, source);
 				
 				Json value = Json.object();
-				value.set(PATH,path);
+				value.set(PATH,p.substring(p.indexOf(".",VESSELS.length()+1)+1));
 				value.set(VALUE, js.at(VALUE).getValue());
 				
 				Json values = Json.array();

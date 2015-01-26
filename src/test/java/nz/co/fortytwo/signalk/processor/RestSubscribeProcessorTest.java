@@ -153,7 +153,7 @@ public class RestSubscribeProcessorTest {
 		// now add webSocket
 		manager.add("sess"+wsSession, wsSession);
 		RestSubscribeProcessor subscribe = new RestSubscribeProcessor();
-		subscribe.subscribe(JsonConstants.SIGNALK_SUBSCRIBE + "vessels." + SELF + ".navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED,"sess"+wsSession);
+		subscribe.subscribe(JsonConstants.SIGNALK_SUBSCRIBE + "/vessels/" + SELF + "/navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED,"sess"+wsSession);
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(1, subs.size());
 		Subscription s = subs.get(0);
@@ -173,10 +173,11 @@ public class RestSubscribeProcessorTest {
 	@Test
 	public void shouldUnSubscribeOne() throws Exception {
 		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
+		RouteManager routeManager = RouteManagerFactory.getInstance(null);
 		String wsSession = UUID.randomUUID().toString();
 		
 		manager.removeSessionId("sess"+wsSession);
-		
+		int routes = routeManager.getRouteCollection().getRoutes().size();
 		// now add webSocket
 		manager.add("sess"+wsSession, wsSession);
 		RestSubscribeProcessor subscribe = new RestSubscribeProcessor();
@@ -185,8 +186,8 @@ public class RestSubscribeProcessorTest {
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(2, subs.size());
 		// see if its created a route
-		RouteManager routeManager = RouteManagerFactory.getInstance(null);
-		assertEquals(2, routeManager.getRouteCollection().getRoutes().size());
+		
+		assertEquals(routes+1, routeManager.getRouteCollection().getRoutes().size());
 		Subscription s = subs.get(0);
 
 		for (RouteDefinition route : routeManager.getRouteCollection().getRoutes()) {
@@ -210,7 +211,7 @@ public class RestSubscribeProcessorTest {
 		manager.add("sess"+wsSession, wsSession);
 		RestSubscribeProcessor subscribe = new RestSubscribeProcessor();
 		subscribe.subscribe(JsonConstants.SIGNALK_SUBSCRIBE + "/vessels/" + SELF + "/navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED,"sess"+wsSession);
-		subscribe.subscribe(JsonConstants.SIGNALK_SUBSCRIBE + "/vessels/" + SELF + "/environment", 500, 0,FORMAT_DELTA, POLICY_FIXED,"sess"+wsSession);
+		subscribe.subscribe(JsonConstants.SIGNALK_SUBSCRIBE + "/vessels/" + SELF + "/environment", 1500, 0,FORMAT_DELTA, POLICY_FIXED,"sess"+wsSession);
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(2, subs.size());
 		// see if its created a route
@@ -242,7 +243,7 @@ public class RestSubscribeProcessorTest {
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(2, subs.size());
 		// see if its created a route
-		assertEquals(routes + 2, routeManager.getRouteCollection().getRoutes().size());
+		assertEquals(routes + 1, routeManager.getRouteCollection().getRoutes().size());
 
 		for (RouteDefinition route : routeManager.getRouteCollection().getRoutes()) {
 			logger.debug("Checking route " + route.getId());

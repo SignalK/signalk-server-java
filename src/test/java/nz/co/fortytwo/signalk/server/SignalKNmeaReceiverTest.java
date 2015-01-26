@@ -29,139 +29,138 @@ import static nz.co.fortytwo.signalk.server.util.JsonConstants.env_wind_speedApp
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.env_wind_speedTrue;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.nav_magneticVariation;
 import static nz.co.fortytwo.signalk.server.util.JsonConstants.nav_position_latitude;
-import static org.junit.Assert.*;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import nz.co.fortytwo.signalk.model.SignalKModel;
-import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
 import nz.co.fortytwo.signalk.processor.WindProcessor;
-import nz.co.fortytwo.signalk.server.util.Util;
 
-import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.impl.DefaultProducerTemplate;
-import org.apache.camel.test.junit4.CamelTestSupport;
 import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 
-public class SignalKReceiverTest extends CamelTestSupport {
+public class SignalKNmeaReceiverTest extends SignalKCamelTestSupport {
  
-    private static final String DIRECT_INPUT = "seda:input";
-	private static Logger logger = Logger.getLogger(SignalKReceiverTest.class);
-	private SignalKModel signalkModel=null;
+    static final String DIRECT_INPUT = "seda:input";
+	static Logger logger = Logger.getLogger(SignalKNmeaReceiverTest.class);
+	DeclinationProcessor declinationProcessor=null;
 
-
-	private DeclinationProcessor declinationProcessor=null;
-
-	private WindProcessor windProcessor = null;
+	WindProcessor windProcessor = null;
 	//private GPXProcessor gpxProcessor;
 
-	private MockEndpoint nmea = null;
-	final CountDownLatch latch = new CountDownLatch(1);
-	@Produce(uri = RouteManager.SEDA_INPUT)
+	MockEndpoint nmea = null;
+	//@Produce(uri = RouteManager.SEDA_INPUT)
     protected ProducerTemplate template;
 	
 	@Before
-	public void setUp() throws Exception {
+	public void before() throws Exception {
+
 		
+	}
+	
+	public void init() throws Exception{
 		
+		declinationProcessor=new DeclinationProcessor();
+		windProcessor = new WindProcessor();
+		template= new DefaultProducerTemplate(routeManager.getContext());
+		template.setDefaultEndpointUri(DIRECT_INPUT);
+		template.start();
 	}
 
 	@Test
     public void shouldProcessMessage() throws Exception {
+		init();
         assertNotNull(template);
+         nmea.reset();
+         nmea.expectedMessageCount(1);
          template.sendBody(DIRECT_INPUT,"$GPRMC,144629.20,A,5156.91111,N,00434.80385,E,0.295,,011113,,,A*78");
-		 logger.debug(signalkModel);
+         latch.await(2,TimeUnit.SECONDS);
+		 logger.debug("SignalKModel:"+signalkModel);
 		 assertEquals(51.9485185d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF), nav_position_latitude).asDouble(),0.00001);
 		 logger.debug("Lat :"+signalkModel.findValue(signalkModel.atPath(VESSELS,SELF), nav_position_latitude));
- 
+		 nmea.assertIsSatisfied();
       
     }
 	
 	@Test
     public void shouldProcessAisMessage() throws Exception {
+		init();
         assertNotNull(template);
+        nmea.reset();
+        nmea.expectedMessageCount(1);
         template.sendBody(DIRECT_INPUT,"!AIVDM,1,1,,B,15MwkRUOidG?GElEa<iQk1JV06Jd,0*6D");
-        
-		 logger.debug(signalkModel);
+        latch.await(2,TimeUnit.SECONDS);
+		 logger.debug("SignalKModel:"+signalkModel);
 		 assertNotNull(signalkModel.atPath(VESSELS,"366998410"));
 		 assertEquals(37.8251d,signalkModel.findValue(signalkModel.atPath(VESSELS,"366998410"), nav_position_latitude).asDouble(),0.001);
 		 logger.debug("Lat :"+signalkModel.findValue(signalkModel.atPath(VESSELS,SELF), nav_position_latitude));
+		 nmea.assertIsSatisfied();
     }
 	@Test
     public void shouldProcessTwoMessages() throws Exception {
+		init();
         assertNotNull(template);
+        nmea.reset();
+        nmea.expectedMessageCount(1);
         String jStr = "{\"vessels\":{\""+SELF+"\":{\"environment\":{\"wind\":{\"angleApparent\":{\"value\":90.0000000000},\"directionTrue\":{\"value\":0.0000000000},\"speedApparent\":{\"value\":20.0000000000},\"speedTrue\":{\"value\":0.0000000000}}}}}}";
         template.sendBody(DIRECT_INPUT,"$GPRMC,144629.20,A,5156.91111,N,00434.80385,E,0.295,,011113,,,A*78");
         template.sendBody(DIRECT_INPUT,jStr);
-        
-		 logger.debug(signalkModel);
+        latch.await(2,TimeUnit.SECONDS);
+		 logger.debug("SignalKModel:"+signalkModel);
 		
 		 assertEquals(51.9485185d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF), nav_position_latitude).asDouble(),0.00001);
 		 assertEquals(20.0d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF),env_wind_speedApparent ).asDouble(),0.00001);
-      
+		 nmea.assertIsSatisfied();
     }
 	
 	@Test
     public void shouldProcessWindTrue() throws Exception {
+		init();
         assertNotNull(template);
+        nmea.reset();
+        nmea.expectedMessageCount(1);
         String jStr = "{\"vessels\":{\""+SELF+"\":{\"environment\":{\"wind\":{\"angleApparent\":{\"value\":90.0000000000},\"directionTrue\":{\"value\":0.0000000000},\"speedApparent\":{\"value\":20.0000000000},\"speedTrue\":{\"value\":0.0000000000}}}}}}";
         template.sendBody(DIRECT_INPUT,"$GPRMC,144629.20,A,5156.91111,N,00434.80385,E,0.295,,011113,,,A*78");
         template.sendBody(DIRECT_INPUT,jStr);
-        
-		 logger.debug(signalkModel);
+        latch.await(2,TimeUnit.SECONDS);
+		 logger.debug("SignalKModel:"+signalkModel);
 		
 		 assertEquals(51.9485185d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF), nav_position_latitude).asDouble(),0.00001);
 		 assertEquals(20.0d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF),env_wind_speedApparent ).asDouble(),0.00001);
 		 windProcessor.handle();
 		 assertEquals(20.0d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF),env_wind_speedTrue ).asDouble(),0.00001);
-      
+		 nmea.assertIsSatisfied();
     }
 	
 	@Test
     public void shouldProcessDeclination() throws Exception {
+		init();
         assertNotNull(template);
+        nmea.reset();
+        nmea.expectedMessageCount(1);
         String jStr = "{\"vessels\":{\""+SELF+"\":{\"environment\":{\"wind\":{\"angleApparent\":{\"value\":90.0000000000},\"directionTrue\":{\"value\":0.0000000000},\"speedApparent\":{\"value\":20.0000000000},\"speedTrue\":{\"value\":0.0000000000}}}}}}";
         template.sendBody(DIRECT_INPUT,"$GPRMC,144629.20,A,5156.91111,N,00434.80385,E,0.295,,011113,,,A*78");
         template.sendBody(DIRECT_INPUT,jStr);
-        
-		 logger.debug(signalkModel);
+        latch.await(2,TimeUnit.SECONDS);
+		 logger.debug("SignalKModel:"+signalkModel);
 		
 		 //assertEquals(51.9485185d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF), nav_magneticVariation).asDouble(),0.00001);
 		// assertEquals(20.0d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF),env_wind_speedApparent ).asDouble(),0.00001);
 		 declinationProcessor.handle();
 		 assertEquals(0.5d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF),nav_magneticVariation ).asDouble(),0.00001);
-      
+		 nmea.assertIsSatisfied();
     }
-	
-	@Override
-	 protected RouteBuilder createRouteBuilder() {
-	        try {
-				RouteManagerFactory.getInstance(Util.getConfig(null));
-				nmea = (MockEndpoint) RouteManagerFactory.getInstance(null).getContext().getEndpoint("mock:nmea");
-				SignalkRouteFactory.configureInputRoute(RouteManagerFactory.getInstance(null), DIRECT_INPUT);
-				RouteManagerFactory.getInstance(null).from(RouteManager.SEDA_COMMON_OUT).to(nmea);
-				signalkModel=SignalKModelFactory.getInstance();
-				declinationProcessor=new DeclinationProcessor();
-				windProcessor = new WindProcessor();
-				template= new DefaultProducerTemplate(CamelContextFactory.getInstance());
-				template.setDefaultEndpointUri(DIRECT_INPUT);
 
-				template.start();
-				return RouteManagerFactory.getInstance(Util.getConfig(null));
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} 
-	        return null;
-	    }
+	@Override
+	public void configureRouteBuilder(RouteBuilder routeBuilder) {
+		nmea = (MockEndpoint) routeBuilder.getContext().getEndpoint("mock:output");
+		SignalkRouteFactory.configureInputRoute(routeBuilder, DIRECT_INPUT);
+		routeBuilder.from(RouteManager.SEDA_NMEA).to(nmea);
+		
+	}
 
 }

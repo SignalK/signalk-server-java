@@ -96,17 +96,20 @@ public class N2KProcessor extends SignalkProcessor implements Processor{
 	 
 	//@Override
 	public Json  handle(String n2kmsg) {
-		//avoid full signalk syntax
+		//get the pgn value
 		String pgn = JsonPath.read(n2kmsg,"$.pgn");
 		logger.debug("processing n2k pgn "+pgn );
-		if(mappings.has(PGN)){
-			//process it
-			
-			//go to context
+		if(mappings.has(pgn)){
+			//process it, mappings is n2kMapping.json as a json object
 			Json mapping = mappings.at(pgn);
-			if( mapping==null)return null;			
+			if( mapping==null)return null;	
+			
+			//make a dummy signalk object
 			SignalKModel temp =  SignalKModelFactory.getCleanInstance();
+			//mapping contains an array
 			for(Json map : mapping.asJsonList()){
+				//TODO: precompile the mappings for performance, precompile the msg to json Document
+				//TODO: changes to n2k formatted output mean we will get back string, int,long,float, double here
 				String var = JsonPath.read(n2kmsg, map.at(FILTER).asString()+"."+map.at(SOURCE).asString());
 				Object obj = resolve(var);
 				String node = map.at(NODE).asString();

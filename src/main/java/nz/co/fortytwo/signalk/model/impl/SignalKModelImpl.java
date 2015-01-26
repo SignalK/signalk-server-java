@@ -36,6 +36,7 @@ import mjson.Json.ObjectJson;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.event.JsonEvent;
 import nz.co.fortytwo.signalk.model.event.JsonEvent.EventType;
+import nz.co.fortytwo.signalk.model.event.PathEvent;
 
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
@@ -43,6 +44,7 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.eventbus.EventBus;
 
 public class SignalKModelImpl extends ObjectJson implements SignalKModel{
@@ -103,10 +105,10 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 				if (mainNode.isObject()) {
 					// Overwrite field
 					Json value = updateNode.at(fieldName);
-					//logger.debug(fieldName + "=" + value);
+					logger.debug(fieldName + "=" + value);
 					mainNode.set(fieldName, value);
-					addToNodeMap(mainNode);
-					eventBus.post(new JsonEvent(mainNode.up(), EventType.EDIT));
+					addToNodeMap(value);
+					eventBus.post(new JsonEvent(mainNode, EventType.EDIT));
 					logger.debug(fieldName + "=" + value);
 				}
 			}
@@ -156,7 +158,7 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 		String[] paths = fullPath.split("\\.");
 		//Json endNode = null;
 		for(String path : paths){
-			logger.debug("findValue:"+path);
+			logger.debug("findNode:"+path);
 			node = node.at(path);
 			if(node==null)return null;
 		}
@@ -369,7 +371,9 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 		Json lastNode=node;
 		for(String path : paths){
 			logger.debug("findValue:"+path);
-			node = node.at(path);
+			//if(node.isObject()){
+				node = node.at(path);
+			//}
 			if(node==null){
 				node = lastNode.set(path,Json.object());
 				node = node.at(path);
@@ -431,9 +435,12 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 		//recursively add to nodeMap
 		if(node==null)return;
 		nodeMap.put(node.getPath(), node);
+		eventBus.post(new PathEvent(node.getPath(), PathEvent.EventType.ADD));
+		logger.debug("Add to nodeMap:"+node.getPath());
 		if(!node.isObject())return;
-		for(Json n : node.asJsonMap().values()){
-			addToNodeMap(n);
+		List<String> keys = ImmutableList.copyOf(node.asJsonMap().keySet());
+		for(String key : keys){
+			addToNodeMap(node.at(key));
 		}
 	}
 

@@ -23,24 +23,28 @@
  */
 package nz.co.fortytwo.signalk.model.event;
 
-import mjson.Json;
 
-public class JsonEvent {
-	public enum EventType  { ADD, EDIT,DEL, CREATE};
-	private Json json;
+public class PathEvent {
+	public enum EventType  { ADD, DEL};
+	private String path;
 	private EventType type;
 
-	public JsonEvent(Json json, EventType type) {
-		this.json = json;
+	public PathEvent(String path, EventType type) {
+		this.path=path;
 		this.type=type;
 	}
 
-	public Json getJson() {
-		return json;
-	}
+	
 
 	public EventType getType() {
 		return type;
 	}
+
+
+
+	public String getPath() {
+		return path;
+	}
+
 
 }
