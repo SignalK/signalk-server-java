@@ -36,7 +36,7 @@ import nz.co.fortytwo.signalk.model.event.JsonEvent.EventType;
 import nz.co.fortytwo.signalk.model.event.PathEvent;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelImpl;
-import nz.co.fortytwo.signalk.processor.DeltaExportProcessor;
+import nz.co.fortytwo.signalk.processor.FullExportProcessor;
 import nz.co.fortytwo.signalk.server.CamelContextFactory;
 import nz.co.fortytwo.signalk.server.NettyServer;
 import nz.co.fortytwo.signalk.server.RouteManager;
@@ -70,8 +70,8 @@ import org.junit.Test;
 
 import com.google.common.eventbus.EventBus;
 
-public class DeltaExportProcessorTest {
-	private static Logger logger = Logger.getLogger(DeltaExportProcessorTest.class);
+public class FullExportProcessorTest {
+	private static Logger logger = Logger.getLogger(FullExportProcessorTest.class);
 
 	@Before
 	public void setUp() throws Exception {
@@ -144,7 +144,7 @@ public class DeltaExportProcessorTest {
 			 
 			resultEndpoint.expectedMessageCount(rcvdCounter);
 			
-			DeltaExportProcessor processor = new DeltaExportProcessor(session);
+			FullExportProcessor processor = new FullExportProcessor(session);
 			ProducerTemplate exportProducer= new DefaultProducerTemplate(CamelContextFactory.getInstance());
 			exportProducer.setDefaultEndpointUri("mock:resultEnd");
 			try {

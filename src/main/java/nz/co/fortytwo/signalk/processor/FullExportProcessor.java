@@ -61,15 +61,15 @@ import com.google.common.eventbus.Subscribe;
  * @author robert
  * 
  */
-public class DeltaExportProcessor extends SignalkProcessor implements Processor {
+public class FullExportProcessor extends SignalkProcessor implements Processor {
 
-	private static Logger logger = Logger.getLogger(DeltaExportProcessor.class);
+	private static Logger logger = Logger.getLogger(FullExportProcessor.class);
 	protected String wsSession = null;
 	protected Queue<String> queue = Queues.newConcurrentLinkedQueue();
 	private ProducerTemplate exportProducer = null;
 	private MsgSender sender = new MsgSender();
 
-	public DeltaExportProcessor(String wsSession) {
+	public FullExportProcessor(String wsSession) {
 		super();
 		this.wsSession = wsSession;
 		exportProducer = new DefaultProducerTemplate(CamelContextFactory.getInstance());

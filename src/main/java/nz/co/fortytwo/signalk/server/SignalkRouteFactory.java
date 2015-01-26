@@ -27,7 +27,7 @@ import java.util.List;
 
 import nz.co.fortytwo.signalk.processor.AISProcessor;
 import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
-import nz.co.fortytwo.signalk.processor.DeltaExportProcessor;
+import nz.co.fortytwo.signalk.processor.FullExportProcessor;
 import nz.co.fortytwo.signalk.processor.DeltaImportProcessor;
 import nz.co.fortytwo.signalk.processor.HeartbeatProcessor;
 import nz.co.fortytwo.signalk.processor.InputFilterProcessor;
@@ -175,7 +175,7 @@ public class SignalkRouteFactory {
 			.onException(Exception.class).handled(true).maximumRedeliveries(0)
 			.to("log:nz.co.fortytwo.signalk.model.output.all?level=ERROR")
 			.end()
-		.process(new DeltaExportProcessor(null))
+		.process(new FullExportProcessor(null))
 		.split(routeBuilder.body())
 		.setHeader(WebsocketConstants.CONNECTION_KEY, routeBuilder.constant(WebsocketConstants.SEND_TO_ALL))
 		.to(RouteManager.SEDA_COMMON_OUT);
@@ -186,7 +186,7 @@ public class SignalkRouteFactory {
 		logger.debug("Configuring route "+input);
 		String wsSession = sub.getWsSession();
 		RouteDefinition route = routeBuilder.from(input);
-			route.process(new DeltaExportProcessor(wsSession))
+			route.process(new FullExportProcessor(wsSession))
 				.onException(Exception.class).handled(true).maximumRedeliveries(0)
 				.to("log:nz.co.fortytwo.signalk.model.output.subscribe?level=ERROR")
 				.end()
