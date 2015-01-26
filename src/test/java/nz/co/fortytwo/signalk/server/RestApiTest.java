@@ -51,7 +51,7 @@ import com.ning.http.client.websocket.WebSocket;
 import com.ning.http.client.websocket.WebSocketTextListener;
 import com.ning.http.client.websocket.WebSocketUpgradeHandler;
 
-public class RestApiTest extends CamelTestSupport {
+public class RestApiTest extends SignalKCamelTestSupport {
  
     private static Logger logger = Logger.getLogger(RestApiTest.class);
 	String jsonDiff = "{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"courseOverGroundTrue\"},{\"value\":3.85,\"path\":\"speedOverGround\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081+00:00\",\"device\":\"/dev/actisense\",\"pgn\":\"128267\",\"src\":\"115\"}}],\"context\":\"vessels."+SELF+".navigation\"}";
@@ -91,25 +91,16 @@ public class RestApiTest extends CamelTestSupport {
         assertEquals(172.9 , resp.at("courseOverGroundTrue").at("value").asFloat(),0.001);
         c.close();
     }
-	
-	
-	
-	 @Override
-	    protected RouteBuilder createRouteBuilder() {
-	        return new RouteBuilder(){
-	            public void configure() {
-	            	CamelContextFactory.setContext(this);
-	            	CamelContextFactory.getInstance().addComponent("skWebsocket", new SignalkWebsocketComponent());
-	    			SignalkRouteFactory.configureInputRoute(this, RouteManager.SEDA_INPUT);
-	    			from(RouteManager.DIRECT_TCP).to("log:nz.co.fortytwo.signalk.model.output.tcp").end();
-	    			SignalkRouteFactory.configureWebsocketRxRoute(this, RouteManager.SEDA_INPUT, 9292);
-	    			SignalkRouteFactory.configureWebsocketTxRoute(this,  RouteManager.SEDA_WEBSOCKETS, 9292);
-	    			SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:9290" + JsonConstants.SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true");
-	    			SignalkRouteFactory.configureAuthRoute(this, "jetty:http://0.0.0.0:9290" + JsonConstants.SIGNALK_AUTH+"?sessionSupport=true&matchOnUriPrefix=true");
-	    			//SignalkRouteFactory.configureOutputTimer(this, "timer://signalkAll?fixedRate=true&period=1000");
-	    			
-	            }
-	        };
-	    }
+
+
+	@Override
+	public void configureRouteBuilder(RouteBuilder routeBuilder) {
+		SignalkRouteFactory.configureInputRoute(routeBuilder, RouteManager.SEDA_INPUT);
+		routeBuilder.from(RouteManager.DIRECT_TCP).to("log:nz.co.fortytwo.signalk.model.output.tcp").end();
+		SignalkRouteFactory.configureWebsocketRxRoute(routeBuilder, RouteManager.SEDA_INPUT, 9292);
+		SignalkRouteFactory.configureWebsocketTxRoute(routeBuilder,  RouteManager.SEDA_WEBSOCKETS, 9292);
+		SignalkRouteFactory.configureRestRoute(routeBuilder, "jetty:http://0.0.0.0:9290" + JsonConstants.SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true");
+		SignalkRouteFactory.configureAuthRoute(routeBuilder, "jetty:http://0.0.0.0:9290" + JsonConstants.SIGNALK_AUTH+"?sessionSupport=true&matchOnUriPrefix=true");
+	}
 
 }

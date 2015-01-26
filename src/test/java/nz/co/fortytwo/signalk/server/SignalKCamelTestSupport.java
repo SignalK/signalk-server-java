@@ -35,6 +35,7 @@ import nz.co.fortytwo.signalk.server.util.Util;
 
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.component.websocket.SignalkWebsocketComponent;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.apache.log4j.Logger;
 
@@ -57,6 +58,7 @@ public abstract class SignalKCamelTestSupport extends CamelTestSupport {
 				routeManager=new RouteManager(config){
 					@Override
 					public void configure() throws Exception {
+						CamelContextFactory.getInstance().addComponent("skWebsocket", new SignalkWebsocketComponent());
 						configureRouteBuilder(this);
 					
 					}

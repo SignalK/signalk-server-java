@@ -23,6 +23,8 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
+import java.util.Arrays;
+
 import javax.activation.MimeType;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -82,7 +84,7 @@ public class RestApiProcessor extends SignalkProcessor implements Processor{
         	return;
         }
         path=path.substring(JsonConstants.SIGNALK_API.length());
-        logger.debug("We are processing the extension:"+path);
+        logger.debug("We are processing the extension:"+Arrays.toString(path.split("/")));
         
         Json json = signalkModel.atPath(path.split("/"));
         if(json==null){

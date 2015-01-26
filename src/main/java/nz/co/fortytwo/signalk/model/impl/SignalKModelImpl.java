@@ -38,6 +38,7 @@ import nz.co.fortytwo.signalk.model.event.JsonEvent;
 import nz.co.fortytwo.signalk.model.event.JsonEvent.EventType;
 import nz.co.fortytwo.signalk.model.event.PathEvent;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -226,6 +227,7 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 	public Json atPath(String ... path ){
 		Json json=this;
 		for(String k:path){
+			if(StringUtils.isBlank(k))continue;
 			json=findNode(json, k);
 			if(json==null) return null;
 		}
