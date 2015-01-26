@@ -38,8 +38,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class DeltaExportProcessorTest {
-	private static Logger logger = Logger.getLogger(DeltaExportProcessorTest.class);
+public class FullToDeltaProcessorTest {
+	private static Logger logger = Logger.getLogger(FullToDeltaProcessorTest.class);
 	@Before
 	public void setUp() throws Exception {
 	}
@@ -55,7 +55,7 @@ public class DeltaExportProcessorTest {
 		Json data = Json
 				.read("{\"vessels\":{\"SELF\":{\"environment\":{\"temperature\":{\"air\":{\"value\":26.7,\"source\":\"n2k1-12-0\",\"n2k1-12-0\":{\"value\":26.7,\"source\":{\"label\":\"OutsideAmbientMasthead\",\"bus\":\"/dev/ttyUSB1\",\"timestamp\":\"2014-08-15-16:00:00.081\"}}},\"water\":{\"value\":18.2,\"source\":\"n2k1-12-1\",\"n2k1-12-1\":{\"value\":18.2,\"source\":{\"label\":\"WaterTemperature\",\"bus\":\"/dev/ttyUSB1\",\"timestamp\":\"2014-08-15-16:00:00.081\"}}},\"n2k2-201-0\":{\"value\":66.7,\"source\":{\"label\":\"Another freezer\",\"bus\":\"/dev/ttyUSB2\",\"timestamp\":\"2014-08-15-16:00:00.081\"}},\"aftMainFreezer\":{\"value\":18.2,\"source\":\"n2k2-201-0\",\"n2k2-201-0\":{\"value\":66.7,\"source\":{\"label\":\"Aftmainfreezer\",\"bus\":\"/dev/ttyUSB2\",\"timestamp\":\"2014-08-15-16:00:00.081\"}}}}}}}}");
 		
-		DeltaExportProcessor processor = new DeltaExportProcessor();
+		FullToDeltaProcessor processor = new FullToDeltaProcessor();
 		Json out = processor.handle(data);
 		logger.debug(out);
 	}

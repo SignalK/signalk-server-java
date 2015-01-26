@@ -45,9 +45,9 @@ import org.joda.time.format.ISODateTimeFormat;
  * @author robert
  * 
  */
-public class DeltaExportProcessor extends SignalkProcessor implements Processor {
+public class FullToDeltaProcessor extends SignalkProcessor implements Processor {
 
-	private static Logger logger = Logger.getLogger(DeltaExportProcessor.class);
+	private static Logger logger = Logger.getLogger(FullToDeltaProcessor.class);
 	private static DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
 
 	public void process(Exchange exchange) throws Exception {

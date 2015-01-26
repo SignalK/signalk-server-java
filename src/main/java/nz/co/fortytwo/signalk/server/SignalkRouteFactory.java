@@ -27,7 +27,7 @@ import java.util.List;
 
 import nz.co.fortytwo.signalk.processor.AISProcessor;
 import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
-import nz.co.fortytwo.signalk.processor.DeltaExportProcessor;
+import nz.co.fortytwo.signalk.processor.FullToDeltaProcessor;
 import nz.co.fortytwo.signalk.processor.FullExportProcessor;
 import nz.co.fortytwo.signalk.processor.DeltaImportProcessor;
 import nz.co.fortytwo.signalk.processor.HeartbeatProcessor;
@@ -181,7 +181,7 @@ public class SignalkRouteFactory {
 				.onException(Exception.class).handled(true).maximumRedeliveries(0)
 				.to("log:nz.co.fortytwo.signalk.model.output.subscribe?level=ERROR")
 				.end()
-			.process(new DeltaExportProcessor())
+			.process(new FullToDeltaProcessor())
 			.setHeader(WebsocketConstants.CONNECTION_KEY, routeBuilder.constant(wsSession))
 			.to(RouteManager.SEDA_COMMON_OUT)
 			.end();
