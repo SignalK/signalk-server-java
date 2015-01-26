@@ -75,7 +75,7 @@ public class CamelNettyHandler extends SimpleChannelInboundHandler<String> {
 
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, String request) throws Exception {
-		logger.debug("Request:" + request);
+		if(logger.isDebugEnabled())logger.debug("Request:" + request);
 		Map headers = getHeaders(ctx);
 		producer.sendBodyAndHeaders(request, headers);
 	}

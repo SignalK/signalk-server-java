@@ -57,7 +57,7 @@ public class FullToDeltaProcessor extends SignalkProcessor implements Processor 
 				return;
 			if (FORMAT_DELTA.equals(exchange.getIn().getHeader(SIGNALK_FORMAT))) {
 				Json json = handle(exchange.getIn().getBody(Json.class));
-				logger.debug("Converted to delta :" + json);
+				if(logger.isDebugEnabled())logger.debug("Converted to delta :" + json);
 				exchange.getIn().setBody(json);
 			}
 		} catch (Exception e) {
@@ -105,7 +105,7 @@ public class FullToDeltaProcessor extends SignalkProcessor implements Processor 
 			return node;
 		// deal with diff format
 		if (node.has(VESSELS)) {
-			logger.debug("processing full format  " + node);
+			if(logger.isDebugEnabled())logger.debug("processing full format  " + node);
 			// find the first branch that splits
 			Json ctx = getContext(node);
 			String context = ctx.getPath();

@@ -884,7 +884,7 @@ public class TSAGeoMag
         ti = Math.sqrt((bh * bh)+(bz * bz));
         //	Calculate the declination.
         dec = (Math.atan2(by, bx) / dtr);
-        logger.debug( "Dec is: " + dec );
+        if(logger.isDebugEnabled())logger.debug( "Dec is: " + dec );
         dip = (Math.atan2(bz, bh) / dtr);
         
         //	This is the variation for grid navigation.

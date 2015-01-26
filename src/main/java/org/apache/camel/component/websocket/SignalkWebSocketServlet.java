@@ -65,12 +65,12 @@ public class SignalkWebSocketServlet extends WebsocketComponentServlet {
 	public void init() throws ServletException {
 		try {
 			String bs = getInitParameter("bufferSize");
-			logger.debug("Upgrade ws, create factory:");
+			if(logger.isDebugEnabled())logger.debug("Upgrade ws, create factory:");
 			this._webSocketFactory = new WebSocketFactory(this, (bs == null) ? 8192 : Integer.parseInt(bs)) {
 				private WebSocketBuffers _buffers = new WebSocketBuffers(8192);
 
 				public void upgrade(HttpServletRequest request, HttpServletResponse response, WebSocket websocket, String protocol) throws IOException {
-					logger.debug("Upgrade ws:" + request.getRequestedSessionId());
+					if(logger.isDebugEnabled())logger.debug("Upgrade ws:" + request.getRequestedSessionId());
 					if (!("websocket".equalsIgnoreCase(request.getHeader("Upgrade"))))
 						throw new IllegalStateException("!Upgrade:websocket");
 					if (!("HTTP/1.1".equals(request.getProtocol()))) {
@@ -168,7 +168,7 @@ public class SignalkWebSocketServlet extends WebsocketComponentServlet {
 					connection.fillBuffersFrom(((HttpParser) http.getParser()).getHeaderBuffer());
 					connection.fillBuffersFrom(((HttpParser) http.getParser()).getBodyBuffer());
 
-					logger.debug("Upgraded session " + request.getRequestedSessionId() + " to ws " + ((DefaultWebsocket) websocket).getConnectionKey());
+					if(logger.isDebugEnabled())logger.debug("Upgraded session " + request.getRequestedSessionId() + " to ws " + ((DefaultWebsocket) websocket).getConnectionKey());
 					try {
 						SubscriptionManagerFactory.getInstance().add(request.getRequestedSessionId(), ((DefaultWebsocket) websocket).getConnectionKey());
 					} catch (Exception e1) {

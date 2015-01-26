@@ -52,7 +52,7 @@ public class RestSubscribeProcessor extends SignalkProcessor implements Processo
 	@Override
 	public void process(Exchange exchange) throws Exception {
 		HttpServletRequest request = exchange.getIn(HttpMessage.class).getRequest();
-		 logger.debug("Session:"+request.getRequestedSessionId());
+		if(logger.isDebugEnabled())logger.debug("Session:"+request.getRequestedSessionId());
        if(request.getSession()!=null){
 	        if(request.getMethod().equals("GET")) processGet(request, exchange);
        }else{
@@ -84,12 +84,12 @@ public class RestSubscribeProcessor extends SignalkProcessor implements Processo
 		HttpServletResponse response = exchange.getIn(HttpMessage.class).getResponse();
         
 		String context =  exchange.getIn().getHeader(Exchange.HTTP_URI, String.class);
-        logger.debug("We are processing the path = "+context);
+		if(logger.isDebugEnabled())logger.debug("We are processing the path = "+context);
         
         //check valid request.
         if(context.length() < JsonConstants.SIGNALK_SUBSCRIBE.length()){
         	response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        	logger.debug("Returning SC_BAD_REQUEST");
+        	if(logger.isDebugEnabled())logger.debug("Returning SC_BAD_REQUEST");
         	return;
         }
         
@@ -127,9 +127,9 @@ public class RestSubscribeProcessor extends SignalkProcessor implements Processo
 
 	protected int subscribe(String path, long period, long minPeriod, String format, String policy, String sessionId) throws Exception {
 		path=path.substring(JsonConstants.SIGNALK_SUBSCRIBE.length());
-        logger.debug("We are processing trimmed path = "+path);
-        logger.debug("sessionId = "+sessionId);
-        logger.debug("wsSession = "+manager.getWsSession(sessionId));
+		if(logger.isDebugEnabled())logger.debug("We are processing trimmed path = "+path);
+		if(logger.isDebugEnabled())logger.debug("sessionId = "+sessionId);
+		if(logger.isDebugEnabled())logger.debug("wsSession = "+manager.getWsSession(sessionId));
         //check valid request.
         
         if( !path.startsWith("/"+JsonConstants.VESSELS)){
@@ -142,7 +142,7 @@ public class RestSubscribeProcessor extends SignalkProcessor implements Processo
         	sub.setActive(false);
         }
         manager.addSubscription(sub);
-        logger.debug("Subscribed  = "+sub.toString());
+        if(logger.isDebugEnabled())logger.debug("Subscribed  = "+sub.toString());
         return HttpServletResponse.SC_ACCEPTED;
 	}
 }

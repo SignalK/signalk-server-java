@@ -333,7 +333,7 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 		while (fieldNames.hasNext()) {
 
 			String fieldName = fieldNames.next();
-			logger.trace("Safe parse " + fieldName);
+			if(logger.isTraceEnabled())logger.trace("Safe parse " + fieldName);
 			// if field exists and starts with _, delete it
 			if(fieldName.startsWith("_")){
 				mainNode.delAt(fieldName);
@@ -437,7 +437,7 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 		if(node==null)return;
 		nodeMap.put(node.getPath(), node);
 		eventBus.post(new PathEvent(node.getPath(), PathEvent.EventType.ADD));
-		logger.debug("Add to nodeMap:"+node.getPath());
+		if(logger.isDebugEnabled())logger.debug("Add to nodeMap:"+node.getPath());
 		if(!node.isObject())return;
 		List<String> keys = ImmutableList.copyOf(node.asJsonMap().keySet());
 		for(String key : keys){

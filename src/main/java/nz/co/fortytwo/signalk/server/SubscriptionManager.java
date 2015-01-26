@@ -62,7 +62,7 @@ public class SubscriptionManager {
 	 */
 	public void addSubscription(Subscription sub) throws Exception{
 		if(!subscriptions.contains(sub)){
-			logger.debug("Adding sub "+sub);
+			if(logger.isDebugEnabled())logger.debug("Adding sub "+sub);
 			subscriptions.add(sub);
 			//create a new route if we have too
 			if(sub.isActive() && !hasExistingRoute(sub)){
@@ -70,7 +70,7 @@ public class SubscriptionManager {
 				SignalkRouteFactory.configureSubscribeTimer(routeManager, sub);
 				heartbeats.remove(sub.getWsSession());
 			}
-			logger.debug("Subs size ="+subscriptions.size());
+			if(logger.isDebugEnabled())logger.debug("Subs size ="+subscriptions.size());
 		}
 		
 	}

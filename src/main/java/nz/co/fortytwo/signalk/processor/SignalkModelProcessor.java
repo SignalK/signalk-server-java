@@ -58,7 +58,7 @@ public class SignalkModelProcessor extends SignalkProcessor implements Processor
 	//@Override
 	public void handle(Json node) {
 		if(!(node.has(VESSELS)))return;
-		logger.debug("SignalkModelProcessor  updating "+node );
+		if(logger.isDebugEnabled())logger.debug("SignalkModelProcessor  updating "+node );
 		
 		signalkModel.merge(node);
 		

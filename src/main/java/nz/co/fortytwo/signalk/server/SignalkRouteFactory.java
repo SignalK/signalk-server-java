@@ -174,7 +174,7 @@ public class SignalkRouteFactory {
 	
 	public static void configureSubscribeTimer(RouteBuilder routeBuilder ,Subscription sub) throws Exception{
 		String input = "timer://"+getRouteId(sub)+"?fixedRate=true&period="+sub.getPeriod();
-		logger.debug("Configuring route "+input);
+		if(logger.isDebugEnabled())logger.debug("Configuring route "+input);
 		String wsSession = sub.getWsSession();
 		RouteDefinition route = routeBuilder.from(input);
 			route.process(new FullExportProcessor(wsSession))
@@ -212,12 +212,12 @@ public class SignalkRouteFactory {
 	public static void removeSubscribeTimer(RouteManager routeManager, Subscription sub) throws Exception {
 			RouteDefinition routeDef = ((DefaultCamelContext)routeManager.getContext()).getRouteDefinition(getRouteId(sub));
 			if(routeDef==null)return;
-			logger.debug("Stopping sub "+getRouteId(sub)+","+routeDef);
+			if(logger.isDebugEnabled())logger.debug("Stopping sub "+getRouteId(sub)+","+routeDef);
 			((DefaultCamelContext)routeManager.getContext()).stopRoute(routeDef);
-			logger.debug("Removing sub "+getRouteId(sub));
+			if(logger.isDebugEnabled())logger.debug("Removing sub "+getRouteId(sub));
 			((DefaultCamelContext)routeManager.getContext()).removeRouteDefinition(routeDef);
 			
-			logger.debug("Done removing sub "+getRouteId(sub));
+			if(logger.isDebugEnabled())logger.debug("Done removing sub "+getRouteId(sub));
 	}
 
 	public static void configureHeartbeatRoute(RouteManager routeBuilder, String input) {

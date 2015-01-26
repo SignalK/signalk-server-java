@@ -62,7 +62,7 @@ public class DeltaImportProcessor extends SignalkProcessor implements Processor{
 			if(exchange.getIn().getBody()==null ||!(exchange.getIn().getBody() instanceof Json)) return;
 			
 			Json json = handle(exchange.getIn().getBody(Json.class));
-			logger.debug("Converted to:"+json);
+			if(logger.isDebugEnabled())logger.debug("Converted to:"+json);
 			exchange.getIn().setBody(json);
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
@@ -108,7 +108,7 @@ public class DeltaImportProcessor extends SignalkProcessor implements Processor{
 		if(node.has(VESSELS))return node;
 		//deal with diff format
 		if(node.has(CONTEXT)){
-			logger.debug("processing delta  "+node );
+			if(logger.isDebugEnabled())logger.debug("processing delta  "+node );
 			//process it
 			SignalKModel temp =  SignalKModelFactory.getCleanInstance();
 			
@@ -125,7 +125,7 @@ public class DeltaImportProcessor extends SignalkProcessor implements Processor{
 				parseUpdate(temp, updates.at(UPDATES), pathNode);
 			}
 			
-			logger.debug("SignalkModelProcessor processed diff  "+temp );
+			if(logger.isDebugEnabled())logger.debug("SignalkModelProcessor processed diff  "+temp );
 			return (Json) temp;
 		}
 		return node;

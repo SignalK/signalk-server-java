@@ -72,7 +72,7 @@ public class N2KProcessor extends SignalkProcessor implements Processor{
 			if(exchange.getIn().getBody()==null ||!(exchange.getIn().getBody() instanceof Json)) return;
 			
 			Json json = handle(exchange.getIn().getHeader(N2K_MESSAGE, String.class));
-			logger.debug("Converted to:"+json);
+			if(logger.isDebugEnabled())logger.debug("Converted to:"+json);
 			exchange.getIn().setBody(json);
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
@@ -98,7 +98,7 @@ public class N2KProcessor extends SignalkProcessor implements Processor{
 	public Json  handle(String n2kmsg) {
 		//get the pgn value
 		String pgn = JsonPath.read(n2kmsg,"$.pgn");
-		logger.debug("processing n2k pgn "+pgn );
+		if(logger.isDebugEnabled())logger.debug("processing n2k pgn "+pgn );
 		if(mappings.has(pgn)){
 			//process it, mappings is n2kMapping.json as a json object
 			Json mapping = mappings.at(pgn);
@@ -119,7 +119,7 @@ public class N2KProcessor extends SignalkProcessor implements Processor{
 					
 				}
 			}
-			logger.debug("N2KProcessor output  "+temp );
+			if(logger.isDebugEnabled())logger.debug("N2KProcessor output  "+temp );
 			return (Json) temp;
 		}
 		return null;

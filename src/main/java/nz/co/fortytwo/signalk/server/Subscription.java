@@ -258,7 +258,7 @@ public class Subscription {
 		List<String> paths = new ArrayList<String>();
 		for (String p : subscribedPaths) {
 			if (p.startsWith(key)) {
-				logger.debug("Adding path:" + p);
+				if(logger.isDebugEnabled())logger.debug("Adding path:" + p);
 				paths.add(p);
 			}
 		}

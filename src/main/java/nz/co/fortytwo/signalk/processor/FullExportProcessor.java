@@ -86,7 +86,7 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 	public void process(Exchange exchange) throws Exception {
 
 		try {
-			logger.info("process  subs for " + exchange.getFromRouteId());
+			if(logger.isDebugEnabled())logger.info("process  subs for " + exchange.getFromRouteId());
 			// get the accumulated delta nodes.
 			exchange.getIn().setBody(createTree(exchange.getFromRouteId()));
 			if(isDelta(exchange.getFromRouteId())){
@@ -94,7 +94,7 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 			}else{
 				exchange.getIn().setHeader(SIGNALK_FORMAT, FORMAT_FULL);
 			}
-			logger.debug("Body set to :" + exchange.getIn().getBody());
+			if(logger.isDebugEnabled())logger.debug("Body set to :" + exchange.getIn().getBody());
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			throw e;
@@ -119,7 +119,7 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 				continue;
 			for (String p : sub.getSubscribed(null)) {
 				Json node = signalkModel.findNode(p);
-				logger.debug("Found node:" + p + " = " + node);
+				if(logger.isDebugEnabled())logger.debug("Found node:" + p + " = " + node);
 				if (node != null) {
 					Json n = temp.addNode((Json) temp, node.up().getPath());
 					if (node.isPrimitive()) {
@@ -185,7 +185,7 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 		// do we care?
 		for (Subscription s : manager.getSubscriptions(wsSession)) {
 			if (s.isActive() && !POLICY_FIXED.equals(s.getPolicy()) && s.isSubscribed(pathEvent.getPath())) {
-				logger.debug("Adding to send queue : "+pathEvent.getPath());
+				if(logger.isDebugEnabled())logger.debug("Adding to send queue : "+pathEvent.getPath());
 				queue.add(pathEvent.getPath());
 				sender.startSender();
 				break;
@@ -213,10 +213,10 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 		Thread t = null;
 
 		public void startSender() {
-			logger.debug("Checking sender..");
+			if(logger.isDebugEnabled())logger.debug("Checking sender..");
 			if (t != null && t.isAlive())
 				return;
-			logger.debug("Starting sender..");
+			if(logger.isDebugEnabled())logger.debug("Starting sender..");
 			t = new Thread(this);
 			t.start();
 		}
@@ -232,7 +232,7 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 					boolean send = false;
 					while ((p = queue.poll()) != null) {
 						Json node = signalkModel.findNode(p);
-						logger.debug("Found node:" + p + " = " + node);
+						if(logger.isDebugEnabled())logger.debug("Found node:" + p + " = " + node);
 						if (node != null) {
 							Json n = temp.addNode((Json) temp, node.getPath());
 							send = true;

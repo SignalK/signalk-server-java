@@ -51,7 +51,7 @@ public class RestAuthProcessor extends SignalkProcessor implements Processor{
 		HttpServletRequest request = exchange.getIn(HttpMessage.class).getRequest();
 		
 		 //HttpSession session = request.getSession();
-		 logger.debug("Session = "+request.getRequestedSessionId());
+		if(logger.isDebugEnabled())logger.debug("Session = "+request.getRequestedSessionId());
        // Request request = exchange.getIn().getHeader(RestletConstants.RESTLET_REQUEST, Request.class);
         if("GET"==request.getMethod()){
         	processGet(request, exchange);
@@ -65,7 +65,7 @@ public class RestAuthProcessor extends SignalkProcessor implements Processor{
 		
         HttpServletResponse response = exchange.getIn(HttpMessage.class).getResponse();
         String path =  exchange.getIn().getHeader(Exchange.HTTP_URI, String.class);
-        logger.debug("We are processing the path = "+path);
+        if(logger.isDebugEnabled())logger.debug("We are processing the path = "+path);
         
         //check valid request.
         if(path.length()<=JsonConstants.SIGNALK_AUTH.length()){
@@ -85,7 +85,7 @@ public class RestAuthProcessor extends SignalkProcessor implements Processor{
         //String breadcrumb = exchange.getIn().getHeader(Exchange.BREADCRUMB_ID,String.class);
         //breadcrumb = breadcrumb.substring(0,breadcrumb.lastIndexOf("-",breadcrumb.lastIndexOf("-")));
         //manager.add(cookieSetting.getValue(), cookieSetting.getValue());
-        logger.info("Adding session = "+request.getSession().getId());
+        if(logger.isDebugEnabled())logger.info("Adding session = "+request.getSession().getId());
         manager.add(request.getRequestedSessionId(), request.getRequestedSessionId());
        
         // SEND RESPONSE

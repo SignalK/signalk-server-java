@@ -57,7 +57,7 @@ public class RestApiProcessor extends SignalkProcessor implements Processor{
 		// the Restlet request should be available if neeeded
 		HttpServletRequest request = exchange.getIn(HttpMessage.class).getRequest();
 		 HttpSession session = request.getSession();
-		 logger.debug("Session = "+session.getId());
+		 if(logger.isDebugEnabled())logger.debug("Session = "+session.getId());
         if(request.getSession()!=null){
 	        if(request.getMethod().equals("GET")) processGet(request, exchange);
 	        
@@ -76,7 +76,7 @@ public class RestApiProcessor extends SignalkProcessor implements Processor{
 		HttpServletResponse response = exchange.getIn(HttpMessage.class).getResponse();
         
 		String path =  exchange.getIn().getHeader(Exchange.HTTP_URI, String.class);
-        logger.debug("We are processing the path = "+path);
+		if(logger.isDebugEnabled())logger.debug("We are processing the path = "+path);
         
         //check valid request.
         if(path.length()<JsonConstants.SIGNALK_API.length()){
@@ -84,7 +84,7 @@ public class RestApiProcessor extends SignalkProcessor implements Processor{
         	return;
         }
         path=path.substring(JsonConstants.SIGNALK_API.length());
-        logger.debug("We are processing the extension:"+Arrays.toString(path.split("/")));
+        if(logger.isDebugEnabled())logger.debug("We are processing the extension:"+Arrays.toString(path.split("/")));
         
         Json json = signalkModel.atPath(path.split("/"));
         if(json==null){
@@ -92,7 +92,7 @@ public class RestApiProcessor extends SignalkProcessor implements Processor{
         	return;
         }
         
-        logger.debug("Returning:"+json);
+        if(logger.isDebugEnabled())logger.debug("Returning:"+json);
         
         response.setContentType("application/json");
         

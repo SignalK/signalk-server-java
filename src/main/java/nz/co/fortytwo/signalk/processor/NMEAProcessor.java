@@ -94,7 +94,7 @@ public class NMEAProcessor extends SignalkProcessor implements Processor {
 		SignalKModel json = null;
 		if (StringUtils.isNotBlank(bodyStr)&& bodyStr.startsWith("$")) {
 			try {
-				logger.debug("Processing NMEA:" + bodyStr);
+				if(logger.isDebugEnabled())logger.debug("Processing NMEA:" + bodyStr);
 				Sentence sentence = SentenceFactory.getInstance().createParser(bodyStr);
 				json = SignalKModelFactory.getCleanInstance();
 				fireSentenceEvent(json, sentence);
@@ -243,7 +243,7 @@ public class NMEAProcessor extends SignalkProcessor implements Processor {
 							startLat = false;
 						}
 						previousLat = Util.movingAverage(ALPHA, previousLat, sen.getPosition().getLatitude());
-						logger.debug("lat position:" + sen.getPosition().getLatitude() + ", hemi=" + sen.getPosition().getLatitudeHemisphere());
+						if(logger.isDebugEnabled())logger.debug("lat position:" + sen.getPosition().getLatitude() + ", hemi=" + sen.getPosition().getLatitudeHemisphere());
 						sk.putWith(json, nav_position_latitude , previousLat, "output");
 	
 						if (startLon) {

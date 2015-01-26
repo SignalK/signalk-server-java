@@ -96,7 +96,7 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
 		if(node.has(VESSELS))return node;
 		//deal with diff format
 		if(node.has(CONTEXT)){
-			logger.debug("processing subscribe  "+node );
+			if(logger.isDebugEnabled())logger.debug("processing subscribe  "+node );
 			
 			//go to context
 			String context = node.at(CONTEXT).asString();
@@ -104,7 +104,7 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
 			
 			Json subscriptions = node.at(SUBSCRIBE);
 			if(subscriptions==null){
-				logger.debug("empty subscribe  "+node );
+				if(logger.isDebugEnabled())logger.debug("empty subscribe  "+node );
 				return (Json) node;
 			}
 			
@@ -121,7 +121,7 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
 					parseUnsubscribe(wsSession, context, subscription);
 				}
 			}
-			logger.debug("SignalkModelProcessor processed subscribe  "+node );
+			if(logger.isDebugEnabled())logger.debug("SignalkModelProcessor processed subscribe  "+node );
 		}
 		return node;
 		
@@ -144,7 +144,7 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
 	 */
 	private void parseSubscribe(String wsSession, String context, Json subscription) throws Exception {
 		//get values
-		logger.debug("Parsing subscribe  "+subscription );
+		if(logger.isDebugEnabled())logger.debug("Parsing subscribe  "+subscription );
 		String path = context+"."+subscription.at(PATH).asString();
 		long period = 1000;
 		if(subscription.at(PERIOD)!=null)period = subscription.at(PERIOD).asInteger();
@@ -156,7 +156,7 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
 		if(subscription.at(MIN_PERIOD)!=null)minPeriod=subscription.at(MIN_PERIOD).asInteger();
 		Subscription sub = new Subscription(wsSession, path, period, minPeriod, format, policy);
 		//sub.setActive(false);
-		logger.debug("Created subscription; "+sub.toString() );
+		if(logger.isDebugEnabled())logger.debug("Created subscription; "+sub.toString() );
 		SubscriptionManagerFactory.getInstance().addSubscription(sub);
 		
 	}

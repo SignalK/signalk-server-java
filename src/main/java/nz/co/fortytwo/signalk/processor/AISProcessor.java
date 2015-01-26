@@ -121,7 +121,7 @@ public class AISProcessor extends SignalkProcessor implements Processor {
 					if(packet!=null && packet.isValidMessage()){
 						//process message here
 						AisMessage message = packet.getAisMessage();
-						logger.debug("AisMessage:"+message.getClass()+":"+message.toString());
+						if(logger.isDebugEnabled())logger.debug("AisMessage:"+message.getClass()+":"+message.toString());
 						//1,2,3
 						if(message instanceof AisPositionMessage){
 							vInfo=new AisVesselInfo((AisPositionMessage) message);

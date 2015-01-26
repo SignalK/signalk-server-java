@@ -64,12 +64,12 @@ public class DeclinationProcessor extends SignalkProcessor implements Processor 
 		Json lon = signalkModel.findNode(signalkModel.self(), JsonConstants.nav_position_longitude);
 		
 		if (lat!=null && lon!=null) {
-			logger.debug("Declination  for "+lat.at("value")+", "+lon.at("value") );
+			if(logger.isDebugEnabled())logger.debug("Declination  for "+lat.at("value")+", "+lon.at("value") );
 			
 			double declination = geoMag.getDeclination(lat.at("value").asDouble(), lon.at("value").asDouble(), DateTime.now().getYear(), 0.0d);
 			
 			declination = round(declination, 1);
-			logger.debug("Declination = " + declination);
+			if(logger.isDebugEnabled())logger.debug("Declination = " + declination);
 			signalkModel.putWith(signalkModel.self(), JsonConstants.nav_magneticVariation, declination, JsonConstants.SELF);	
 		}
 		

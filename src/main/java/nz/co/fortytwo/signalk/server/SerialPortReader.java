@@ -159,14 +159,14 @@ public class SerialPortReader implements Processor {
 			headers.put(JsonConstants.MSG_TYPE, JsonConstants.SERIAL);
 			headers.put(JsonConstants.MSG_PORT, portName);
 			uid = Pattern.compile(Constants.UID + ":");
-			logger.info("Setup serialReader on :"+portName);
+			if(logger.isDebugEnabled())logger.info("Setup serialReader on :"+portName);
 			sendMessage = new Boolean(Util.getConfig(null).getProperty(Constants.SEND_MESSAGE, "true"));
 		}
 
 		
 		//@Override
 		public void serialEvent(SerialPortEvent event) {
-			logger.trace("SerialEvent:"+event.getEventType());
+			if(logger.isTraceEnabled())logger.trace("SerialEvent:"+event.getEventType());
 			try{
 				if (running && event.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
 					
@@ -195,7 +195,7 @@ public class SerialPortReader implements Processor {
 							//we have a line ending in CR/LF
 							if (complete) {
 								String lineStr = line.toString().trim();
-								logger.debug(portName + ":Serial Received:" + lineStr);
+								if(logger.isDebugEnabled())logger.debug(portName + ":Serial Received:" + lineStr);
 								//its not empty!
 								if(lineStr.length()>0){
 									//map it if we havent already
@@ -212,7 +212,7 @@ public class SerialPortReader implements Processor {
 									if(sendMessage){
 										producer.sendBodyAndHeaders(lineStr,headers);
 									}else{
-										logger.debug("sendMessage false:"+lineStr);
+										if(logger.isDebugEnabled())logger.debug("sendMessage false:"+lineStr);
 									}
 								}
 								complete=false;
@@ -292,10 +292,10 @@ public class SerialPortReader implements Processor {
 		if (StringUtils.isNotBlank(message)) {
 			// check its valid for this device
 			if (running && deviceType == null || message.contains(Constants.UID + ":" + deviceType)) {
-				logger.debug(portName + ":wrote out to device:" + message);
+				if(logger.isDebugEnabled())logger.debug(portName + ":wrote out to device:" + message);
 				// queue them and write in background
 				if(!queue.offer(message)){
-					logger.debug("Output queue id ful for "+portName);
+					if(logger.isDebugEnabled())logger.debug("Output queue id full for "+portName);
 				}
 			}
 		}
