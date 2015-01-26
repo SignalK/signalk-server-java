@@ -89,11 +89,25 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 			logger.info("process  subs for " + exchange.getFromRouteId());
 			// get the accumulated delta nodes.
 			exchange.getIn().setBody(createTree(exchange.getFromRouteId()));
+			if(isDelta(exchange.getFromRouteId())){
+				exchange.getIn().setHeader(SIGNALK_FORMAT, FORMAT_DELTA);
+			}else{
+				exchange.getIn().setHeader(SIGNALK_FORMAT, FORMAT_FULL);
+			}
 			logger.debug("Body set to :" + exchange.getIn().getBody());
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			throw e;
 		}
+	}
+
+	private boolean isDelta(String routeId) {
+		for (Subscription sub : manager.getSubscriptions(wsSession)) {
+			if (sub == null || !sub.isActive() || !routeId.equals(sub.getRouteId()))
+				continue;
+			if(FORMAT_DELTA.equals(sub.getFormat())) return true;
+		}
+		return false;
 	}
 
 	private SignalKModel createTree(String routeId) {

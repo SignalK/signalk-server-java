@@ -52,6 +52,7 @@ public class JsonConstants {
 	public static final String PATH = "path";
 	public static final String PERIOD = "period";
 	public static final String MIN_PERIOD = "minPeriod";
+	public static final String SIGNALK_FORMAT="SIGNALK_FORMAT";
 	public static final String FORMAT="format";
 	public static final String FORMAT_DELTA="delta";
 	public static final String FORMAT_FULL="full";

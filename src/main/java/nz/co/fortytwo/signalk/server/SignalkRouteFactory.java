@@ -27,6 +27,7 @@ import java.util.List;
 
 import nz.co.fortytwo.signalk.processor.AISProcessor;
 import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
+import nz.co.fortytwo.signalk.processor.DeltaExportProcessor;
 import nz.co.fortytwo.signalk.processor.FullExportProcessor;
 import nz.co.fortytwo.signalk.processor.DeltaImportProcessor;
 import nz.co.fortytwo.signalk.processor.HeartbeatProcessor;
@@ -170,16 +171,6 @@ public class SignalkRouteFactory {
 			.to("log:nz.co.fortytwo.signalk.model.output?level=DEBUG")
 		.end();
 	}
-	public static void configureOutputTimer(RouteBuilder routeBuilder ,String input){
-		routeBuilder.from(input)
-			.onException(Exception.class).handled(true).maximumRedeliveries(0)
-			.to("log:nz.co.fortytwo.signalk.model.output.all?level=ERROR")
-			.end()
-		.process(new FullExportProcessor(null))
-		.split(routeBuilder.body())
-		.setHeader(WebsocketConstants.CONNECTION_KEY, routeBuilder.constant(WebsocketConstants.SEND_TO_ALL))
-		.to(RouteManager.SEDA_COMMON_OUT);
-	}
 	
 	public static void configureSubscribeTimer(RouteBuilder routeBuilder ,Subscription sub) throws Exception{
 		String input = "timer://"+getRouteId(sub)+"?fixedRate=true&period="+sub.getPeriod();
@@ -190,9 +181,9 @@ public class SignalkRouteFactory {
 				.onException(Exception.class).handled(true).maximumRedeliveries(0)
 				.to("log:nz.co.fortytwo.signalk.model.output.subscribe?level=ERROR")
 				.end()
-			.split(routeBuilder.body())
-				.setHeader(WebsocketConstants.CONNECTION_KEY, routeBuilder.constant(wsSession))
-				.to(RouteManager.SEDA_COMMON_OUT)
+			.process(new DeltaExportProcessor())
+			.setHeader(WebsocketConstants.CONNECTION_KEY, routeBuilder.constant(wsSession))
+			.to(RouteManager.SEDA_COMMON_OUT)
 			.end();
 		route.setId(getRouteId(sub));
 		sub.setRouteId(getRouteId(sub));

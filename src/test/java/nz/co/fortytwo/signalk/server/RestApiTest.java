@@ -106,7 +106,7 @@ public class RestApiTest extends CamelTestSupport {
 	    			SignalkRouteFactory.configureWebsocketTxRoute(this,  RouteManager.SEDA_WEBSOCKETS, 9292);
 	    			SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:9290" + JsonConstants.SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true");
 	    			SignalkRouteFactory.configureAuthRoute(this, "jetty:http://0.0.0.0:9290" + JsonConstants.SIGNALK_AUTH+"?sessionSupport=true&matchOnUriPrefix=true");
-	    			SignalkRouteFactory.configureOutputTimer(this, "timer://signalkAll?fixedRate=true&period=1000");
+	    			//SignalkRouteFactory.configureOutputTimer(this, "timer://signalkAll?fixedRate=true&period=1000");
 	    			
 	            }
 	        };
