@@ -71,7 +71,7 @@ public class HeartbeatProcessor extends SignalkProcessor implements Processor{
 		
 		try {
 			List<String> heartbeats = ImmutableList.copyOf(manager.getHeartbeats());
-			logger.info("process heartbeats: "+heartbeats.size());
+			if(logger.isDebugEnabled())logger.debug("process heartbeats: "+heartbeats.size());
 			for(String session : heartbeats){
 				producer.sendBodyAndHeader(msg, WebsocketConstants.CONNECTION_KEY, session);
 			}

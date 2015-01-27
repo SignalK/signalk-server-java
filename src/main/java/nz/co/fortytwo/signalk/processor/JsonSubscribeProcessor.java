@@ -55,11 +55,15 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
 			if(exchange.getIn().getBody()==null ||!(exchange.getIn().getBody() instanceof Json)) return;
 			String wsSession = exchange.getIn().getHeader(WebsocketConstants.CONNECTION_KEY, String.class);
 			if(wsSession==null){
-				//maybe some other source - TCPServer, serial?
-				
+				return;
 			}
-			Json json = handle(exchange.getIn().getBody(Json.class), wsSession);
-			exchange.getIn().setBody(json);
+			Json json = exchange.getIn().getBody(Json.class);
+			//avoid full signalk syntax
+			if(json.has(VESSELS))return;
+			if(json.has(CONTEXT) && (json.has(SUBSCRIBE) || json.has(UNSUBSCRIBE))){
+				json = handle(json, wsSession);
+				exchange.getIn().setBody(json);
+			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
 		}
@@ -92,37 +96,36 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
 	 
 	//@Override
 	public Json  handle(Json node, String wsSession) throws Exception {
-		//avoid full signalk syntax
-		if(node.has(VESSELS))return node;
+		
 		//deal with diff format
-		if(node.has(CONTEXT)){
-			if(logger.isDebugEnabled())logger.debug("processing subscribe  "+node );
-			
-			//go to context
-			String context = node.at(CONTEXT).asString();
-			//TODO: is the context and path valid? A DOS attack is possible if we allow numerous crap/bad paths?
-			
-			Json subscriptions = node.at(SUBSCRIBE);
-			if(subscriptions==null){
-				if(logger.isDebugEnabled())logger.debug("empty subscribe  "+node );
-				return (Json) node;
-			}
-			
+		
+		if(logger.isDebugEnabled())logger.debug("Checking for subscribe  "+node );
+		
+		//go to context
+		String context = node.at(CONTEXT).asString();
+		//TODO: is the context and path valid? A DOS attack is possible if we allow numerous crap/bad paths?
+		
+		Json subscriptions = node.at(SUBSCRIBE);
+		if(subscriptions!=null){
 			if(subscriptions.isArray()){
 				for(Json subscription: subscriptions.asJsonList()){
 					parseSubscribe(wsSession, context, subscription);
 				}
 			}
-			Json unsubscriptions = node.at(UNSUBSCRIBE);
-			if(unsubscriptions==null)return (Json) node;
-			
+			if(logger.isDebugEnabled())logger.debug("SignalkModelProcessor processed subscribe  "+node );
+		}
+		Json unsubscriptions = node.at(UNSUBSCRIBE);
+		if(unsubscriptions!=null){
+		
 			if(unsubscriptions.isArray()){
 				for(Json subscription: unsubscriptions.asJsonList()){
 					parseUnsubscribe(wsSession, context, subscription);
 				}
 			}
-			if(logger.isDebugEnabled())logger.debug("SignalkModelProcessor processed subscribe  "+node );
+			if(logger.isDebugEnabled())logger.debug("SignalkModelProcessor processed unsubscribe  "+node );
 		}
+			
+		
 		return node;
 		
 	}
@@ -138,7 +141,6 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
                 }
                 </pre>
 	 * @param context
-	 * @param context2 
 	 * @param subscription
 	 * @throws Exception 
 	 */
@@ -172,7 +174,6 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
                 }
                 </pre>
 	 * @param context
-	 * @param context2 
 	 * @param subscription
 	 * @throws Exception 
 	 */
