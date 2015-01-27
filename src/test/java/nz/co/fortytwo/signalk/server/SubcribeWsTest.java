@@ -115,14 +115,20 @@ public class SubcribeWsTest extends CamelTestSupport {
         latch3.await(6, TimeUnit.SECONDS);
         
         //assertTrue(latch3.await(15, TimeUnit.SECONDS));
+        String fullMsg = null;
         for(String msg : received){
         	logger.debug(msg);
+        	if(msg.contains("\"updates\":[{\"")){
+        		fullMsg=msg;
+        	}
         }
-        assertEquals(1, received.size());
+        assertTrue(received.size()>1);
         //{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"navigation.courseOverGroundTrue\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}],\"context\":\"vessels.self\"}
         //{\"context\":\"vessels.motu\",\"updates\":[{\"values\":[{\"path\":\"navigation.courseOverGroundTrue\",\"value\":172.9}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}},{\"values\":[{\"path\":\"navigation.speedOverGround\",\"value\":3.85}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}]}
-        Json sk = Json.read("{\"context\":\"vessels.motu\",\"updates\":[{\"values\":[{\"path\":\"navigation.courseOverGroundTrue\",\"value\":172.9}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}},{\"values\":[{\"path\":\"navigation.speedOverGround\",\"value\":3.85}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}]}");
-        assertEquals(sk , Json.read(received.get(0)));
+        //{\"context\":\"vessels.motu.navigation\",\"updates\":[{\"values\":[{\"path\":\"courseOverGroundTrue\",\"value\":172.9}],\"source\":\"/dev/actisense-N2K-115-128267\"},{\"values\":[{\"path\":\"speedOverGround\",\"value\":3.85}],\"source\":\"/dev/actisense-N2K-115-128267\"}]}
+        Json sk = Json.read("{\"context\":\"vessels.motu.navigation\",\"updates\":[{\"values\":[{\"path\":\"courseOverGroundTrue\",\"value\":172.9}],\"source\":\"/dev/actisense-N2K-115-128267\"},{\"values\":[{\"path\":\"speedOverGround\",\"value\":3.85}],\"source\":\"/dev/actisense-N2K-115-128267\"}]}");
+        assertNotNull(fullMsg);
+        assertEquals(sk , Json.read(fullMsg));
         c.close();
     }
 	

@@ -118,16 +118,7 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 			if (sub == null || !sub.isActive() || !routeId.equals(sub.getRouteId()))
 				continue;
 			for (String p : sub.getSubscribed(null)) {
-				Json node = signalkModel.findNode(p);
-				if(logger.isDebugEnabled())logger.debug("Found node:" + p + " = " + node);
-				if (node != null) {
-					Json n = temp.addNode((Json) temp, node.up().getPath());
-					if (node.isPrimitive()) {
-						n.set(node.getParentKey(), node.getValue());
-					} else {
-						n.up().set(node.getParentKey(),node.getValue());
-					}
-				}
+				populateTree(temp, p);
 			}
 		}
 		return temp;
@@ -169,6 +160,20 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 	 * }
 	 * </pre>
 	 */
+
+	public void populateTree(SignalKModel temp, String p) {
+		Json node = signalkModel.findNode(p);
+		if(logger.isDebugEnabled())logger.debug("Found node:" + p + " = " + node);
+		if (node != null) {
+			Json n = temp.addNode((Json) temp, node.up().getPath());
+			if (node.isPrimitive()) {
+				n.set(node.getParentKey(), node.getValue());
+			} else {
+				n.set(node.getParentKey(),node.getValue());
+			}
+		}
+		
+	}
 
 	/**
 	 * @param pathEvent

@@ -90,8 +90,9 @@ public class Subscription {
 		newPath = newPath.replace('/', '.');
 		if (newPath.startsWith(DOT))
 			newPath = newPath.substring(1);
-		if (VESSELS_DOT_SELF.equals(newPath))
+		if (VESSELS_DOT_SELF.equals(newPath)){
 			newPath = JsonConstants.VESSELS + DOT + JsonConstants.SELF;
+		}
 		newPath = newPath.replace(VESSELS_DOT_SELF + DOT, JsonConstants.VESSELS + DOT + JsonConstants.SELF + DOT);
 
 		// regex it
