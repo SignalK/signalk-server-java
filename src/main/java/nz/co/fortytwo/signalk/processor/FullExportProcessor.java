@@ -165,12 +165,7 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 		Json node = signalkModel.findNode(p);
 		if(logger.isDebugEnabled())logger.debug("Found node:" + p + " = " + node);
 		if (node != null) {
-			Json n = temp.addNode((Json) temp, node.up().getPath());
-			if (node.isPrimitive()) {
-				n.set(node.getParentKey(), node.getValue());
-			} else {
-				n.set(node.getParentKey(),node.getValue());
-			}
+			addNodeToTemp(temp, node);
 		}
 		
 	}
@@ -184,8 +179,7 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 			return;
 		if (pathEvent.getPath() == null)
 			return;
-		if (logger.isDebugEnabled())
-			logger.debug(this.wsSession + " received event " + pathEvent.getPath());
+		if (logger.isDebugEnabled())logger.debug(this.wsSession + " received event " + pathEvent.getPath());
 
 		// do we care?
 		for (Subscription s : manager.getSubscriptions(wsSession)) {
@@ -210,6 +204,15 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 
 	public void setExportProducer(ProducerTemplate exportProducer) {
 		this.exportProducer = exportProducer;
+	}
+	
+	private void addNodeToTemp(SignalKModel temp, Json node) {
+		Json n = temp.addNode((Json) temp, node.up().getPath());
+		if (node.isPrimitive()) {
+			n.set(node.getParentKey(), node.getValue());
+		} else {
+			n.set(node.getParentKey(),node.getValue());
+		}
 	}
 
 	class MsgSender implements Runnable {
@@ -239,14 +242,8 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 						Json node = signalkModel.findNode(p);
 						if(logger.isDebugEnabled())logger.debug("Found node:" + p + " = " + node);
 						if (node != null) {
-							Json n = temp.addNode((Json) temp, node.getPath());
+							addNodeToTemp(temp, node);
 							send = true;
-							if (node.isPrimitive()) {
-								n.set(node.getParentKey(), node.getValue());
-							} else {
-								//logger.debug("Object at end of path! : " + node);
-								n.up().set(node.getParentKey(),node.getValue());
-							}
 						}
 					}
 					if (send) {
@@ -263,6 +260,8 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 			}
 
 		}
+
+		
 
 	}
 }
