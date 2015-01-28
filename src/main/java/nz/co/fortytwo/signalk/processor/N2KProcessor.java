@@ -61,9 +61,14 @@ public class N2KProcessor extends SignalkProcessor implements Processor{
 	private NumberFormat numberFormat = NumberFormat.getInstance();
 	private Json mappings=null;
 	
-	public N2KProcessor() throws IOException{
+	public N2KProcessor(){
 		File mappingFile = new File("./conf/n2kMappings.json");
-		mappings = Json.read(FileUtils.readFileToString(mappingFile));
+		try {
+			mappings = Json.read(FileUtils.readFileToString(mappingFile));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			logger.error(e.getMessage(),e);
+		}
 	}
 	public void process(Exchange exchange) throws Exception {
 		

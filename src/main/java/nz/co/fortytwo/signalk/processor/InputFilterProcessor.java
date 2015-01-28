@@ -23,16 +23,12 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import java.util.regex.Pattern;
-
 import mjson.Json;
 import nz.co.fortytwo.signalk.server.util.JsonConstants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.log4j.Logger;
-
-import com.jayway.jsonpath.JsonPath;
 
 /**
  * Churns through incoming nav data and filters out misc debug and unnecessary messages from the other devices

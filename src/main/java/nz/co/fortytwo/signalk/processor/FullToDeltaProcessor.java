@@ -157,10 +157,11 @@ public class FullToDeltaProcessor extends SignalkProcessor implements Processor 
 				entry.set(SOURCE, jsSrc.getValue());
 				if (jsSrc.isString()) {
 					// recurse
-					Json ref = js.at(jsSrc.asString());
+					String jsSrcRef = jsSrc.asString();
+					Json ref = js.at(jsSrcRef);
 					if (ref != null) {
 						ref.delAt(VALUE);
-						entry.set(jsSrc.asString(), ref);
+						entry.set(jsSrcRef, ref);
 					}
 				}
 			}

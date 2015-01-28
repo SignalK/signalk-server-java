@@ -2297,6 +2297,7 @@ public class Json
 	    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
 	  };
 
+	  private static ConcurrentHashMap<CharSequence, String> escapeHash = new ConcurrentHashMap<CharSequence, String>();
 	  private static final Set<Character> JS_ESCAPE_CHARS;
 	  private static final Set<Character> HTML_ESCAPE_CHARS;
 
@@ -2323,12 +2324,14 @@ public class Json
 	  }
 
 	  public String escapeJsonString(CharSequence plainText) {
+		if(escapeHash.contains(plainText))return escapeHash.get(plainText);
 	    StringBuilder escapedString = new StringBuilder(plainText.length() + 20);
 	    try {
 	      escapeJsonString(plainText, escapedString);
 	    } catch (IOException e) {
 	      throw new RuntimeException(e);
 	    }
+	    escapeHash.put(plainText, escapedString.toString());
 	    return escapedString.toString();
 	  }
 

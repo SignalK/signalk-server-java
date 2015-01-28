@@ -32,6 +32,7 @@ import nz.co.fortytwo.signalk.processor.FullExportProcessor;
 import nz.co.fortytwo.signalk.processor.DeltaImportProcessor;
 import nz.co.fortytwo.signalk.processor.HeartbeatProcessor;
 import nz.co.fortytwo.signalk.processor.InputFilterProcessor;
+import nz.co.fortytwo.signalk.processor.N2KProcessor;
 import nz.co.fortytwo.signalk.processor.NMEAProcessor;
 import nz.co.fortytwo.signalk.processor.OutputFilterProcessor;
 import nz.co.fortytwo.signalk.processor.RestApiProcessor;
@@ -66,6 +67,7 @@ public class SignalkRouteFactory {
 	 * @param nmeaProcessor
 	 * @param aisProcessor
 	 * @param signalkModelProcessor
+	 * @throws Exception 
 	 */
 	public static void configureInputRoute(RouteBuilder routeBuilder,String input) {
 		routeBuilder.from(input)
@@ -78,6 +80,8 @@ public class SignalkRouteFactory {
 		.process(new NMEAProcessor())
 		//convert AIS to signalk
 		.process(new AISProcessor())
+		//convert n2k
+		.process(new N2KProcessor())
 		//handle subscribe messages
 		.process(new JsonSubscribeProcessor())
 		//deal with diff format
