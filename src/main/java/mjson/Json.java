@@ -1264,19 +1264,14 @@ public class Json
 	 */
 	public String getPath() {
 		if(fullPath!=null)return fullPath;
-		StringBuffer path = new StringBuffer();
-		Json j = this;
-		String tmp = j.getParentKey();
-		path.insert(0,tmp );
-		
-		while ((j=j.up())!=null){
-			//if(logger.isTraceEnabled())logger.trace(j.toString());
-			tmp=j.getParentKey();
-			if(tmp!=null && tmp.length()>1){
-				path.insert(0,tmp+".");
-			}
+		if(up()==null){
+			fullPath="";
+			return "";
 		}
-		this.fullPath=path.toString();
+		StringBuffer path = new StringBuffer();
+		
+		fullPath = path.append(up().getPath()+"."+getParentKey()).toString();
+		if(fullPath.startsWith("."))fullPath=fullPath.substring(1);
 		return fullPath;
 	}
 	/**
