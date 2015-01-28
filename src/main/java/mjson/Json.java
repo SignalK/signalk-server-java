@@ -38,6 +38,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+
 /**
  * 
  * <p>
@@ -2292,7 +2296,7 @@ public class Json
 	    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
 	  };
 
-	  private static ConcurrentHashMap<CharSequence, String> escapeHash = new ConcurrentHashMap<CharSequence, String>();
+	  private static LoadingCache<CharSequence, String> escapeHash = null;
 	  private static final Set<Character> JS_ESCAPE_CHARS;
 	  private static final Set<Character> HTML_ESCAPE_CHARS;
 
@@ -2310,24 +2314,31 @@ public class Json
 	    htmlEscapeSet.add('\'');
 //	    htmlEscapeSet.add('/');  -- Removing slash for now since it causes some incompatibilities
 	    HTML_ESCAPE_CHARS = Collections.unmodifiableSet(htmlEscapeSet);
+	     
 	  }
 
 	  private final boolean escapeHtmlCharacters;
 
 	  Escaper(boolean escapeHtmlCharacters) {
 	    this.escapeHtmlCharacters = escapeHtmlCharacters;
+	    escapeHash = CacheBuilder.newBuilder()
+	    	       .maximumSize(1000)
+	    	       .build(
+	    	               new CacheLoader<CharSequence, String>() {
+	    	                 public String load(CharSequence plainText) throws Exception {
+	    	                	 StringBuilder escapedString = new StringBuilder(plainText.length() + 20);
+	    	             	    try {
+	    	             	      escapeJsonString(plainText, escapedString);
+	    	             	    } catch (IOException e) {
+	    	             	      throw new RuntimeException(e);
+	    	             	    }
+	    	             	    return escapedString.toString();
+	    	                 }
+	    	               });
 	  }
 
 	  public String escapeJsonString(CharSequence plainText) {
-		if(escapeHash.contains(plainText))return escapeHash.get(plainText);
-	    StringBuilder escapedString = new StringBuilder(plainText.length() + 20);
-	    try {
-	      escapeJsonString(plainText, escapedString);
-	    } catch (IOException e) {
-	      throw new RuntimeException(e);
-	    }
-	    escapeHash.put(plainText, escapedString.toString());
-	    return escapedString.toString();
+		return escapeHash.getUnchecked(plainText);
 	  }
 
 	  private void escapeJsonString(CharSequence plainText, StringBuilder out) throws IOException {
