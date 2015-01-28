@@ -42,7 +42,7 @@ The content mime type is application/json, your browser may not display it direc
 It currently streams out a demo file taken from a boat sailing in a race in San Francisco. The output includes AIS data. 
 If you edit the `conf/signalk.cfg` file and make `signalk.demo=false` (default=true), then it will stop doing that.
 Normally it only sends output in signalk delta format to subscribed clients, so clients MUST subscribe or you see only the heartbeat message every 1000ms.
-You can subscribe by sending the following json. In linux you can paste it into the screen you opened earlier and press [Enter]. :
+You can subscribe by sending the following json. It supports * and ? wildcards In linux you can paste it into the screen you opened earlier and press [Enter]. :
 ```
 {"context":"vessels.self","subscribe":[{"path":"environment.depth.belowTransducer"},{"path":"navigation.position"}]}
 ``` 
@@ -53,6 +53,15 @@ Try:
 {"context":"vessels.366982320","subscribe":[{"path":"navigation.position"}]}
 
 {"context":"vessels.*","subscribe":[{"path":"navigation.position"}]}
+
+{"context":"vessels.366982320","subscribe":[{"path":"navigation.position"}]}
+{"context":"vessels.366982320","unsubscribe":[{"path":"navigation.position"}]}
+
+{"context":"vessels.*","subscribe":[{"path":"navigation.position.l*"}]}
+{"context":"vessels.*","unsubscribe":[{"path":"navigation.position.l*"}]}
+
+{"context":"vessels.*","subscribe":[{"path":"navigation.course*"}]}
+{"context":"vessels.*","unsubscribe":[{"path":"navigation.course*"}]}
 
 ``` 
 
