@@ -146,8 +146,9 @@ public class DeltaImportProcessor extends SignalkProcessor implements Processor{
 			String key = e.at(PATH).asString();
 			Json n = temp.addNode(pathNode, key);
 			int pos = key.lastIndexOf(".");
-			if(pos>0)
-			key = key.substring(pos+1);
+			if(pos>0){
+				key = key.substring(pos+1);
+			}
 			temp.putWith(n.up(),key, e.at(VALUE).getValue(),device,timestamp);
 		}
 		

@@ -146,7 +146,7 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 	 * @return
 	 */
 	public Json findNode(String fullPath) {
-		return findNode(this,fullPath);
+		return nodeMap.get(fullPath);
 	}
 	/**
 	 * Recursive findNode()
@@ -155,14 +155,9 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 	 * @return
 	 */
 	public Json findNode(Json node, String fullPath) {
-		String[] paths = fullPath.split("\\.");
-		//Json endNode = null;
-		for(String path : paths){
-			logger.debug("findNode:"+path);
-			node = node.at(path);
-			if(node==null)return null;
-		}
-		return node;
+		String path = node.getPath()+"."+fullPath;
+		logger.debug("findNode:"+path);
+		return findNode(path);
 	}
 	/**
 	 * Merge tempNode into parentNode as a child of parentNode
@@ -359,19 +354,37 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 	public  Json putWith(String fullPath, Object value, String source, DateTime dateTime){
 		return putWith(this,fullPath, value,source,dateTime);
 	}
-	/**
-	 * Recursive addNode()
-	 * Same as findNode, but will make a new node if any node on the path is empty
-	 * @param node
-	 * @param fullPath
-	 * @param value 
-	 * @return
-	 */
+
+	/*public  Json addNode(Json node, String fullPath) {
+		
+		String path = node.getPath()+"."+fullPath;
+		Json newNode = nodeMap.get(path);
+		int x = path.length();
+		while(newNode==null&& x>node.getPath().length()){
+			int i = path.lastIndexOf(".",x);
+			if(i>0){
+				//trim and lookup
+				node=nodeMap.get(path.substring(0,path.indexOf(i)));
+			}else{
+				newNode = addNode0(node, path.substring(i+1));
+			}
+			x=i;
+		}
+		return newNode;
+	}*/
+/**
+ * Recursive addNode()
+ * Same as findNode, but will make a new node if any node on the path is empty
+ * @param node
+ * @param fullPath
+ * @param value 
+ * @return
+ */
 	public  Json addNode(Json node, String fullPath) {
 		String[] paths = fullPath.split("\\.");
 		Json lastNode=node;
 		for(String path : paths){
-			logger.debug("findValue:"+path);
+			if(logger.isDebugEnabled())logger.debug("findValue:"+path);
 			//if(node.isObject()){
 				node = node.at(path);
 			//}
