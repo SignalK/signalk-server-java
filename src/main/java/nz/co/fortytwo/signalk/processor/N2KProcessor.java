@@ -1,25 +1,24 @@
 /*
- *
+ * 
  * Copyright (C) 2012-2014 R T Huitema. All Rights Reserved.
  * Web: www.42.co.nz
  * Email: robert@42.co.nz
  * Author: R T Huitema
- *
+ * 
  * This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
  * WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 package nz.co.fortytwo.signalk.processor;
 
@@ -29,6 +28,10 @@ import java.io.File;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
@@ -42,6 +45,10 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 
 /**
@@ -50,95 +57,116 @@ import com.jayway.jsonpath.JsonPath;
  * @author robert
  * 
  */
-public class N2KProcessor extends SignalkProcessor implements Processor{
+public class N2KProcessor extends SignalkProcessor implements Processor {
 
 	private static final String FILTER = "filter";
 	private static final String NODE = "node";
 	private static final String SOURCE = "source";
-	private static final String self = VESSELS+"."+SELF+".";
+	private static final String self = VESSELS + "." + SELF + ".";
 	private static Logger logger = Logger.getLogger(N2KProcessor.class);
-	private static DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
+	// private static DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
 	private NumberFormat numberFormat = NumberFormat.getInstance();
-	private Json mappings=null;
-	
-	public N2KProcessor(){
+	private Json mappings = null;
+	private JsonPath pgnPath = JsonPath.compile("$.pgn");
+	private Multimap<String, N2KHolder> nodeMap = HashMultimap.create();
+
+	public N2KProcessor() {
 		File mappingFile = new File("./conf/n2kMappings.json");
 		try {
 			mappings = Json.read(FileUtils.readFileToString(mappingFile));
+			for (String pgn : mappings.asJsonMap().keySet()) {
+				Json mappingArray = mappings.at(pgn);
+				for (Json j : mappingArray.asJsonList()) {
+					JsonPath compiledPath = JsonPath.compile(j.at(FILTER).asString() + "." + j.at(SOURCE).asString());
+					String node = j.at(NODE).asString();
+					nodeMap.put(pgn, new N2KHolder(node, compiledPath));
+				}
+			}
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			logger.error(e.getMessage(),e);
+			logger.error(e.getMessage(), e);
 		}
 	}
+
 	public void process(Exchange exchange) throws Exception {
-		
+
 		try {
-			if(exchange.getIn().getHeader(N2K_MESSAGE)==null) return;
-			if(exchange.getIn().getBody()==null ||!(exchange.getIn().getBody() instanceof Json)) return;
-			
+			if (exchange.getIn().getHeader(N2K_MESSAGE) == null)
+				return;
+			if (exchange.getIn().getBody() == null || !(exchange.getIn().getBody() instanceof Json))
+				return;
+
 			Json json = handle(exchange.getIn().getHeader(N2K_MESSAGE, String.class));
-			if(logger.isDebugEnabled())logger.debug("Converted to:"+json);
+			if (logger.isDebugEnabled())
+				logger.debug("Converted to:" + json);
 			exchange.getIn().setBody(json);
 		} catch (Exception e) {
-			logger.error(e.getMessage(),e);
+			logger.error(e.getMessage(), e);
 		}
 	}
 
 	/*
-	 *  {
-    "timestamp": "2013-10-08-15:47:28.264",
-    "prio": "2",
-    "src": "2",
-    "dst": "255",
-    "pgn": "129025",
-    "description": "Position, Rapid Update",
-    "fields": {
-        "Latitude": "60.1445540",
-        "Longitude": "24.7921348"
-    }
-}
-*/
-	 
-	//@Override
-	public Json  handle(String n2kmsg) {
-		//get the pgn value
-		String pgn = JsonPath.read(n2kmsg,"$.pgn");
-		if(logger.isDebugEnabled())logger.debug("processing n2k pgn "+pgn );
-		if(mappings.has(pgn)){
-			//process it, mappings is n2kMapping.json as a json object
-			Json mapping = mappings.at(pgn);
-			if( mapping==null)return null;	
-			
-			//make a dummy signalk object
-			SignalKModel temp =  SignalKModelFactory.getCleanInstance();
-			//mapping contains an array
-			for(Json map : mapping.asJsonList()){
-				//TODO: precompile the mappings for performance, precompile the msg to json Document
-				//TODO: changes to n2k formatted output mean we will get back string, int,long,float, double here
-				String var = JsonPath.read(n2kmsg, map.at(FILTER).asString()+"."+map.at(SOURCE).asString());
-				Object obj = resolve(var);
-				String node = map.at(NODE).asString();
-				if(node!=null && var!=null){
-					//put in signalk tree
-					temp.putWith(self+node, obj);
-					
-				}
+	 * {
+	 * "timestamp": "2013-10-08-15:47:28.264",
+	 * "prio": "2",
+	 * "src": "2",
+	 * "dst": "255",
+	 * "pgn": "129025",
+	 * "description": "Position, Rapid Update",
+	 * "fields": {
+	 * "Latitude": "60.1445540",
+	 * "Longitude": "24.7921348"
+	 * }
+	 * }
+	 */
+
+	// @Override
+	public Json handle(String n2kmsg) {
+		// get the pgn value
+		DocumentContext n2k = JsonPath.parse(n2kmsg);
+		String pgn = n2k.read(pgnPath);
+		if (logger.isDebugEnabled())
+			logger.debug("processing n2k pgn " + pgn);
+		if (nodeMap.containsKey(pgn)) {
+			// process it, mappings is n2kMapping.json as a json object
+			Collection<N2KHolder> entries = nodeMap.get(pgn);
+
+			// make a dummy signalk object
+			SignalKModel temp = SignalKModelFactory.getCleanInstance();
+			// mapping contains an array
+			for (N2KHolder entry : entries) {
+				Object var = n2k.read(entry.path);
+				// put in signalk tree
+				temp.putWith(self + entry.node, resolve(var));
 			}
-			if(logger.isDebugEnabled())logger.debug("N2KProcessor output  "+temp );
+			if (logger.isDebugEnabled())
+				logger.debug("N2KProcessor output  " + temp);
 			return (Json) temp;
 		}
 		return null;
-		
+
 	}
-	private Object resolve(String var) {
-		if(var==null) return null;
+
+	private Object resolve(Object var) {
+		if (var == null || !(var instanceof String))
+			return var;
 		try {
-			return numberFormat.parse(var);
+			return numberFormat.parse((String)var);
 		} catch (ParseException e) {
 			return var;
 		}
-		
+
 	}
 
-	
+	class N2KHolder {
+		String node = null;
+		JsonPath path = null;
+
+		public N2KHolder(String node, JsonPath path) {
+			this.node = node;
+			this.path = path;
+		}
+	}
+
 }
