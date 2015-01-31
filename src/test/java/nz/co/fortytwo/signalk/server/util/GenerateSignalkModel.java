@@ -81,7 +81,7 @@ public class GenerateSignalkModel {
 		k = k.replace("(^[A-Za-z0-9]+$)", "[ID]");
 		k=k.replace("vessels.[ID].", "");
 		String c = k;
-		k=k.replaceAll("[ID]", "UUID");
+		k=k.replaceAll("[ID]", "*");
 		c=c.replace('.','_');
 		c=c.replace("[ID]","id");
 		c=c.replace("navigation", "nav");

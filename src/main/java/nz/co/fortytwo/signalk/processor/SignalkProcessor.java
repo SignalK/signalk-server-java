@@ -24,12 +24,16 @@
 
 package nz.co.fortytwo.signalk.processor;
 
+import java.util.regex.Pattern;
+
+import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.server.CamelContextFactory;
 import nz.co.fortytwo.signalk.server.RouteManager;
 import nz.co.fortytwo.signalk.server.SubscriptionManager;
 import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
+import nz.co.fortytwo.signalk.server.util.JsonConstants;
 import nz.co.fortytwo.signalk.server.util.Util;
 
 import org.apache.camel.Produce;
@@ -50,15 +54,21 @@ public class SignalkProcessor {
 	static protected SignalKModel signalkModel = SignalKModelFactory.getInstance();
 	static protected  SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
 	//@Produce(uri = RouteManager.SEDA_NMEA )
-    ProducerTemplate nmeaproducer;
+    ProducerTemplate nmeaProducer;
+    ProducerTemplate outProducer;
+	public static final String DOT = ".";
+	public static final String VESSELS_DOT_SELF = JsonConstants.VESSELS + ".self";
     
 	
 	
 	public SignalkProcessor(){
-		nmeaproducer= new DefaultProducerTemplate(CamelContextFactory.getInstance());
-		nmeaproducer.setDefaultEndpointUri(RouteManager.SEDA_NMEA );
+		nmeaProducer= new DefaultProducerTemplate(CamelContextFactory.getInstance());
+		nmeaProducer.setDefaultEndpointUri(RouteManager.SEDA_NMEA );
+		outProducer= new DefaultProducerTemplate(CamelContextFactory.getInstance());
+		outProducer.setDefaultEndpointUri(RouteManager.SEDA_COMMON_OUT );
 		try {
-			nmeaproducer.start();
+			nmeaProducer.start();
+			outProducer.start();
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
 		}
@@ -71,7 +81,7 @@ public class SignalkProcessor {
 	 * @param output
 	 */
 	public void sendNmea(String nmea){
-		nmeaproducer.sendBodyAndHeader(nmea, WebsocketConstants.CONNECTION_KEY, WebsocketConstants.SEND_TO_ALL);
+		nmeaProducer.sendBodyAndHeader(nmea, WebsocketConstants.CONNECTION_KEY, WebsocketConstants.SEND_TO_ALL);
 	}
 
 
@@ -84,6 +94,51 @@ public class SignalkProcessor {
 	public double round(double val, int places){
 		return Util.round(val, places);
 	}
+
+
+	public static Pattern regexPath(String newPath) {
+		// regex it
+		String regex = newPath.replaceAll(".", "[$0]").replace("[*]", ".*").replace("[?]", ".");
+		return Pattern.compile(regex);
+	}
+
+
+	public static String sanitizePath(String newPath) {
+		newPath = newPath.replace('/', '.');
+		if (newPath.startsWith(SignalkProcessor.DOT))
+			newPath = newPath.substring(1);
+		if (SignalkProcessor.VESSELS_DOT_SELF.equals(newPath)){
+			newPath = JsonConstants.VESSELS + SignalkProcessor.DOT + JsonConstants.SELF;
+		}
+		newPath = newPath.replace(SignalkProcessor.VESSELS_DOT_SELF + SignalkProcessor.DOT, JsonConstants.VESSELS + SignalkProcessor.DOT + JsonConstants.SELF + SignalkProcessor.DOT);
+		return newPath;
+	}
 	
-	
+	public ProducerTemplate getExportProducer() {
+		return outProducer;
+	}
+
+	public void setExportProducer(ProducerTemplate outProducer) {
+		this.outProducer = outProducer;
+	}
+
+
+	public void populateTree(SignalKModel temp, String p) {
+		Json node = signalkModel.findNode(p);
+		if(logger.isDebugEnabled())logger.debug("Found node:" + p + " = " + node);
+		if (node != null) {
+			addNodeToTemp(temp, node);
+		}
+		
+	}
+
+
+	protected void addNodeToTemp(SignalKModel temp, Json node) {
+		Json n = temp.addNode((Json) temp, node.up().getPath());
+		if (node.isPrimitive()) {
+			n.set(node.getParentKey(), node.getValue());
+		} else {
+			n.set(node.getParentKey(),node.getValue());
+		}
+	}
 }

@@ -25,6 +25,7 @@ package nz.co.fortytwo.signalk.processor;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.server.util.JsonConstants;
+import nz.co.fortytwo.signalk.server.util.SignalKConstants;
 import nz.co.fortytwo.signalk.server.util.TSAGeoMag;
 
 import org.apache.camel.Exchange;
@@ -60,8 +61,8 @@ public class DeclinationProcessor extends SignalkProcessor implements Processor 
 	//@Override
 	public void handle() {
 		logger.debug("Declination  calculation fired " );
-		Json lat = signalkModel.findNode(signalkModel.self(), JsonConstants.nav_position_latitude);
-		Json lon = signalkModel.findNode(signalkModel.self(), JsonConstants.nav_position_longitude);
+		Json lat = signalkModel.findNode(signalkModel.self(), SignalKConstants.nav_position_latitude);
+		Json lon = signalkModel.findNode(signalkModel.self(), SignalKConstants.nav_position_longitude);
 		
 		if (lat!=null && lon!=null) {
 			if(logger.isDebugEnabled())logger.debug("Declination  for "+lat.at("value")+", "+lon.at("value") );
@@ -70,7 +71,7 @@ public class DeclinationProcessor extends SignalkProcessor implements Processor 
 			
 			declination = round(declination, 1);
 			if(logger.isDebugEnabled())logger.debug("Declination = " + declination);
-			signalkModel.putWith(signalkModel.self(), JsonConstants.nav_magneticVariation, declination, JsonConstants.SELF);	
+			signalkModel.putWith(signalkModel.self(), SignalKConstants.nav_magneticVariation, declination, JsonConstants.SELF);	
 		}
 		
 	}

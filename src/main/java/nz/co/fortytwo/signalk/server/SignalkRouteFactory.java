@@ -32,6 +32,8 @@ import nz.co.fortytwo.signalk.processor.FullExportProcessor;
 import nz.co.fortytwo.signalk.processor.DeltaImportProcessor;
 import nz.co.fortytwo.signalk.processor.HeartbeatProcessor;
 import nz.co.fortytwo.signalk.processor.InputFilterProcessor;
+import nz.co.fortytwo.signalk.processor.JsonGetProcessor;
+import nz.co.fortytwo.signalk.processor.JsonListProcessor;
 import nz.co.fortytwo.signalk.processor.N2KProcessor;
 import nz.co.fortytwo.signalk.processor.NMEAProcessor;
 import nz.co.fortytwo.signalk.processor.OutputFilterProcessor;
@@ -82,9 +84,13 @@ public class SignalkRouteFactory {
 		.process(new AISProcessor())
 		//convert n2k
 		.process(new N2KProcessor())
+		//handle list
+		.process(new JsonListProcessor())
+		//handle get
+		.process(new JsonGetProcessor())
 		//handle subscribe messages
 		.process(new JsonSubscribeProcessor())
-		//deal with diff format
+		//deal with delta format
 		.process(new DeltaImportProcessor())
 		//make sure we have timestamp/source
 		.process(new ValidationProcessor())
@@ -170,6 +176,7 @@ public class SignalkRouteFactory {
 			.onException(Exception.class).handled(true).maximumRedeliveries(0)
 			.to("log:nz.co.fortytwo.signalk.model.output?level=ERROR")
 			.end()
+		.process(new FullToDeltaProcessor())
 		.multicast().parallelProcessing()
 			.to(RouteManager.DIRECT_TCP,RouteManager.SEDA_WEBSOCKETS)
 			.to("log:nz.co.fortytwo.signalk.model.output?level=DEBUG")
@@ -185,7 +192,6 @@ public class SignalkRouteFactory {
 				.onException(Exception.class).handled(true).maximumRedeliveries(0)
 				.to("log:nz.co.fortytwo.signalk.model.output.subscribe?level=ERROR")
 				.end()
-			.process(new FullToDeltaProcessor())
 			.setHeader(WebsocketConstants.CONNECTION_KEY, routeBuilder.constant(wsSession))
 			.to(RouteManager.SEDA_COMMON_OUT)
 			.end();

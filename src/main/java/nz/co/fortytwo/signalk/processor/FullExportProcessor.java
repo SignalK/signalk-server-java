@@ -63,22 +63,15 @@ import com.google.common.eventbus.Subscribe;
  */
 public class FullExportProcessor extends SignalkProcessor implements Processor {
 
-	private static Logger logger = Logger.getLogger(FullExportProcessor.class);
+	static Logger logger = Logger.getLogger(FullExportProcessor.class);
 	protected String wsSession = null;
 	protected Queue<String> queue = Queues.newConcurrentLinkedQueue();
-	private ProducerTemplate exportProducer = null;
+	//private ProducerTemplate exportProducer = null;
 	private MsgSender sender = new MsgSender();
 
 	public FullExportProcessor(String wsSession) {
 		super();
 		this.wsSession = wsSession;
-		exportProducer = new DefaultProducerTemplate(CamelContextFactory.getInstance());
-		exportProducer.setDefaultEndpointUri(RouteManager.SEDA_COMMON_OUT);
-		try {
-			exportProducer.start();
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-		}
 		signalkModel.getEventBus().register(this);
 
 	}
@@ -161,15 +154,6 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 	 * </pre>
 	 */
 
-	public void populateTree(SignalKModel temp, String p) {
-		Json node = signalkModel.findNode(p);
-		if(logger.isDebugEnabled())logger.debug("Found node:" + p + " = " + node);
-		if (node != null) {
-			addNodeToTemp(temp, node);
-		}
-		
-	}
-
 	/**
 	 * @param pathEvent
 	 */
@@ -198,23 +182,8 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 		logger.debug("Received dead event" + e.getSource());
 	}
 
-	public ProducerTemplate getExportProducer() {
-		return exportProducer;
-	}
-
-	public void setExportProducer(ProducerTemplate exportProducer) {
-		this.exportProducer = exportProducer;
-	}
 	
-	private void addNodeToTemp(SignalKModel temp, Json node) {
-		Json n = temp.addNode((Json) temp, node.up().getPath());
-		if (node.isPrimitive()) {
-			n.set(node.getParentKey(), node.getValue());
-		} else {
-			n.set(node.getParentKey(),node.getValue());
-		}
-	}
-
+	
 	class MsgSender implements Runnable {
 		long lastSend = 0;
 
@@ -247,7 +216,7 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 						}
 					}
 					if (send) {
-						exportProducer.sendBodyAndHeader(temp, WebsocketConstants.CONNECTION_KEY, wsSession);
+						outProducer.sendBodyAndHeader(temp, WebsocketConstants.CONNECTION_KEY, wsSession);
 						lastSend = System.currentTimeMillis();
 					}
 					break;

@@ -5,6 +5,8 @@
  * Email: robert@42.co.nz
  * Author: R T Huitema
  *
+ * This file is part of the signalk-server-java project
+ *
  * This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
  * WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  * 
@@ -27,44 +29,38 @@ import static org.junit.Assert.*;
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
-import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
 import nz.co.fortytwo.signalk.server.RouteManagerFactory;
-import nz.co.fortytwo.signalk.server.util.SignalKConstants;
 
+import org.apache.camel.CamelContext;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class DeclinationProcessorTest {
+public class JsonListProcessorTest {
 
 	@Before
 	public void setUp() throws Exception {
-		RouteManagerFactory.getInstance(null);
+		CamelContext ctx = RouteManagerFactory.getInstance(null).getContext();
+		SignalKModel model = SignalKModelFactory.getInstance();
 	}
+
 	@After
 	public void tearDown() throws Exception {
 	}
 
 	@Test
-	public void shouldGetDeclination() {
-		DeclinationProcessor p = new DeclinationProcessor();
-		SignalKModel model = SignalKModelFactory.getInstance();
-		model.putWith(model.self(), SignalKConstants.nav_position_latitude, -41.5);
-		model.putWith(model.self(), SignalKConstants.nav_position_longitude, 172.5);
-		p.handle();
-		double decl = model.findValue(model.self(),SignalKConstants.nav_magneticVariation).asDouble();
-		assertEquals(22.1, decl, 001);
+	public void shouldProducePathList() throws Exception {
+		String request = "{\"context\":\"vessels.*\",\"list\":[{\"path\":\"navigation.*\"}]}";
+		Json json = Json.read(request);
+		JsonListProcessor processor = new JsonListProcessor();
+		processor.handle(json, "mmmmmmm");
 	}
-	
 	@Test
-	public void shouldNotGetDeclination() {
-		DeclinationProcessor p = new DeclinationProcessor();
-		SignalKModel model = SignalKModelFactory.getInstance();
-		model.putWith(model.self(), SignalKConstants.nav_position_latitude, -41.5);
-		//model.putWith(model.self(), JsonConstants.nav_position_longitude, 172.5);
-		p.handle();
-		Json decl = model.findValue(model.self(),SignalKConstants.nav_magneticVariation);
-		assertNull( decl);
+	public void shouldProduceMultiplePathList() throws Exception {
+		String request = "{\"context\":\"vessels.*\",\"list\":[{\"path\":\"navigation.position.*\"},{\"path\":\"navigation.course*\"}]}";
+		Json json = Json.read(request);
+		JsonListProcessor processor = new JsonListProcessor();
+		processor.handle(json, "mmmmmmm");
 	}
 
 }

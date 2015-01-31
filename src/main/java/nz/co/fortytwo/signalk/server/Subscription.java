@@ -43,7 +43,7 @@ import nz.co.fortytwo.signalk.model.event.JsonEvent;
 import nz.co.fortytwo.signalk.model.event.PathEvent;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.processor.FullExportProcessor;
-import nz.co.fortytwo.signalk.server.util.JsonConstants;
+import nz.co.fortytwo.signalk.processor.SignalkProcessor;
 
 /**
  * Holds subscription data, wsSessionId, path, period
@@ -56,8 +56,6 @@ import nz.co.fortytwo.signalk.server.util.JsonConstants;
  */
 public class Subscription {
 	private static Logger logger = Logger.getLogger(Subscription.class);
-	private static final String VESSELS_DOT_SELF = JsonConstants.VESSELS + ".self";
-	private static final String DOT = ".";
 	String wsSession = null;
 	String path = null;
 	long period = -1;
@@ -73,7 +71,8 @@ public class Subscription {
 	public Subscription(String wsSession, String path, long period, long minPeriod, String format, String policy) {
 		this.wsSession = wsSession;
 
-		this.path = sanitizePath(path);
+		this.path = SignalkProcessor.sanitizePath(path);
+		pattern = SignalkProcessor.regexPath(this.path);
 		this.period = period;
 		this.minPeriod = minPeriod;
 		this.format = format;
@@ -84,21 +83,6 @@ public class Subscription {
 				subscribedPaths.add(p);
 			}
 		}
-	}
-
-	private String sanitizePath(String newPath) {
-		newPath = newPath.replace('/', '.');
-		if (newPath.startsWith(DOT))
-			newPath = newPath.substring(1);
-		if (VESSELS_DOT_SELF.equals(newPath)){
-			newPath = JsonConstants.VESSELS + DOT + JsonConstants.SELF;
-		}
-		newPath = newPath.replace(VESSELS_DOT_SELF + DOT, JsonConstants.VESSELS + DOT + JsonConstants.SELF + DOT);
-
-		// regex it
-		String regex = newPath.replaceAll(".", "[$0]").replace("[*]", ".*").replace("[?]", ".");
-		pattern = Pattern.compile(regex);
-		return newPath;
 	}
 
 	@Override
@@ -148,7 +132,7 @@ public class Subscription {
 	}
 
 	public void setPath(String path) {
-		this.path = sanitizePath(path);
+		this.path = SignalkProcessor.sanitizePath(path);
 	}
 
 	public long getPeriod() {
