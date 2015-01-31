@@ -35,6 +35,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import mjson.Json;
+import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelImpl;
 
 import org.apache.log4j.Logger;
@@ -121,6 +122,7 @@ public class SignalKModelImplTest {
 		assertNull(signalk.atPath(VESSELS, SELF, env_wind));
 		Json wind = Json.read("{\"speedAlarm\": {\"value\":0.0000000000},\"directionChangeAlarm\": {\"value\":0.0000000000},\"angleApparent\": {\"value\":0.0000000000},\"directionTrue\": {\"value\":256.3},\"speedApparent\": {\"value\":0.0000000000},\"speedTrue\": {\"value\":7.68}}");
 		signalk.mergeAtPath(VESSELS+"."+ SELF+".environment","wind", wind);
+		logger.debug("Model:"+signalk);
 		assertNotNull(signalk.atPath(VESSELS, SELF, env_wind));
 		Json dirTrue = signalk.findValue(signalk.self(), env_wind_directionTrue);
 		assertEquals(dirTrue.asDouble(),256.3,0.000001);
@@ -180,8 +182,10 @@ public class SignalKModelImplTest {
 		Json wind = Json.read("{\"speedAlarm\": {\"value\":0.0000000000},\"directionChangeAlarm\": {\"value\":0.0000000000},\"angleApparent\": {\"value\":0.0000000000},\"directionTrue\": {\"value\":256.3},\"speedApparent\": {\"value\":0.0000000000},\"speedTrue\": {\"value\":7.68}}");
 		signalk.mergeAtPath(VESSELS+"."+ SELF+".navigation","_arduino", wind);
 		assertNotNull(signalk.atPath(VESSELS, SELF, "navigation._arduino"));
-		Json safeNode = signalk.safe(signalk.duplicate());
-		assertNull(signalk.findNode(safeNode, VESSELS+"."+SELF+".navigation._arduino"));
+		SignalKModel safeNode = signalk.safeDuplicate();
+		
+		logger.debug("SafeNode:"+safeNode);
+		assertNull(safeNode.findNode( VESSELS+"."+SELF+".navigation._arduino"));
 		assertNotNull(signalk.atPath(VESSELS, SELF, "navigation._arduino"));
 	}
 }

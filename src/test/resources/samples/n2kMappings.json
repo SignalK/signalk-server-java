@@ -47,7 +47,7 @@
              "node": "navigation.position.longitude"
          },
          {
-            "latitude": "Latitude",
+            "source": "Latitude",
             "node": "navigation.position.latitude"
         }
     ],

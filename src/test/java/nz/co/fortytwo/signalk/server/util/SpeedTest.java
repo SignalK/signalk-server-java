@@ -57,14 +57,15 @@ public class SpeedTest {
 		model.merge(data);
 		long start = System.currentTimeMillis();
 		for(int x=0;x<500;x++){
-			Json m2 = model.duplicate();
+			SignalKModel m2 = model.duplicate();
 		}
 		long end =  System.currentTimeMillis();
 		logger.debug("Time taken:"+(end-start));
 		
+		SignalKModel m2 = SignalKModelFactory.getInstance();
 		start = System.currentTimeMillis();
 		for(int x=0;x<500;x++){
-			Json m2 = Json.read(model.toString());
+			 m2.merge(Json.read(model.toString()));
 		}
 		end =  System.currentTimeMillis();
 		logger.debug("Time taken:"+(end-start));

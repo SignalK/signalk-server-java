@@ -52,7 +52,7 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 	
 	private static Logger logger = Logger.getLogger(SignalKModelImpl.class);
 	private static DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
-	private static ConcurrentHashMap<String, Json> nodeMap = new ConcurrentHashMap<String, Json>();
+	private ConcurrentHashMap<String, Json> nodeMap = new ConcurrentHashMap<String, Json>();
 	//private Json this;
 	private EventBus eventBus = new EventBus();
 	
@@ -141,7 +141,6 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 	}
 	/**
 	 * Recursive findNode()
-	 * @param node
 	 * @param fullPath
 	 * @return
 	 */
@@ -155,9 +154,14 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 	 * @return
 	 */
 	public Json findNode(Json node, String fullPath) {
-		String path = node.getPath()+"."+fullPath;
-		logger.debug("findNode:"+path);
-		return findNode(path);
+		String[] paths = fullPath.split("\\.");
+		//Json endNode = null;
+		for(String path : paths){
+			logger.debug("findNode:"+path);
+			node = node.at(path);
+			if(node==null)return null;
+		}
+		return node;
 	}
 	/**
 	 * Merge tempNode into parentNode as a child of parentNode
@@ -168,7 +172,8 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 	public Json mergeAtPath(Json parentNode, String key, Json tempNode){
 		Json newNode = parentNode.at(key);
 		if(newNode==null){
-			parentNode.set(key, tempNode);
+			Json tmp = parentNode.set(key, tempNode);
+			addToNodeMap(tmp);
 		}else{
 			merge(newNode, tempNode);
 		}
@@ -220,13 +225,17 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 	 * @return
 	 */
 	public Json atPath(String ... path ){
-		Json json=this;
+		//Json json=this;
+		StringBuffer fullPath = new StringBuffer() ;
 		for(String k:path){
 			if(StringUtils.isBlank(k))continue;
-			json=findNode(json, k);
-			if(json==null) return null;
+			fullPath.append("."+k);
+			//json=findNode(json, k);
+			//if(json==null) return null;
 		}
-		return json;
+		if(fullPath.charAt(0)=='.')fullPath.deleteCharAt(0);
+		logger.debug("atPath:"+fullPath.toString());
+		return findNode(fullPath.toString());
 	}
 	/**
 	 * Sets the value, adding "source":"self" and "timestamp":now()
@@ -296,7 +305,9 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 	 * @param key
 	 */
 	public void delete(Json parentNode, String key) {
-		if(parentNode!=null){
+		if(parentNode!=null ){
+			String fullPath = parentNode.getPath()+"."+key;
+			nodeMap.remove(fullPath);
 			parentNode.delAt(key);
 		}
 	}
@@ -305,7 +316,7 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 	 * Return a Json node which is a deep copy of the signalk model root node
 	 * @return
 	 */
-	public Json duplicate(){
+	public SignalKModel duplicate(){
 		return this.dup();
 	}
 	
@@ -314,8 +325,21 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 	 * and has the keys starting with _ removed.
 	 * @return
 	 */
-	public Json safeDuplicate(){
-		return safe(this.dup());
+	public SignalKModel safeDuplicate(){
+		SignalKModel safe = this.duplicate();
+		ImmutableList<String> fieldNames = ImmutableList.copyOf(safe.getNodeMap().keySet().iterator());
+		for (String fieldName:fieldNames) {
+			if(logger.isTraceEnabled())logger.trace("Safe parse " + fieldName);
+			// if field exists and starts with _, delete it
+			if(fieldName.contains("._")){
+				//logger.debug("Remove "+fieldName);
+				Json tmp = safe.getNodeMap().get(fieldName);
+				tmp.up().delAt(tmp.getParentKey());
+				safe.getNodeMap().remove(fieldName);
+			}
+			
+		}
+		return safe;
 	}
 
 	/**
@@ -324,20 +348,16 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 	 * @return
 	 */
 	public Json safe(Json mainNode) {
-		Iterator<String> fieldNames = mainNode.asMap().keySet().iterator();
-		while (fieldNames.hasNext()) {
-
-			String fieldName = fieldNames.next();
+		ImmutableList<String> fieldNames = ImmutableList.copyOf(nodeMap.keySet().iterator());
+		for (String fieldName:fieldNames) {
 			if(logger.isTraceEnabled())logger.trace("Safe parse " + fieldName);
 			// if field exists and starts with _, delete it
-			if(fieldName.startsWith("_")){
-				mainNode.delAt(fieldName);
-			}else{
-				Json json = mainNode.at(fieldName);
-				if (json != null && json.isObject()) {
-					safe(json);
-				} 
+			if(fieldName.contains("._")){
+				Json tmp = nodeMap.get(fieldName);
+				tmp.up().delAt(tmp.getParentKey());
+				nodeMap.remove(fieldName);
 			}
+			
 		}
 		return mainNode;
 	}
@@ -465,20 +485,28 @@ public class SignalKModelImpl extends ObjectJson implements SignalKModel{
 	SignalKModelImpl(Json e) { super(e); }
 	
 
-	public Json dup() 
+	public SignalKModelImpl dup() 
 	{ 
+		//TODO: this can be faster
 		SignalKModelImpl j = (SignalKModelImpl) SignalKModelFactory.getCleanInstance();
 	    for (Map.Entry<String, Json> e : object.entrySet())
 	    {
 	        Json v = e.getValue().dup();
 	        v.attachTo(j);
+	        if(v.isObject())((ObjectJson)v).setParentKey(e.getKey()) ;
 	        j.object.put(e.getKey(), v);
+	        j.addToNodeMap(v);
 	    }
+	    
 	    return j;
 	}
 	
 	public boolean equals(Object x)
 	{			
 		return x instanceof SignalKModelImpl && ((SignalKModelImpl)x).object.equals(object); 
+	}
+
+	public ConcurrentHashMap<String, Json> getNodeMap() {
+		return nodeMap;
 	}
 }

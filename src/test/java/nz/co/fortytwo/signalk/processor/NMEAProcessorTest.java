@@ -95,7 +95,7 @@ public class NMEAProcessorTest {
 		 NMEAProcessor processor = new NMEAProcessor();
 		
 		 Json json = (Json) processor.handle(nmea1);
-		 logger.debug(json);
+		 logger.debug("Returned signalk tree:"+json);
 		 assertEquals(51.9485185d,signalkModel.findValue(json.at(VESSELS).at(SELF), nav_position_latitude).asDouble(),0.00001);
 		 logger.debug("Lat :"+signalkModel.findValue(json, nav_position_latitude));
 	}

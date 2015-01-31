@@ -76,8 +76,14 @@ public class N2KProcessor extends SignalkProcessor implements Processor {
 			mappings = Json.read(FileUtils.readFileToString(mappingFile));
 			for (String pgn : mappings.asJsonMap().keySet()) {
 				Json mappingArray = mappings.at(pgn);
+				logger.debug("Array="+mappingArray);
 				for (Json j : mappingArray.asJsonList()) {
-					JsonPath compiledPath = JsonPath.compile(j.at(FILTER).asString() + "." + j.at(SOURCE).asString());
+					logger.debug("Json="+j);
+					String filter = "$";
+					if(j.at(FILTER)!=null && !j.at(FILTER).isNull()){
+						filter=j.at(FILTER).toString();
+					}
+					JsonPath compiledPath = JsonPath.compile(filter + "." + j.at(SOURCE));
 					String node = j.at(NODE).asString();
 					nodeMap.put(pgn, new N2KHolder(node, compiledPath));
 				}

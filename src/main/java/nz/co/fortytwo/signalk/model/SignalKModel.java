@@ -24,6 +24,7 @@
 package nz.co.fortytwo.signalk.model;
 
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import mjson.Json;
 
@@ -137,15 +138,15 @@ public interface SignalKModel{
 		 * Return a Json node which is a deep copy of the signalk model root node
 		 * @return
 		 */
-		public Json duplicate();
+		public SignalKModel duplicate();
 		
 		/**
 		 * Return a Json node which is a deep copy of the signalk model root node
 		 * and has the keys starting with _ removed.
 		 * @return
 		 */
-		public Json safeDuplicate();
-		
+		public SignalKModel safeDuplicate();
+		public ConcurrentHashMap<String, Json> getNodeMap();
 		/**
 		 * Recursive addNode()
 		 * Same as findNode, but will make a new node if any node on the path is empty
