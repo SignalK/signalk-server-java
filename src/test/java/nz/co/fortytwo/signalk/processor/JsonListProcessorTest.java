@@ -53,14 +53,28 @@ public class JsonListProcessorTest {
 		String request = "{\"context\":\"vessels.*\",\"list\":[{\"path\":\"navigation.*\"}]}";
 		Json json = Json.read(request);
 		JsonListProcessor processor = new JsonListProcessor();
-		processor.handle(json, "mmmmmmm");
+		Json reply = processor.handle(json, "mmmmmmm");
+		assertNotNull(reply);
+		assertTrue(reply.at("pathlist").asList().size()>10);
 	}
 	@Test
 	public void shouldProduceMultiplePathList() throws Exception {
 		String request = "{\"context\":\"vessels.*\",\"list\":[{\"path\":\"navigation.position.*\"},{\"path\":\"navigation.course*\"}]}";
 		Json json = Json.read(request);
 		JsonListProcessor processor = new JsonListProcessor();
-		processor.handle(json, "mmmmmmm");
+		Json reply = processor.handle(json, "mmmmmmm");
+		assertNotNull(reply);
+		assertTrue(reply.at("pathlist").asList().size()>4);
+	}
+	
+	@Test
+	public void shouldProduceVesselPathList() throws Exception {
+		String request = "{\"context\":\"vessels.motu\",\"list\":[{\"path\":\"navigation.position.*\"},{\"path\":\"navigation.course*\"}]}";
+		Json json = Json.read(request);
+		JsonListProcessor processor = new JsonListProcessor();
+		Json reply = processor.handle(json, "mmmmmmm");
+		assertNotNull(reply);
+		assertTrue(reply.at("pathlist").asList().size()>4);
 	}
 
 }

@@ -187,6 +187,15 @@ public class JsonListProcessor extends SignalkProcessor implements Processor{
 			return ImmutableList.copyOf(keys);
 		}
 		regex=sanitizePath(regex);
+		//deal with vessels.motu, vessels.self
+		int p1 = VESSELS.length()+1;
+		int p2 = regex.indexOf(".",p1);
+		if(p2>0){
+			regex = VESSELS+DOT+"*"+regex.substring(p2);
+		}else{
+			regex = VESSELS+DOT+"*";
+		}
+		if(logger.isDebugEnabled())logger.debug("Regexing " + regex);
 		Pattern pattern = regexPath(regex);
 		List<String> paths = new ArrayList<String>();
 		for (String p : keys) {

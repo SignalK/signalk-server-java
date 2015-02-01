@@ -100,27 +100,33 @@ public class JsonGetProcessor extends SignalkProcessor implements Processor{
 	//@Override
 	public Json  handle(Json node, String wsSession) throws Exception {
 		
-		if(logger.isDebugEnabled())logger.debug("Checking for list  "+node );
+		if(logger.isDebugEnabled())logger.debug("Checking for get  "+node );
 		
 		//go to context
 		String context = node.at(CONTEXT).asString();
 		//TODO: is the context and path valid? A DOS attack is possible if we allow numerous crap/bad paths?
 		
 		Json paths = node.at(GET);
+		
 		if(paths!=null){
 			if(paths.isArray()){
+				String format = FORMAT_DELTA;
 				SignalKModel tree = SignalKModelFactory.getCleanInstance();
 				for(Json path: paths.asJsonList()){
 					parseGet(wsSession, context, path, tree);
+					if(path.has(FORMAT)){
+						format = path.at(FORMAT).asString();
+					}
 				}
+				
 				node.delAt(GET);
 				Map<String, Object> headers = new HashMap<String, Object>();
 				headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
-				headers.put(SIGNALK_FORMAT, FORMAT_DELTA);
+				headers.put(SIGNALK_FORMAT, format);
 				
 				outProducer.sendBodyAndHeaders(tree, headers);
 			}
-			if(logger.isDebugEnabled())logger.debug("Processed list  "+node );
+			if(logger.isDebugEnabled())logger.debug("Processed get  "+node );
 			
 		}
 		
@@ -135,14 +141,16 @@ public class JsonGetProcessor extends SignalkProcessor implements Processor{
                   
                 }
                 </pre>
+	 * @param wsSession
 	 * @param context
-	 * @param list
-	 * @throws Exception 
+	 * @param path
+	 * @param tree
+	 * @throws Exception
 	 */
 	private void parseGet(String wsSession, String context, Json path, SignalKModel tree) throws Exception {
 		//get values
 		String regexKey = context+DOT+path.at(PATH).asString();
-		if(logger.isDebugEnabled())logger.debug("Parsing list  "+regexKey );
+		if(logger.isDebugEnabled())logger.debug("Parsing get  "+regexKey );
 		
 		List<String> rslt = getMatchingPaths(regexKey);
 		//add to tree
@@ -153,8 +161,8 @@ public class JsonGetProcessor extends SignalkProcessor implements Processor{
 	}
 	
 	/**
-	 * Returns a list of paths that this implementation is currently providing.
-	 * The list is filtered by the key if it is not null or empty in which case a full list is returned,
+	 * Returns a get of paths that this implementation is currently providing.
+	 * The get is filtered by the key if it is not null or empty in which case a full get is returned,
 	 * supports * and ? wildcards.
 	 * @param regex
 	 * @return
