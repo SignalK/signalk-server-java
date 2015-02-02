@@ -147,6 +147,8 @@ public class Util {
 		props.setProperty(Constants.SERIAL_PORT_BAUD,"38400");
 		props.setProperty(Constants.TCP_PORT,"5555");
 		props.setProperty(Constants.UDP_PORT,"5554");
+		props.setProperty(Constants.TCP_NMEA_PORT,"5557");
+		props.setProperty(Constants.UDP_NMEA_PORT,"5556");
 	}
 	
 

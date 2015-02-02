@@ -74,14 +74,14 @@ public class NettyServer implements Processor{
 	private CamelNettyHandler forwardingHandler = null;
 	private CamelUdpNettyHandler udpHandler = null;
 	private Channel udpChannel = null;
-	private int port = 5555;
+	private int tcpPort = 5555;
+	private int udpPort = 5554;
 	/**
 	 * @param configDir
 	 * @throws Exception 
 	 */
 	public NettyServer(String configDir) throws Exception {
 		config = Util.getConfig(configDir);
-		port = Integer.valueOf(config.getProperty(Constants.TCP_PORT), port);
 		group = new NioEventLoopGroup();
 		workerGroup = new NioEventLoopGroup();
 		
@@ -98,7 +98,7 @@ public class NettyServer implements Processor{
 		forwardingHandler = new CamelNettyHandler(config);
 		// The generic TCP socket server
 		ServerBootstrap skBootstrap = new ServerBootstrap();
-		skBootstrap.group(group, workerGroup).channel(NioServerSocketChannel.class).localAddress(port)
+		skBootstrap.group(group, workerGroup).channel(NioServerSocketChannel.class).localAddress(tcpPort)
 				.childHandler(new ChannelInitializer<SocketChannel>() {
 					@Override
 					public void initChannel(SocketChannel socketChannel) throws Exception {
@@ -120,7 +120,7 @@ public class NettyServer implements Processor{
 		Bootstrap udpBootstrap = new Bootstrap();
 		udpBootstrap.group(group).channel(NioDatagramChannel.class).option(ChannelOption.SO_BROADCAST, true)
 					.handler(udpHandler);
-		udpChannel = udpBootstrap.bind(port-1).sync().channel();
+		udpChannel = udpBootstrap.bind(tcpPort-1).sync().channel();
 	}
 
 	public void shutdownServer() {
@@ -169,12 +169,20 @@ public class NettyServer implements Processor{
 		
 	}
 
-	public int getPort() {
-		return port;
+	public int getTcpPort() {
+		return tcpPort;
 	}
 
-	public void setPort(int port) {
-		this.port = port;
+	public void setTcpPort(int port) {
+		this.tcpPort = port;
+	}
+
+	protected int getUdpPort() {
+		return udpPort;
+	}
+
+	protected void setUdpPort(int udpPort) {
+		this.udpPort = udpPort;
 	}
 
 }

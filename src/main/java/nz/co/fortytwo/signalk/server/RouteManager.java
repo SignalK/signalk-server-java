@@ -136,10 +136,13 @@ public class RouteManager extends RouteBuilder {
 		
 		
 		skServer = new NettyServer(null);
+		nmeaServer.setTcpPort(Integer.valueOf(config.getProperty(Constants.TCP_PORT)));
+		nmeaServer.setUdpPort(Integer.valueOf(config.getProperty(Constants.UDP_PORT)));
 		skServer.run();
 		
 		nmeaServer = new NettyServer(null);
-		nmeaServer.setPort(nmeaServer.getPort()+2);
+		nmeaServer.setTcpPort(Integer.valueOf(config.getProperty(Constants.TCP_NMEA_PORT)));
+		nmeaServer.setUdpPort(Integer.valueOf(config.getProperty(Constants.UDP_NMEA_PORT)));
 		nmeaServer.run();
 		
 		// start a serial port manager

@@ -54,6 +54,8 @@ public class Constants {
 //	public static final String SESSIONID = "signalk.session";
 	public static final String TCP_PORT = "signalk.tcp.port";
 	public static final String UDP_PORT = "signalk.udp.port";
+	public static final String TCP_NMEA_PORT = "signalk.tcp.nmea.port";
+	public static final String UDP_NMEA_PORT = "signalk.udp.nmea.port";
 	
 	public Constants() {
 		// TODO Auto-generated constructor stub
