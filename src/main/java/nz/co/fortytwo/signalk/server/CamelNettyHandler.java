@@ -37,7 +37,6 @@ import java.util.UUID;
 
 import mjson.Json;
 
-import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.camel.impl.DefaultProducerTemplate;
@@ -76,12 +75,12 @@ public class CamelNettyHandler extends SimpleChannelInboundHandler<String> {
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, String request) throws Exception {
 		if(logger.isDebugEnabled())logger.debug("Request:" + request);
-		Map headers = getHeaders(ctx);
+		Map<String, Object> headers = getHeaders(ctx);
 		producer.sendBodyAndHeaders(request, headers);
 	}
 
-	private Map getHeaders(ChannelHandlerContext ctx) {
-		Map<String, String> headers = new HashMap<>();
+	private Map<String, Object> getHeaders(ChannelHandlerContext ctx) {
+		Map<String, Object> headers = new HashMap<>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, contextList.inverse().get(ctx));
 		headers.put(RouteManager.REMOTE_ADDRESS, ctx.channel().remoteAddress().toString());
 		return headers;

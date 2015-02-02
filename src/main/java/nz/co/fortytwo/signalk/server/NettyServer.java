@@ -31,13 +31,16 @@ package nz.co.fortytwo.signalk.server;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -45,8 +48,10 @@ import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import io.netty.handler.codec.Delimiters;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
+import io.netty.util.CharsetUtil;
 import io.netty.util.concurrent.Future;
 
+import java.net.InetSocketAddress;
 import java.util.Properties;
 
 import nz.co.fortytwo.signalk.server.util.Constants;
@@ -67,6 +72,8 @@ public class NettyServer implements Processor{
 	private static final StringDecoder DECODER = new StringDecoder();
 	private static final StringEncoder ENCODER = new StringEncoder();
 	private CamelNettyHandler forwardingHandler = null;
+	private CamelUdpNettyHandler udpHandler = null;
+	private Channel udpChannel = null;
 	private int port = 5555;
 	/**
 	 * @param configDir
@@ -74,7 +81,7 @@ public class NettyServer implements Processor{
 	 */
 	public NettyServer(String configDir) throws Exception {
 		config = Util.getConfig(configDir);
-		port = Integer.valueOf(config.getProperty(Constants.TCP_PORT));
+		port = Integer.valueOf(config.getProperty(Constants.TCP_PORT), port);
 		group = new NioEventLoopGroup();
 		workerGroup = new NioEventLoopGroup();
 		
@@ -108,23 +115,12 @@ public class NettyServer implements Processor{
 		final ChannelFuture signalkTcpFuture = skBootstrap.bind().sync();
 		logger.info("Server listening on TCP " + signalkTcpFuture.channel().localAddress());
 		signalkTcpFuture.channel().closeFuture();
-		
-		//TODO: udp server:https://github.com/netty/netty/tree/master/example/src/main/java/io/netty/example/qotm
-		/*Bootstrap udpBootstrap = new Bootstrap();
-		udpBootstrap.group(group).channel(NioDatagramChannel.class).localAddress(Integer.valueOf(config.getProperty(Constants.UDP_PORT)))
-				.handler(new ChannelInitializer<Channel>() {
-					@Override
-					public void initChannel(Channel socketChannel) throws Exception {
-						ChannelPipeline pipeline = socketChannel.pipeline();
-						pipeline.addLast(new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));
-						pipeline.addLast(DECODER);
-						pipeline.addLast(ENCODER);
-						pipeline.addLast(forwardingHandler);
-					}
-				});
-		ChannelFuture signalkUdpFuture = udpBootstrap.bind().sync();
-		logger.info("Server listening on udp " + signalkUdpFuture.channel().localAddress());
-		signalkUdpFuture.channel().closeFuture().sync();*/
+		udpHandler = new CamelUdpNettyHandler(config);
+		 
+		Bootstrap udpBootstrap = new Bootstrap();
+		udpBootstrap.group(group).channel(NioDatagramChannel.class).option(ChannelOption.SO_BROADCAST, true)
+					.handler(udpHandler);
+		udpChannel = udpBootstrap.bind(port-1).sync().channel();
 	}
 
 	public void shutdownServer() {
@@ -145,12 +141,21 @@ public class NettyServer implements Processor{
 
 	@Override
 	public void process(Exchange exchange) throws Exception {
-		logger.debug("Received msg for tcp: "+exchange.getIn().getBody());
+		logger.debug("Received msg : "+exchange.getIn().getBody());
 		String msg = exchange.getIn().getBody().toString();
 		if(msg!=null){
 			//get the session
 			String session = exchange.getIn().getHeader(WebsocketConstants.CONNECTION_KEY, String.class);
-		
+			
+			if(udpChannel!=null&& udpChannel.isWritable()){
+				for(InetSocketAddress client:udpHandler.getClients()){
+					logger.debug("Sending udp: "+exchange.getIn().getBody());
+					//udpCtx.pipeline().writeAndFlush(msg+"\r\n");
+					udpChannel.writeAndFlush(new DatagramPacket(
+						Unpooled.copiedBuffer(msg+"\r\n", CharsetUtil.UTF_8),client));
+					logger.debug("Sent udp to "+client);
+				}
+			}
 			if(WebsocketConstants.SEND_TO_ALL.equals(session)){
 				for(String key: forwardingHandler.getContextList().keySet()){
 					ChannelHandlerContext ctx = forwardingHandler.getChannel(key);

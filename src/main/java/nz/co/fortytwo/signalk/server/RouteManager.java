@@ -139,7 +139,7 @@ public class RouteManager extends RouteBuilder {
 		skServer.run();
 		
 		nmeaServer = new NettyServer(null);
-		nmeaServer.setPort(nmeaServer.getPort()+1);
+		nmeaServer.setPort(nmeaServer.getPort()+2);
 		nmeaServer.run();
 		
 		// start a serial port manager
