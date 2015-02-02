@@ -136,8 +136,8 @@ public class RouteManager extends RouteBuilder {
 		
 		
 		skServer = new NettyServer(null);
-		nmeaServer.setTcpPort(Integer.valueOf(config.getProperty(Constants.TCP_PORT)));
-		nmeaServer.setUdpPort(Integer.valueOf(config.getProperty(Constants.UDP_PORT)));
+		skServer.setTcpPort(Integer.valueOf(config.getProperty(Constants.TCP_PORT)));
+		skServer.setUdpPort(Integer.valueOf(config.getProperty(Constants.UDP_PORT)));
 		skServer.run();
 		
 		nmeaServer = new NettyServer(null);

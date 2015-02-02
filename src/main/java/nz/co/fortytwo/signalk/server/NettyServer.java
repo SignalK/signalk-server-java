@@ -115,12 +115,16 @@ public class NettyServer implements Processor{
 		final ChannelFuture signalkTcpFuture = skBootstrap.bind().sync();
 		logger.info("Server listening on TCP " + signalkTcpFuture.channel().localAddress());
 		signalkTcpFuture.channel().closeFuture();
-		udpHandler = new CamelUdpNettyHandler(config);
-		 
-		Bootstrap udpBootstrap = new Bootstrap();
-		udpBootstrap.group(group).channel(NioDatagramChannel.class).option(ChannelOption.SO_BROADCAST, true)
-					.handler(udpHandler);
-		udpChannel = udpBootstrap.bind(tcpPort-1).sync().channel();
+		
+		if(udpPort>0){
+			udpHandler = new CamelUdpNettyHandler(config);
+			 
+			Bootstrap udpBootstrap = new Bootstrap();
+			udpBootstrap.group(group).channel(NioDatagramChannel.class)
+				.option(ChannelOption.SO_BROADCAST, true)
+				.handler(udpHandler);
+			udpChannel = udpBootstrap.bind(tcpPort-1).sync().channel();
+		}
 	}
 
 	public void shutdownServer() {
@@ -147,16 +151,17 @@ public class NettyServer implements Processor{
 			//get the session
 			String session = exchange.getIn().getHeader(WebsocketConstants.CONNECTION_KEY, String.class);
 			
-			if(udpChannel!=null&& udpChannel.isWritable()){
-				for(InetSocketAddress client:udpHandler.getClients()){
-					logger.debug("Sending udp: "+exchange.getIn().getBody());
-					//udpCtx.pipeline().writeAndFlush(msg+"\r\n");
-					udpChannel.writeAndFlush(new DatagramPacket(
-						Unpooled.copiedBuffer(msg+"\r\n", CharsetUtil.UTF_8),client));
-					logger.debug("Sent udp to "+client);
-				}
-			}
 			if(WebsocketConstants.SEND_TO_ALL.equals(session)){
+				//udp
+				if(udpPort>0 && udpChannel!=null&& udpChannel.isWritable()){
+					for(InetSocketAddress client:udpHandler.getClients()){
+						logger.debug("Sending udp: "+exchange.getIn().getBody());
+						//udpCtx.pipeline().writeAndFlush(msg+"\r\n");
+						udpChannel.writeAndFlush(new DatagramPacket(
+							Unpooled.copiedBuffer(msg+"\r\n", CharsetUtil.UTF_8),client));
+						logger.debug("Sent udp to "+client);
+					}
+				}
 				for(String key: forwardingHandler.getContextList().keySet()){
 					ChannelHandlerContext ctx = forwardingHandler.getChannel(key);
 					if(ctx!=null&& ctx.channel().isWritable())ctx.pipeline().writeAndFlush(msg+"\r\n");
