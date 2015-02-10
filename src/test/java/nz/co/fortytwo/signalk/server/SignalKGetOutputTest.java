@@ -22,7 +22,7 @@
  */
 package nz.co.fortytwo.signalk.server;
 
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;
+import static nz.co.fortytwo.signalk.util.JsonConstants.*;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 import mjson.Json;
 import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
 import nz.co.fortytwo.signalk.processor.WindProcessor;
-import nz.co.fortytwo.signalk.server.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.JsonConstants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.ProducerTemplate;

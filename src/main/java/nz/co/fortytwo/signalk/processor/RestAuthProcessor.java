@@ -26,7 +26,7 @@ package nz.co.fortytwo.signalk.processor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import nz.co.fortytwo.signalk.server.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.JsonConstants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;

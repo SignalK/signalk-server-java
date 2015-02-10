@@ -23,17 +23,17 @@
  */
 package nz.co.fortytwo.signalk.server;
 
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.SELF;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.VESSELS;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.env_wind_speedApparent;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.env_wind_speedTrue;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.nav_magneticVariation;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.nav_position_latitude;
+import static nz.co.fortytwo.signalk.util.JsonConstants.SELF;
+import static nz.co.fortytwo.signalk.util.JsonConstants.VESSELS;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.env_wind_speedApparent;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.env_wind_speedTrue;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_magneticVariation;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position_latitude;
 
 import java.util.concurrent.TimeUnit;
 
-import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
-import nz.co.fortytwo.signalk.processor.WindProcessor;
+import nz.co.fortytwo.signalk.handler.DeclinationHandler;
+import nz.co.fortytwo.signalk.handler.TrueWindHandler;
 
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
@@ -47,9 +47,9 @@ public class SignalKNmeaReceiverTest extends SignalKCamelTestSupport {
  
     static final String DIRECT_INPUT = "seda:input";
 	static Logger logger = Logger.getLogger(SignalKNmeaReceiverTest.class);
-	DeclinationProcessor declinationProcessor=null;
+	DeclinationHandler declinationProcessor=null;
 
-	WindProcessor windProcessor = null;
+	TrueWindHandler windProcessor = null;
 	//private GPXProcessor gpxProcessor;
 
 	MockEndpoint nmea = null;
@@ -64,8 +64,8 @@ public class SignalKNmeaReceiverTest extends SignalKCamelTestSupport {
 	
 	public void init() throws Exception{
 		
-		declinationProcessor=new DeclinationProcessor();
-		windProcessor = new WindProcessor();
+		declinationProcessor=new DeclinationHandler();
+		windProcessor = new TrueWindHandler();
 		template= new DefaultProducerTemplate(routeManager.getContext());
 		template.setDefaultEndpointUri(DIRECT_INPUT);
 		template.start();
@@ -131,7 +131,7 @@ public class SignalKNmeaReceiverTest extends SignalKCamelTestSupport {
 		
 		 assertEquals(51.9485185d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF), nav_position_latitude).asDouble(),0.00001);
 		 assertEquals(20.0d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF),env_wind_speedApparent ).asDouble(),0.00001);
-		 windProcessor.handle();
+		 windProcessor.handle(signalkModel);
 		 assertEquals(20.0d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF),env_wind_speedTrue ).asDouble(),0.00001);
 		 nmea.assertIsSatisfied();
     }
@@ -150,7 +150,7 @@ public class SignalKNmeaReceiverTest extends SignalKCamelTestSupport {
 		
 		 //assertEquals(51.9485185d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF), nav_magneticVariation).asDouble(),0.00001);
 		// assertEquals(20.0d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF),env_wind_speedApparent ).asDouble(),0.00001);
-		 declinationProcessor.handle();
+		 declinationProcessor.handle(signalkModel);
 		 assertEquals(0.5d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF),nav_magneticVariation ).asDouble(),0.00001);
 		 nmea.assertIsSatisfied();
     }

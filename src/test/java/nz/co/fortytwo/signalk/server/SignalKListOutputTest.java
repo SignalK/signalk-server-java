@@ -23,7 +23,7 @@
  */
 package nz.co.fortytwo.signalk.server;
 
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;
+import static nz.co.fortytwo.signalk.util.JsonConstants.*;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 

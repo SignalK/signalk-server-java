@@ -27,7 +27,7 @@ import static org.junit.Assert.*;
 import mjson.Json;
 import nz.co.fortytwo.signalk.processor.ValidationProcessor;
 import nz.co.fortytwo.signalk.server.RouteManagerFactory;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;
+import static nz.co.fortytwo.signalk.util.JsonConstants.*;
 
 import org.apache.log4j.Logger;
 import org.junit.After;

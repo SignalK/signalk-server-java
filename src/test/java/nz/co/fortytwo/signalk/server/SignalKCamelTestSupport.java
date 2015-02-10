@@ -31,7 +31,7 @@ import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
 import nz.co.fortytwo.signalk.processor.WindProcessor;
-import nz.co.fortytwo.signalk.server.util.Util;
+import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;

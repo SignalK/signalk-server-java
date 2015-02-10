@@ -23,15 +23,11 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import mjson.Json;
-import nz.co.fortytwo.signalk.server.util.JsonConstants;
-import nz.co.fortytwo.signalk.server.util.SignalKConstants;
-import nz.co.fortytwo.signalk.server.util.TSAGeoMag;
+import nz.co.fortytwo.signalk.handler.DeclinationHandler;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.log4j.Logger;
-import org.joda.time.DateTime;
 
 /**
  * Processes messages, if it finds a Magnetic bearing, and has seen a LAT and LON, it calculates declination,
@@ -45,35 +41,17 @@ public class DeclinationProcessor extends SignalkProcessor implements Processor 
 
 	private static Logger logger = Logger.getLogger(DeclinationProcessor.class);
 	
-	private TSAGeoMag geoMag = new TSAGeoMag();
+	private DeclinationHandler decl = new DeclinationHandler();
 	
 	public void process(Exchange exchange) throws Exception {
 		
 		try {
 		
-			handle();
+			decl.handle(signalkModel);
 			
 		} catch (Exception e) {
 			logger.error(e);
 		}
-	}
-
-	//@Override
-	public void handle() {
-		logger.debug("Declination  calculation fired " );
-		Json lat = signalkModel.findNode(signalkModel.self(), SignalKConstants.nav_position_latitude);
-		Json lon = signalkModel.findNode(signalkModel.self(), SignalKConstants.nav_position_longitude);
-		
-		if (lat!=null && lon!=null) {
-			if(logger.isDebugEnabled())logger.debug("Declination  for "+lat.at("value")+", "+lon.at("value") );
-			
-			double declination = geoMag.getDeclination(lat.at("value").asDouble(), lon.at("value").asDouble(), DateTime.now().getYear(), 0.0d);
-			
-			declination = round(declination, 1);
-			if(logger.isDebugEnabled())logger.debug("Declination = " + declination);
-			signalkModel.putWith(signalkModel.self(), SignalKConstants.nav_magneticVariation, declination, JsonConstants.SELF);	
-		}
-		
 	}
 
 }

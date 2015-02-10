@@ -31,8 +31,8 @@ import java.util.Properties;
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
-import nz.co.fortytwo.signalk.server.util.Constants;
-import nz.co.fortytwo.signalk.server.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.Constants;
+import nz.co.fortytwo.signalk.util.JsonConstants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Predicate;

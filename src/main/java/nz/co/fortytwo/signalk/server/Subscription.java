@@ -24,7 +24,7 @@
  */
 package nz.co.fortytwo.signalk.server;
 
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.VESSELS;
+import static nz.co.fortytwo.signalk.util.JsonConstants.VESSELS;
 import io.netty.util.internal.ConcurrentSet;
 
 import java.util.ArrayList;

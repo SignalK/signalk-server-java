@@ -23,7 +23,7 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;
+import static nz.co.fortytwo.signalk.util.JsonConstants.*;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -33,12 +33,13 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import mjson.Json;
+import nz.co.fortytwo.signalk.handler.JsonGetHandler;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.server.Subscription;
 import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
-import nz.co.fortytwo.signalk.server.util.JsonConstants;
-import nz.co.fortytwo.signalk.server.util.SignalKConstants;
+import nz.co.fortytwo.signalk.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -61,6 +62,7 @@ public class JsonGetProcessor extends SignalkProcessor implements Processor{
 
 	private static Logger logger = Logger.getLogger(JsonGetProcessor.class);
 	//private static DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
+	private JsonGetHandler getHandler = new JsonGetHandler();
 	
 	public void process(Exchange exchange) throws Exception {
 		
@@ -74,7 +76,13 @@ public class JsonGetProcessor extends SignalkProcessor implements Processor{
 			//avoid full signalk syntax
 			if(json.has(VESSELS))return;
 			if(json.has(CONTEXT) && (json.has(GET))){
-				json = handle(json, wsSession);
+				SignalKModel temp = getHandler.handle(signalkModel, json);
+				
+				Map<String, Object> headers = new HashMap<String, Object>();
+				headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
+				headers.put(SIGNALK_FORMAT, getHandler.getFormat(json));
+				json.delAt(GET);
+				outProducer.sendBodyAndHeaders(temp, headers);
 				exchange.getIn().setBody(json);
 			}
 		} catch (Exception e) {
@@ -82,106 +90,8 @@ public class JsonGetProcessor extends SignalkProcessor implements Processor{
 		}
 	}
 
-	/*
-	 *  
-	 *  <pre>
-{
-    "context": "vessels.*",
-    "get": [
-        {
-                    "path": "navigation.position",
-                }
-        ]
-}
 
-</pre>
-*/
-	 
-	//@Override
-	public Json  handle(Json node, String wsSession) throws Exception {
-		
-		if(logger.isDebugEnabled())logger.debug("Checking for get  "+node );
-		
-		//go to context
-		String context = node.at(CONTEXT).asString();
-		//TODO: is the context and path valid? A DOS attack is possible if we allow numerous crap/bad paths?
-		
-		Json paths = node.at(GET);
-		
-		if(paths!=null){
-			if(paths.isArray()){
-				String format = FORMAT_DELTA;
-				SignalKModel tree = SignalKModelFactory.getCleanInstance();
-				for(Json path: paths.asJsonList()){
-					parseGet(wsSession, context, path, tree);
-					if(path.has(FORMAT)){
-						format = path.at(FORMAT).asString();
-					}
-				}
-				
-				node.delAt(GET);
-				Map<String, Object> headers = new HashMap<String, Object>();
-				headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
-				headers.put(SIGNALK_FORMAT, format);
-				
-				outProducer.sendBodyAndHeaders(tree, headers);
-			}
-			if(logger.isDebugEnabled())logger.debug("Processed get  "+node );
-			
-		}
-		
-		return node;
-		
-	}
-
-	/**
-	 *  
-	 *   <pre>{
-                    "path": "navigation.speedThroughWater",
-                  
-                }
-                </pre>
-	 * @param wsSession
-	 * @param context
-	 * @param path
-	 * @param tree
-	 * @throws Exception
-	 */
-	private void parseGet(String wsSession, String context, Json path, SignalKModel tree) throws Exception {
-		//get values
-		String regexKey = context+DOT+path.at(PATH).asString();
-		if(logger.isDebugEnabled())logger.debug("Parsing get  "+regexKey );
-		
-		List<String> rslt = getMatchingPaths(regexKey);
-		//add to tree
-		for(String p: rslt){
-			populateTree(tree, p);
-		}
-		
-	}
 	
-	/**
-	 * Returns a get of paths that this implementation is currently providing.
-	 * The get is filtered by the key if it is not null or empty in which case a full get is returned,
-	 * supports * and ? wildcards.
-	 * @param regex
-	 * @return
-	 */
-	public List<String> getMatchingPaths(String regex) {
-		if(StringUtils.isBlank(regex)){
-			return ImmutableList.copyOf(signalkModel.getFullPaths());
-		}
-		regex=sanitizePath(regex);
-		Pattern pattern = regexPath(regex);
-		List<String> paths = new ArrayList<String>();
-		for (String p : signalkModel.getFullPaths()) {
-			if (pattern.matcher(p).matches()) {
-				if(logger.isDebugEnabled())logger.debug("Adding path:" + p);
-				paths.add(p);
-			}
-		}
-		return paths;
-	}
 
 	
 }

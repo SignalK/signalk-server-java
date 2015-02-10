@@ -22,7 +22,7 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;
+import static nz.co.fortytwo.signalk.util.JsonConstants.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,6 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import mjson.Json;
+import nz.co.fortytwo.signalk.handler.N2KHandler;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 
@@ -59,41 +60,12 @@ import com.jayway.jsonpath.JsonPath;
  */
 public class N2KProcessor extends SignalkProcessor implements Processor {
 
-	private static final String FILTER = "filter";
-	private static final String NODE = "node";
-	private static final String SOURCE = "source";
-	private static final String self = VESSELS + "." + SELF + ".";
+	
 	private static Logger logger = Logger.getLogger(N2KProcessor.class);
-	// private static DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
-	private NumberFormat numberFormat = NumberFormat.getInstance();
-	private Json mappings = null;
-	private JsonPath pgnPath = JsonPath.compile("$.pgn");
-	private Multimap<String, N2KHolder> nodeMap = HashMultimap.create();
+	
+	private N2KHandler n2k = new N2KHandler(); 
 
-	public N2KProcessor() {
-		File mappingFile = new File("./conf/n2kMappings.json");
-		try {
-			mappings = Json.read(FileUtils.readFileToString(mappingFile));
-			for (String pgn : mappings.asJsonMap().keySet()) {
-				Json mappingArray = mappings.at(pgn);
-				logger.debug("Array="+mappingArray);
-				for (Json j : mappingArray.asJsonList()) {
-					logger.debug("Json="+j);
-					String filter = "$";
-					if(j.at(FILTER)!=null && !j.at(FILTER).isNull()){
-						filter=j.at(FILTER).toString();
-					}
-					JsonPath compiledPath = JsonPath.compile(filter + "." + j.at(SOURCE));
-					String node = j.at(NODE).asString();
-					nodeMap.put(pgn, new N2KHolder(node, compiledPath));
-				}
-			}
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			logger.error(e.getMessage(), e);
-		}
-	}
+	
 
 	public void process(Exchange exchange) throws Exception {
 
@@ -103,7 +75,7 @@ public class N2KProcessor extends SignalkProcessor implements Processor {
 			if (exchange.getIn().getBody() == null || !(exchange.getIn().getBody() instanceof Json))
 				return;
 
-			Json json = handle(exchange.getIn().getHeader(N2K_MESSAGE, String.class));
+			Json json = n2k.handle(exchange.getIn().getHeader(N2K_MESSAGE, String.class));
 			if (logger.isDebugEnabled())
 				logger.debug("Converted to:" + json);
 			exchange.getIn().setBody(json);
@@ -112,67 +84,5 @@ public class N2KProcessor extends SignalkProcessor implements Processor {
 		}
 	}
 
-	/*
-	 * {
-	 * "timestamp": "2013-10-08-15:47:28.264",
-	 * "prio": "2",
-	 * "src": "2",
-	 * "dst": "255",
-	 * "pgn": "129025",
-	 * "description": "Position, Rapid Update",
-	 * "fields": {
-	 * "Latitude": "60.1445540",
-	 * "Longitude": "24.7921348"
-	 * }
-	 * }
-	 */
-
-	// @Override
-	public Json handle(String n2kmsg) {
-		// get the pgn value
-		DocumentContext n2k = JsonPath.parse(n2kmsg);
-		String pgn = n2k.read(pgnPath);
-		if (logger.isDebugEnabled())
-			logger.debug("processing n2k pgn " + pgn);
-		if (nodeMap.containsKey(pgn)) {
-			// process it, mappings is n2kMapping.json as a json object
-			Collection<N2KHolder> entries = nodeMap.get(pgn);
-
-			// make a dummy signalk object
-			SignalKModel temp = SignalKModelFactory.getCleanInstance();
-			// mapping contains an array
-			for (N2KHolder entry : entries) {
-				Object var = n2k.read(entry.path);
-				// put in signalk tree
-				temp.putWith(self + entry.node, resolve(var));
-			}
-			if (logger.isDebugEnabled())
-				logger.debug("N2KProcessor output  " + temp);
-			return (Json) temp;
-		}
-		return null;
-
-	}
-
-	private Object resolve(Object var) {
-		if (var == null || !(var instanceof String))
-			return var;
-		try {
-			return numberFormat.parse((String)var);
-		} catch (ParseException e) {
-			return var;
-		}
-
-	}
-
-	class N2KHolder {
-		String node = null;
-		JsonPath path = null;
-
-		public N2KHolder(String node, JsonPath path) {
-			this.node = node;
-			this.path = path;
-		}
-	}
 
 }

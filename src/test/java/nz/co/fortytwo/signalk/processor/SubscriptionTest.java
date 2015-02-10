@@ -27,7 +27,7 @@ package nz.co.fortytwo.signalk.processor;
 
 import static org.junit.Assert.*;
 import nz.co.fortytwo.signalk.server.Subscription;
-import nz.co.fortytwo.signalk.server.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.JsonConstants;
 
 import org.junit.After;
 import org.junit.Before;

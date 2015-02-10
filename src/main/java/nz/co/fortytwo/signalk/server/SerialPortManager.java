@@ -31,8 +31,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import nz.co.fortytwo.signalk.server.util.Constants;
-import nz.co.fortytwo.signalk.server.util.Util;
+import nz.co.fortytwo.signalk.util.Constants;
+import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;

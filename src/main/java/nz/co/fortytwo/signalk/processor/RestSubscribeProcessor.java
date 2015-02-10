@@ -30,7 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import nz.co.fortytwo.signalk.server.Subscription;
-import nz.co.fortytwo.signalk.server.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.JsonConstants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;

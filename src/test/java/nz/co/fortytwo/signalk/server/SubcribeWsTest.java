@@ -23,8 +23,7 @@
  */
 package nz.co.fortytwo.signalk.server;
 
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;
-
+import static nz.co.fortytwo.signalk.util.JsonConstants.*;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -34,7 +33,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import mjson.Json;
-import nz.co.fortytwo.signalk.server.util.Util;
+import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;

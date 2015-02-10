@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import mjson.Json;
-import nz.co.fortytwo.signalk.server.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.JsonConstants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;

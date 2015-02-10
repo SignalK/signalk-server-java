@@ -45,7 +45,7 @@ import nz.co.fortytwo.signalk.processor.JsonSubscribeProcessor;
 import nz.co.fortytwo.signalk.processor.ValidationProcessor;
 import nz.co.fortytwo.signalk.processor.WindProcessor;
 import nz.co.fortytwo.signalk.processor.WsSessionProcessor;
-import nz.co.fortytwo.signalk.server.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.JsonConstants;
 
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.Processor;

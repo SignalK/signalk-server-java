@@ -40,7 +40,7 @@
  * You should have received a copy of the GNU General Public License
  * along with FreeBoard. If not, see <http://www.gnu.org/licenses/>.
  */
- package nz.co.fortytwo.signalk.server.util;
+ package nz.co.fortytwo.signalk.util;
 
 import java.io.InputStream;
 import java.io.OutputStream;

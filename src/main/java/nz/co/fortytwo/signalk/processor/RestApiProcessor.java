@@ -23,23 +23,18 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import java.util.Arrays;
-
-import javax.activation.MimeType;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import mjson.Json;
-import nz.co.fortytwo.signalk.server.util.JsonConstants;
+import nz.co.fortytwo.signalk.handler.RestApiHandler;
+import nz.co.fortytwo.signalk.util.JsonConstants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.http.HttpMessage;
-import org.apache.camel.component.restlet.RestletConstants;
-import org.apache.http.entity.mime.MIME;
 import org.apache.log4j.Logger;
-import org.eclipse.jetty.http.MimeTypes;
 
 /*
  * Processes REST requests for Signal K data
@@ -52,6 +47,8 @@ import org.eclipse.jetty.http.MimeTypes;
 public class RestApiProcessor extends SignalkProcessor implements Processor{
 
 	private static Logger logger = Logger.getLogger(RestApiProcessor.class);
+	
+	private RestApiHandler api = new RestApiHandler();
 	@Override
 	public void process(Exchange exchange) throws Exception {
 		// the Restlet request should be available if neeeded
@@ -59,7 +56,12 @@ public class RestApiProcessor extends SignalkProcessor implements Processor{
 		 HttpSession session = request.getSession();
 		 if(logger.isDebugEnabled())logger.debug("Session = "+session.getId());
         if(request.getSession()!=null){
-	        if(request.getMethod().equals("GET")) processGet(request, exchange);
+	        if(request.getMethod().equals("GET")){
+	        	HttpServletResponse response = exchange.getIn(HttpMessage.class).getResponse();
+	        	Json json = api.processGet(request, response, signalkModel);
+	        	if(json!=null)exchange.getIn().setBody(json);
+	        	//response codes are set here, so all good now.
+	        }
 	        
         }else{
         	HttpServletResponse response = exchange.getIn(HttpMessage.class).getResponse();
@@ -70,36 +72,5 @@ public class RestApiProcessor extends SignalkProcessor implements Processor{
 	}
 
 
-
-	private void processGet(HttpServletRequest request, Exchange exchange) {
-		// use Restlet API to create the response
-		HttpServletResponse response = exchange.getIn(HttpMessage.class).getResponse();
-        
-		String path =  exchange.getIn().getHeader(Exchange.HTTP_URI, String.class);
-		if(logger.isDebugEnabled())logger.debug("We are processing the path = "+path);
-        
-        //check valid request.
-        if(path.length()<JsonConstants.SIGNALK_API.length()){
-        	response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        	return;
-        }
-        path=path.substring(JsonConstants.SIGNALK_API.length());
-        if(logger.isDebugEnabled())logger.debug("We are processing the extension:"+Arrays.toString(path.split("/")));
-        
-        Json json = signalkModel.atPath(path.split("/"));
-        if(json==null){
-        	response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-        	return;
-        }
-        
-        if(logger.isDebugEnabled())logger.debug("Returning:"+json);
-        
-        response.setContentType("application/json");
-        
-        // SEND RESPONSE
-        exchange.getIn().setBody(json);
-        response.setStatus(HttpServletResponse.SC_OK);
-		
-	}
 
 }

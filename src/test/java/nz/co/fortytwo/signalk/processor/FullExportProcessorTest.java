@@ -44,8 +44,8 @@ import nz.co.fortytwo.signalk.server.RouteManagerFactory;
 import nz.co.fortytwo.signalk.server.SignalkRouteFactory;
 import nz.co.fortytwo.signalk.server.Subscription;
 import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
-import nz.co.fortytwo.signalk.server.util.JsonConstants;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;
+import nz.co.fortytwo.signalk.util.JsonConstants;
+import static nz.co.fortytwo.signalk.util.JsonConstants.*;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;

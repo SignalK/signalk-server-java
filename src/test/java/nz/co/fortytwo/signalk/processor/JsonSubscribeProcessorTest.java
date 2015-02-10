@@ -25,7 +25,7 @@
 package nz.co.fortytwo.signalk.processor;
 
 import static org.junit.Assert.*;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;
+import static nz.co.fortytwo.signalk.util.JsonConstants.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -39,7 +39,7 @@ import nz.co.fortytwo.signalk.server.SubscriptionManager;
 import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
 import nz.co.fortytwo.signalk.server.SignalkRouteFactory;
 import nz.co.fortytwo.signalk.server.Subscription;
-import nz.co.fortytwo.signalk.server.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.JsonConstants;
 
 import org.apache.camel.model.RouteDefinition;
 import org.apache.log4j.Logger;

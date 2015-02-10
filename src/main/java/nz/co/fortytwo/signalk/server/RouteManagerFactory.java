@@ -27,7 +27,7 @@ package nz.co.fortytwo.signalk.server;
 
 import java.util.Properties;
 
-import nz.co.fortytwo.signalk.server.util.Util;
+import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.log4j.Logger;
 

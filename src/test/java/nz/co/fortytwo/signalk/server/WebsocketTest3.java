@@ -23,9 +23,9 @@
  */
 package nz.co.fortytwo.signalk.server;
 
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.SELF;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.SIGNALK_SUBSCRIBE;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.SIGNALK_WS;
+import static nz.co.fortytwo.signalk.util.JsonConstants.SELF;
+import static nz.co.fortytwo.signalk.util.JsonConstants.SIGNALK_SUBSCRIBE;
+import static nz.co.fortytwo.signalk.util.JsonConstants.SIGNALK_WS;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -37,8 +37,8 @@ import java.util.concurrent.TimeUnit;
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
-import nz.co.fortytwo.signalk.server.util.JsonConstants;
-import nz.co.fortytwo.signalk.server.util.Util;
+import nz.co.fortytwo.signalk.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;

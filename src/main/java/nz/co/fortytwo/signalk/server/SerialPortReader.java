@@ -36,9 +36,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-import nz.co.fortytwo.signalk.server.util.Constants;
-import nz.co.fortytwo.signalk.server.util.JsonConstants;
-import nz.co.fortytwo.signalk.server.util.Util;
+import nz.co.fortytwo.signalk.util.Constants;
+import nz.co.fortytwo.signalk.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;

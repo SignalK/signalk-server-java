@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Set;
 
 import nz.co.fortytwo.signalk.processor.JsonSubscribeProcessor;
-import nz.co.fortytwo.signalk.server.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.JsonConstants;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;

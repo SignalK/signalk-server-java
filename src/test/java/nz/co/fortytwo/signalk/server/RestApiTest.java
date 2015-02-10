@@ -23,8 +23,8 @@
  */
 package nz.co.fortytwo.signalk.server;
 
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.SELF;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.SIGNALK_WS;
+import static nz.co.fortytwo.signalk.util.JsonConstants.SELF;
+import static nz.co.fortytwo.signalk.util.JsonConstants.SIGNALK_WS;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
-import nz.co.fortytwo.signalk.server.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.JsonConstants;
 
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;

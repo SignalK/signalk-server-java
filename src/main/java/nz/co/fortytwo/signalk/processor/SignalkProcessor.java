@@ -33,8 +33,8 @@ import nz.co.fortytwo.signalk.server.CamelContextFactory;
 import nz.co.fortytwo.signalk.server.RouteManager;
 import nz.co.fortytwo.signalk.server.SubscriptionManager;
 import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
-import nz.co.fortytwo.signalk.server.util.JsonConstants;
-import nz.co.fortytwo.signalk.server.util.Util;
+import nz.co.fortytwo.signalk.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;

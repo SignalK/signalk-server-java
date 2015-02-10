@@ -27,8 +27,8 @@ package nz.co.fortytwo.signalk.server;
 import java.io.File;
 import java.util.Properties;
 
-import nz.co.fortytwo.signalk.server.util.Constants;
-import nz.co.fortytwo.signalk.server.util.Util;
+import nz.co.fortytwo.signalk.util.Constants;
+import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.component.websocket.WebsocketComponentServlet;
 import org.apache.camel.main.Main;

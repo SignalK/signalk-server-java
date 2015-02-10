@@ -23,7 +23,7 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.UPDATES;
+import static nz.co.fortytwo.signalk.util.JsonConstants.UPDATES;
 
 import java.util.List;
 
@@ -32,7 +32,7 @@ import nz.co.fortytwo.signalk.server.CamelContextFactory;
 import nz.co.fortytwo.signalk.server.RouteManager;
 import nz.co.fortytwo.signalk.server.SubscriptionManager;
 import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
-import nz.co.fortytwo.signalk.server.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.JsonConstants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;

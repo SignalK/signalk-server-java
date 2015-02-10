@@ -25,7 +25,7 @@
  */
 package nz.co.fortytwo.signalk.server.util;
 
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.SELF;
+import static nz.co.fortytwo.signalk.util.JsonConstants.SELF;
 import static org.junit.Assert.*;
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;

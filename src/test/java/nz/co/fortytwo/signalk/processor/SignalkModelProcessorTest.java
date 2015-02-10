@@ -30,7 +30,7 @@ import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.processor.SignalkModelProcessor;
 import nz.co.fortytwo.signalk.server.RouteManagerFactory;
 import nz.co.fortytwo.signalk.server.SignalkRouteFactory;
-import static nz.co.fortytwo.signalk.server.util.JsonConstants.*;
+import static nz.co.fortytwo.signalk.util.JsonConstants.*;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;

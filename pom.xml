@@ -6,6 +6,7 @@
   <name>signalk-server</name>
   <properties>
 		<!-- <bundle.name>nsb-${project.version}</bundle.name> -->
+		<signalk.core.version>0.0.1-SNAPSHOT</signalk.core.version>
 		<jetty.version>8.1.15.v20140411</jetty.version>
 		<camel.version>2.14.1</camel.version>
 		<camel.core.version>2.14.1</camel.core.version>
@@ -64,6 +65,12 @@
 	</pluginRepositories>
 	
   <dependencies>
+  
+  		<dependency>
+			<groupId>nz.co.fortytwo.signalk.core</groupId>
+			<artifactId>signalk-core</artifactId>
+			<version>${signalk.core.version}</version>
+		</dependency>
   			<!-- serial comms -->
 
 		<!-- jna LGPL, Apache-->
