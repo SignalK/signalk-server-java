@@ -2,7 +2,7 @@ Signal K java server
 =================================================
 
 An example Signal K server using java
-Now under Apache licence
+Now under Apache 2 licence
 
 Installation
 ------------
@@ -66,6 +66,11 @@ Try:
 ``` 
 
 Devices (aka GPS) attached on serial>USB adaptors will be automatically found and used. The input can be NMEA0183 compatible, or signalk, and expects 38400 baud by default. The configuration can be changed by editing conf/signalk.cfg
+
+Development
+-----------
+The project is developed and built using maven and eclipse. You will need to clone the signalk-core-java project and build it with maven , then the signalk-server-java project.
+The signalk-core-java project is usuable separately and contains the core model, and useful helpers.
 
 Roadmap
 -------
