@@ -42,6 +42,7 @@ import nz.co.fortytwo.signalk.processor.RestAuthProcessor;
 import nz.co.fortytwo.signalk.processor.SignalkModelProcessor;
 import nz.co.fortytwo.signalk.processor.RestSubscribeProcessor;
 import nz.co.fortytwo.signalk.processor.JsonSubscribeProcessor;
+import nz.co.fortytwo.signalk.processor.StompProcessor;
 import nz.co.fortytwo.signalk.processor.ValidationProcessor;
 import nz.co.fortytwo.signalk.processor.WindProcessor;
 import nz.co.fortytwo.signalk.processor.WsSessionProcessor;
@@ -177,8 +178,9 @@ public class SignalkRouteFactory {
 			.to("log:nz.co.fortytwo.signalk.model.output?level=ERROR")
 			.end()
 		.process(new FullToDeltaProcessor())
+		.process(new StompProcessor())
 		.multicast().parallelProcessing()
-			.to(RouteManager.DIRECT_TCP,RouteManager.SEDA_WEBSOCKETS)
+			.to(RouteManager.DIRECT_TCP,RouteManager.SEDA_WEBSOCKETS, RouteManager.STOMP)
 			.to("log:nz.co.fortytwo.signalk.model.output?level=DEBUG")
 		.end();
 	}

@@ -39,6 +39,7 @@ import org.apache.camel.Predicate;
 import org.apache.camel.builder.PredicateBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.restlet.RestletConstants;
+import org.apache.camel.component.stomp.SkStompComponent;
 import org.apache.camel.component.websocket.SignalkWebsocketComponent;
 import org.apache.camel.impl.JndiRegistry;
 import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry;
@@ -69,6 +70,8 @@ public class RouteManager extends RouteBuilder {
 	public static final String SEDA_NMEA = "seda:nmeaOutput?purgeWhenStopping=true&size=100";
 
 	public static final String SEDA_COMMON_OUT = "seda:commonOut?purgeWhenStopping=true&size=100";
+
+	public static final String STOMP = "skStomp:queue:signalk?brokerURL=tcp://localhost:61613";
 	
 	private int wsPort = 9292;
 	private int restPort = 9290;
@@ -163,6 +166,7 @@ public class RouteManager extends RouteBuilder {
 		PropertyPlaceholderDelegateRegistry registry = (PropertyPlaceholderDelegateRegistry) CamelContextFactory.getInstance().getRegistry(); 
 		((JndiRegistry)registry.getRegistry()).bind("staticHandler",staticHandler);
 		CamelContextFactory.getInstance().addComponent("skWebsocket", new SignalkWebsocketComponent());
+		CamelContextFactory.getInstance().addComponent("skStomp", new SkStompComponent());
 		
 		SignalkRouteFactory.configureWebsocketTxRoute(this, SEDA_WEBSOCKETS, wsPort);
 		SignalkRouteFactory.configureWebsocketRxRoute(this, SEDA_INPUT, wsPort);

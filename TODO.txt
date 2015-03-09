@@ -1,0 +1,17 @@
+TODO:
+
+$GPVDR - Set and Drift 	$IIVDR,,,,,,N*0E
+$GPVPW - Speed, Measured Parallel to Wind $IIVPW,2.71,N,,*05
+MWD -	 Wind Direction & Speed 	$IIMWD,,,,,06.04,N,03.11,M*5C
+VWT - True Wind Speed and Angle (obsolete)	$IIVWT,065,L,06.10,N,03.14,M,,*28								
+$GPWCV - Waypoint Closure Velocity $GPWCV,,N,,D*5F
+$GPXTE - Cross-Track Error, Measured  $GPXTE,A,A,,R,N,D*06
+
+
+Do security outProcessor
+Universal client lib
+
+TCP done, look into UDP (NMEA)
+	
+make java n2k code a standalone jar
+do unit tests

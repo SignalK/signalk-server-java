@@ -1,0 +1,73 @@
+{
+	"vessels": 
+	{
+		"366982330": 
+		{
+			"navigation": 
+			{
+				"position": 
+				{
+					"longitude": 
+					{
+						"timestamp": "2015-02-24T20:53:46.259Z",
+						"source": "AIS",
+						"value": -122.33896
+					},
+
+					"latitude": 
+					{
+						"timestamp": "2015-02-24T20:53:46.259Z",
+						"source": "AIS",
+						"value": 37.80852
+					}
+				},
+
+				"state": 
+				{
+					"timestamp": "2015-02-24T20:53:46.259Z",
+					"source": "AIS",
+					"value": "Moored"
+				},
+
+				"headingTrue": 
+				{
+					"timestamp": "2015-02-24T20:53:46.260Z",
+					"source": "AIS",
+					"value": 6.0
+				},
+
+				"courseOverGroundTrue": 
+				{
+					"timestamp": "2015-02-24T20:53:46.260Z",
+					"source": "AIS",
+					"value": 219.3
+				},
+
+				"speedOverGround": 
+				{
+					"timestamp": "2015-02-24T20:53:46.260Z",
+					"source": "AIS",
+					"value": 0.0
+				}
+			},
+
+			"communication": 
+			{
+				"callsignVhf": 
+				{
+					"timestamp": "2015-02-24T20:53:46.260Z",
+					"source": "AIS",
+					"value": null
+				}
+			},
+
+			"mmsi": "366982330",
+			"name": null
+		},
+
+		"motu": 
+		{
+			
+		}
+	}
+}

@@ -51,6 +51,7 @@ Then you will see those values every 1000ms.
 Try:
 ```
 {"context":"vessels.366982320","subscribe":[{"path":"navigation.position"}]}
+{"context":"vessels.366982320","unsubscribe":[{"path":"navigation.position"}]}
 
 {"context":"vessels.*","subscribe":[{"path":"navigation.position"}]}
 

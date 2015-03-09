@@ -30,6 +30,8 @@ import java.util.Properties;
 import nz.co.fortytwo.signalk.util.Constants;
 import nz.co.fortytwo.signalk.util.Util;
 
+import org.apache.activemq.apollo.broker.Broker;
+import org.apache.activemq.broker.BrokerService;
 import org.apache.camel.component.websocket.WebsocketComponentServlet;
 import org.apache.camel.main.Main;
 import org.apache.commons.lang3.StringUtils;
@@ -87,6 +89,10 @@ public class SignalKServer {
 		server.setHandler(handlers);
 		server.start();*/
 		
+		//Start apollo broker
+		//Broker broker = ApolloBrokerFactory.newInstance();
+		BrokerService broker = ActiveMqBrokerFactory.newInstance();
+		broker.start();
 		
 		RouteManager routeManager = RouteManagerFactory.getInstance(config);
 		
@@ -100,6 +106,7 @@ public class SignalKServer {
 		
 		routeManager.stopSerial();
 		server.stop();
+		broker.stop();
 		System.exit(0);
 	}
 
