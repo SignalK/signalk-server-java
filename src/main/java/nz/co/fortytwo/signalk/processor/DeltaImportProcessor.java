@@ -24,7 +24,8 @@
 package nz.co.fortytwo.signalk.processor;
 
 import mjson.Json;
-import nz.co.fortytwo.signalk.handler.DeltaToFullConverter;
+import nz.co.fortytwo.signalk.handler.DeltaToMapConverter;
+import nz.co.fortytwo.signalk.model.SignalKModel;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -40,16 +41,18 @@ public class DeltaImportProcessor extends SignalkProcessor implements Processor{
 
 	private static Logger logger = Logger.getLogger(DeltaImportProcessor.class);
 	
-	private DeltaToFullConverter deltaToFull = new DeltaToFullConverter();
+	private DeltaToMapConverter deltaToMap = new DeltaToMapConverter();
 	
 	public void process(Exchange exchange) throws Exception {
 		
 		try {
 			if(exchange.getIn().getBody()==null ||!(exchange.getIn().getBody() instanceof Json)) return;
 			
-			Json json = deltaToFull.handle(exchange.getIn().getBody(Json.class));
-			if(logger.isDebugEnabled())logger.debug("Converted to:"+json);
-			exchange.getIn().setBody(json);
+			SignalKModel model = deltaToMap.handle(exchange.getIn().getBody(Json.class));
+			if(logger.isDebugEnabled())logger.debug("Converted to:"+model);
+			if(model!=null){
+				exchange.getIn().setBody(model);
+			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
 		}

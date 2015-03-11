@@ -80,8 +80,8 @@ public class SignalKListOutputTest extends SignalKCamelTestSupport {
          template.sendBody(DIRECT_INPUT,jsonString);
          latch.await(2,TimeUnit.SECONDS);
 		 logger.debug("SignalKModel:"+signalkModel);
-		 assertEquals(11.96d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF), nav_courseOverGroundTrue).asDouble(),0.00001);
-		 logger.debug("Lat :"+signalkModel.findValue(signalkModel.atPath(VESSELS,SELF), nav_position_latitude));
+		 assertEquals(11.96d,(double)signalkModel.getValue(vessels_dot_self_dot + nav_courseOverGroundTrue),0.00001);
+		 logger.debug("Lat :"+signalkModel.getValue(vessels_dot_self_dot + nav_position_latitude));
 		 
 		 //request list
 		 Json sub = getJson("vessels." + SELF,"navigation.position.*");

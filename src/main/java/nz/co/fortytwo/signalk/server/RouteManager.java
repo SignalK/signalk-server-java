@@ -33,6 +33,7 @@ import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.util.Constants;
 import nz.co.fortytwo.signalk.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.JsonSerializer;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Predicate;
@@ -117,7 +118,8 @@ public class RouteManager extends RouteBuilder {
 			try{
 				
 				Json temp = Json.read(jsonFile.toURI().toURL());
-				signalkModel.merge(temp);
+				JsonSerializer ser = new JsonSerializer();
+				signalkModel.putAll(ser.read(temp));
 				log.info("   Saved state found");
 			}catch(Exception ex){
 				System.out.println(ex.getMessage());

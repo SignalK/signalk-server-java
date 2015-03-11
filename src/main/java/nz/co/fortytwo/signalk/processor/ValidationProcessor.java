@@ -23,12 +23,14 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import mjson.Json;
+import nz.co.fortytwo.signalk.model.SignalKModel;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.*;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 /**
  * Validate the signalkModel json.
@@ -44,31 +46,38 @@ public class ValidationProcessor extends SignalkProcessor implements Processor{
 	public void process(Exchange exchange) throws Exception {
 		
 		try {
-			if(!(exchange.getIn().getBody() instanceof Json)){
+			if(!(exchange.getIn().getBody() instanceof SignalKModel)){
 				if(logger.isDebugEnabled())logger.debug("Invalid object found:" + exchange.getIn().getBody());
 				exchange.getIn().setBody(null);
 				return;
 			}
-			validate(exchange.getIn().getBody(Json.class));
+			validate(exchange.getIn().getBody(SignalKModel.class));
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
 		}
 	}
 
 	
-	public void validate(Json node){
+	/**
+	 * @param model
+	 */
+	public void validate(SignalKModel model){
 		//is this a leaf?
-		if(logger.isDebugEnabled())	logger.debug(node.toString());
-		if(node.isNull()||!node.isObject())return;
-		if(node.has("value")){
-			//it should have timestamp and source
-			if(!node.has("timestamp"))node.set("timestamp",new DateTime().toString());
-			if(!node.has("source"))node.set("source","unknown");
-		}else{
-			for(Json n : node.asJsonMap().values()){
-				validate(n);
+		if(logger.isDebugEnabled())	logger.debug(model.toString());
+		if(model==null||model.getKeys().size()==0)return;
+		//check the values
+		for(String key: model.getKeys()){
+			if(logger.isDebugEnabled())	logger.debug("Checking key="+key);
+			if(key.endsWith(dot+value)){
+				if(logger.isDebugEnabled())	logger.debug("Processing key="+key);
+				String tmpKey = key.substring(0,key.length()-value.length());
+				//it should have timestamp and source
+				if(model.get(tmpKey+timestamp)==null)model.put(tmpKey+timestamp,new DateTime(DateTimeZone.UTC).toDateTimeISO().toString());
+				if(model.get(tmpKey+source)==null)model.put(tmpKey+source,"unknown");
 			}
+		
 		}
+		
 	}
 
 }

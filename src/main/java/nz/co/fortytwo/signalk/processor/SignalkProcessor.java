@@ -24,6 +24,7 @@
 
 package nz.co.fortytwo.signalk.processor;
 
+import java.util.NavigableMap;
 import java.util.regex.Pattern;
 
 import mjson.Json;
@@ -124,21 +125,10 @@ public class SignalkProcessor {
 
 
 	public void populateTree(SignalKModel temp, String p) {
-		Json node = signalkModel.findNode(p);
+		NavigableMap<String, Object> node = signalkModel.getSubMap(p);
 		if(logger.isDebugEnabled())logger.debug("Found node:" + p + " = " + node);
-		if (node != null) {
-			addNodeToTemp(temp, node);
-		}
+		temp.putAll(node);
 		
 	}
 
-
-	protected void addNodeToTemp(SignalKModel temp, Json node) {
-		Json n = temp.addNode((Json) temp, node.up().getPath());
-		if (node.isPrimitive()) {
-			n.set(node.getParentKey(), node.getValue());
-		} else {
-			n.set(node.getParentKey(),node.getValue());
-		}
-	}
 }

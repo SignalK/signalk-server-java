@@ -32,7 +32,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
-import nz.co.fortytwo.signalk.model.event.JsonEvent;
 import nz.co.fortytwo.signalk.model.event.PathEvent;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.server.CamelContextFactory;
@@ -208,10 +207,10 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 					SignalKModel temp = SignalKModelFactory.getCleanInstance();
 					boolean send = false;
 					while ((p = queue.poll()) != null) {
-						Json node = signalkModel.findNode(p);
+						Object node = signalkModel.get(p);
 						if(logger.isDebugEnabled())logger.debug("Found node:" + p + " = " + node);
 						if (node != null) {
-							addNodeToTemp(temp, node);
+							temp.put(p, node);
 							send = true;
 						}
 					}

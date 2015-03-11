@@ -32,18 +32,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import nz.co.fortytwo.signalk.model.event.PathEvent;
+import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
+import nz.co.fortytwo.signalk.processor.SignalkProcessor;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.eventbus.Subscribe;
-
-import mjson.Json;
-import nz.co.fortytwo.signalk.model.event.JsonEvent;
-import nz.co.fortytwo.signalk.model.event.PathEvent;
-import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
-import nz.co.fortytwo.signalk.processor.FullExportProcessor;
-import nz.co.fortytwo.signalk.processor.SignalkProcessor;
 
 /**
  * Holds subscription data, wsSessionId, path, period
@@ -78,7 +75,7 @@ public class Subscription {
 		this.format = format;
 		this.policy = policy;
 		SignalKModelFactory.getInstance().getEventBus().register(this);
-		for(String p: ImmutableList.copyOf(SignalKModelFactory.getInstance().getFullPaths())){
+		for(String p: ImmutableList.copyOf(SignalKModelFactory.getInstance().getKeys())){
 			if(isSubscribed(p)){
 				subscribedPaths.add(p);
 			}

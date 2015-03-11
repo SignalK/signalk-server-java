@@ -29,6 +29,7 @@ import javax.servlet.http.HttpSession;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.handler.RestApiHandler;
+import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.util.JsonConstants;
 
 import org.apache.camel.Exchange;
@@ -58,7 +59,7 @@ public class RestApiProcessor extends SignalkProcessor implements Processor{
         if(request.getSession()!=null){
 	        if(request.getMethod().equals("GET")){
 	        	HttpServletResponse response = exchange.getIn(HttpMessage.class).getResponse();
-	        	Json json = api.processGet(request, response, signalkModel);
+	        	SignalKModel json = api.processGet(request, response, signalkModel);
 	        	if(json!=null)exchange.getIn().setBody(json);
 	        	//response codes are set here, so all good now.
 	        }

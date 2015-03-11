@@ -30,9 +30,11 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import mjson.Json;
+import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
 import nz.co.fortytwo.signalk.processor.WindProcessor;
 import nz.co.fortytwo.signalk.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.ProducerTemplate;
@@ -79,8 +81,8 @@ public class SignalKGetOutputTest extends SignalKCamelTestSupport {
 		template.sendBody(DIRECT_INPUT, jsonString);
 		latch.await(3, TimeUnit.SECONDS);
 		logger.debug("SignalKModel:" + signalkModel);
-		assertEquals(11.96d, signalkModel.findValue(signalkModel.atPath(VESSELS, SELF), nav_courseOverGroundTrue).asDouble(), 0.00001);
-		logger.debug("Lat :" + signalkModel.findValue(signalkModel.atPath(VESSELS, SELF), nav_position_latitude));
+		assertEquals(11.96d, (double)signalkModel.getValue(SignalKConstants.vessels_dot_self_dot+ nav_courseOverGroundTrue), 0.00001);
+		logger.debug("Lat :" + signalkModel.getValue(SignalKConstants.vessels_dot_self_dot+ nav_position_latitude));
 
 		// request list
 		Json sub = getJson("vessels." + SELF, "navigation.position.*", JsonConstants.FORMAT_DELTA);
@@ -88,14 +90,15 @@ public class SignalKGetOutputTest extends SignalKCamelTestSupport {
 		output.assertIsSatisfied();
 		
 		Exchange exch = output.getReceivedExchanges().get(0);
-		Json reply = exch.getIn().getBody(Json.class);
-		logger.debug("Reply:" + reply.toString());
+		logger.debug("Reply:" + exch.getIn().getBody().toString());
+		SignalKModel reply = exch.getIn().getBody(SignalKModel.class);
+		//logger.debug("Reply:" + reply.toString());
 
 		assertEquals(wsSession, exch.getIn().getHeader(WebsocketConstants.CONNECTION_KEY));
 		assertEquals(FORMAT_DELTA, exch.getIn().getHeader(SIGNALK_FORMAT));
 
 		assertNotNull(reply);
-		assertTrue(reply.at(VESSELS).at(SELF).at(nav).at("position").has("latitude"));
+		assertNotNull(reply.getValue(vessels_dot_self_dot+nav_position_latitude));
 
 	}
 

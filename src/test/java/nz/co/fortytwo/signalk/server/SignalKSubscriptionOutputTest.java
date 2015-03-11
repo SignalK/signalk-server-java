@@ -77,8 +77,8 @@ public class SignalKSubscriptionOutputTest extends SignalKCamelTestSupport {
          template.sendBody(DIRECT_INPUT,jsonString);
          latch.await(2,TimeUnit.SECONDS);
 		 logger.debug("SignalKModel:"+signalkModel);
-		 assertEquals(11.96d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF), nav_courseOverGroundTrue).asDouble(),0.00001);
-		 logger.debug("Lat :"+signalkModel.findValue(signalkModel.atPath(VESSELS,SELF), nav_position_latitude));
+		 assertEquals(11.96d,(double)signalkModel.getValue(vessels_dot_self_dot + nav_courseOverGroundTrue),0.00001);
+		 logger.debug("Lat :"+(double)signalkModel.getValue(vessels_dot_self_dot + nav_position_latitude));
 		 
 		 //add a sub
 		 Json sub = getJson("vessels." + SELF,"navigation", 500, 0,FORMAT_FULL, POLICY_FIXED);
@@ -98,8 +98,8 @@ public class SignalKSubscriptionOutputTest extends SignalKCamelTestSupport {
          template.sendBody(DIRECT_INPUT,jsonString);
          latch.await(2,TimeUnit.SECONDS);
 		 logger.debug("SignalKModel:"+signalkModel);
-		 assertEquals(11.96d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF), nav_courseOverGroundTrue).asDouble(),0.00001);
-		 logger.debug("Lat :"+signalkModel.findValue(signalkModel.atPath(VESSELS,SELF), nav_position_latitude));
+		 assertEquals(11.96d,(double)signalkModel.getValue(vessels_dot_self_dot + nav_courseOverGroundTrue),0.00001);
+		 logger.debug("Lat :"+(double)signalkModel.getValue(vessels_dot_self_dot + nav_position_latitude));
 		 
 		 //add a sub
 		 Json sub = getJson("vessels." + SELF,nav_position, 500, 0,FORMAT_FULL, POLICY_FIXED);
@@ -108,7 +108,7 @@ public class SignalKSubscriptionOutputTest extends SignalKCamelTestSupport {
 		 Json out = output.getReceivedExchanges().get(0).getIn().getBody(Json.class);
 		 logger.debug("Received msg: "+out);
 		 Json expected = Json.read("{\"vessels\":{\"motu\":{\"navigation\":{\"position\":{\"longitude\":{\"timestamp\":\"2015-01-26T16:19:21.686+13:00\",\"source\":\"unknown\",\"value\":173.2470855712},\"latitude\":{\"timestamp\":\"2015-01-26T16:19:21.782+13:00\",\"source\":\"unknown\",\"value\":-41.2936935424},\"altitude\":{\"timestamp\":\"2015-01-26T16:19:21.782+13:00\",\"source\":\"unknown\",\"value\":0.0}}}}}}");
-		 assertEquals(-41.2936935424d,out.at(VESSELS).at(SELF).at(nav).at("position").at("latitude").at("value").asDouble(), 0.000d);
+		 assertEquals(-41.2936935424d,out.at(VESSELS).at(SELF).at(nav).at("position").at("latitude").asDouble(), 0.000d);
 		 assertFalse(out.at(VESSELS).at(SELF).has(env));
     }
 	@Test
@@ -121,8 +121,8 @@ public class SignalKSubscriptionOutputTest extends SignalKCamelTestSupport {
          template.sendBody(DIRECT_INPUT,jsonString);
          latch.await(2,TimeUnit.SECONDS);
 		 logger.debug("SignalKModel:"+signalkModel);
-		 assertEquals(11.96d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF), nav_courseOverGroundTrue).asDouble(),0.00001);
-		 logger.debug("Lat :"+signalkModel.findValue(signalkModel.atPath(VESSELS,SELF), nav_position_latitude));
+		 assertEquals(11.96d,(double)signalkModel.getValue(vessels_dot_self_dot + nav_courseOverGroundTrue),0.00001);
+		 logger.debug("Lat :"+(double)signalkModel.getValue(vessels_dot_self_dot + nav_position_latitude));
 		 
 		 //add a sub
 		 Json sub = getJson("vessels." + SELF,nav_position, 500, 0,FORMAT_FULL, POLICY_FIXED);
@@ -133,7 +133,7 @@ public class SignalKSubscriptionOutputTest extends SignalKCamelTestSupport {
 		 output.assertIsSatisfied();
 		 Json out = output.getReceivedExchanges().get(0).getIn().getBody(Json.class);
 		 logger.debug("Received msg: "+out);
-		 assertEquals(-41.2936935424d,out.at(VESSELS).at(SELF).at(nav).at("position").at("latitude").at("value").asDouble(), 0.000d);
+		 assertEquals(-41.2936935424d,out.at(VESSELS).at(SELF).at(nav).at("position").at("latitude").asDouble(), 0.000d);
 		 assertEquals(-0.0d,out.at(VESSELS).at(SELF).at(env).at("wind").at("speedApparent").at("value").asDouble(), 0.000d);
     }
 	

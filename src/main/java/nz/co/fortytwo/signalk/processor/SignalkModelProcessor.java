@@ -23,14 +23,10 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import static nz.co.fortytwo.signalk.util.JsonConstants.*;
-import mjson.Json;
-import nz.co.fortytwo.signalk.server.CamelContextFactory;
+import nz.co.fortytwo.signalk.model.SignalKModel;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.camel.Produce;
-import org.apache.camel.ProducerTemplate;
 import org.apache.log4j.Logger;
 
 /**
@@ -47,20 +43,20 @@ public class SignalkModelProcessor extends SignalkProcessor implements Processor
 	public void process(Exchange exchange) throws Exception {
 		
 		try {
-			if(exchange.getIn().getBody()==null ||!(exchange.getIn().getBody() instanceof Json)) return;
+			if(exchange.getIn().getBody()==null ||!(exchange.getIn().getBody() instanceof SignalKModel)) return;
 			
-			handle(exchange.getIn().getBody(Json.class));
+			handle(exchange.getIn().getBody(SignalKModel.class));
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
 		}
 	}
 
 	//@Override
-	public void handle(Json node) {
-		if(!(node.has(VESSELS)))return;
+	public void handle(SignalKModel node) {
+		//if(!(node.has(VESSELS)))return;
 		if(logger.isDebugEnabled())logger.debug("SignalkModelProcessor  updating "+node );
 		
-		signalkModel.merge(node);
+		signalkModel.putAll(node.getData());
 		
 	}
 

@@ -25,7 +25,10 @@
 package nz.co.fortytwo.signalk.processor;
 
 import mjson.Json;
+import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.JsonSerializer;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -39,22 +42,37 @@ import org.apache.log4j.Logger;
 public class OutputFilterProcessor extends SignalkProcessor implements Processor {
 
 	private static Logger logger = Logger.getLogger(OutputFilterProcessor.class);
+	JsonSerializer ser = new JsonSerializer();
 	
 	public void process(Exchange exchange) throws Exception {
 		if (exchange.getIn().getBody()==null)
 			return;
 		//TODO: add more filters here
-		Json json = (Json)exchange.getIn().getBody();
-		//remove _arduino
-		try{
-			json.at(JsonConstants.VESSELS).at(JsonConstants.SELF).delAt("_arduino");
-		}catch(NullPointerException npe){}
-		//remove _config
-		try{
-			json.at(JsonConstants.VESSELS).at(JsonConstants.SELF).delAt("_config");
-		}catch(NullPointerException npe){}
-		
-		exchange.getIn().setBody(json.toString());
+		if(exchange.getIn().getBody() instanceof Json){
+			Json json = (Json)exchange.getIn().getBody();
+			//remove _arduino
+			try{
+				json.at(JsonConstants.VESSELS).at(JsonConstants.SELF).delAt("_arduino");
+			}catch(NullPointerException npe){}
+			//remove _config
+			try{
+				json.at(JsonConstants.VESSELS).at(JsonConstants.SELF).delAt("_config");
+			}catch(NullPointerException npe){}
+			
+			exchange.getIn().setBody(json.toString());
+		}else if (exchange.getIn().getBody() instanceof SignalKModel){
+			SignalKModel model = (SignalKModel)exchange.getIn().getBody();
+			//remove _arduino
+			try{
+				model.put(SignalKConstants.vessels_dot_self_dot+"_arduino",null);
+			}catch(NullPointerException npe){}
+			//remove _config
+			try{
+				model.put(SignalKConstants.vessels_dot_self_dot+"_config",null);
+			}catch(NullPointerException npe){}
+			
+			exchange.getIn().setBody(ser.write(model));
+		}
 	}
 
 }

@@ -75,10 +75,12 @@ public class N2KProcessor extends SignalkProcessor implements Processor {
 			if (exchange.getIn().getBody() == null || !(exchange.getIn().getBody() instanceof Json))
 				return;
 
-			Json json = n2k.handle(exchange.getIn().getHeader(N2K_MESSAGE, String.class));
-			if (logger.isDebugEnabled())
-				logger.debug("Converted to:" + json);
-			exchange.getIn().setBody(json);
+			SignalKModel model = n2k.handle(exchange.getIn().getHeader(N2K_MESSAGE, String.class));
+			if(model!=null){
+				if (logger.isDebugEnabled())
+					logger.debug("Converted to:" + model);
+				exchange.getIn().setBody(model);
+			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}

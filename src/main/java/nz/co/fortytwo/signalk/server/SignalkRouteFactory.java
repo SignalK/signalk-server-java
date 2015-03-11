@@ -27,6 +27,7 @@ import java.util.List;
 
 import nz.co.fortytwo.signalk.processor.AISProcessor;
 import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
+import nz.co.fortytwo.signalk.processor.FullImportProcessor;
 import nz.co.fortytwo.signalk.processor.FullToDeltaProcessor;
 import nz.co.fortytwo.signalk.processor.FullExportProcessor;
 import nz.co.fortytwo.signalk.processor.DeltaImportProcessor;
@@ -93,6 +94,8 @@ public class SignalkRouteFactory {
 		.process(new JsonSubscribeProcessor())
 		//deal with delta format
 		.process(new DeltaImportProcessor())
+		//deal with full format
+		.process(new FullImportProcessor())
 		//make sure we have timestamp/source
 		.process(new ValidationProcessor())
 		//and update signalk model

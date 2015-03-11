@@ -25,7 +25,7 @@ package nz.co.fortytwo.signalk.server;
 
 import static nz.co.fortytwo.signalk.util.JsonConstants.SELF;
 import static nz.co.fortytwo.signalk.util.JsonConstants.VESSELS;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.env_wind_speedApparent;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.*;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.env_wind_speedTrue;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_magneticVariation;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position_latitude;
@@ -34,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 
 import nz.co.fortytwo.signalk.handler.DeclinationHandler;
 import nz.co.fortytwo.signalk.handler.TrueWindHandler;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
 
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
@@ -80,8 +81,8 @@ public class SignalKNmeaReceiverTest extends SignalKCamelTestSupport {
          template.sendBody(DIRECT_INPUT,"$GPRMC,144629.20,A,5156.91111,N,00434.80385,E,0.295,,011113,,,A*78");
          latch.await(2,TimeUnit.SECONDS);
 		 logger.debug("SignalKModel:"+signalkModel);
-		 assertEquals(51.9485185d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF), nav_position_latitude).asDouble(),0.00001);
-		 logger.debug("Lat :"+signalkModel.findValue(signalkModel.atPath(VESSELS,SELF), nav_position_latitude));
+		 assertEquals(51.9485185d,(double)signalkModel.getValue(SignalKConstants.vessels_dot_self_dot + nav_position_latitude),0.00001);
+		 logger.debug("Lat :"+signalkModel.getValue(vessels_dot_self_dot + nav_position_latitude));
 		 nmea.assertIsSatisfied();
       
     }
@@ -95,9 +96,9 @@ public class SignalKNmeaReceiverTest extends SignalKCamelTestSupport {
         template.sendBody(DIRECT_INPUT,"!AIVDM,1,1,,B,15MwkRUOidG?GElEa<iQk1JV06Jd,0*6D");
         latch.await(2,TimeUnit.SECONDS);
 		 logger.debug("SignalKModel:"+signalkModel);
-		 assertNotNull(signalkModel.atPath(VESSELS,"366998410"));
-		 assertEquals(37.8251d,signalkModel.findValue(signalkModel.atPath(VESSELS,"366998410"), nav_position_latitude).asDouble(),0.001);
-		 logger.debug("Lat :"+signalkModel.findValue(signalkModel.atPath(VESSELS,SELF), nav_position_latitude));
+		 //assertNotNull(signalkModel.atPath(VESSELS,"366998410"));
+		 assertEquals(37.8251d,(double)signalkModel.getValue(vessels+".366998410"+nav_position_latitude),0.001);
+		 logger.debug("Lat :"+signalkModel.getValue(vessels_dot_self_dot + nav_position_latitude));
 		 nmea.assertIsSatisfied();
     }
 	@Test
@@ -112,8 +113,8 @@ public class SignalKNmeaReceiverTest extends SignalKCamelTestSupport {
         latch.await(2,TimeUnit.SECONDS);
 		 logger.debug("SignalKModel:"+signalkModel);
 		
-		 assertEquals(51.9485185d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF), nav_position_latitude).asDouble(),0.00001);
-		 assertEquals(20.0d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF),env_wind_speedApparent ).asDouble(),0.00001);
+		 assertEquals(51.9485185d,(double)signalkModel.getValue(vessels_dot_self_dot + nav_position_latitude),0.00001);
+		 assertEquals(20.0d,(double)signalkModel.getValue(vessels_dot_self_dot +env_wind_speedApparent ),0.00001);
 		 nmea.assertIsSatisfied();
     }
 	
@@ -129,10 +130,10 @@ public class SignalKNmeaReceiverTest extends SignalKCamelTestSupport {
         latch.await(2,TimeUnit.SECONDS);
 		 logger.debug("SignalKModel:"+signalkModel);
 		
-		 assertEquals(51.9485185d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF), nav_position_latitude).asDouble(),0.00001);
-		 assertEquals(20.0d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF),env_wind_speedApparent ).asDouble(),0.00001);
+		 assertEquals(51.9485185d,(double)signalkModel.getValue(vessels_dot_self_dot + nav_position_latitude),0.00001);
+		 assertEquals(20.0d,(double)signalkModel.getValue(vessels_dot_self_dot +env_wind_speedApparent ),0.00001);
 		 windProcessor.handle(signalkModel);
-		 assertEquals(20.0d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF),env_wind_speedTrue ).asDouble(),0.00001);
+		 assertEquals(20.0d,(double)signalkModel.getValue(vessels_dot_self_dot +env_wind_speedTrue ),0.00001);
 		 nmea.assertIsSatisfied();
     }
 	
@@ -148,10 +149,11 @@ public class SignalKNmeaReceiverTest extends SignalKCamelTestSupport {
         latch.await(2,TimeUnit.SECONDS);
 		 logger.debug("SignalKModel:"+signalkModel);
 		
-		 //assertEquals(51.9485185d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF), nav_magneticVariation).asDouble(),0.00001);
-		// assertEquals(20.0d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF),env_wind_speedApparent ).asDouble(),0.00001);
+		 //assertEquals(51.9485185d,signalkModel.getValue(vessels_dot_self_dot + nav_magneticVariation),0.00001);
+		// assertEquals(20.0d,signalkModel.getValue(vessels_dot_self_dot +env_wind_speedApparent ),0.00001);
 		 declinationProcessor.handle(signalkModel);
-		 assertEquals(0.5d,signalkModel.findValue(signalkModel.atPath(VESSELS,SELF),nav_magneticVariation ).asDouble(),0.00001);
+		 logger.debug("SignalKModel:"+signalkModel);
+		 assertEquals(0.5d,(double)signalkModel.getValue(vessels_dot_self_dot +nav_magneticVariation ),0.00001);
 		 nmea.assertIsSatisfied();
     }
 

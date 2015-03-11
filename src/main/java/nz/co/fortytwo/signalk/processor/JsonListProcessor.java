@@ -51,7 +51,7 @@ import org.joda.time.format.ISODateTimeFormat;
 import com.google.common.collect.ImmutableList;
 
 /**
- * Handles json messages with 'list' requests
+ * Handles json messages with 'list' requests. These provide a list of available signalk keys the server understands
  * 
  * @author robert
  * 
