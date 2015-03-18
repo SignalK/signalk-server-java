@@ -25,6 +25,7 @@ package nz.co.fortytwo.signalk.server;
 
 import static nz.co.fortytwo.signalk.util.JsonConstants.*;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,12 +34,15 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import mjson.Json;
+import nz.co.fortytwo.signalk.util.Constants;
+import nz.co.fortytwo.signalk.util.JsonConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.test.junit4.CamelTestSupport;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
@@ -48,14 +52,23 @@ import com.ning.http.client.websocket.WebSocket;
 import com.ning.http.client.websocket.WebSocketTextListener;
 import com.ning.http.client.websocket.WebSocketUpgradeHandler;
 
-public class SubcribeWsTest extends CamelTestSupport {
+public class SubcribeWsTest extends SignalKCamelTestSupport{
  
     private static Logger logger = Logger.getLogger(SubcribeWsTest.class);
-	String jsonDiff = "{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"courseOverGroundTrue\"},{\"value\":3.85,\"path\":\"speedOverGround\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081+00:00\",\"device\":\"/dev/actisense\",\"pgn\":\"128267\",\"src\":\"115\"}}],\"context\":\"vessels."+SELF+".navigation\"}";
+	String jsonDiff = null;
 	
 	@Produce(uri = "direct:input")
     protected ProducerTemplate template;
 
+	public SubcribeWsTest(){
+		try {
+			jsonDiff = FileUtils.readFileToString(new File("src/test/resources/samples/testUpdate.json"));
+			jsonDiff=jsonDiff.replaceAll("SELF", SELF);
+		} catch (IOException e) {
+			logger.error(e);
+			fail();
+		}
+	}
 	@Test
     public void shouldGetSubscribeWsResponse() throws Exception {
 		final List<String> received = new ArrayList<String>();
@@ -105,7 +118,7 @@ public class SubcribeWsTest extends CamelTestSupport {
         //websocket.sendTextMessage(jsonDiff);
         latch4.await(2, TimeUnit.SECONDS);
       //subscribe
-        Response reponse = c.prepareGet("http://localhost:9290"+SIGNALK_SUBSCRIBE+"/vessels/motu/navigation").setCookies(r1.getCookies()).execute().get();
+        Response reponse = c.prepareGet("http://localhost:9290"+SIGNALK_SUBSCRIBE+"/vessels/motu/navigation?format=delta").setCookies(r1.getCookies()).execute().get();
         latch.await(2, TimeUnit.SECONDS);
         logger.debug(reponse.getResponseBody());
         assertEquals(202, reponse.getStatusCode());
@@ -122,29 +135,26 @@ public class SubcribeWsTest extends CamelTestSupport {
         	}
         }
         assertTrue(received.size()>1);
-        //{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"navigation.courseOverGroundTrue\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}],\"context\":\"vessels.self\"}
-        //{\"context\":\"vessels.motu\",\"updates\":[{\"values\":[{\"path\":\"navigation.courseOverGroundTrue\",\"value\":172.9}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}},{\"values\":[{\"path\":\"navigation.speedOverGround\",\"value\":3.85}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}]}
-        //{\"context\":\"vessels.motu.navigation\",\"updates\":[{\"values\":[{\"path\":\"courseOverGroundTrue\",\"value\":172.9}],\"source\":\"/dev/actisense-N2K-115-128267\"},{\"values\":[{\"path\":\"speedOverGround\",\"value\":3.85}],\"source\":\"/dev/actisense-N2K-115-128267\"}]}
-        Json sk = Json.read("{\"context\":\"vessels.motu.navigation\",\"updates\":[{\"values\":[{\"path\":\"courseOverGroundTrue\",\"value\":172.9}],\"source\":\"/dev/actisense-N2K-115-128267\"},{\"values\":[{\"path\":\"speedOverGround\",\"value\":3.85}],\"source\":\"/dev/actisense-N2K-115-128267\"}]}");
+       
+        Json sk = Json.read("{\"context\":\"vessels."+SELF+".navigation\",\"updates\":[{\"values\":[{\"path\":\"courseOverGroundTrue\",\"value\":172.9},{\"path\":\"speedOverGround\",\"value\":3.85}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081+00:00\",\"device\":\"/dev/actisense\",\"src\":\"115\",\"pgn\":\"128267\"}}]}");
         assertNotNull(fullMsg);
         assertEquals(sk , Json.read(fullMsg));
         c.close();
     }
 	
 	
-	
-	 @Override
-	    protected RouteBuilder createRouteBuilder() {
-	        try {
-				return RouteManagerFactory.getInstance(Util.getConfig(null));
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-	        return null;
-	    }
+
+	@Override
+	public void configureRouteBuilder(RouteBuilder routeBuilder) {
+		// TODO Auto-generated method stub
+		try {
+			((RouteManager)routeBuilder).configure0();
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			logger.error(e);
+			fail();
+		}
+	}
 
 }

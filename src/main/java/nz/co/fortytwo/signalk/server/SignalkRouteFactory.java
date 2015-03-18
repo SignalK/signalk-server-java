@@ -158,7 +158,8 @@ public class SignalkRouteFactory {
 	public static void configureRestRoute(RouteBuilder routeBuilder ,String input){
 		routeBuilder.from(input)
 			.setExchangePattern(ExchangePattern.InOut)
-			.process(new RestApiProcessor());
+			.process(new RestApiProcessor())
+			.process(new OutputFilterProcessor());
 		}
 	
 	public static void configureAuthRoute(RouteBuilder routeBuilder ,String input){
@@ -180,6 +181,7 @@ public class SignalkRouteFactory {
 			.onException(Exception.class).handled(true).maximumRedeliveries(0)
 			.to("log:nz.co.fortytwo.signalk.model.output?level=ERROR")
 			.end()
+		.process(new OutputFilterProcessor())
 		.process(new FullToDeltaProcessor())
 		.process(new StompProcessor())
 		.multicast().parallelProcessing()
@@ -224,7 +226,7 @@ public class SignalkRouteFactory {
 		
 	}
 	
-	public static void removeSubscribeTimer(RouteManager routeManager, Subscription sub) throws Exception {
+	public static void removeSubscribeTimer(RouteBuilder routeManager, Subscription sub) throws Exception {
 			RouteDefinition routeDef = ((DefaultCamelContext)routeManager.getContext()).getRouteDefinition(getRouteId(sub));
 			if(routeDef==null)return;
 			if(logger.isDebugEnabled())logger.debug("Stopping sub "+getRouteId(sub)+","+routeDef);
@@ -235,7 +237,7 @@ public class SignalkRouteFactory {
 			if(logger.isDebugEnabled())logger.debug("Done removing sub "+getRouteId(sub));
 	}
 
-	public static void configureHeartbeatRoute(RouteManager routeBuilder, String input) {
+	public static void configureHeartbeatRoute(RouteBuilder routeBuilder, String input) {
 		
 		routeBuilder.from(input)
 			.onException(Exception.class).handled(true).maximumRedeliveries(0)

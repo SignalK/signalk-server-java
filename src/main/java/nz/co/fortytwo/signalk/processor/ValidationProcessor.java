@@ -72,8 +72,8 @@ public class ValidationProcessor extends SignalkProcessor implements Processor{
 				if(logger.isDebugEnabled())	logger.debug("Processing key="+key);
 				String tmpKey = key.substring(0,key.length()-value.length());
 				//it should have timestamp and source
-				if(model.get(tmpKey+timestamp)==null)model.put(tmpKey+timestamp,new DateTime(DateTimeZone.UTC).toDateTimeISO().toString());
-				if(model.get(tmpKey+source)==null)model.put(tmpKey+source,"unknown");
+				if(model.getSubMap(tmpKey+timestamp).size()==0)model.put(tmpKey+timestamp,new DateTime(DateTimeZone.UTC).toDateTimeISO().toString());
+				if(model.getSubMap(tmpKey+source).size()==0)model.put(tmpKey+source,"unknown");
 			}
 		
 		}

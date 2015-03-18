@@ -23,9 +23,10 @@
  */
 package nz.co.fortytwo.signalk.server;
 
-import static nz.co.fortytwo.signalk.util.JsonConstants.SELF;
-import static nz.co.fortytwo.signalk.util.JsonConstants.SIGNALK_WS;
+import static nz.co.fortytwo.signalk.util.JsonConstants.*;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -41,6 +42,7 @@ import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.websocket.SignalkWebsocketComponent;
 import org.apache.camel.test.junit4.CamelTestSupport;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
@@ -54,10 +56,20 @@ import com.ning.http.client.websocket.WebSocketUpgradeHandler;
 public class RestApiTest extends SignalKCamelTestSupport {
  
     private static Logger logger = Logger.getLogger(RestApiTest.class);
-	String jsonDiff = "{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"courseOverGroundTrue\"},{\"value\":3.85,\"path\":\"speedOverGround\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081+00:00\",\"device\":\"/dev/actisense\",\"pgn\":\"128267\",\"src\":\"115\"}}],\"context\":\"vessels."+SELF+".navigation\"}";
+	String jsonDiff = null;
 	
 	@Produce(uri = "direct:input")
     protected ProducerTemplate template;
+	
+	public RestApiTest(){
+		try {
+			jsonDiff = FileUtils.readFileToString(new File("src/test/resources/samples/testUpdate.json"));
+			jsonDiff=jsonDiff.replaceAll("SELF", SELF);
+		} catch (IOException e) {
+			logger.error(e);
+			fail();
+		}
+	}
 
 	@Test
     public void shouldGetJsonResponse() throws Exception {
@@ -69,26 +81,25 @@ public class RestApiTest extends SignalKCamelTestSupport {
         template.sendBody(RouteManager.SEDA_INPUT,jsonDiff);
         
         //get a sessionid
-        c.prepareGet("http://localhost:9290/signalk/auth/demoPass").execute().get();
+        Response r1 = c.prepareGet("http://localhost:9290/signalk/auth/demoPass").execute().get();
         latch2.await(3, TimeUnit.SECONDS);
+        assertEquals(200, r1.getStatusCode());
+        Response reponse = c.prepareGet("http://localhost:9290/signalk/api/vessels/"+SELF).setCookies(r1.getCookies()).execute().get();
+        latch.await(3, TimeUnit.SECONDS);
+        logger.debug(reponse.getResponseBody());
+        assertEquals(200, reponse.getStatusCode());
         
-        Response reponse = c.prepareGet("http://localhost:9290/signalk/api/vessels/"+SELF).execute().get();
-        latch.await(3, TimeUnit.SECONDS);
-        logger.debug(reponse.getResponseBody());
-        assertEquals(200, reponse.getStatusCode());
-        			//{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"navigation.courseOverGroundTrue\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}],\"context\":\"vessels.self\"}
-        Json sk = Json.read("{\"navigation\":{\"courseOverGroundTrue\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":172.9},\"speedOverGround\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":3.85}}}");
         Json resp = Json.read(reponse.getResponseBody());
-        assertEquals(172.9 , resp.at("navigation").at("courseOverGroundTrue").at("value").asFloat(),0.001);
+        assertEquals(172.9 , resp.at(VESSELS).at(SELF).at(nav).at("courseOverGroundTrue").at("value").asFloat(),0.001);
      
-        reponse = c.prepareGet("http://localhost:9290/signalk/api/vessels/motu/navigation").execute().get();
+        reponse = c.prepareGet("http://localhost:9290/signalk/api/vessels/"+SELF+"/navigation").setCookies(r1.getCookies()).execute().get();
         latch.await(3, TimeUnit.SECONDS);
         logger.debug(reponse.getResponseBody());
         assertEquals(200, reponse.getStatusCode());
         			//{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"navigation.courseOverGroundTrue\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}],\"context\":\"vessels.self\"}
-        sk = Json.read("{\"courseOverGroundTrue\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":172.9},\"speedOverGround\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":3.85}}");
+        
         resp = Json.read(reponse.getResponseBody());
-        assertEquals(172.9 , resp.at("courseOverGroundTrue").at("value").asFloat(),0.001);
+        assertEquals(172.9 , resp.at(VESSELS).at(SELF).at(nav).at("courseOverGroundTrue").at("value").asFloat(),0.001);
         c.close();
     }
 

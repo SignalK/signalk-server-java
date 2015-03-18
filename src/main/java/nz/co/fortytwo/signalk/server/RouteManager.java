@@ -88,6 +88,7 @@ public class RouteManager extends RouteBuilder {
 	private NettyServer nmeaServer;
 
 	protected RouteManager(Properties config) {
+		signalkModel.getData().clear();
 		this.config = config;
 		// web socket on port 9090
 		logger.info("  Websocket port:"+config.getProperty(Constants.WEBSOCKET_PORT));
@@ -111,6 +112,9 @@ public class RouteManager extends RouteBuilder {
 
 	@Override
 	public void configure() throws Exception {
+		configure0();
+	}
+	public void configure0() throws Exception {
 		
 		File jsonFile = new File("./conf/self.json");
 		log.info("Checking for previous state: "+jsonFile.getAbsolutePath());
@@ -167,8 +171,12 @@ public class RouteManager extends RouteBuilder {
 		//bind in registry
 		PropertyPlaceholderDelegateRegistry registry = (PropertyPlaceholderDelegateRegistry) CamelContextFactory.getInstance().getRegistry(); 
 		((JndiRegistry)registry.getRegistry()).bind("staticHandler",staticHandler);
-		CamelContextFactory.getInstance().addComponent("skWebsocket", new SignalkWebsocketComponent());
-		CamelContextFactory.getInstance().addComponent("skStomp", new SkStompComponent());
+		if(CamelContextFactory.getInstance().getComponent("skWebsocket")==null){
+			CamelContextFactory.getInstance().addComponent("skWebsocket", new SignalkWebsocketComponent());
+		}
+		if(CamelContextFactory.getInstance().getComponent("skStomp")==null){
+			CamelContextFactory.getInstance().addComponent("skStomp", new SkStompComponent());
+		}
 		
 		SignalkRouteFactory.configureWebsocketTxRoute(this, SEDA_WEBSOCKETS, wsPort);
 		SignalkRouteFactory.configureWebsocketRxRoute(this, SEDA_INPUT, wsPort);

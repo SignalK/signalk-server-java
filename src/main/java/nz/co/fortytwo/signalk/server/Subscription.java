@@ -142,7 +142,7 @@ public class Subscription {
 
 	@Override
 	public String toString() {
-		return "Subscription [wsSession=" + wsSession + ", path=" + path + ", period=" + period + ", active=" + active + "]";
+		return "Subscription [wsSession=" + wsSession + ", path=" + path + ", period=" + period + ", format=" + format + ", active=" + active + "]";
 	}
 
 	public boolean isActive() {

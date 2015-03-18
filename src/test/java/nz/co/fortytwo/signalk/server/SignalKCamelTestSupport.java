@@ -33,20 +33,36 @@ import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
 import nz.co.fortytwo.signalk.processor.WindProcessor;
 import nz.co.fortytwo.signalk.util.Util;
 
+import org.apache.activemq.broker.BrokerService;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.component.websocket.SignalkWebsocketComponent;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.apache.log4j.Logger;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 
 public abstract class SignalKCamelTestSupport extends CamelTestSupport {
 	static Logger logger = Logger.getLogger(SignalKNmeaReceiverTest.class);
 	protected SignalKModel signalkModel = null;
 	protected RouteManager routeManager = null;
 	protected final CountDownLatch latch = new CountDownLatch(1);
-
+    protected BrokerService broker = null;
+    
 	public SignalKCamelTestSupport() {
 		super();
+		try {
+			broker = ActiveMqBrokerFactory.newInstance();
+		} catch (Exception e) {
+			logger.error(e.getMessage(),e);
+			fail();
+		}
+	}
+	
+	@After
+	public void shutdownBroker() throws Exception{
+		broker.stop();
 	}
 
 	@Override
@@ -54,11 +70,14 @@ public abstract class SignalKCamelTestSupport extends CamelTestSupport {
 	    try {
 	    	try {
 				Properties config=Util.getConfig(null);
-			
+				
+				broker.start();
 				routeManager=new RouteManager(config){
 					@Override
 					public void configure() throws Exception {
-						CamelContextFactory.getInstance().addComponent("skWebsocket", new SignalkWebsocketComponent());
+						if(CamelContextFactory.getInstance().getComponent("skWebsocket")==null){
+							CamelContextFactory.getInstance().addComponent("skWebsocket", new SignalkWebsocketComponent());
+						}
 						configureRouteBuilder(this);
 					
 					}

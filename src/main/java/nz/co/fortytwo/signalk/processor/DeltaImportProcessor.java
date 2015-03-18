@@ -49,9 +49,12 @@ public class DeltaImportProcessor extends SignalkProcessor implements Processor{
 			if(exchange.getIn().getBody()==null ||!(exchange.getIn().getBody() instanceof Json)) return;
 			
 			SignalKModel model = deltaToMap.handle(exchange.getIn().getBody(Json.class));
-			if(logger.isDebugEnabled())logger.debug("Converted to:"+model);
+			
 			if(model!=null){
+				if(logger.isDebugEnabled())logger.debug("Converted to:"+model);
 				exchange.getIn().setBody(model);
+			}else{
+				if(logger.isDebugEnabled())logger.debug("Ignored, not update:"+exchange.getIn().getBody(Json.class));
 			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);

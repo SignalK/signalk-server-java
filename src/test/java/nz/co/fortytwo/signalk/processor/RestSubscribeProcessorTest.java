@@ -69,7 +69,7 @@ public class RestSubscribeProcessorTest {
 		List<Subscription> subs = manager.getSubscriptions("sess"+wsSession);
 		assertEquals(1, subs.size());
 		Subscription s = subs.get(0);
-		assertEquals("Subscription [wsSession=sess"+wsSession+", path=vessels." + SELF + ".navigation, period=1000, active=false]", s.toString());
+		assertEquals("Subscription [wsSession=sess"+wsSession+", path=vessels." + SELF + ".navigation, period=1000, format=delta, active=false]", s.toString());
 	}
 
 	@Test
@@ -82,7 +82,7 @@ public class RestSubscribeProcessorTest {
 		List<Subscription> subs = manager.getSubscriptions("sess"+wsSession);
 		assertEquals(1, subs.size());
 		Subscription s = subs.get(0);
-		assertEquals("Subscription [wsSession=sess"+wsSession+", path=vessels." + SELF + ".navigation, period=500, active=false]", s.toString());
+		assertEquals("Subscription [wsSession=sess"+wsSession+", path=vessels." + SELF + ".navigation, period=500, format=delta, active=false]", s.toString());
 		manager.removeSessionId("sess"+wsSession);
 		subs = manager.getSubscriptions("sess"+wsSession);
 		assertEquals(0, subs.size());
@@ -98,7 +98,7 @@ public class RestSubscribeProcessorTest {
 		List<Subscription> subs = manager.getSubscriptions("sess"+wsSession);
 		assertEquals(1, subs.size());
 		Subscription s = subs.get(0);
-		assertEquals("Subscription [wsSession=sess"+wsSession+", path=vessels." + SELF + ".navigation, period=500, active=false]", s.toString());
+		assertEquals("Subscription [wsSession=sess"+wsSession+", path=vessels." + SELF + ".navigation, period=500, format=delta, active=false]", s.toString());
 	}
 
 	@Test
@@ -116,7 +116,7 @@ public class RestSubscribeProcessorTest {
 		assertEquals(1, subs.size());
 
 		Subscription s = subs.get(0);
-		assertEquals("Subscription [wsSession="+wsSession+", path=vessels." + SELF + ".navigation, period=1000, active=true]", s.toString());
+		assertEquals("Subscription [wsSession="+wsSession+", path=vessels." + SELF + ".navigation, period=1000, format=delta, active=true]", s.toString());
 	}
 
 	@Test
@@ -130,7 +130,7 @@ public class RestSubscribeProcessorTest {
 		// sub under sessionId
 		assertEquals(1, subs.size());
 		Subscription s = subs.get(0);
-		assertEquals("Subscription [wsSession=sess"+wsSession+", path=vessels." + SELF + ".navigation, period=1000, active=false]", s.toString());
+		assertEquals("Subscription [wsSession=sess"+wsSession+", path=vessels." + SELF + ".navigation, period=1000, format=delta, active=false]", s.toString());
 		// now add webSocket
 		manager.add("sess"+wsSession, wsSession);
 		// sub under sessionId gone
@@ -140,7 +140,7 @@ public class RestSubscribeProcessorTest {
 		subs = manager.getSubscriptions(wsSession);
 		assertEquals(1, subs.size());
 		s = subs.get(0);
-		assertEquals("Subscription [wsSession="+wsSession+", path=vessels." + SELF + ".navigation, period=1000, active=true]", s.toString());
+		assertEquals("Subscription [wsSession="+wsSession+", path=vessels." + SELF + ".navigation, period=1000, format=delta, active=true]", s.toString());
 	}
 
 	@Test
@@ -157,7 +157,7 @@ public class RestSubscribeProcessorTest {
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(1, subs.size());
 		Subscription s = subs.get(0);
-		assertEquals("Subscription [wsSession="+wsSession+", path=vessels." + SELF + ".navigation, period=500, active=true]", s.toString());
+		assertEquals("Subscription [wsSession="+wsSession+", path=vessels." + SELF + ".navigation, period=500, format=delta, active=true]", s.toString());
 		// see if its created a route
 		RouteManager routeManager = RouteManagerFactory.getInstance(null);
 		for (RouteDefinition route : routeManager.getRouteCollection().getRoutes()) {

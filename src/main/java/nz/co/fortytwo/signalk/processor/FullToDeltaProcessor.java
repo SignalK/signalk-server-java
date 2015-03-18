@@ -46,13 +46,15 @@ public class FullToDeltaProcessor extends SignalkProcessor implements Processor 
 	public void process(Exchange exchange) throws Exception {
 
 		try {
-			if (exchange.getIn().getBody() == null || !(exchange.getIn().getBody() instanceof Json))
-				return;
+			if (exchange.getIn().getBody() == null) return;
+			if(logger.isDebugEnabled())logger.debug("Processing :" + exchange.getIn());
+			if(!(exchange.getIn().getBody() instanceof Json))return;
 			if (FORMAT_DELTA.equals(exchange.getIn().getHeader(SIGNALK_FORMAT))) {
 				Json json = fullToDelta.handle(exchange.getIn().getBody(Json.class));
 				if(logger.isDebugEnabled())logger.debug("Converted to delta :" + json);
 				exchange.getIn().setBody(json);
 			}
+			if(logger.isDebugEnabled())logger.debug("Outputting :" + exchange.getIn());
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}

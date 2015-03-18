@@ -78,7 +78,7 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 	public void process(Exchange exchange) throws Exception {
 
 		try {
-			if(logger.isDebugEnabled())logger.info("process  subs for " + exchange.getFromRouteId());
+			if(logger.isDebugEnabled())logger.info("process  subs for " + exchange.getFromRouteId()+" as delta? "+isDelta(exchange.getFromRouteId()));
 			// get the accumulated delta nodes.
 			exchange.getIn().setBody(createTree(exchange.getFromRouteId()));
 			if(isDelta(exchange.getFromRouteId())){
@@ -86,7 +86,10 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 			}else{
 				exchange.getIn().setHeader(SIGNALK_FORMAT, FORMAT_FULL);
 			}
-			if(logger.isDebugEnabled())logger.debug("Body set to :" + exchange.getIn().getBody());
+			if(logger.isDebugEnabled()){
+				logger.debug("Header set to :" + exchange.getIn().getHeader(SIGNALK_FORMAT));
+				logger.debug("Body set to :" + exchange.getIn().getBody());
+			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			throw e;
@@ -162,7 +165,7 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 			return;
 		if (pathEvent.getPath() == null)
 			return;
-		if (logger.isDebugEnabled())logger.debug(this.wsSession + " received event " + pathEvent.getPath());
+		if (logger.isTraceEnabled())logger.trace(this.wsSession + " received event " + pathEvent.getPath());
 
 		// do we care?
 		for (Subscription s : manager.getSubscriptions(wsSession)) {

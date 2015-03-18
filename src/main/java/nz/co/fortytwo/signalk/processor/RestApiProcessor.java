@@ -31,6 +31,7 @@ import mjson.Json;
 import nz.co.fortytwo.signalk.handler.RestApiHandler;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.JsonSerializer;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -48,6 +49,7 @@ import org.apache.log4j.Logger;
 public class RestApiProcessor extends SignalkProcessor implements Processor{
 
 	private static Logger logger = Logger.getLogger(RestApiProcessor.class);
+	private JsonSerializer ser = new JsonSerializer();
 	
 	private RestApiHandler api = new RestApiHandler();
 	@Override
@@ -59,8 +61,10 @@ public class RestApiProcessor extends SignalkProcessor implements Processor{
         if(request.getSession()!=null){
 	        if(request.getMethod().equals("GET")){
 	        	HttpServletResponse response = exchange.getIn(HttpMessage.class).getResponse();
-	        	SignalKModel json = api.processGet(request, response, signalkModel);
-	        	if(json!=null)exchange.getIn().setBody(json);
+	        	SignalKModel model = api.processGet(request, response, signalkModel);
+	        	if(model!=null){
+	        		exchange.getIn().setBody(ser.write(model));
+	        	}
 	        	//response codes are set here, so all good now.
 	        }
 	        

@@ -45,8 +45,10 @@ public class OutputFilterProcessor extends SignalkProcessor implements Processor
 	JsonSerializer ser = new JsonSerializer();
 	
 	public void process(Exchange exchange) throws Exception {
+		
 		if (exchange.getIn().getBody()==null)
 			return;
+		if(logger.isDebugEnabled())logger.debug("Processing:"+exchange.getIn().getBody().getClass());
 		//TODO: add more filters here
 		if(exchange.getIn().getBody() instanceof Json){
 			Json json = (Json)exchange.getIn().getBody();
@@ -60,7 +62,8 @@ public class OutputFilterProcessor extends SignalkProcessor implements Processor
 			}catch(NullPointerException npe){}
 			
 			exchange.getIn().setBody(json.toString());
-		}else if (exchange.getIn().getBody() instanceof SignalKModel){
+		}
+		if (exchange.getIn().getBody() instanceof SignalKModel){
 			SignalKModel model = (SignalKModel)exchange.getIn().getBody();
 			//remove _arduino
 			try{
@@ -71,8 +74,9 @@ public class OutputFilterProcessor extends SignalkProcessor implements Processor
 				model.put(SignalKConstants.vessels_dot_self_dot+"_config",null);
 			}catch(NullPointerException npe){}
 			
-			exchange.getIn().setBody(ser.write(model));
+			exchange.getIn().setBody(ser.writeJson(model));
 		}
+		if(logger.isDebugEnabled())logger.debug("Outputting:"+exchange.getIn());
 	}
 
 }

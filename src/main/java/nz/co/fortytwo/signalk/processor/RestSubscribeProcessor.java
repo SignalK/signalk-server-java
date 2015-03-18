@@ -66,7 +66,7 @@ public class RestSubscribeProcessor extends SignalkProcessor implements Processo
 
 	/**
 	 * <ul>
-    * <li> path=[path.to.key] is appended to the context to specify subsets of the context. The path value can use jsonPath syntax.
+    * <li> NOTE: disabled. // path=[path.to.key] is appended to the context to specify subsets of the context. The path value can use jsonPath syntax.
     * <li> period=[millisecs] becomes the transmission rate, eg every period/1000 seconds.
     * <li> format=[delta|full] specifies delta or full format. Delta format is provided by default
     * <li> policy=[immediate|maximum|periodic]
@@ -110,10 +110,7 @@ public class RestSubscribeProcessor extends SignalkProcessor implements Processo
         if(exchange.getIn().getHeader("policy")!=null){
         	policy = (String) exchange.getIn().getHeader("policy");
         }
-        String path = null;
-        if(exchange.getIn().getHeader("path")!=null){
-        	policy = (String) exchange.getIn().getHeader("policy");
-        }
+        
         
         String sessionId = request.getSession().getId();
         

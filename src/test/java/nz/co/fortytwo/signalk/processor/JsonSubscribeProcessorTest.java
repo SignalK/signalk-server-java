@@ -71,7 +71,7 @@ public class JsonSubscribeProcessorTest {
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(1, subs.size());
 		Subscription s = subs.get(0);
-		assertEquals("Subscription [wsSession="+wsSession+", path=vessels." + SELF + ".navigation, period=1000, active=true]", s.toString());
+		assertEquals("Subscription [wsSession="+wsSession+", path=vessels." + SELF + ".navigation, period=1000, format=delta, active=true]", s.toString());
 	}
 
 	/**
@@ -128,7 +128,7 @@ public class JsonSubscribeProcessorTest {
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(1, subs.size());
 		Subscription s = subs.get(0);
-		assertEquals("Subscription [wsSession="+wsSession+", path=vessels." + SELF + ".navigation, period=500, active=true]", s.toString());
+		assertEquals("Subscription [wsSession="+wsSession+", path=vessels." + SELF + ".navigation, period=500, format=delta, active=true]", s.toString());
 		manager.removeSessionId(wsSession);
 		subs = manager.getSubscriptions(wsSession);
 		assertEquals(0, subs.size());
@@ -144,7 +144,7 @@ public class JsonSubscribeProcessorTest {
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(1, subs.size());
 		Subscription s = subs.get(0);
-		assertEquals("Subscription [wsSession="+wsSession+", path=vessels." + SELF + ".navigation, period=500, active=true]", s.toString());
+		assertEquals("Subscription [wsSession="+wsSession+", path=vessels." + SELF + ".navigation, period=500, format=delta, active=true]", s.toString());
 	}
 
 	@Test
@@ -159,7 +159,7 @@ public class JsonSubscribeProcessorTest {
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(1, subs.size());
 		Subscription s = subs.get(0);
-		assertEquals("Subscription [wsSession="+wsSession+", path=vessels." + SELF + ".navigation, period=500, active=true]", s.toString());
+		assertEquals("Subscription [wsSession="+wsSession+", path=vessels." + SELF + ".navigation, period=500, format=delta, active=true]", s.toString());
 		// see if its created a route
 		RouteManager routeManager = RouteManagerFactory.getInstance(null);
 		for (RouteDefinition route : routeManager.getRouteCollection().getRoutes()) {
