@@ -24,22 +24,20 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import static org.junit.Assert.*;
-import static nz.co.fortytwo.signalk.util.JsonConstants.*;
+import static nz.co.fortytwo.signalk.util.JsonConstants.FORMAT_DELTA;
+import static nz.co.fortytwo.signalk.util.JsonConstants.POLICY_FIXED;
+import static nz.co.fortytwo.signalk.util.JsonConstants.SELF;
+import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 import java.util.UUID;
 
-import javax.servlet.http.HttpServletResponse;
-
 import mjson.Json;
 import nz.co.fortytwo.signalk.server.RouteManager;
 import nz.co.fortytwo.signalk.server.RouteManagerFactory;
+import nz.co.fortytwo.signalk.server.Subscription;
 import nz.co.fortytwo.signalk.server.SubscriptionManager;
 import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
-import nz.co.fortytwo.signalk.server.SignalkRouteFactory;
-import nz.co.fortytwo.signalk.server.Subscription;
-import nz.co.fortytwo.signalk.util.JsonConstants;
 
 import org.apache.camel.model.RouteDefinition;
 import org.apache.log4j.Logger;
@@ -47,7 +45,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.restlet.data.Status;
 
 public class JsonSubscribeProcessorTest {
 

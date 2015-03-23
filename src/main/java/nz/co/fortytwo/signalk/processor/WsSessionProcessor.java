@@ -39,13 +39,14 @@ public class WsSessionProcessor extends SignalkProcessor implements Processor {
 	@Override
 	public void process(Exchange exchange) throws Exception {
 		String connectionKey = exchange.getIn().getHeader(WebsocketConstants.CONNECTION_KEY, String.class);
-		logger.info("WS connection key is " + connectionKey);
-		
-		for(String key : exchange.getIn().getHeaders().keySet()){
-			logger.info("In headers = "+key+"="+exchange.getIn().getHeader(key));
-		}
-		for(String key : exchange.getProperties().keySet()){
-			logger.info("props = "+key);
+		if(logger.isDebugEnabled())logger.debug("WS connection key is " + connectionKey);
+		if(logger.isDebugEnabled()){
+			for(String key : exchange.getIn().getHeaders().keySet()){
+				logger.debug("In headers = "+key+"="+exchange.getIn().getHeader(key));
+			}
+			for(String key : exchange.getProperties().keySet()){
+				logger.debug("props = "+key);
+			}
 		}
 		
 		//String sessionId = exchange.getProperty(Constants.SESSIONID, String.class);
@@ -54,7 +55,7 @@ public class WsSessionProcessor extends SignalkProcessor implements Processor {
 	    //breadcrumb = breadcrumb.substring(0,breadcrumb.lastIndexOf("-",breadcrumb.lastIndexOf("-")));
 	    //logger.info("Found breadcrumb = "+breadcrumb);
 	    //String sessionId = manager.getWsSession(breadcrumb);
-	    logger.info("Found sessionId session = "+connectionKey+","+manager.getSessionId(connectionKey));
+		if(logger.isDebugEnabled())logger.debug("Found sessionId session = "+connectionKey+","+manager.getSessionId(connectionKey));
 		//manager.add(sessionId, connectionKey);
 		//logger.info("Added session = "+sessionId+","+connectionKey);
 		

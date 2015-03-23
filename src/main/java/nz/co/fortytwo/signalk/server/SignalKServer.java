@@ -27,21 +27,13 @@ package nz.co.fortytwo.signalk.server;
 import java.io.File;
 import java.util.Properties;
 
-import nz.co.fortytwo.signalk.util.Constants;
 import nz.co.fortytwo.signalk.util.Util;
 
-import org.apache.activemq.apollo.broker.Broker;
 import org.apache.activemq.broker.BrokerService;
-import org.apache.camel.component.websocket.WebsocketComponentServlet;
 import org.apache.camel.main.Main;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.HandlerList;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
-import org.eclipse.jetty.servlet.DefaultServlet;
-import org.eclipse.jetty.servlet.ServletContextHandler;
 
 public class SignalKServer {
 

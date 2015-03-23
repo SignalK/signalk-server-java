@@ -8,9 +8,9 @@
 	<properties>
 		<!-- <bundle.name>nsb-${project.version}</bundle.name> -->
 		<signalk.core.version>0.0.1-SNAPSHOT</signalk.core.version>
-		<jetty.version>8.1.15.v20140411</jetty.version>
-		<camel.version>2.14.1</camel.version>
-		<camel.core.version>2.14.1</camel.core.version>
+		<jetty.version>8.1.16.v20140903</jetty.version>
+		<camel.version>2.15.0</camel.version>
+		<camel.core.version>2.15.0</camel.core.version>
 		<jna.version>3.6.0-SNAPSHOT</jna.version>
 		<apollo.version>1.7.1</apollo.version>
 		<activemq.version>5.11.0</activemq.version>
@@ -75,27 +75,6 @@
 			<version>${signalk.core.version}</version>
 		</dependency>
 
-		<!-- apache apollo broker -->
-		<dependency>
-			<groupId>org.apache.activemq</groupId>
-			<artifactId>apollo-broker</artifactId>
-			<version>${apollo.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.activemq</groupId>
-			<artifactId>apollo-stomp</artifactId>
-			<version>${apollo.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.activemq</groupId>
-			<artifactId>apollo-mqtt</artifactId>
-			<version>${apollo.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.activemq</groupId>
-			<artifactId>apollo-web</artifactId>
-			<version>${apollo.version}</version>
-		</dependency>
 	<!-- ActiveMq -->
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
@@ -284,16 +263,16 @@
 			<artifactId>commons-io</artifactId>
 			<version>1.3.1</version>
 		</dependency>
-		<dependency>
-			<groupId>commons-lang</groupId>
-			<artifactId>commons-lang</artifactId>
-			<version>2.4</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-exec</artifactId>
-			<version>1.1</version>
-		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>commons-lang</groupId> -->
+<!-- 			<artifactId>commons-lang</artifactId> -->
+<!-- 			<version>2.4</version> -->
+<!-- 		</dependency> -->
+<!-- 		<dependency> -->
+<!-- 			<groupId>org.apache.commons</groupId> -->
+<!-- 			<artifactId>commons-exec</artifactId> -->
+<!-- 			<version>1.1</version> -->
+<!-- 		</dependency> -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -315,7 +294,8 @@
 		<dependency>
 			<groupId>com.ning</groupId>
 			<artifactId>async-http-client</artifactId>
-			<version>1.8.14</version>
+			<version>1.8.14</version> 
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 	<build>
