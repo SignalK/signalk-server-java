@@ -144,41 +144,44 @@ public class FullExportProcessorTest {
 	private void testScenario(String session, String subKey, String format, String policy, int rcvdCounter, int mapSizeBefore, int mapSizeAfter, NavigableSet<String> eventSet) throws Exception {
 			
 		CamelContext ctx = RouteManagerFactory.getInstance(null).getContext();
-			
-			Subscription sub = new Subscription(session, subKey, 10, 1000, format, policy);
-			SubscriptionManagerFactory.getInstance().add("ses"+session, session);
-			SubscriptionManagerFactory.getInstance().addSubscription(sub);
-			
-			//make a mock Endpoint
-			MockEndpoint resultEndpoint = (MockEndpoint) ctx.getEndpoint("mock:resultEnd");
-			 
-			resultEndpoint.expectedMessageCount(rcvdCounter);
-			
-			FullExportProcessor processor = new FullExportProcessor(session);
-			ProducerTemplate exportProducer= new DefaultProducerTemplate(CamelContextFactory.getInstance());
-			exportProducer.setDefaultEndpointUri("mock:resultEnd");
-			try {
-				exportProducer.start();
-			} catch (Exception e) {
-				logger.error(e.getMessage(),e);
+			try{
+				Subscription sub = new Subscription(session, subKey, 10, 1000, format, policy);
+				SubscriptionManagerFactory.getInstance().add("ses"+session, session);
+				SubscriptionManagerFactory.getInstance().addSubscription(sub);
+				
+				//make a mock Endpoint
+				MockEndpoint resultEndpoint = (MockEndpoint) ctx.getEndpoint("mock:resultEnd");
+				 
+				resultEndpoint.expectedMessageCount(rcvdCounter);
+				
+				FullExportProcessor processor = new FullExportProcessor(session);
+				ProducerTemplate exportProducer= new DefaultProducerTemplate(CamelContextFactory.getInstance());
+				exportProducer.setDefaultEndpointUri("mock:resultEnd");
+				try {
+					exportProducer.start();
+				} catch (Exception e) {
+					logger.error(e.getMessage(),e);
+				}
+				processor.setExportProducer(exportProducer);
+	
+				assertEquals(mapSizeBefore, processor.queue.size());
+				EventBus bus = new EventBus();
+				bus.register(processor);
+	
+				for(String key : eventSet){
+					bus.post(new PathEvent(key,0, nz.co.fortytwo.signalk.model.event.PathEvent.EventType.ADD));
+				}
+				resultEndpoint.assertIsSatisfied();
+				assertEquals(rcvdCounter, resultEndpoint.getReceivedCounter());
+				resultEndpoint.reset();
+				assertEquals(mapSizeAfter, processor.queue.size());
+				for(Exchange e: resultEndpoint.getExchanges()){
+					logger.debug(e.getIn().getBody());
+				}
+				SubscriptionManagerFactory.getInstance().removeSubscription(sub);
+			}finally{
+				SubscriptionManagerFactory.getInstance().removeWsSession(session);
 			}
-			processor.setExportProducer(exportProducer);
-
-			assertEquals(mapSizeBefore, processor.queue.size());
-			EventBus bus = new EventBus();
-			bus.register(processor);
-
-			for(String key : eventSet){
-				bus.post(new PathEvent(key,0, nz.co.fortytwo.signalk.model.event.PathEvent.EventType.ADD));
-			}
-			resultEndpoint.assertIsSatisfied();
-			assertEquals(rcvdCounter, resultEndpoint.getReceivedCounter());
-			resultEndpoint.reset();
-			assertEquals(mapSizeAfter, processor.queue.size());
-			for(Exchange e: resultEndpoint.getExchanges()){
-				logger.debug(e.getIn().getBody());
-			}
-			SubscriptionManagerFactory.getInstance().removeSubscription(sub);
 		}
 	
 }
