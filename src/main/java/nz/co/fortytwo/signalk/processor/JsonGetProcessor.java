@@ -46,6 +46,7 @@ import org.apache.camel.Processor;
 import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.fusesource.stomp.client.Constants;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -62,7 +63,7 @@ public class JsonGetProcessor extends SignalkProcessor implements Processor{
 
 	private static Logger logger = Logger.getLogger(JsonGetProcessor.class);
 	//private static DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
-	private JsonGetHandler getHandler = new JsonGetHandler();
+	private JsonGetHandler handler = new JsonGetHandler();
 	
 	public void process(Exchange exchange) throws Exception {
 		
@@ -76,12 +77,17 @@ public class JsonGetProcessor extends SignalkProcessor implements Processor{
 			//avoid full signalk syntax
 			if(json.has(VESSELS))return;
 			if(json.has(CONTEXT) && (json.has(GET))){
-				SignalKModel temp = getHandler.handle(signalkModel, json);
-				
-				Map<String, Object> headers = new HashMap<String, Object>();
-				headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
-				headers.put(SIGNALK_FORMAT, getHandler.getFormat(json));
+				SignalKModel temp = handler.handle(signalkModel, json);
+				//also STOMP headers etc, swap replyTo
+				Map<String, Object> headers = exchange.getIn().getHeaders();
+				headers.put(SIGNALK_FORMAT, handler.getFormat(json));
 				json.delAt(GET);
+				//also STOMP headers etc, swap replyTo
+				if(headers!=null && headers.containsKey(Constants.REPLY_TO.toString())){
+					headers.put(Constants.DESTINATION.toString(), headers.get(Constants.REPLY_TO.toString()));
+					headers.remove(Constants.REPLY_TO.toString());
+				}
+				logger.debug("headers:"+headers);
 				outProducer.sendBodyAndHeaders(temp, headers);
 				exchange.getIn().setBody(json);
 			}

@@ -21,9 +21,9 @@ import java.util.Map;
 import org.apache.camel.Endpoint;
 import org.apache.camel.impl.DefaultComponent;
 
-public class SkStompComponent extends DefaultComponent {
+public class SkStompComponent extends StompComponent {
 
-    private StompConfiguration configuration = new StompConfiguration();
+    
 
     @Override
     protected Endpoint createEndpoint(String uri, String remaining, Map<String, Object> parameters) throws Exception {
@@ -39,23 +39,5 @@ public class SkStompComponent extends DefaultComponent {
         return endpoint;
     }
 
-    public StompConfiguration getConfiguration() {
-        return configuration;
-    }
-
-    public void setConfiguration(StompConfiguration configuration) {
-        this.configuration = configuration;
-    }
-
-    public void setBrokerURL(String brokerURL) {
-        getConfiguration().setBrokerURL(brokerURL);
-    }
-
-    public void setLogin(String login) {
-        getConfiguration().setLogin(login);
-    }
-
-    public void setPasscode(String passcode) {
-        getConfiguration().setPasscode(passcode);
-    }
+   
 }

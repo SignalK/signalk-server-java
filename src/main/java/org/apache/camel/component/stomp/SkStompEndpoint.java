@@ -20,20 +20,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import nz.co.fortytwo.signalk.processor.JsonSubscribeProcessor;
+
+import org.apache.camel.AsyncCallback;
 import org.apache.camel.Consumer;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.Processor;
 import org.apache.camel.Producer;
 import org.apache.camel.impl.DefaultEndpoint;
+import org.apache.log4j.Logger;
 import org.fusesource.hawtbuf.AsciiBuffer;
 import org.fusesource.hawtbuf.Buffer;
+import org.fusesource.hawtbuf.UTF8Buffer;
 import org.fusesource.hawtdispatch.Task;
 import org.fusesource.stomp.client.Callback;
 import org.fusesource.stomp.client.CallbackConnection;
+import org.fusesource.stomp.client.Constants;
 import org.fusesource.stomp.client.Promise;
 import org.fusesource.stomp.client.Stomp;
 import org.fusesource.stomp.codec.StompFrame;
+import org.fusesource.stomp.codec.StompFrame.HeaderEntry;
 
 import static org.fusesource.hawtbuf.UTF8Buffer.utf8;
 import static org.fusesource.stomp.client.Constants.DESTINATION;
@@ -43,37 +50,34 @@ import static org.fusesource.stomp.client.Constants.SEND;
 import static org.fusesource.stomp.client.Constants.SUBSCRIBE;
 import static org.fusesource.stomp.client.Constants.UNSUBSCRIBE;
 
-public class SkStompEndpoint extends DefaultEndpoint {
+public class SkStompEndpoint extends StompEndpoint {
 
+	private static Logger logger = Logger.getLogger(SkStompEndpoint.class);
+	
     private CallbackConnection connection;
-    private StompConfiguration configuration;
+    //private StompConfiguration configuration;
     private String destination;
     private Stomp stomp;
 
     private final List<StompConsumer> consumers = new CopyOnWriteArrayList<StompConsumer>();
 
-    public SkStompEndpoint(String uri, SkStompComponent component, StompConfiguration configuration, String destination) {
-        super(uri, component);
-        this.configuration = configuration;
+    public SkStompEndpoint(String uri, StompComponent component, StompConfiguration configuration, String destination) {
+        super(uri, component,configuration,destination);
         this.destination = destination;
     }
 
     public Producer createProducer() throws Exception {
-        return new SkStompProducer(this);
+        return new StompProducer(this);
     }
 
     public Consumer createConsumer(Processor processor) throws Exception {
         return new StompConsumer(this, processor);
     }
 
-    public boolean isSingleton() {
-        return true;
-    }
-
     @Override
     protected void doStart() throws Exception {
         final Promise<CallbackConnection> promise = new Promise<CallbackConnection>();
-
+        StompConfiguration configuration = ((StompComponent)getComponent()).getConfiguration();
         stomp = new Stomp(configuration.getBrokerURL());
         stomp.setLogin(configuration.getLogin());
         stomp.setPasscode(configuration.getPasscode());
@@ -94,9 +98,16 @@ public class SkStompEndpoint extends DefaultEndpoint {
 
                     @Override
                     public void onSuccess(StompFrame value) {
+                    	if(logger.isDebugEnabled())logger.debug("STOMP frame:"+value.toString());
+                    	if(logger.isDebugEnabled())logger.debug("STOMP frame:"+value.contentAsString());
                         if (!consumers.isEmpty()) {
                             Exchange exchange = createExchange();
-                            exchange.getIn().setBody(value.content());
+                            exchange.getIn().setBody(value.contentAsString());
+                            //map headers across
+                            for(HeaderEntry header : value.headerList()){
+                            	if(logger.isDebugEnabled())logger.debug("STOMP header:"+header.getKey().toString()+"="+header.getValue().toString());
+                            	exchange.getIn().setHeader(header.getKey().toString(),header.getValue().toString());
+                            }
                             for (StompConsumer consumer : consumers) {
                                 consumer.processExchange(exchange);
                             }
@@ -120,26 +131,38 @@ public class SkStompEndpoint extends DefaultEndpoint {
         connection.close(null);
     }
     
-    protected void send(Message message) {
-    	send(message, null);
-    }
-    	
-    protected void send(Message message, Map<String, Object> headers) {
+   
+    
+    protected void send(final Exchange exchange, final AsyncCallback callback) {
         final StompFrame frame = new StompFrame(SEND);
-        //frame.addHeader(DESTINATION, StompFrame.encodeHeader(destination));
-        //add any valid headers
+        if(logger.isDebugEnabled())logger.debug("STOMP: sending :"+exchange);
+        frame.addHeader(DESTINATION, StompFrame.encodeHeader(destination));
+        Map<String, Object> headers = exchange.getIn().getHeaders();
         if(headers!=null){
         	for(String key:headers.keySet()){
         		if(headers.get(key) instanceof String){
+        			if(logger.isDebugEnabled())logger.debug("STOMP: encode header :"+key+"="+(String)headers.get(key));
         			frame.addHeader(Buffer.ascii(key), StompFrame.encodeHeader((String)headers.get(key)));
         		}
         	}
         }
-        frame.content(utf8(message.getBody().toString()));
+        frame.content(utf8(exchange.getIn().getBody().toString()));
+
         connection.getDispatchQueue().execute(new Task() {
             @Override
             public void run() {
-                connection.send(frame, null);
+                connection.send(frame, new Callback<Void>() {
+                    @Override
+                    public void onFailure(Throwable e) {
+                        exchange.setException(e);
+                        callback.done(false);
+                    }
+
+                    @Override
+                    public void onSuccess(Void v) {
+                        callback.done(false);
+                    }
+                });
             }
         });
     }

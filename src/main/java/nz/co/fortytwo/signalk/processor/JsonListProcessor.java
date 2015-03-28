@@ -28,6 +28,7 @@ import static nz.co.fortytwo.signalk.util.JsonConstants.*;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import mjson.Json;
@@ -44,6 +45,7 @@ import org.apache.camel.Processor;
 import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.fusesource.stomp.client.Constants;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -79,7 +81,13 @@ public class JsonListProcessor extends SignalkProcessor implements Processor{
 				Json pathList = listHandler.handle(json);
 				json.set(PATHLIST, pathList);
 				json.delAt(LIST);
-				outProducer.sendBodyAndHeader(json, WebsocketConstants.CONNECTION_KEY, wsSession);
+				//also STOMP headers etc, swap replyTo
+				Map<String, Object> headers = exchange.getIn().getHeaders();
+				if(headers!=null && headers.containsKey(Constants.REPLY_TO.toString())){
+					headers.put(Constants.DESTINATION.toString(), headers.get(Constants.REPLY_TO.toString()));
+					headers.remove(Constants.REPLY_TO.toString());
+				}
+				outProducer.sendBodyAndHeaders(json, headers);
 				exchange.getIn().setBody(json);
 			}
 		} catch (Exception e) {

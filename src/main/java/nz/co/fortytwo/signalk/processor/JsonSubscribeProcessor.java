@@ -55,6 +55,7 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
 			if(exchange.getIn().getBody()==null ||!(exchange.getIn().getBody() instanceof Json)) return;
 			String wsSession = exchange.getIn().getHeader(WebsocketConstants.CONNECTION_KEY, String.class);
 			if(wsSession==null){
+				if(logger.isDebugEnabled())logger.debug("WsSession is null:"+exchange.getIn().getHeaders());
 				return;
 			}
 			Json json = exchange.getIn().getBody(Json.class);
@@ -112,7 +113,7 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
 					parseSubscribe(wsSession, context, subscription);
 				}
 			}
-			if(logger.isDebugEnabled())logger.debug("SignalkModelProcessor processed subscribe  "+node );
+			if(logger.isDebugEnabled())logger.debug("processed subscribe  "+node );
 		}
 		Json unsubscriptions = node.at(UNSUBSCRIBE);
 		if(unsubscriptions!=null){
@@ -122,7 +123,7 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
 					parseUnsubscribe(wsSession, context, subscription);
 				}
 			}
-			if(logger.isDebugEnabled())logger.debug("SignalkModelProcessor processed unsubscribe  "+node );
+			if(logger.isDebugEnabled())logger.debug("processed unsubscribe  "+node );
 		}
 			
 		

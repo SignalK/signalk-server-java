@@ -22,15 +22,14 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import static nz.co.fortytwo.signalk.util.JsonConstants.CONTEXT;
-import static nz.co.fortytwo.signalk.util.JsonConstants.FORMAT_DELTA;
-import static nz.co.fortytwo.signalk.util.JsonConstants.SIGNALK_FORMAT;
+import java.util.Map;
+
 import mjson.Json;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.log4j.Logger;
+import org.fusesource.stomp.client.Constants;
 
 /**
  * Create the queue destination
@@ -47,16 +46,9 @@ public class StompProcessor extends SignalkProcessor implements Processor {
 		try {
 			if (exchange.getIn().getBody() == null || !(exchange.getIn().getBody() instanceof Json))
 				return;
-			//assemble the queue name
-			StringBuffer queue = new StringBuffer("/queue/signalk.");
-			queue.append(exchange.getIn().getHeader(WebsocketConstants.CONNECTION_KEY));
-			if (FORMAT_DELTA.equals(exchange.getIn().getHeader(SIGNALK_FORMAT))) {
-				Json json = exchange.getIn().getBody(Json.class);
-				String context = json.at(CONTEXT).asString();
-				queue.append(".").append(context);
-			}
-			if(logger.isDebugEnabled())logger.debug("Message Queue :" + queue);
-			exchange.getIn().setHeader("destination",queue.toString());
+			
+			if(logger.isDebugEnabled())logger.debug("Message destination :" + exchange.getIn().getHeader(Constants.DESTINATION.toString()));
+			
 			exchange.getIn().setHeader("ttl", "3000");
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);

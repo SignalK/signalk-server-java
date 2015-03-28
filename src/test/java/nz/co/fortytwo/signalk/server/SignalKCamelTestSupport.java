@@ -24,9 +24,14 @@
  */
 package nz.co.fortytwo.signalk.server;
 
+import static nz.co.fortytwo.signalk.util.JsonConstants.FORMAT;
+import static nz.co.fortytwo.signalk.util.JsonConstants.GET;
+import static nz.co.fortytwo.signalk.util.JsonConstants.PATH;
+
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
+import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
@@ -65,6 +70,80 @@ public abstract class SignalKCamelTestSupport extends CamelTestSupport {
 		broker.stop();
 	}
 
+	/**
+	 * <pre>
+	 {
+    "context": "vessels.230099999",
+    "subscribe": [
+        {
+                    "path": "navigation.speedThroughWater",
+                    "period": 1000,
+                    "format": "delta",
+                    "policy": "ideal",
+                    "minPeriod": 200
+                },
+         {
+                    "path": "navigation.logTrip",
+                    "period": 10000
+                }
+        ],
+     "unsubscribe": [
+        {
+                    "path": "environment.depth.belowTransducer",
+                }
+         ]
+}
+	 * </pre>
+	 * @param string
+	 * @param i
+	 * @param j
+	 * @param formatDelta
+	 * @param policyFixed
+	 * @return
+	 */
+	public Json getSubscribe(String context, String path, int period, int minPeriod, String format, String policy) {
+		Json json = Json.read("{\"context\":\""+context+"\", \"subscribe\": []}");
+		Json sub = Json.object();
+		sub.set("path",path);
+		sub.set("period",period);
+		sub.set("minPeriod",minPeriod);
+		sub.set("format",format);
+		sub.set("policy",policy);
+		json.at("subscribe").add(sub);
+		logger.debug("Created json subcribe: "+json);
+		return json;
+	}
+	public Json getUnsubscribe(String context, String path, int period, int minPeriod, String format, String policy) {
+		Json json = Json.read("{\"context\":\""+context+"\", \"unsubscribe\": []}");
+		Json sub = Json.object();
+		sub.set("path",path);
+		sub.set("period",period);
+		sub.set("minPeriod",minPeriod);
+		sub.set("format",format);
+		sub.set("policy",policy);
+		json.at("unsubscribe").add(sub);
+		logger.debug("Created json unsubscribe: "+json);
+		return json;
+	}
+	
+	public Json getList(String context, String path) {
+		Json json = Json.read("{\"context\":\""+context+"\", \"list\": []}");
+		Json sub = Json.object();
+		sub.set("path",path);
+		json.at("list").add(sub);
+		logger.debug("Created json list: "+json);
+		return json;
+	}
+	public Json getGet(String context, String path, String format) {
+		Json json = Json.read("{\"context\":\"" + context + "\", \"get\": []}");
+		Json sub = Json.object();
+		sub.set(PATH, path);
+		sub.set(FORMAT, format);
+		json.at(GET).add(sub);
+		logger.debug("Created json get: " + json);
+		return json;
+	}
+	
 	@Override
 	protected RouteBuilder createRouteBuilder() {
 	    try {
@@ -72,6 +151,7 @@ public abstract class SignalKCamelTestSupport extends CamelTestSupport {
 				Properties config=Util.getConfig(null);
 				
 				broker.start();
+				logger.debug("Started broker");
 				routeManager=new RouteManager(config){
 					@Override
 					public void configure() throws Exception {

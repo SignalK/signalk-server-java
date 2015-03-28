@@ -47,6 +47,8 @@ public class InputFilterProcessor extends SignalkProcessor implements Processor 
 		String msg = (String) exchange.getIn().getBody(String.class);
 		if(msg !=null){
 			msg=msg.trim();
+			//stomp messages are prefixed with 'ascii:'
+			if(msg.startsWith("ascii:"))msg = msg.substring(6).trim();
 			boolean ok = false;
 			if(msg.startsWith("!AIVDM")){
 				//AIS

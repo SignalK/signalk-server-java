@@ -96,7 +96,7 @@ public class SignalKGetOutputTest extends SignalKCamelTestSupport {
 		logger.debug("Lat :" + signalkModel.getValue(SignalKConstants.vessels_dot_self_dot+ nav_position_latitude));
 
 		// request list
-		Json sub = getJson("vessels." + SELF, "navigation.position.*", JsonConstants.FORMAT_DELTA);
+		Json sub = getGet("vessels." + SELF, "navigation.position.*", JsonConstants.FORMAT_DELTA);
 		template.sendBodyAndHeader(DIRECT_INPUT, sub.toString(), WebsocketConstants.CONNECTION_KEY, wsSession);
 		output.assertIsSatisfied();
 		
@@ -111,16 +111,6 @@ public class SignalKGetOutputTest extends SignalKCamelTestSupport {
 		assertNotNull(reply);
 		assertNotNull(reply.get(vessels_dot_self_dot+nav_position_latitude));
 
-	}
-
-	private Json getJson(String context, String path, String format) {
-		Json json = Json.read("{\"context\":\"" + context + "\", \"get\": []}");
-		Json sub = Json.object();
-		sub.set(PATH, path);
-		sub.set(FORMAT, format);
-		json.at(GET).add(sub);
-		logger.debug("Created json get: " + json);
-		return json;
 	}
 
 	@Override

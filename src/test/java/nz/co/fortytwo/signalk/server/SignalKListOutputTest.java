@@ -84,7 +84,7 @@ public class SignalKListOutputTest extends SignalKCamelTestSupport {
 		 logger.debug("Lat :"+signalkModel.getValue(vessels_dot_self_dot + nav_position_latitude));
 		 
 		 //request list
-		 Json sub = getJson("vessels." + SELF,"navigation.position.*");
+		 Json sub = getList("vessels." + SELF,"navigation.position.*");
 		 template.sendBodyAndHeader(DIRECT_INPUT, sub.toString(),WebsocketConstants.CONNECTION_KEY, wsSession);
 		 output.assertIsSatisfied();
 		 Exchange exch = output.getReceivedExchanges().get(0);
@@ -95,16 +95,6 @@ public class SignalKListOutputTest extends SignalKCamelTestSupport {
 		 
     }
 	
-	
-	
-	private Json getJson(String context, String path) {
-		Json json = Json.read("{\"context\":\""+context+"\", \"list\": []}");
-		Json sub = Json.object();
-		sub.set("path",path);
-		json.at("list").add(sub);
-		logger.debug("Created json list: "+json);
-		return json;
-	}
 
 	@Override
 	public void configureRouteBuilder(RouteBuilder routeBuilder) {

@@ -13,7 +13,7 @@
 		<camel.core.version>2.15.0</camel.core.version>
 		<jna.version>3.6.0-SNAPSHOT</jna.version>
 		<apollo.version>1.7.1</apollo.version>
-		<activemq.version>5.11.0</activemq.version>
+		<activemq.version>5.11.1</activemq.version>
 	</properties>
 	<licenses>
 		<license>

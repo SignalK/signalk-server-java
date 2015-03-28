@@ -88,7 +88,7 @@ public class SignalKSubscriptionOutputTest extends SignalKCamelTestSupport {
 		 logger.debug("Lat :"+(double)signalkModel.get(vessels_dot_self_dot + nav_position_latitude));
 		 
 		 //add a sub
-		 Json sub = getJson("vessels." + SELF,"navigation", 500, 0,FORMAT_FULL, POLICY_FIXED);
+		 Json sub = getSubscribe("vessels." + SELF,"navigation", 500, 0,FORMAT_FULL, POLICY_FIXED);
 		 template.sendBodyAndHeader(DIRECT_INPUT, sub.toString(),WebsocketConstants.CONNECTION_KEY, wsSession);
 		 
 		 output.assertIsSatisfied();
@@ -109,7 +109,7 @@ public class SignalKSubscriptionOutputTest extends SignalKCamelTestSupport {
 		 logger.debug("Lat :"+(double)signalkModel.get(vessels_dot_self_dot + nav_position_latitude));
 		 
 		 //add a sub
-		 Json sub = getJson("vessels." + SELF,nav_position, 500, 0,FORMAT_FULL, POLICY_FIXED);
+		 Json sub = getSubscribe("vessels." + SELF,nav_position, 500, 0,FORMAT_FULL, POLICY_FIXED);
 		 template.sendBodyAndHeader(DIRECT_INPUT, sub.toString(),WebsocketConstants.CONNECTION_KEY, wsSession);
 		 output.assertIsSatisfied();
 		 SignalKModel out = (SignalKModel)output.getReceivedExchanges().get(0).getIn().getBody(SignalKModel.class);
@@ -132,9 +132,9 @@ public class SignalKSubscriptionOutputTest extends SignalKCamelTestSupport {
 		 logger.debug("Lat :"+(double)signalkModel.get(vessels_dot_self_dot + nav_position_latitude));
 		 
 		 //add a sub
-		 Json sub = getJson("vessels." + SELF,nav_position, 500, 0,FORMAT_FULL, POLICY_FIXED);
+		 Json sub = getSubscribe("vessels." + SELF,nav_position, 500, 0,FORMAT_FULL, POLICY_FIXED);
 		 template.sendBodyAndHeader(DIRECT_INPUT, sub.toString(),WebsocketConstants.CONNECTION_KEY, wsSession);
-		 sub = getJson("vessels." + SELF,env_wind, 500, 0,FORMAT_FULL, POLICY_FIXED);
+		 sub = getSubscribe("vessels." + SELF,env_wind, 500, 0,FORMAT_FULL, POLICY_FIXED);
 		 template.sendBodyAndHeader(DIRECT_INPUT, sub.toString(),WebsocketConstants.CONNECTION_KEY, wsSession);
 		 
 		 output.assertIsSatisfied();
@@ -144,19 +144,7 @@ public class SignalKSubscriptionOutputTest extends SignalKCamelTestSupport {
 		 assertEquals(0.0,(double)out.getValue(vessels_dot_self_dot + env_wind_speedApparent), 0.001d);
     }
 	
-	private Json getJson(String context, String path, int period, int minPeriod, String format, String policy) {
-		Json json = Json.read("{\"context\":\""+context+"\", \"subscribe\": []}");
-		Json sub = Json.object();
-		sub.set("path",path);
-		sub.set("period",period);
-		sub.set("minPeriod",minPeriod);
-		sub.set("format",format);
-		sub.set("policy",policy);
-		json.at("subscribe").add(sub);
-		logger.debug("Created json sub: "+json);
-		return json;
-	}
-
+	
 	@Override
 	public void configureRouteBuilder(RouteBuilder routeBuilder) {
 		output = (MockEndpoint) routeBuilder.getContext().getEndpoint("mock:output");
