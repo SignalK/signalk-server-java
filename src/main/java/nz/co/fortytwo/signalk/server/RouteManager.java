@@ -224,6 +224,17 @@ public class RouteManager extends RouteBuilder {
 		this.streamUrl = serialUrl;
 	}
 
+	public void stopNettyServers(){
+		if(skServer!=null){
+			skServer.shutdownServer();
+			skServer=null;
+		}
+		
+		if(nmeaServer!=null){
+			nmeaServer.shutdownServer();
+			nmeaServer=null;
+		}
+	}
 	/**
 	 * When the serial port is used to read from the arduino this must be called to shut
 	 * down the readers, which are in their own threads.

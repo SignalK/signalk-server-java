@@ -52,7 +52,7 @@ public class RestSubscribeProcessor extends SignalkProcessor implements Processo
 	@Override
 	public void process(Exchange exchange) throws Exception {
 		HttpServletRequest request = exchange.getIn(HttpMessage.class).getRequest();
-		if(logger.isDebugEnabled())logger.debug("Session:"+request.getRequestedSessionId());
+		if(logger.isDebugEnabled())logger.debug("Session:"+request.getSession().getId());
        if(request.getSession()!=null){
 	        if(request.getMethod().equals("GET")) processGet(request, exchange);
        }else{

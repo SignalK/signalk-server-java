@@ -24,6 +24,9 @@
 package nz.co.fortytwo.signalk.processor;
 
 import static nz.co.fortytwo.signalk.util.JsonConstants.*;
+
+import java.util.Map;
+
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
@@ -34,6 +37,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.log4j.Logger;
+import org.fusesource.stomp.client.Constants;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -62,7 +66,7 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
 			//avoid full signalk syntax
 			if(json.has(VESSELS))return;
 			if(json.has(CONTEXT) && (json.has(SUBSCRIBE) || json.has(UNSUBSCRIBE))){
-				json = handle(json, wsSession);
+				json = handle(json, exchange.getIn().getHeaders());
 				exchange.getIn().setBody(json);
 			}
 		} catch (Exception e) {
@@ -96,7 +100,7 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
 */
 	 
 	//@Override
-	public Json  handle(Json node, String wsSession) throws Exception {
+	public Json  handle(Json node, Map<String, Object> headers) throws Exception {
 		
 		//deal with diff format
 		
@@ -110,7 +114,8 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
 		if(subscriptions!=null){
 			if(subscriptions.isArray()){
 				for(Json subscription: subscriptions.asJsonList()){
-					parseSubscribe(wsSession, context, subscription);
+					
+					parseSubscribe(headers, context, subscription);
 				}
 			}
 			if(logger.isDebugEnabled())logger.debug("processed subscribe  "+node );
@@ -120,7 +125,7 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
 		
 			if(unsubscriptions.isArray()){
 				for(Json subscription: unsubscriptions.asJsonList()){
-					parseUnsubscribe(wsSession, context, subscription);
+					parseUnsubscribe(headers, context, subscription);
 				}
 			}
 			if(logger.isDebugEnabled())logger.debug("processed unsubscribe  "+node );
@@ -145,9 +150,10 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
 	 * @param subscription
 	 * @throws Exception 
 	 */
-	private void parseSubscribe(String wsSession, String context, Json subscription) throws Exception {
+	private void parseSubscribe(Map<String, Object> headers, String context, Json subscription) throws Exception {
 		//get values
 		if(logger.isDebugEnabled())logger.debug("Parsing subscribe  "+subscription );
+		String wsSession = (String) headers.get(WebsocketConstants.CONNECTION_KEY);
 		String path = context+"."+subscription.at(PATH).asString();
 		long period = 1000;
 		if(subscription.at(PERIOD)!=null)period = subscription.at(PERIOD).asInteger();
@@ -158,6 +164,9 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
 		long minPeriod = 0;
 		if(subscription.at(MIN_PERIOD)!=null)minPeriod=subscription.at(MIN_PERIOD).asInteger();
 		Subscription sub = new Subscription(wsSession, path, period, minPeriod, format, policy);
+		if(headers.containsKey(Constants.REPLY_TO.toString())){
+			sub.setDestination( headers.get(Constants.REPLY_TO.toString()).toString());
+		}
 		//sub.setActive(false);
 		if(logger.isDebugEnabled())logger.debug("Created subscription; "+sub.toString() );
 		SubscriptionManagerFactory.getInstance().addSubscription(sub);
@@ -178,9 +187,10 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
 	 * @param subscription
 	 * @throws Exception 
 	 */
-	private void parseUnsubscribe(String wsSession, String context, Json subscription) throws Exception {
+	private void parseUnsubscribe(Map<String, Object> headers, String context, Json subscription) throws Exception {
 		//get values
 		String path = context+"."+subscription.at(PATH).asString();
+		String wsSession = (String) headers.get(WebsocketConstants.CONNECTION_KEY);
 		long period = 1000;
 		if(subscription.at(PERIOD)!=null)period = subscription.at(PERIOD).asInteger();
 		String format = FORMAT_DELTA;

@@ -45,6 +45,7 @@ import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.camel.impl.DefaultProducerTemplate;
 import org.apache.log4j.Logger;
+import org.fusesource.stomp.client.Constants;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
@@ -81,11 +82,7 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 			if(logger.isDebugEnabled())logger.info("process  subs for " + exchange.getFromRouteId()+" as delta? "+isDelta(exchange.getFromRouteId()));
 			// get the accumulated delta nodes.
 			exchange.getIn().setBody(createTree(exchange.getFromRouteId()));
-			if(isDelta(exchange.getFromRouteId())){
-				exchange.getIn().setHeader(SIGNALK_FORMAT, FORMAT_DELTA);
-			}else{
-				exchange.getIn().setHeader(SIGNALK_FORMAT, FORMAT_FULL);
-			}
+			setHeaders(exchange);
 			if(logger.isDebugEnabled()){
 				logger.debug("Header set to :" + exchange.getIn().getHeader(SIGNALK_FORMAT));
 				logger.debug("Body set to :" + exchange.getIn().getBody());
@@ -94,6 +91,18 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 			logger.error(e.getMessage(), e);
 			throw e;
 		}
+	}
+
+	private void setHeaders(Exchange exchange) {
+		for (Subscription sub : manager.getSubscriptions(wsSession)) {
+			if (sub == null || !sub.isActive() || !exchange.getFromRouteId().equals(sub.getRouteId()))
+				continue;
+				exchange.getIn().setHeader(SIGNALK_FORMAT, sub.getFormat());
+				if(sub.getDestination()!=null){
+					exchange.getIn().setHeader(Constants.DESTINATION.toString(), sub.getDestination());
+				}
+		}
+		
 	}
 
 	private boolean isDelta(String routeId) {

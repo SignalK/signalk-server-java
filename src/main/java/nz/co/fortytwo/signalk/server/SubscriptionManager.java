@@ -29,12 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import nz.co.fortytwo.signalk.processor.JsonSubscribeProcessor;
-import nz.co.fortytwo.signalk.util.JsonConstants;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.jboss.netty.util.VirtualExecutorService;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;

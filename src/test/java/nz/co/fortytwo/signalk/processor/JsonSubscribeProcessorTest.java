@@ -29,6 +29,7 @@ import static nz.co.fortytwo.signalk.util.JsonConstants.POLICY_FIXED;
 import static nz.co.fortytwo.signalk.util.JsonConstants.SELF;
 import static org.junit.Assert.assertEquals;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,6 +40,7 @@ import nz.co.fortytwo.signalk.server.Subscription;
 import nz.co.fortytwo.signalk.server.SubscriptionManager;
 import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
 
+import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.camel.model.RouteDefinition;
 import org.apache.log4j.Logger;
 import org.junit.After;
@@ -64,7 +66,9 @@ public class JsonSubscribeProcessorTest {
 		String wsSession = UUID.randomUUID().toString();
 		manager.removeSessionId(wsSession);
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
-		subscribe.handle(getJson("vessels." + SELF,"navigation", 1000,0,FORMAT_DELTA, POLICY_FIXED), wsSession);
+		HashMap<String, Object> headers = new HashMap<String, Object>();
+		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
+		subscribe.handle(getJson("vessels." + SELF,"navigation", 1000,0,FORMAT_DELTA, POLICY_FIXED), headers);
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(1, subs.size());
 		Subscription s = subs.get(0);
@@ -121,7 +125,9 @@ public class JsonSubscribeProcessorTest {
 		String wsSession = UUID.randomUUID().toString();
 		manager.removeSessionId(wsSession);
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
-		subscribe.handle(getJson("vessels." + SELF,"navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED),wsSession);
+		HashMap<String, Object> headers = new HashMap<String, Object>();
+		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
+		subscribe.handle(getJson("vessels." + SELF,"navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED),headers);
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(1, subs.size());
 		Subscription s = subs.get(0);
@@ -137,7 +143,9 @@ public class JsonSubscribeProcessorTest {
 		String wsSession = UUID.randomUUID().toString();
 		manager.removeSessionId(wsSession);
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
-		subscribe.handle(getJson("vessels." + SELF,"navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED),wsSession);
+		HashMap<String, Object> headers = new HashMap<String, Object>();
+		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
+		subscribe.handle(getJson("vessels." + SELF,"navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED),headers);
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(1, subs.size());
 		Subscription s = subs.get(0);
@@ -152,7 +160,9 @@ public class JsonSubscribeProcessorTest {
 		// now add webSocket
 		manager.add(wsSession, wsSession);
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
-		subscribe.handle(getJson("vessels." + SELF,"navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED),wsSession);
+		HashMap<String, Object> headers = new HashMap<String, Object>();
+		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
+		subscribe.handle(getJson("vessels." + SELF,"navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED),headers);
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(1, subs.size());
 		Subscription s = subs.get(0);
@@ -180,8 +190,10 @@ public class JsonSubscribeProcessorTest {
 		// now add webSocket
 		manager.add(wsSession, wsSession);
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
-		subscribe.handle(getJson("vessels." + SELF,"navigation", 500,0,FORMAT_DELTA, POLICY_FIXED), wsSession);
-		subscribe.handle(getJson("vessels." + SELF,"environment", 500, 0,FORMAT_DELTA, POLICY_FIXED),wsSession);
+		HashMap<String, Object> headers = new HashMap<String, Object>();
+		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
+		subscribe.handle(getJson("vessels." + SELF,"navigation", 500,0,FORMAT_DELTA, POLICY_FIXED), headers);
+		subscribe.handle(getJson("vessels." + SELF,"environment", 500, 0,FORMAT_DELTA, POLICY_FIXED),headers);
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(2, subs.size());
 		// see if its created a route
@@ -201,8 +213,10 @@ public class JsonSubscribeProcessorTest {
 		// now add webSocket
 		manager.add(wsSession, wsSession);
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
-		subscribe.handle(getJson("vessels." + SELF,"navigation", 500,0,FORMAT_DELTA, POLICY_FIXED), wsSession);
-		subscribe.handle(getJson("vessels." + SELF,"environment", 1500, 0,FORMAT_DELTA, POLICY_FIXED),wsSession);
+		HashMap<String, Object> headers = new HashMap<String, Object>();
+		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
+		subscribe.handle(getJson("vessels." + SELF,"navigation", 500,0,FORMAT_DELTA, POLICY_FIXED), headers);
+		subscribe.handle(getJson("vessels." + SELF,"environment", 1500, 0,FORMAT_DELTA, POLICY_FIXED),headers);
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(2, subs.size());
 		// see if its created a route
@@ -220,8 +234,10 @@ public class JsonSubscribeProcessorTest {
 		// now add webSocket
 		manager.add(wsSession, wsSession);
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
-		subscribe.handle(getJson("vessels." + SELF,"navigation", 500,0,FORMAT_DELTA, POLICY_FIXED), wsSession);
-		subscribe.handle(getJson("vessels." + SELF,"environment", 1500, 0,FORMAT_DELTA, POLICY_FIXED),wsSession);
+		HashMap<String, Object> headers = new HashMap<String, Object>();
+		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
+		subscribe.handle(getJson("vessels." + SELF,"navigation", 500,0,FORMAT_DELTA, POLICY_FIXED), headers);
+		subscribe.handle(getJson("vessels." + SELF,"environment", 1500, 0,FORMAT_DELTA, POLICY_FIXED),headers);
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(2, subs.size());
 		// see if its created a route
@@ -249,8 +265,10 @@ public class JsonSubscribeProcessorTest {
 		// now add webSocket
 		manager.add(wsSession, wsSession);
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
-		subscribe.handle(getJson("vessels." + SELF,"navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED),wsSession);
-		subscribe.handle(getJson("vessels." + SELF, "environment", 1000, 0,FORMAT_DELTA, POLICY_FIXED),wsSession);
+		HashMap<String, Object> headers = new HashMap<String, Object>();
+		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
+		subscribe.handle(getJson("vessels." + SELF,"navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED),headers);
+		subscribe.handle(getJson("vessels." + SELF, "environment", 1000, 0,FORMAT_DELTA, POLICY_FIXED),headers);
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(2, subs.size());
 		// see if its created a route
@@ -277,8 +295,10 @@ public class JsonSubscribeProcessorTest {
 		// now add webSocket
 		manager.add(wsSession, wsSession);
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
-		subscribe.handle(getJson("vessels." + SELF,"navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED),wsSession);
-		subscribe.handle(getJson("vessels." + SELF,"environment", 500, 0,FORMAT_DELTA, POLICY_FIXED),wsSession);
+		HashMap<String, Object> headers = new HashMap<String, Object>();
+		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
+		subscribe.handle(getJson("vessels." + SELF,"navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED),headers);
+		subscribe.handle(getJson("vessels." + SELF,"environment", 500, 0,FORMAT_DELTA, POLICY_FIXED),headers);
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(2, subs.size());
 		// see if its created a route
@@ -305,8 +325,10 @@ public class JsonSubscribeProcessorTest {
 		manager.add(wsSession, wsSession);
 		
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
+		HashMap<String, Object> headers = new HashMap<String, Object>();
+		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
 		Json sub = getJson("vess." + SELF,"navigation",1000,0,FORMAT_DELTA, POLICY_FIXED);
-		Json json = subscribe.handle(sub, wsSession);
+		Json json = subscribe.handle(sub, headers);
 		assertEquals(sub, json);
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(0, subs.size());

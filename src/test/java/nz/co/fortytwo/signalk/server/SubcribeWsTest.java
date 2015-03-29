@@ -120,16 +120,17 @@ public class SubcribeWsTest extends SignalKCamelTestSupport{
       //subscribe
         Response reponse = c.prepareGet("http://localhost:9290"+SIGNALK_SUBSCRIBE+"/vessels/motu/navigation?format=delta").setCookies(r1.getCookies()).execute().get();
         latch.await(2, TimeUnit.SECONDS);
-        logger.debug(reponse.getResponseBody());
+        logger.debug("Get response = "+reponse.getStatusCode());
         assertEquals(202, reponse.getStatusCode());
         
         websocket.sendTextMessage(jsonDiff);
-        latch3.await(6, TimeUnit.SECONDS);
+        logger.debug("Sent update = "+jsonDiff);
+        latch3.await(10, TimeUnit.SECONDS);
         
         //assertTrue(latch3.await(15, TimeUnit.SECONDS));
         String fullMsg = null;
         for(String msg : received){
-        	logger.debug(msg);
+        	logger.debug("Received msg = "+msg);
         	if(msg.contains("\"updates\":[{\"")){
         		fullMsg=msg;
         	}

@@ -64,6 +64,7 @@ public class Subscription {
 	private String vesselPath;
 	Set<String> subscribedPaths = new ConcurrentSet<String>();
 	private String routeId;
+	private String destination;
 
 	public Subscription(String wsSession, String path, long period, long minPeriod, String format, String policy) {
 		this.wsSession = wsSession;
@@ -210,9 +211,7 @@ public class Subscription {
 	 * @return
 	 */
 	public boolean isSubscribed(String key) {
-		if (pattern.matcher(key).find())
-			return true;
-		return false;
+		return pattern.matcher(key).find();
 	}
 
 	public long getMinPeriod() {
@@ -271,6 +270,14 @@ public class Subscription {
 
 	public String getRouteId() {
 		return routeId;
+	}
+
+	public String getDestination() {
+		return destination;
+	}
+
+	public void setDestination(String destination) {
+		this.destination = destination;
 	}
 
 	

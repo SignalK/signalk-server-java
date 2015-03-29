@@ -54,6 +54,10 @@
 			<name>Public online Restlet repository</name>
 			<url>http://maven.restlet.com</url>
 		</repository>
+		<repository>
+	        <id>Eclipse Paho Repo</id>
+	        <url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
+	    </repository>
 	</repositories>
 	<pluginRepositories>
 		<pluginRepository>
@@ -296,6 +300,11 @@
 			<artifactId>async-http-client</artifactId>
 			<version>1.8.14</version> 
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+		  <groupId>org.fusesource.mqtt-client</groupId>
+		  <artifactId>mqtt-client</artifactId>
+		  <version>1.10</version>
 		</dependency>
 	</dependencies>
 	<build>

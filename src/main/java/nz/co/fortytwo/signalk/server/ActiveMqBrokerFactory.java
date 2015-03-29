@@ -45,9 +45,14 @@ public class ActiveMqBrokerFactory {
 		connector.setUri(new URI("tcp://localhost:61616"));
 		broker.addConnector(connector);
 		broker.addConnector("ws://localhost:61614");
+		
 		TransportConnector stomp = new TransportConnector();
 		stomp.setUri(new URI("stomp+nio://localhost:61613?transport.hbGracePeriodMultiplier=1.5"));
 		broker.addConnector(stomp);
+		
+		TransportConnector mqtt = new TransportConnector();
+		mqtt.setUri(new URI("mqtt+nio://localhost:1883"));
+		broker.addConnector(mqtt);
 		
 		List<BrokerPlugin> plugins = new ArrayList<BrokerPlugin>();
 		BrokerPlugin[] pluginArray = broker.getPlugins();

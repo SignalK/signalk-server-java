@@ -72,6 +72,7 @@ public class RestApiProcessor extends SignalkProcessor implements Processor{
         	HttpServletResponse response = exchange.getIn(HttpMessage.class).getResponse();
         	response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         	response.sendRedirect(JsonConstants.SIGNALK_AUTH);
+        	exchange.getIn().setBody(null);
         }
      
 	}

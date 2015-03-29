@@ -81,8 +81,7 @@ public class SignalKServer {
 		server.setHandler(handlers);
 		server.start();*/
 		
-		//Start apollo broker
-		//Broker broker = ApolloBrokerFactory.newInstance();
+		//Start activemq broker
 		BrokerService broker = ActiveMqBrokerFactory.newInstance();
 		broker.start();
 		

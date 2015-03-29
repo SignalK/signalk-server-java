@@ -67,7 +67,9 @@ public abstract class SignalKCamelTestSupport extends CamelTestSupport {
 	
 	@After
 	public void shutdownBroker() throws Exception{
+		routeManager.stopNettyServers();
 		broker.stop();
+		routeManager.getContext().stop();
 	}
 
 	/**
