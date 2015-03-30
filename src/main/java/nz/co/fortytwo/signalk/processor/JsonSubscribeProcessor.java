@@ -32,12 +32,12 @@ import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.server.Subscription;
 import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
+import nz.co.fortytwo.signalk.util.Constants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.log4j.Logger;
-import org.fusesource.stomp.client.Constants;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -60,7 +60,7 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
 			String wsSession = exchange.getIn().getHeader(WebsocketConstants.CONNECTION_KEY, String.class);
 			if(wsSession==null){
 				if(logger.isDebugEnabled())logger.debug("WsSession is null:"+exchange.getIn().getHeaders());
-				return;
+				//return;
 			}
 			Json json = exchange.getIn().getBody(Json.class);
 			//avoid full signalk syntax
@@ -164,8 +164,16 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
 		long minPeriod = 0;
 		if(subscription.at(MIN_PERIOD)!=null)minPeriod=subscription.at(MIN_PERIOD).asInteger();
 		Subscription sub = new Subscription(wsSession, path, period, minPeriod, format, policy);
-		if(headers.containsKey(Constants.REPLY_TO.toString())){
-			sub.setDestination( headers.get(Constants.REPLY_TO.toString()).toString());
+		if(headers.containsKey(Constants.OUTPUT_TYPE)){
+			sub.setOutputType( headers.get(Constants.OUTPUT_TYPE).toString());
+		}
+		//STOMP
+		if(headers.containsKey(Constants.REPLY_TO)){
+			sub.setDestination( headers.get(Constants.REPLY_TO).toString());
+		}
+		//for MQTT
+		if(subscription.has(Constants.REPLY_TO)){
+			sub.setDestination( subscription.at(Constants.REPLY_TO).asString());
 		}
 		//sub.setActive(false);
 		if(logger.isDebugEnabled())logger.debug("Created subscription; "+sub.toString() );

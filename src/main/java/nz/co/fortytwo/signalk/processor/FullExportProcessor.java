@@ -22,36 +22,24 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import static nz.co.fortytwo.signalk.util.JsonConstants.*;
+import static nz.co.fortytwo.signalk.util.JsonConstants.FORMAT_DELTA;
+import static nz.co.fortytwo.signalk.util.JsonConstants.POLICY_FIXED;
+import static nz.co.fortytwo.signalk.util.JsonConstants.SIGNALK_FORMAT;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
 
-import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.event.PathEvent;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
-import nz.co.fortytwo.signalk.server.CamelContextFactory;
-import nz.co.fortytwo.signalk.server.RouteManager;
 import nz.co.fortytwo.signalk.server.Subscription;
+import nz.co.fortytwo.signalk.util.Constants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.camel.Producer;
-import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.websocket.WebsocketConstants;
-import org.apache.camel.impl.DefaultProducerTemplate;
 import org.apache.log4j.Logger;
-import org.fusesource.stomp.client.Constants;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import com.google.common.collect.Queues;
-import com.google.common.collect.TreeMultimap;
 import com.google.common.eventbus.DeadEvent;
 import com.google.common.eventbus.Subscribe;
 
@@ -85,6 +73,7 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 			setHeaders(exchange);
 			if(logger.isDebugEnabled()){
 				logger.debug("Header set to :" + exchange.getIn().getHeader(SIGNALK_FORMAT));
+				logger.debug("Destination set to :" + exchange.getIn().getHeader(Constants.DESTINATION));
 				logger.debug("Body set to :" + exchange.getIn().getBody());
 			}
 		} catch (Exception e) {
@@ -99,7 +88,12 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 				continue;
 				exchange.getIn().setHeader(SIGNALK_FORMAT, sub.getFormat());
 				if(sub.getDestination()!=null){
-					exchange.getIn().setHeader(Constants.DESTINATION.toString(), sub.getDestination());
+					exchange.getIn().setHeader(Constants.DESTINATION, sub.getDestination());
+					
+				}
+				if(sub.getOutputType()!=null){
+					exchange.getIn().setHeader(Constants.OUTPUT_TYPE, sub.getOutputType());
+					
 				}
 		}
 		

@@ -28,6 +28,7 @@ import nz.co.fortytwo.signalk.util.JsonConstants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.log4j.Logger;
 
 /**
@@ -44,7 +45,7 @@ public class InputFilterProcessor extends SignalkProcessor implements Processor 
 		
 	}
 	public void process(Exchange exchange) throws Exception {
-		String msg = (String) exchange.getIn().getBody(String.class);
+		String msg = exchange.getIn().getBody(String.class);
 		if(msg !=null){
 			msg=msg.trim();
 			//stomp messages are prefixed with 'ascii:'
@@ -65,6 +66,10 @@ public class InputFilterProcessor extends SignalkProcessor implements Processor 
 				//n2k
 				if(json.has(JsonConstants.PGN)){
 					exchange.getIn().setHeader(JsonConstants.N2K_MESSAGE, msg);
+				}
+				//compensate for MQTT and STOMP sessionid
+				if(json.has(WebsocketConstants.CONNECTION_KEY)){
+					exchange.getIn().setHeader(WebsocketConstants.CONNECTION_KEY, json.at(WebsocketConstants.CONNECTION_KEY).asString());
 				}
 				//json
 				exchange.getIn().setBody(json);

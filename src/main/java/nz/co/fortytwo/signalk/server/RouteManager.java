@@ -42,6 +42,7 @@ import org.apache.camel.ExchangePattern;
 import org.apache.camel.Predicate;
 import org.apache.camel.builder.PredicateBuilder;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.mqtt.MQTTEndpoint;
 import org.apache.camel.component.restlet.RestletConstants;
 import org.apache.camel.component.stomp.SkStompComponent;
 import org.apache.camel.component.websocket.SignalkWebsocketComponent;
@@ -69,13 +70,16 @@ public class RouteManager extends RouteBuilder {
 	
 	public static final String SEDA_INPUT = "seda:inputData?purgeWhenStopping=true&size=100";
 	public static final String SEDA_WEBSOCKETS = "seda:websockets?purgeWhenStopping=true&size=100";
+	public static final String DIRECT_STOMP = "direct:stomp";
+	public static final String DIRECT_MQTT = "direct:mqtt";
 	public static final String DIRECT_TCP = "seda:tcp?purgeWhenStopping=true&size=100";
 	public static final String REMOTE_ADDRESS = "remote.address";
 	public static final String SEDA_NMEA = "seda:nmeaOutput?purgeWhenStopping=true&size=100";
-
 	public static final String SEDA_COMMON_OUT = "seda:commonOut?purgeWhenStopping=true&size=100";
 
 	public static final String STOMP = "skStomp:queue:signalk?brokerURL=tcp://localhost:61613";
+	public static final String MQTT = "mqtt:signalk?host=tcp://localhost:1883";
+
 	
 	private int wsPort = 9292;
 	private int restPort = 9290;
@@ -200,9 +204,15 @@ public class RouteManager extends RouteBuilder {
 		SignalkRouteFactory.configureWindTimer(this, "timer://wind?fixedRate=true&period=1000");
 		
 		//STOMP
-		from("skStomp:queue:signalk.put").to(SEDA_INPUT);
-		//from("skStomp:queue:signalk.put").setExchangePattern(ExchangePattern.InOut).transform(body().convertToString()).process(new InputFilterProcessor()).process(new JsonSubscribeProcessor());
-	
+		from("skStomp:queue:signalk.put")
+			.setHeader(Constants.OUTPUT_TYPE, constant(Constants.OUTPUT_STOMP))
+			.to(SEDA_INPUT);
+		//MQTT
+		from(MQTT+"&subscribeTopicName=signalk.put")
+			.transform(body().convertToString())
+			.setHeader(Constants.OUTPUT_TYPE, constant(Constants.OUTPUT_MQTT))
+			.to(SEDA_INPUT);
+		
 		//WebsocketEndpoint wsEndpoint = (WebsocketEndpoint) getContext().getEndpoint("websocket://0.0.0.0:"+wsPort+JsonConstants.SIGNALK_WS);
 		if (Boolean.valueOf(config.getProperty(Constants.DEMO))) {
 			from("stream:file?fileName=" + streamUrl)

@@ -74,7 +74,7 @@ public class OutputFilterProcessor extends SignalkProcessor implements Processor
 				model.put(SignalKConstants.vessels_dot_self_dot+"_config",null);
 			}catch(NullPointerException npe){}
 			
-			exchange.getIn().setBody(ser.writeJson(model));
+			exchange.getIn().setBody(ser.write(model));
 		}
 		if(logger.isDebugEnabled())logger.debug("Outputting:"+exchange.getIn());
 	}

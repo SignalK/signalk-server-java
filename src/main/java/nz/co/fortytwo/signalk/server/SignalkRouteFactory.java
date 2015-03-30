@@ -35,6 +35,8 @@ import nz.co.fortytwo.signalk.processor.HeartbeatProcessor;
 import nz.co.fortytwo.signalk.processor.InputFilterProcessor;
 import nz.co.fortytwo.signalk.processor.JsonGetProcessor;
 import nz.co.fortytwo.signalk.processor.JsonListProcessor;
+import nz.co.fortytwo.signalk.processor.MapToJsonProcessor;
+import nz.co.fortytwo.signalk.processor.MqttProcessor;
 import nz.co.fortytwo.signalk.processor.N2KProcessor;
 import nz.co.fortytwo.signalk.processor.NMEAProcessor;
 import nz.co.fortytwo.signalk.processor.OutputFilterProcessor;
@@ -47,6 +49,7 @@ import nz.co.fortytwo.signalk.processor.StompProcessor;
 import nz.co.fortytwo.signalk.processor.ValidationProcessor;
 import nz.co.fortytwo.signalk.processor.WindProcessor;
 import nz.co.fortytwo.signalk.processor.WsSessionProcessor;
+import nz.co.fortytwo.signalk.util.Constants;
 import nz.co.fortytwo.signalk.util.JsonConstants;
 
 import org.apache.camel.ExchangePattern;
@@ -181,13 +184,26 @@ public class SignalkRouteFactory {
 			.onException(Exception.class).handled(true).maximumRedeliveries(0)
 			.to("log:nz.co.fortytwo.signalk.model.output?level=ERROR")
 			.end()
-		.process(new OutputFilterProcessor())
+		.process(new MapToJsonProcessor())
 		.process(new FullToDeltaProcessor())
 		.process(new StompProcessor())
+		.process(new OutputFilterProcessor())
 		.multicast().parallelProcessing()
-			.to(RouteManager.DIRECT_TCP,RouteManager.SEDA_WEBSOCKETS, RouteManager.STOMP)
-			.to("log:nz.co.fortytwo.signalk.model.output?level=DEBUG")
+			.to(RouteManager.DIRECT_TCP,
+					RouteManager.SEDA_WEBSOCKETS, 
+					RouteManager.DIRECT_MQTT, 
+					RouteManager.DIRECT_STOMP,
+					"log:nz.co.fortytwo.signalk.model.output?level=DEBUG"
+					)
 		.end();
+		routeBuilder.from(RouteManager.DIRECT_MQTT)
+		.filter(routeBuilder.header(Constants.OUTPUT_TYPE).isEqualTo(Constants.OUTPUT_MQTT))
+			.process(new MqttProcessor())
+			.to(RouteManager.MQTT+"?publishTopicName=signalk.dlq");
+		routeBuilder.from(RouteManager.DIRECT_STOMP)
+			.filter(routeBuilder.header(Constants.OUTPUT_TYPE).isEqualTo(Constants.OUTPUT_STOMP))
+			.process(new StompProcessor())
+			.to(RouteManager.STOMP);
 	}
 	
 	public static void configureSubscribeTimer(RouteBuilder routeBuilder ,Subscription sub) throws Exception{

@@ -54,10 +54,13 @@
 			<name>Public online Restlet repository</name>
 			<url>http://maven.restlet.com</url>
 		</repository>
-		<repository>
-	        <id>Eclipse Paho Repo</id>
-	        <url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
-	    </repository>
+		 <repository>
+		    <id>eclipse-paho</id>
+		    <url>https://repo.eclipse.org/content/repositories/paho-releases</url>
+		    <snapshots>
+		      <enabled>false</enabled>
+		    </snapshots>
+		  </repository>
 	</repositories>
 	<pluginRepositories>
 		<pluginRepository>
@@ -167,7 +170,11 @@
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-netty4</artifactId>
 			<version>${camel.version}</version>
-			<!-- use the same version as your Camel core version -->
+		</dependency>
+		<dependency>
+		    <groupId>org.apache.camel</groupId>
+		    <artifactId>camel-mqtt</artifactId>
+		    <version>${camel.version}</version>
 		</dependency>
 		<!-- <dependency> <groupId>org.apache.camel</groupId> <artifactId>camel-quartz2</artifactId> 
 			<version>${camel.version}</version> </dependency> -->

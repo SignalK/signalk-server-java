@@ -23,34 +23,21 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import static nz.co.fortytwo.signalk.util.JsonConstants.*;
+import static nz.co.fortytwo.signalk.util.JsonConstants.CONTEXT;
+import static nz.co.fortytwo.signalk.util.JsonConstants.LIST;
+import static nz.co.fortytwo.signalk.util.JsonConstants.PATHLIST;
+import static nz.co.fortytwo.signalk.util.JsonConstants.VESSELS;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.handler.JsonListHandler;
-import nz.co.fortytwo.signalk.model.SignalKModel;
-import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
-import nz.co.fortytwo.signalk.server.Subscription;
-import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
-import nz.co.fortytwo.signalk.util.JsonConstants;
-import nz.co.fortytwo.signalk.util.SignalKConstants;
+import nz.co.fortytwo.signalk.util.Constants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.websocket.WebsocketConstants;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.fusesource.stomp.client.Constants;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
-
-import com.google.common.collect.ImmutableList;
 
 /**
  * Handles json messages with 'list' requests. These provide a list of available signalk keys the server understands
@@ -80,13 +67,18 @@ public class JsonListProcessor extends SignalkProcessor implements Processor{
 			if(json.has(CONTEXT) && (json.has(LIST))){
 				Json pathList = listHandler.handle(json);
 				json.set(PATHLIST, pathList);
-				json.delAt(LIST);
+				
 				//also STOMP headers etc, swap replyTo
 				Map<String, Object> headers = exchange.getIn().getHeaders();
-				if(headers!=null && headers.containsKey(Constants.REPLY_TO.toString())){
-					headers.put(Constants.DESTINATION.toString(), headers.get(Constants.REPLY_TO.toString()));
-					headers.remove(Constants.REPLY_TO.toString());
+				if(headers!=null && headers.containsKey(Constants.REPLY_TO)){
+					headers.put(Constants.DESTINATION, headers.get(Constants.REPLY_TO));
+					headers.remove(Constants.REPLY_TO);
 				}
+				//for MQTT
+				if(json.has(Constants.REPLY_TO)){
+					headers.put(Constants.DESTINATION, json.at(Constants.REPLY_TO).asString());
+				}
+				json.delAt(LIST);
 				outProducer.sendBodyAndHeaders(json, headers);
 				exchange.getIn().setBody(json);
 			}

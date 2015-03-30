@@ -22,32 +22,41 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import mjson.Json;
+import nz.co.fortytwo.signalk.util.Constants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.log4j.Logger;
-import org.fusesource.stomp.client.Constants;
+
 
 /**
- * Create the queue destination
+ * Convert to Mqtt string to byte array message
  * 
  * @author robert
  * 
  */
-public class StompProcessor extends SignalkProcessor implements Processor {
+public class MqttProcessor extends SignalkProcessor implements Processor {
 
-	private static Logger logger = Logger.getLogger(StompProcessor.class);
+	private static Logger logger = Logger.getLogger(MqttProcessor.class);
+
 	
 	public void process(Exchange exchange) throws Exception {
 
 		try {
-			if (exchange.getIn().getBody() == null || !(exchange.getIn().getBody() instanceof Json))
+			logger.debug("Message: "+exchange.getIn().getBody().getClass());
+			logger.debug("Message: "+exchange.getIn().getBody());
+			if (exchange.getIn().getBody() == null || !(exchange.getIn().getBody() instanceof String)){
 				return;
+			}
+			String msg = exchange.getIn().getBody(String.class);
+			exchange.getIn().setBody(msg.getBytes());
+			String dest = exchange.getIn().getHeader(Constants.DESTINATION, String.class);
+			exchange.getIn().setHeader(Constants.CamelMQTTPublishTopic, dest.replace('.', '/'));
+			if(logger.isDebugEnabled()){
+				logger.debug("Message: "+msg);
+				logger.debug("Message destination :" + exchange.getIn().getHeader(Constants.CamelMQTTPublishTopic));
+			}
 			
-			if(logger.isDebugEnabled())logger.debug("Message destination :" + exchange.getIn().getHeader(Constants.DESTINATION.toString()));
-			
-			exchange.getIn().setHeader("ttl", "3000");
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
