@@ -23,7 +23,10 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
+import java.util.Map;
+
 import mjson.Json;
+import nz.co.fortytwo.signalk.util.Constants;
 import nz.co.fortytwo.signalk.util.JsonConstants;
 
 import org.apache.camel.Exchange;
@@ -70,6 +73,16 @@ public class InputFilterProcessor extends SignalkProcessor implements Processor 
 				//compensate for MQTT and STOMP sessionid
 				if(json.has(WebsocketConstants.CONNECTION_KEY)){
 					exchange.getIn().setHeader(WebsocketConstants.CONNECTION_KEY, json.at(WebsocketConstants.CONNECTION_KEY).asString());
+				}
+				//deal with REPLY_TO
+				Map<String, Object> headers = exchange.getIn().getHeaders();
+				if(headers!=null && headers.containsKey(Constants.REPLY_TO)){
+					exchange.getIn().setHeader(Constants.DESTINATION, headers.get(Constants.REPLY_TO));
+					//headers.remove(Constants.REPLY_TO);
+				}
+				//for MQTT
+				if(json.has(Constants.REPLY_TO)){
+					exchange.getIn().setHeader(Constants.DESTINATION, ( json.at(Constants.REPLY_TO).asString()));
 				}
 				//json
 				exchange.getIn().setBody(json);

@@ -187,9 +187,9 @@ public class RouteManager extends RouteBuilder {
 		
 		SignalkRouteFactory.configureWebsocketTxRoute(this, SEDA_WEBSOCKETS, wsPort);
 		SignalkRouteFactory.configureWebsocketRxRoute(this, SEDA_INPUT, wsPort);
-		SignalkRouteFactory.configureTcpServerRoute(this, DIRECT_TCP, skServer);
+		SignalkRouteFactory.configureTcpServerRoute(this, DIRECT_TCP, skServer, Constants.OUTPUT_TCP);
 		
-		SignalkRouteFactory.configureTcpServerRoute(this, SEDA_NMEA, nmeaServer);
+		SignalkRouteFactory.configureTcpServerRoute(this, SEDA_NMEA, nmeaServer, Constants.OUTPUT_NMEA);
 		
 		SignalkRouteFactory.configureCommonOut(this);
 		

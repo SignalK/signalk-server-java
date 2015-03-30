@@ -69,16 +69,6 @@ public class JsonGetProcessor extends SignalkProcessor implements Processor{
 				Map<String, Object> headers = exchange.getIn().getHeaders();
 				headers.put(SIGNALK_FORMAT, handler.getFormat(json));
 				
-				//also STOMP headers etc, swap replyTo
-				//STOMP
-				if(headers!=null && headers.containsKey(Constants.REPLY_TO)){
-					headers.put(Constants.DESTINATION, headers.get(Constants.REPLY_TO));
-					headers.remove(Constants.REPLY_TO);
-				}
-				//for MQTT
-				if(json.has(Constants.REPLY_TO)){
-					headers.put(Constants.DESTINATION, json.at(Constants.REPLY_TO).asString());
-				}
 				json.delAt(GET);
 				logger.debug("headers:"+headers);
 				outProducer.sendBodyAndHeaders(temp, headers);

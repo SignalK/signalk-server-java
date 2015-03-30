@@ -53,7 +53,9 @@ import nz.co.fortytwo.signalk.util.Constants;
 import nz.co.fortytwo.signalk.util.JsonConstants;
 
 import org.apache.camel.ExchangePattern;
+import org.apache.camel.Predicate;
 import org.apache.camel.Processor;
+import org.apache.camel.builder.PredicateBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.camel.component.websocket.WebsocketEndpoint;
@@ -146,14 +148,16 @@ public class SignalkRouteFactory {
 		.to(input);
 		
 	}
-	public static void configureTcpServerRoute(RouteBuilder routeBuilder ,String input, NettyServer nettyServer) throws Exception{
+	public static void configureTcpServerRoute(RouteBuilder routeBuilder ,String input, NettyServer nettyServer, String outputType) throws Exception{
 		// push out via TCPServer.
+		Predicate p1 = routeBuilder.header(Constants.OUTPUT_TYPE).isEqualTo(outputType);
+		Predicate p2 = routeBuilder.header(WebsocketConstants.CONNECTION_KEY).isEqualTo(WebsocketConstants.SEND_TO_ALL);
 		routeBuilder.from(input)
 			.onException(Exception.class)
 			.handled(true)
 			.maximumRedeliveries(0)
 			.end()
-		
+		.filter(PredicateBuilder.or(p1, p2))
 		.process((Processor) nettyServer).end();
 			
 	}

@@ -36,6 +36,7 @@ import java.util.Properties;
 import java.util.UUID;
 
 import mjson.Json;
+import nz.co.fortytwo.signalk.util.Constants;
 
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.websocket.WebsocketConstants;
@@ -83,6 +84,7 @@ public class CamelNettyHandler extends SimpleChannelInboundHandler<String> {
 		Map<String, Object> headers = new HashMap<>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, contextList.inverse().get(ctx));
 		headers.put(RouteManager.REMOTE_ADDRESS, ctx.channel().remoteAddress().toString());
+		headers.put(Constants.OUTPUT_TYPE, Constants.OUTPUT_TCP);
 		return headers;
 	}
 

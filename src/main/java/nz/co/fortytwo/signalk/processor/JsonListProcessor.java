@@ -70,14 +70,7 @@ public class JsonListProcessor extends SignalkProcessor implements Processor{
 				
 				//also STOMP headers etc, swap replyTo
 				Map<String, Object> headers = exchange.getIn().getHeaders();
-				if(headers!=null && headers.containsKey(Constants.REPLY_TO)){
-					headers.put(Constants.DESTINATION, headers.get(Constants.REPLY_TO));
-					headers.remove(Constants.REPLY_TO);
-				}
-				//for MQTT
-				if(json.has(Constants.REPLY_TO)){
-					headers.put(Constants.DESTINATION, json.at(Constants.REPLY_TO).asString());
-				}
+				
 				json.delAt(LIST);
 				outProducer.sendBodyAndHeaders(json, headers);
 				exchange.getIn().setBody(json);

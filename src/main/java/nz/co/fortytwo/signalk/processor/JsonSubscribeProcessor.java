@@ -167,14 +167,11 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
 		if(headers.containsKey(Constants.OUTPUT_TYPE)){
 			sub.setOutputType( headers.get(Constants.OUTPUT_TYPE).toString());
 		}
-		//STOMP
-		if(headers.containsKey(Constants.REPLY_TO)){
-			sub.setDestination( headers.get(Constants.REPLY_TO).toString());
+		//STOMP, MQTT
+		if(headers.containsKey(Constants.DESTINATION)){
+			sub.setDestination( headers.get(Constants.DESTINATION).toString());
 		}
-		//for MQTT
-		if(subscription.has(Constants.REPLY_TO)){
-			sub.setDestination( subscription.at(Constants.REPLY_TO).asString());
-		}
+		
 		//sub.setActive(false);
 		if(logger.isDebugEnabled())logger.debug("Created subscription; "+sub.toString() );
 		SubscriptionManagerFactory.getInstance().addSubscription(sub);
