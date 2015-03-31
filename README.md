@@ -1,7 +1,8 @@
 Signal K java server
 =================================================
 
-An example Signal K server using java
+An example Signal K server using java.
+
 Provided under an Apache 2 licence
 
 Current capabilities:
