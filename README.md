@@ -2,7 +2,44 @@ Signal K java server
 =================================================
 
 An example Signal K server using java
-Now under Apache 2 licence
+Provided under an Apache 2 licence
+
+Current capabilities:
+* Accepts as input:
+	* NMEA0813
+	* AIS 
+	* NMEA2000 in Canboat format
+	* Signalk json
+* Reads input from:
+	* TCP/IP sockets
+	* Websockets
+	* HTTP via REST api
+	* MQTT
+	* STOMP
+	* Serial
+	* USB
+	* local files
+* Outputs to:
+	* TCP/IP sockets
+	* UDP sockets
+	* Websockets
+	* HTTP via REST api
+	* MQTT
+	* STOMP
+	* Serial
+	* USB
+* Supports:
+	* Delta and Full signalk formats, and translations between them.
+	* Subscriptions, with * and ? wildcards. Configurable format, period and delivery policy
+	* LIST - get a list of available signalk keys with * and ? wildcard support
+	* GET - get data matching keys on demand
+	* PUT - send data on demand 
+	* UPDATES - periodic messages.
+	
+* Todo:
+	* metadata
+	* _attr based security
+	* on-demand user apps.
 
 Installation
 ------------
@@ -29,7 +66,9 @@ You should now have a SignalK server running:
 	* Authentication on http://localhost:9290/signalk/auth - but its a pass all for now so you dont need to login
 * websockets server on `http://localhost:9292`. 
 * signalk output streamed as TCP over port 5555. On linux you can watch this with `$ ncat localhost 5555` **see below for subscriptions
-* nmea output will be streamed as TCP over port 5556. On linux you can watch this with `$ ncat localhost 5556`, or use telnet to connect.
+* signalk output streamed as UDP over port 5554.
+* nmea output will be streamed as TCP over port 5557. On linux you can watch this with `$ ncat localhost 5557`, or use telnet to connect.
+* nmea output will be streamed as UDP over port 5556.
 
 It will be streaming a demo file and dumping logging to screen. Control logging by editing conf/log4j.properties.
 
@@ -72,16 +111,6 @@ Development
 -----------
 The project is developed and built using maven and eclipse. You will need to clone the signalk-core-java project and build it with maven , then the signalk-server-java project.
 The signalk-core-java project is usuable separately and contains the core model, and useful helpers.
-
-Roadmap
--------
-This is a first cut of the server and more functionality will be added:
-* Better documentation (always)
-* A better configuration method
-* Completed security framework
-* Completed REST API
-* Support for client modules on demand
-* and more
 
 
 See http://www.42.co.nz/freeboard and http://http://signalk.github.io/ for more.
