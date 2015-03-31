@@ -52,11 +52,12 @@ public class CamelNettyHandler extends SimpleChannelInboundHandler<String> {
 
 	private Logger logger = Logger.getLogger(CamelNettyHandler.class.getSimpleName());
 	private BiMap<String,ChannelHandlerContext> contextList = HashBiMap.create();
-
+	private String outputType;
 	//@Produce(uri = RouteManager.SEDA_INPUT)
     ProducerTemplate producer;
 	
-	public CamelNettyHandler(Properties config) throws Exception {
+	public CamelNettyHandler(Properties config, String outputType) throws Exception {
+		this.outputType=outputType;
 		producer= new DefaultProducerTemplate(CamelContextFactory.getInstance());
 		producer.setDefaultEndpointUri(RouteManager.SEDA_INPUT );
 		producer.start();
@@ -84,7 +85,7 @@ public class CamelNettyHandler extends SimpleChannelInboundHandler<String> {
 		Map<String, Object> headers = new HashMap<>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, contextList.inverse().get(ctx));
 		headers.put(RouteManager.REMOTE_ADDRESS, ctx.channel().remoteAddress().toString());
-		headers.put(Constants.OUTPUT_TYPE, Constants.OUTPUT_TCP);
+		headers.put(Constants.OUTPUT_TYPE, outputType);
 		return headers;
 	}
 

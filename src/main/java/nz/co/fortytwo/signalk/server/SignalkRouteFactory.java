@@ -79,7 +79,7 @@ public class SignalkRouteFactory {
 	 * @throws Exception 
 	 */
 	public static void configureInputRoute(RouteBuilder routeBuilder,String input) {
-		routeBuilder.from(input)
+		routeBuilder.from(input).id("INPUT")
 			.onException(Exception.class).handled(true).maximumRedeliveries(0)
 			.to("log:nz.co.fortytwo.signalk.model.receive?level=ERROR&showException=true&showStackTrace=true")
 			.end()
@@ -116,7 +116,7 @@ public class SignalkRouteFactory {
 	public static void configureWebsocketTxRoute(RouteBuilder routeBuilder ,String input, int port){
 		
 		//from SEDA_WEBSOCKETS
-			routeBuilder.from(input)
+			routeBuilder.from(input).id("Websocket Tx")
 				.onException(Exception.class)
 				.handled(true)
 				.maximumRedeliveries(0)
@@ -138,7 +138,7 @@ public class SignalkRouteFactory {
 		
 		wsEndpoint.setSessionSupport(true);
 		
-		routeBuilder.from(wsEndpoint)
+		routeBuilder.from(wsEndpoint).id("Websocket Rx")
 			.onException(Exception.class)
 			.handled(true).maximumRedeliveries(0)
 			.to("log:nz.co.fortytwo.signalk.model.websocket.rx?level=ERROR&showException=true&showStackTrace=true")
@@ -152,7 +152,7 @@ public class SignalkRouteFactory {
 		// push out via TCPServer.
 		Predicate p1 = routeBuilder.header(Constants.OUTPUT_TYPE).isEqualTo(outputType);
 		Predicate p2 = routeBuilder.header(WebsocketConstants.CONNECTION_KEY).isEqualTo(WebsocketConstants.SEND_TO_ALL);
-		routeBuilder.from(input)
+		routeBuilder.from(input).id("Netty "+outputType+" Server")
 			.onException(Exception.class)
 			.handled(true)
 			.maximumRedeliveries(0)
@@ -163,28 +163,28 @@ public class SignalkRouteFactory {
 	}
 	
 	public static void configureRestRoute(RouteBuilder routeBuilder ,String input){
-		routeBuilder.from(input)
+		routeBuilder.from(input).id("REST Api")
 			.setExchangePattern(ExchangePattern.InOut)
 			.process(new RestApiProcessor())
 			.process(new OutputFilterProcessor());
 		}
 	
 	public static void configureAuthRoute(RouteBuilder routeBuilder ,String input){
-		routeBuilder.from(input)
+		routeBuilder.from(input).id("REST Authenticate")
 			.setExchangePattern(ExchangePattern.InOut)
 			.process(new RestAuthProcessor());
 		}
 	
 	public static void configureDeclinationTimer(RouteBuilder routeBuilder ,String input){
-		routeBuilder.from(input).process(new DeclinationProcessor()).to("log:nz.co.fortytwo.signalk.model.update?level=INFO").end();
+		routeBuilder.from(input).id("Declination").process(new DeclinationProcessor()).to("log:nz.co.fortytwo.signalk.model.update?level=DEBUG").end();
 	}
 	
 	public static void configureWindTimer(RouteBuilder routeBuilder ,String input){
-		routeBuilder.from("timer://wind?fixedRate=true&period=1000").process(new WindProcessor()).to("log:nz.co.fortytwo.signalk.model.update?level=INFO").end();
+		routeBuilder.from("timer://wind?fixedRate=true&period=1000").id("True Wind").process(new WindProcessor()).to("log:nz.co.fortytwo.signalk.model.update?level=DEBUG").end();
 	}
 	
 	public static void configureCommonOut(RouteBuilder routeBuilder ){
-		routeBuilder.from(RouteManager.SEDA_COMMON_OUT)
+		routeBuilder.from(RouteManager.SEDA_COMMON_OUT).id("COMMON_OUT")
 			.onException(Exception.class).handled(true).maximumRedeliveries(0)
 			.to("log:nz.co.fortytwo.signalk.model.output?level=ERROR")
 			.end()
@@ -200,11 +200,11 @@ public class SignalkRouteFactory {
 					"log:nz.co.fortytwo.signalk.model.output?level=DEBUG"
 					)
 		.end();
-		routeBuilder.from(RouteManager.DIRECT_MQTT)
+		routeBuilder.from(RouteManager.DIRECT_MQTT).id("MQTT out")
 		.filter(routeBuilder.header(Constants.OUTPUT_TYPE).isEqualTo(Constants.OUTPUT_MQTT))
 			.process(new MqttProcessor())
 			.to(RouteManager.MQTT+"?publishTopicName=signalk.dlq");
-		routeBuilder.from(RouteManager.DIRECT_STOMP)
+		routeBuilder.from(RouteManager.DIRECT_STOMP).id("STOMP out")
 			.filter(routeBuilder.header(Constants.OUTPUT_TYPE).isEqualTo(Constants.OUTPUT_STOMP))
 			.process(new StompProcessor())
 			.to(RouteManager.STOMP);
@@ -234,7 +234,7 @@ public class SignalkRouteFactory {
 	}
 
 	public static void configureSubscribeRoute(RouteBuilder routeBuilder, String input) {
-		routeBuilder.from(input)
+		routeBuilder.from(input).id("REST Subscribe")
 		.setExchangePattern(ExchangePattern.InOut)
 		.process(new RestSubscribeProcessor());
 	}
@@ -259,7 +259,7 @@ public class SignalkRouteFactory {
 
 	public static void configureHeartbeatRoute(RouteBuilder routeBuilder, String input) {
 		
-		routeBuilder.from(input)
+		routeBuilder.from(input).id("Heartbeat")
 			.onException(Exception.class).handled(true).maximumRedeliveries(0)
 			.to("log:nz.co.fortytwo.signalk.model.output.all?level=ERROR")
 			.end()

@@ -168,7 +168,7 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 			return;
 		if (pathEvent.getPath() == null)
 			return;
-		if (logger.isTraceEnabled())logger.trace(this.wsSession + " received event " + pathEvent.getPath());
+		//if (logger.isTraceEnabled())logger.trace(this.wsSession + " received event " + pathEvent.getPath());
 
 		// do we care?
 		for (Subscription s : manager.getSubscriptions(wsSession)) {

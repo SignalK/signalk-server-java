@@ -37,6 +37,7 @@ import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
 import nz.co.fortytwo.signalk.util.JsonConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
+import org.apache.camel.Exchange;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.websocket.WebsocketConstants;
@@ -81,8 +82,10 @@ public class SignalkProcessor {
 	 * 
 	 * @param output
 	 */
-	public void sendNmea(String nmea){
-		nmeaProducer.sendBodyAndHeader(nmea, WebsocketConstants.CONNECTION_KEY, WebsocketConstants.SEND_TO_ALL);
+	public void sendNmea(Exchange ex){
+		Exchange exchange = ex.copy();
+		exchange.getIn().setHeader(WebsocketConstants.CONNECTION_KEY, WebsocketConstants.SEND_TO_ALL);
+		nmeaProducer.send(exchange);
 	}
 
 

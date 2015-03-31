@@ -151,12 +151,12 @@ public class RouteManager extends RouteBuilder {
 		//intercept().when(stopNull).stop();
 		
 		
-		skServer = new NettyServer(null);
+		skServer = new NettyServer(null, Constants.OUTPUT_TCP);
 		skServer.setTcpPort(Integer.valueOf(config.getProperty(Constants.TCP_PORT)));
 		skServer.setUdpPort(Integer.valueOf(config.getProperty(Constants.UDP_PORT)));
 		skServer.run();
 		
-		nmeaServer = new NettyServer(null);
+		nmeaServer = new NettyServer(null, Constants.OUTPUT_NMEA);
 		nmeaServer.setTcpPort(Integer.valueOf(config.getProperty(Constants.TCP_NMEA_PORT)));
 		nmeaServer.setUdpPort(Integer.valueOf(config.getProperty(Constants.UDP_NMEA_PORT)));
 		nmeaServer.run();
@@ -204,18 +204,18 @@ public class RouteManager extends RouteBuilder {
 		SignalkRouteFactory.configureWindTimer(this, "timer://wind?fixedRate=true&period=1000");
 		
 		//STOMP
-		from("skStomp:queue:signalk.put")
+		from("skStomp:queue:signalk.put").id("STOMP In")
 			.setHeader(Constants.OUTPUT_TYPE, constant(Constants.OUTPUT_STOMP))
 			.to(SEDA_INPUT);
 		//MQTT
-		from(MQTT+"&subscribeTopicName=signalk.put")
+		from(MQTT+"&subscribeTopicName=signalk.put").id("MQTT In")
 			.transform(body().convertToString())
 			.setHeader(Constants.OUTPUT_TYPE, constant(Constants.OUTPUT_MQTT))
 			.to(SEDA_INPUT);
 		
 		//WebsocketEndpoint wsEndpoint = (WebsocketEndpoint) getContext().getEndpoint("websocket://0.0.0.0:"+wsPort+JsonConstants.SIGNALK_WS);
 		if (Boolean.valueOf(config.getProperty(Constants.DEMO))) {
-			from("stream:file?fileName=" + streamUrl)
+			from("stream:file?fileName=" + streamUrl).id("demo feed")
 				.onException(Exception.class).handled(true).maximumRedeliveries(0)
 				.end()
 			.throttle(50).timePeriodMillis(1000).asyncDelayed().to(SEDA_INPUT).end();

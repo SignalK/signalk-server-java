@@ -76,15 +76,16 @@ public class NettyServer implements Processor{
 	private Channel udpChannel = null;
 	private int tcpPort = 5555;
 	private int udpPort = 5554;
+	private String outputType;
 	/**
 	 * @param configDir
 	 * @throws Exception 
 	 */
-	public NettyServer(String configDir) throws Exception {
+	public NettyServer(String configDir,String outputType) throws Exception {
 		config = Util.getConfig(configDir);
 		group = new NioEventLoopGroup();
 		workerGroup = new NioEventLoopGroup();
-		
+		this.outputType=outputType;
 		
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 			@Override
@@ -95,7 +96,7 @@ public class NettyServer implements Processor{
 	}
 	
 	public void run() throws Exception{
-		forwardingHandler = new CamelNettyHandler(config);
+		forwardingHandler = new CamelNettyHandler(config, outputType);
 		// The generic TCP socket server
 		ServerBootstrap skBootstrap = new ServerBootstrap();
 		skBootstrap.group(group, workerGroup).channel(NioServerSocketChannel.class).localAddress(tcpPort)
@@ -107,7 +108,7 @@ public class NettyServer implements Processor{
 						pipeline.addLast(DECODER);
 						pipeline.addLast(ENCODER);
 						pipeline.addLast(forwardingHandler);
-						logger.info("Signal K Connection over TCP from:" + socketChannel.remoteAddress());
+						logger.info("Signal K "+outputType+" Connection over TCP from:" + socketChannel.remoteAddress());
 						
 					}
 					

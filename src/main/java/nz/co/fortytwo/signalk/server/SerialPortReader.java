@@ -166,7 +166,7 @@ public class SerialPortReader implements Processor {
 		
 		//@Override
 		public void serialEvent(SerialPortEvent event) {
-			if(logger.isTraceEnabled())logger.trace("SerialEvent:"+event.getEventType());
+			//if(logger.isTraceEnabled())logger.trace("SerialEvent:"+event.getEventType());
 			try{
 				if (running && event.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
 					
