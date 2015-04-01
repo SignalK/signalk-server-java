@@ -92,6 +92,12 @@ public class RestSubscribeProcessor extends SignalkProcessor implements Processo
         	if(logger.isDebugEnabled())logger.debug("Returning SC_BAD_REQUEST");
         	return;
         }
+        //avoid primus.js requests!
+        if(context.endsWith(".js")||context.endsWith(".html")){
+        	response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        	if(logger.isDebugEnabled())logger.debug("Returning SC_NOT_FOUND");
+        	return;
+        }
         
         //get period, default 1000.
         long period = 1000;

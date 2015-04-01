@@ -26,14 +26,12 @@ package nz.co.fortytwo.signalk.server;
 import static nz.co.fortytwo.signalk.util.JsonConstants.SELF;
 import static nz.co.fortytwo.signalk.util.JsonConstants.VESSELS;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.*;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.env_wind_speedTrue;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_magneticVariation;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position_latitude;
 
 import java.util.concurrent.TimeUnit;
 
 import nz.co.fortytwo.signalk.handler.DeclinationHandler;
 import nz.co.fortytwo.signalk.handler.TrueWindHandler;
+import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.util.SignalKConstants;
 
 import org.apache.camel.ProducerTemplate;
@@ -158,6 +156,32 @@ public class SignalKNmeaReceiverTest extends SignalKCamelTestSupport {
 		 nmea.assertIsSatisfied();
     }
 
+	@Test
+	public void shouldHandleMultipleMessages() throws Exception{
+		
+		init();
+        assertNotNull(template);
+        nmea.reset();
+        nmea.expectedMessageCount(3);
+       
+        template.sendBody(DIRECT_INPUT,"$IIDBT,034.25,f,010.44,M,005.64,F*27");
+        template.sendBody(DIRECT_INPUT,"$IIDBT,034.31,f,010.46,M,005.65,F*21");
+        template.sendBody(DIRECT_INPUT,"$IIDBT,039.17,f,011.94,M,006.45,F*27");
+        
+        latch.await(5,TimeUnit.SECONDS);
+		 logger.debug("SignalKModel:"+signalkModel);
+		
+		 assertEquals(011.94d,(double)signalkModel.getValue(vessels_dot_self_dot + env_depth_belowTransducer),0.00001);
+		
+		 nmea.assertIsSatisfied();
+		 
+		/*$IIDBT,034.25,f,010.44,M,005.64,F*27
+		$IIDBT,034.31,f,010.46,M,005.65,F*21
+		$IIDBT,034.28,f,010.45,M,005.64,F*2B
+		$IIDBT,034.31,f,010.46,M,005.65,F*21
+		$IIDBT,034.31,f,010.46,M,005.65,F*21*/
+
+	}
 	@Override
 	public void configureRouteBuilder(RouteBuilder routeBuilder) {
 		nmea = (MockEndpoint) routeBuilder.getContext().getEndpoint("mock:output");

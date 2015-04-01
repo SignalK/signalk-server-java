@@ -53,8 +53,8 @@ import org.apache.log4j.Logger;
 public class SignalkProcessor {
 	
 	private static Logger logger = Logger.getLogger(SignalkProcessor.class);
-	static protected SignalKModel signalkModel = SignalKModelFactory.getInstance();
-	static protected  SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
+	protected static final SignalKModel signalkModel = SignalKModelFactory.getInstance();
+	protected  SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
 	//@Produce(uri = RouteManager.SEDA_NMEA )
     ProducerTemplate nmeaProducer;
     ProducerTemplate outProducer;

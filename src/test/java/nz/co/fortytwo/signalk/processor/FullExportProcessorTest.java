@@ -112,22 +112,23 @@ public class FullExportProcessorTest {
 		model = Util.populateModel(model, new File("src/test/resources/samples/basicModel.txt"));
 		model = Util.populateModel(model, new File("src/test/resources/samples/otherModel.txt"));
 		
-		testScenario(UUID.randomUUID().toString(), "vessels.self.navigation", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 1, 0, 0, getJsonForEvent( SELF, nav_courseOverGroundTrue));
-		testScenario(UUID.randomUUID().toString(), "vessels.self.navigation", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_INSTANT, 1, 0, 0, getJsonForEvent( SELF, nav_courseOverGroundTrue));
+		testScenario(1,UUID.randomUUID().toString(), "vessels.self.navigation", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 1, 0, 0, getJsonForEvent( SELF, nav_courseOverGroundTrue));
+		testScenario(2,UUID.randomUUID().toString(), "vessels.self.navigation", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_INSTANT, 1, 0, 0, getJsonForEvent( SELF, nav_courseOverGroundTrue));
 		
-		testScenario(UUID.randomUUID().toString(), "vessels.self.navigation", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_FIXED, 0, 0, 0, getJsonForEvent( SELF, nav_courseOverGroundTrue));
+		testScenario(3,UUID.randomUUID().toString(), "vessels.self.navigation", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_FIXED, 0, 0, 0, getJsonForEvent( SELF, nav_courseOverGroundTrue));
 		
-		testScenario(UUID.randomUUID().toString(), "vessels.self.invalid", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 0, 0, 0, getJsonForEvent( SELF, nav_courseOverGroundTrue));
-		testScenario(UUID.randomUUID().toString(), "vessels.self.environment", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 1, 0, 0, getJsonForEvent( SELF, env_wind_angleApparent));
+		testScenario(4,UUID.randomUUID().toString(), "vessels.self.invalid", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 0, 0, 0, getJsonForEvent( SELF, nav_courseOverGroundTrue));
+		testScenario(5,UUID.randomUUID().toString(), "vessels.self.environment", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 1, 0, 0, getJsonForEvent( SELF, env_wind_angleApparent));
 		
-		testScenario(UUID.randomUUID().toString(), "vessels.*.environment", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 1, 0, 0, getJsonForEvent( SELF, env_wind_angleApparent));
-		testScenario(UUID.randomUUID().toString(), "vessels.*.environment", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 1, 0, 0, getJsonForEvent( "other", env_wind_angleApparent));
-		testScenario(UUID.randomUUID().toString(), "vessels.other.environment", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 1, 0, 0, getJsonForEvent( "other", env_wind_angleApparent));
-		testScenario(UUID.randomUUID().toString(), "vessels.other.environment", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 0, 0, 0, getJsonForEvent( SELF, env_wind_angleApparent));
+		testScenario(6,UUID.randomUUID().toString(), "vessels.*.environment", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 1, 0, 0, getJsonForEvent( SELF, env_wind_angleApparent));
+		testScenario(7,UUID.randomUUID().toString(), "vessels.*.environment", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 1, 0, 0, getJsonForEvent( "other", env_wind_angleApparent));
+		
+		testScenario(8,UUID.randomUUID().toString(), "vessels.other.environment", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 1, 0, 0, getJsonForEvent( "other", env_wind_angleApparent));
+		testScenario(9,UUID.randomUUID().toString(), "vessels.other.environment", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 0, 0, 0, getJsonForEvent( SELF, env_wind_angleApparent));
 		ConcurrentSkipListSet<String> event = new ConcurrentSkipListSet<String>(getJsonForEvent(SELF, nav_courseOverGroundTrue));
 		event.addAll(getJsonForEvent("other", env_wind_angleApparent));
-		testScenario(UUID.randomUUID().toString(), "vessels.*.environment", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 1, 0, 0, event);
-		testScenario(UUID.randomUUID().toString(), "vessels.*", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 1, 0, 0, event);
+		testScenario(10,UUID.randomUUID().toString(), "vessels.*.environment", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 1, 0, 0, event);
+		testScenario(11,UUID.randomUUID().toString(), "vessels.*", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 1, 0, 0, event);
 		
 		final CountDownLatch latch = new CountDownLatch(1);
 		latch.await(10, TimeUnit.SECONDS);
@@ -141,7 +142,7 @@ public class FullExportProcessorTest {
 	}
 	
 
-	private void testScenario(String session, String subKey, String format, String policy, int rcvdCounter, int mapSizeBefore, int mapSizeAfter, NavigableSet<String> eventSet) throws Exception {
+	private void testScenario(int pos,String session, String subKey, String format, String policy, int rcvdCounter, int mapSizeBefore, int mapSizeAfter, NavigableSet<String> eventSet) throws Exception {
 			
 		CamelContext ctx = RouteManagerFactory.getInstance(null).getContext();
 			try{
@@ -151,7 +152,7 @@ public class FullExportProcessorTest {
 				
 				//make a mock Endpoint
 				MockEndpoint resultEndpoint = (MockEndpoint) ctx.getEndpoint("mock:resultEnd");
-				 
+				resultEndpoint.reset();
 				resultEndpoint.expectedMessageCount(rcvdCounter);
 				
 				FullExportProcessor processor = new FullExportProcessor(session);
@@ -172,16 +173,19 @@ public class FullExportProcessorTest {
 					bus.post(new PathEvent(key,0, nz.co.fortytwo.signalk.model.event.PathEvent.EventType.ADD));
 				}
 				resultEndpoint.assertIsSatisfied();
-				assertEquals(rcvdCounter, resultEndpoint.getReceivedCounter());
+				//assertEquals(pos+":rcvdCounter != actual received counter",rcvdCounter, resultEndpoint.getReceivedCounter());
 				resultEndpoint.reset();
-				assertEquals(mapSizeAfter, processor.queue.size());
+				assertEquals(pos+":MapSizeAfter != queue size", mapSizeAfter, processor.queue.size());
 				for(Exchange e: resultEndpoint.getExchanges()){
 					logger.debug(e.getIn().getBody());
 				}
 				SubscriptionManagerFactory.getInstance().removeSubscription(sub);
 			}finally{
 				SubscriptionManagerFactory.getInstance().removeWsSession(session);
+				//final CountDownLatch latch = new CountDownLatch(1);
+				//latch.await(2, TimeUnit.SECONDS);
 			}
+			
 		}
 	
 }
