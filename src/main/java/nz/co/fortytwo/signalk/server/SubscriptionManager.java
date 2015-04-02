@@ -26,7 +26,9 @@
 package nz.co.fortytwo.signalk.server;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -47,6 +49,7 @@ public class SubscriptionManager {
 	
 	//hold sessionid <> wsSessionId
 	BiMap<String, String> wsSessionMap = HashBiMap.create();
+	Map<String, String> outPutMap = new HashMap<String, String>();
 	//wsSessionId>Subscription
 	List<Subscription> subscriptions = new ArrayList<Subscription>();
 	List<String> heartbeats = new ArrayList<String>();
@@ -138,9 +141,11 @@ public class SubscriptionManager {
 	 * @param wsSession
 	 * @throws Exception 
 	 */
-	public void add(String sessionId, String wsSession) throws Exception{
+	public void add(String sessionId, String wsSession, String outputType) throws Exception{
 		if(StringUtils.isBlank(wsSession) ||  StringUtils.isBlank(sessionId))return; 
 		wsSessionMap.put(sessionId, wsSession);
+		outPutMap.put(wsSession, outputType);
+		logger.debug("Adding "+sessionId+"/"+wsSession+", outputType="+outputType);
 		//now update any subscriptions for sessionId
 		List<Subscription> subs = getSubscriptions(sessionId);
 
@@ -167,6 +172,7 @@ public class SubscriptionManager {
 	public void removeSessionId(String sessionId) throws Exception{
 		String wsSession = wsSessionMap.get(sessionId);
 		wsSessionMap.remove(sessionId);
+		outPutMap.remove(wsSession);
 		//remove all subscriptions
 		RouteManager routeManager = RouteManagerFactory.getInstance(null);
 		SignalkRouteFactory.removeSubscribeTimers(routeManager, getSubscriptions(wsSession));
@@ -177,6 +183,7 @@ public class SubscriptionManager {
 	}
 	public void removeWsSession(String wsSession) throws Exception{
 		wsSessionMap.inverse().remove(wsSession);
+		outPutMap.remove(wsSession);
 		//remove all subscriptions
 		RouteManager routeManager = RouteManagerFactory.getInstance(null);
 		SignalkRouteFactory.removeSubscribeTimers(routeManager, getSubscriptions(wsSession));
@@ -193,6 +200,9 @@ public class SubscriptionManager {
 		return wsSessionMap.keySet();
 	}
 	
+	public String getOutputType(String wsSession){
+		return outPutMap.get(wsSession);
+	}
 	/**
 	 * Gets a Set of all the current wsSessions
 	 * @return

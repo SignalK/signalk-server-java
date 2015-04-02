@@ -112,6 +112,14 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
 		
 		Json subscriptions = node.at(SUBSCRIBE);
 		if(subscriptions!=null){
+			//MQTT and STOMP wont have created proper session links
+			if(node.has(WebsocketConstants.CONNECTION_KEY)){
+				String wsSession = node.at(WebsocketConstants.CONNECTION_KEY).asString();
+				if(node.has(Constants.OUTPUT_TYPE)){
+					String outputType = node.at(Constants.OUTPUT_TYPE).asString();
+					SubscriptionManagerFactory.getInstance().add(wsSession, wsSession, outputType);
+				}
+			}
 			if(subscriptions.isArray()){
 				for(Json subscription: subscriptions.asJsonList()){
 					
@@ -164,9 +172,7 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
 		long minPeriod = 0;
 		if(subscription.at(MIN_PERIOD)!=null)minPeriod=subscription.at(MIN_PERIOD).asInteger();
 		Subscription sub = new Subscription(wsSession, path, period, minPeriod, format, policy);
-		if(headers.containsKey(Constants.OUTPUT_TYPE)){
-			sub.setOutputType( headers.get(Constants.OUTPUT_TYPE).toString());
-		}
+		
 		//STOMP, MQTT
 		if(headers.containsKey(Constants.DESTINATION)){
 			sub.setDestination( headers.get(Constants.DESTINATION).toString());

@@ -39,6 +39,7 @@ import nz.co.fortytwo.signalk.server.RouteManagerFactory;
 import nz.co.fortytwo.signalk.server.Subscription;
 import nz.co.fortytwo.signalk.server.SubscriptionManager;
 import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
+import nz.co.fortytwo.signalk.util.Constants;
 import nz.co.fortytwo.signalk.util.JsonConstants;
 
 import org.apache.camel.model.RouteDefinition;
@@ -106,7 +107,7 @@ public class RestSubscribeProcessorTest {
 		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
 		String wsSession = UUID.randomUUID().toString();
 		manager.removeSessionId("sess"+wsSession);
-		manager.add("sess"+wsSession, wsSession);
+		manager.add("sess"+wsSession, wsSession,Constants.OUTPUT_REST);
 		RestSubscribeProcessor subscribe = new RestSubscribeProcessor();
 		subscribe.subscribe(JsonConstants.SIGNALK_SUBSCRIBE + "/vessels/" + SELF + "/navigation", 1000, 0,FORMAT_DELTA, POLICY_FIXED,"sess"+wsSession);
 		List<Subscription> subs = manager.getSubscriptions("sess"+wsSession);
@@ -132,7 +133,7 @@ public class RestSubscribeProcessorTest {
 		Subscription s = subs.get(0);
 		assertEquals("Subscription [wsSession=sess"+wsSession+", path=vessels." + SELF + ".navigation, period=1000, format=delta, active=false]", s.toString());
 		// now add webSocket
-		manager.add("sess"+wsSession, wsSession);
+		manager.add("sess"+wsSession, wsSession,Constants.OUTPUT_REST);
 		// sub under sessionId gone
 		subs = manager.getSubscriptions("sess"+wsSession);
 		assertEquals(0, subs.size());
@@ -151,7 +152,7 @@ public class RestSubscribeProcessorTest {
 		manager.removeSessionId("sess"+wsSession);
 		
 		// now add webSocket
-		manager.add("sess"+wsSession, wsSession);
+		manager.add("sess"+wsSession, wsSession,Constants.OUTPUT_REST);
 		RestSubscribeProcessor subscribe = new RestSubscribeProcessor();
 		subscribe.subscribe(JsonConstants.SIGNALK_SUBSCRIBE + "/vessels/" + SELF + "/navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED,"sess"+wsSession);
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
@@ -179,7 +180,7 @@ public class RestSubscribeProcessorTest {
 		manager.removeSessionId("sess"+wsSession);
 		int routes = routeManager.getRouteCollection().getRoutes().size();
 		// now add webSocket
-		manager.add("sess"+wsSession, wsSession);
+		manager.add("sess"+wsSession, wsSession,Constants.OUTPUT_REST);
 		RestSubscribeProcessor subscribe = new RestSubscribeProcessor();
 		subscribe.subscribe(JsonConstants.SIGNALK_SUBSCRIBE + "/vessels/" + SELF + "/navigation", 500,0,FORMAT_DELTA, POLICY_FIXED, "sess"+wsSession);
 		subscribe.subscribe(JsonConstants.SIGNALK_SUBSCRIBE + "/vessels/" + SELF + "/environment", 500, 0,FORMAT_DELTA, POLICY_FIXED,"sess"+wsSession);
@@ -208,7 +209,7 @@ public class RestSubscribeProcessorTest {
 		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
 		manager.removeSessionId("sess"+wsSession);
 		// now add webSocket
-		manager.add("sess"+wsSession, wsSession);
+		manager.add("sess"+wsSession, wsSession,Constants.OUTPUT_REST);
 		RestSubscribeProcessor subscribe = new RestSubscribeProcessor();
 		subscribe.subscribe(JsonConstants.SIGNALK_SUBSCRIBE + "/vessels/" + SELF + "/navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED,"sess"+wsSession);
 		subscribe.subscribe(JsonConstants.SIGNALK_SUBSCRIBE + "/vessels/" + SELF + "/environment", 1500, 0,FORMAT_DELTA, POLICY_FIXED,"sess"+wsSession);
@@ -236,7 +237,7 @@ public class RestSubscribeProcessorTest {
 		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
 		manager.removeSessionId("sess"+wsSession);
 		// now add webSocket
-		manager.add("sess"+wsSession, wsSession);
+		manager.add("sess"+wsSession, wsSession,Constants.OUTPUT_REST);
 		RestSubscribeProcessor subscribe = new RestSubscribeProcessor();
 		subscribe.subscribe(JsonConstants.SIGNALK_SUBSCRIBE + "/vessels/" + SELF + "/navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED,"sess"+wsSession);
 		subscribe.subscribe(JsonConstants.SIGNALK_SUBSCRIBE + "/vessels/" + SELF + "/environment", 500, 0,FORMAT_DELTA, POLICY_FIXED,"sess"+wsSession);

@@ -49,7 +49,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 public abstract class SignalKCamelTestSupport extends CamelTestSupport {
-	static Logger logger = Logger.getLogger(SignalKNmeaReceiverTest.class);
+	static Logger logger = Logger.getLogger(SignalKCamelTestSupport.class);
 	protected SignalKModel signalkModel = null;
 	protected RouteManager routeManager = null;
 	protected final CountDownLatch latch = new CountDownLatch(1);

@@ -25,6 +25,7 @@ package nz.co.fortytwo.signalk.processor;
 
 import static nz.co.fortytwo.signalk.util.JsonConstants.UPDATES;
 
+import java.util.HashMap;
 import java.util.List;
 
 import mjson.Json;
@@ -32,6 +33,7 @@ import nz.co.fortytwo.signalk.server.CamelContextFactory;
 import nz.co.fortytwo.signalk.server.RouteManager;
 import nz.co.fortytwo.signalk.server.SubscriptionManager;
 import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
+import nz.co.fortytwo.signalk.util.Constants;
 import nz.co.fortytwo.signalk.util.JsonConstants;
 
 import org.apache.camel.Exchange;
@@ -73,7 +75,10 @@ public class HeartbeatProcessor extends SignalkProcessor implements Processor{
 			List<String> heartbeats = ImmutableList.copyOf(manager.getHeartbeats());
 			if(logger.isDebugEnabled())logger.debug("process heartbeats: "+heartbeats.size());
 			for(String session : heartbeats){
-				producer.sendBodyAndHeader(msg, WebsocketConstants.CONNECTION_KEY, session);
+				HashMap<String, Object> headers = new HashMap<String, Object>();
+				headers.put(WebsocketConstants.CONNECTION_KEY, session);
+				headers.put(Constants.OUTPUT_TYPE, manager.getOutputType(session));
+				producer.sendBodyAndHeaders(msg, headers);
 			}
 			
 		} catch (Exception e) {

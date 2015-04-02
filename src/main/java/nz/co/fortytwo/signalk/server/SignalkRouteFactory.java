@@ -114,7 +114,8 @@ public class SignalkRouteFactory {
 	 * @param input
 	 */
 	public static void configureWebsocketTxRoute(RouteBuilder routeBuilder ,String input, int port){
-		
+		Predicate p1 = routeBuilder.header(Constants.OUTPUT_TYPE).isEqualTo(Constants.OUTPUT_WS);
+		Predicate p2 = routeBuilder.header(WebsocketConstants.CONNECTION_KEY).isEqualTo(WebsocketConstants.SEND_TO_ALL);
 		//from SEDA_WEBSOCKETS
 			routeBuilder.from(input).id("Websocket Tx")
 				.onException(Exception.class)
@@ -122,7 +123,8 @@ public class SignalkRouteFactory {
 				.maximumRedeliveries(0)
 				.end()
 				//.to("log:nz.co.fortytwo.signalk.model.websocket.tx?level=ERROR&showException=true&showStackTrace=true")
-			.process(new OutputFilterProcessor())
+			.filter(PredicateBuilder.or(p1, p2))
+			//.process(new OutputFilterProcessor())
 			.to("skWebsocket://0.0.0.0:"+port+JsonConstants.SIGNALK_WS);
 		
 	}
@@ -190,7 +192,6 @@ public class SignalkRouteFactory {
 			.end()
 		.process(new MapToJsonProcessor())
 		.process(new FullToDeltaProcessor())
-		.process(new StompProcessor())
 		.process(new OutputFilterProcessor())
 		.multicast().parallelProcessing()
 			.to(RouteManager.DIRECT_TCP,
@@ -201,7 +202,7 @@ public class SignalkRouteFactory {
 					)
 		.end();
 		routeBuilder.from(RouteManager.DIRECT_MQTT).id("MQTT out")
-		.filter(routeBuilder.header(Constants.OUTPUT_TYPE).isEqualTo(Constants.OUTPUT_MQTT))
+			.filter(routeBuilder.header(Constants.OUTPUT_TYPE).isEqualTo(Constants.OUTPUT_MQTT))
 			.process(new MqttProcessor())
 			.to(RouteManager.MQTT+"?publishTopicName=signalk.dlq");
 		routeBuilder.from(RouteManager.DIRECT_STOMP).id("STOMP out")

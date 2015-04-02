@@ -95,6 +95,7 @@ public class MqttTest extends SignalKCamelTestSupport{
 		Json subMsg = getSubscribe("vessels." + SELF,"navigation", 1000,0,FORMAT_DELTA, POLICY_FIXED);
 		subMsg.set(Constants.REPLY_TO.toString(), "signalk."+uuid+".vessels.motu.navigation");
 		subMsg.set(WebsocketConstants.CONNECTION_KEY, uuid);
+		subMsg.set(nz.co.fortytwo.signalk.util.Constants.OUTPUT_TYPE, nz.co.fortytwo.signalk.util.Constants.OUTPUT_MQTT);
 		//HashMap<String,String> headers = new HashMap<String,String>();
 		
 		//queue>signalk.3202a939-1681-4a74-ad4b-3a90212e4f33.vessels.motu.navigation

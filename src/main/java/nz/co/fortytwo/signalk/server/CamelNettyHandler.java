@@ -70,10 +70,17 @@ public class CamelNettyHandler extends SimpleChannelInboundHandler<String> {
 		ctx.write("It is " + new Date() + " now.\r\n");
 		ctx.flush();
 		String session = UUID.randomUUID().toString();
-		SubscriptionManagerFactory.getInstance().add(session, session);
+		SubscriptionManagerFactory.getInstance().add(session, session, outputType);
 		contextList.put(session, ctx);
 	}
 
+	@Override
+	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+		// unsubscribe all
+		String session = contextList.inverse().get(ctx);
+		SubscriptionManagerFactory.getInstance().removeSessionId(session);
+		super.channelInactive(ctx);
+	}
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, String request) throws Exception {
 		if(logger.isDebugEnabled())logger.debug("Request:" + request);
@@ -113,5 +120,7 @@ public class CamelNettyHandler extends SimpleChannelInboundHandler<String> {
 		if(msg instanceof Json || msg instanceof String)return true;
 		return super.acceptInboundMessage(msg);
 	}
+
+	
 
 }

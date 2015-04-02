@@ -48,7 +48,7 @@ public class OutputFilterProcessor extends SignalkProcessor implements Processor
 		
 		if (exchange.getIn().getBody()==null)
 			return;
-		if(logger.isDebugEnabled())logger.debug("Processing:"+exchange.getIn().getBody().getClass());
+		if(logger.isDebugEnabled())logger.debug("Processing, class="+exchange.getIn().getBody().getClass());
 		//TODO: add more filters here
 		if(exchange.getIn().getBody() instanceof Json){
 			Json json = (Json)exchange.getIn().getBody();
@@ -76,7 +76,10 @@ public class OutputFilterProcessor extends SignalkProcessor implements Processor
 			
 			exchange.getIn().setBody(ser.write(model));
 		}
-		if(logger.isDebugEnabled())logger.debug("Outputting:"+exchange.getIn());
+		if(logger.isDebugEnabled()){
+			logger.debug("Outputting:"+exchange.getIn().getHeaders());
+			logger.debug("Outputting:"+exchange.getIn());
+		}
 	}
 
 }

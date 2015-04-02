@@ -47,6 +47,7 @@ import nz.co.fortytwo.signalk.server.RouteManagerFactory;
 import nz.co.fortytwo.signalk.server.SignalkRouteFactory;
 import nz.co.fortytwo.signalk.server.Subscription;
 import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
+import nz.co.fortytwo.signalk.util.Constants;
 import nz.co.fortytwo.signalk.util.JsonConstants;
 import nz.co.fortytwo.signalk.util.JsonSerializer;
 import nz.co.fortytwo.signalk.util.Util;
@@ -147,7 +148,7 @@ public class FullExportProcessorTest {
 		CamelContext ctx = RouteManagerFactory.getInstance(null).getContext();
 			try{
 				Subscription sub = new Subscription(session, subKey, 10, 1000, format, policy);
-				SubscriptionManagerFactory.getInstance().add("ses"+session, session);
+				SubscriptionManagerFactory.getInstance().add("ses"+session, session, Constants.OUTPUT_WS);
 				SubscriptionManagerFactory.getInstance().addSubscription(sub);
 				
 				//make a mock Endpoint

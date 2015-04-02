@@ -39,6 +39,7 @@ import nz.co.fortytwo.signalk.server.RouteManagerFactory;
 import nz.co.fortytwo.signalk.server.Subscription;
 import nz.co.fortytwo.signalk.server.SubscriptionManager;
 import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
+import nz.co.fortytwo.signalk.util.Constants;
 
 import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.camel.model.RouteDefinition;
@@ -158,7 +159,7 @@ public class JsonSubscribeProcessorTest {
 		String wsSession = UUID.randomUUID().toString();
 		manager.removeSessionId(wsSession);
 		// now add webSocket
-		manager.add(wsSession, wsSession);
+		manager.add(wsSession, wsSession,Constants.OUTPUT_WS);
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
 		HashMap<String, Object> headers = new HashMap<String, Object>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
@@ -188,7 +189,7 @@ public class JsonSubscribeProcessorTest {
 		manager.removeSessionId(wsSession);
 		int routes = routeManager.getRouteCollection().getRoutes().size();
 		// now add webSocket
-		manager.add(wsSession, wsSession);
+		manager.add(wsSession, wsSession,Constants.OUTPUT_WS);
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
 		HashMap<String, Object> headers = new HashMap<String, Object>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
@@ -211,7 +212,7 @@ public class JsonSubscribeProcessorTest {
 		manager.removeSessionId(wsSession);
 		int routes = routeManager.getRouteCollection().getRoutes().size();
 		// now add webSocket
-		manager.add(wsSession, wsSession);
+		manager.add(wsSession, wsSession,Constants.OUTPUT_WS);
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
 		HashMap<String, Object> headers = new HashMap<String, Object>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
@@ -232,7 +233,7 @@ public class JsonSubscribeProcessorTest {
 		String wsSession = UUID.randomUUID().toString();
 		manager.removeSessionId(wsSession);
 		// now add webSocket
-		manager.add(wsSession, wsSession);
+		manager.add(wsSession, wsSession,Constants.OUTPUT_WS);
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
 		HashMap<String, Object> headers = new HashMap<String, Object>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
@@ -263,7 +264,7 @@ public class JsonSubscribeProcessorTest {
 		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
 		manager.removeSessionId(wsSession);
 		// now add webSocket
-		manager.add(wsSession, wsSession);
+		manager.add(wsSession, wsSession,Constants.OUTPUT_WS);
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
 		HashMap<String, Object> headers = new HashMap<String, Object>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
@@ -293,7 +294,7 @@ public class JsonSubscribeProcessorTest {
 		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
 		manager.removeSessionId(wsSession);
 		// now add webSocket
-		manager.add(wsSession, wsSession);
+		manager.add(wsSession, wsSession,Constants.OUTPUT_WS);
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
 		HashMap<String, Object> headers = new HashMap<String, Object>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
@@ -322,7 +323,7 @@ public class JsonSubscribeProcessorTest {
 		String wsSession = UUID.randomUUID().toString();
 		manager.removeSessionId(wsSession);
 		// now add webSocket
-		manager.add(wsSession, wsSession);
+		manager.add(wsSession, wsSession,Constants.OUTPUT_WS);
 		
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
 		HashMap<String, Object> headers = new HashMap<String, Object>();

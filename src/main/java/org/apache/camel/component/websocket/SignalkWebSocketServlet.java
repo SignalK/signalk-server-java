@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
+import nz.co.fortytwo.signalk.util.Constants;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.http.HttpException;
@@ -168,9 +169,10 @@ public class SignalkWebSocketServlet extends WebsocketComponentServlet {
 					connection.fillBuffersFrom(((HttpParser) http.getParser()).getHeaderBuffer());
 					connection.fillBuffersFrom(((HttpParser) http.getParser()).getBodyBuffer());
 
+					//if(logger.isDebugEnabled())logger.debug("Upgraded session " + request.getSession().getId() + " to ws " + ((DefaultWebsocket) websocket).getConnectionKey());
 					if(logger.isDebugEnabled())logger.debug("Upgraded session " + request.getRequestedSessionId() + " to ws " + ((DefaultWebsocket) websocket).getConnectionKey());
 					try {
-						SubscriptionManagerFactory.getInstance().add(request.getRequestedSessionId(), ((DefaultWebsocket) websocket).getConnectionKey());
+						SubscriptionManagerFactory.getInstance().add(request.getRequestedSessionId(), ((DefaultWebsocket) websocket).getConnectionKey(), Constants.OUTPUT_WS);
 					} catch (Exception e1) {
 						logger.error(e1.getMessage(),e1);
 						throw new IOException(e1);

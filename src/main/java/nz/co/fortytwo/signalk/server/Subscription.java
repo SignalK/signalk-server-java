@@ -65,7 +65,7 @@ public class Subscription {
 	Set<String> subscribedPaths = new ConcurrentSet<String>();
 	private String routeId;
 	private String destination;
-	private String outputType;
+	//private String outputType;
 
 	public Subscription(String wsSession, String path, long period, long minPeriod, String format, String policy) {
 		this.wsSession = wsSession;
@@ -281,14 +281,6 @@ public class Subscription {
 		this.destination = destination;
 	}
 
-	public String getOutputType() {
-		return outputType;
-	}
 
-	public void setOutputType(String outputType) {
-		this.outputType = outputType;
-	}
-
-	
 
 }

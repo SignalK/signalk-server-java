@@ -26,6 +26,7 @@ import static nz.co.fortytwo.signalk.util.JsonConstants.FORMAT_DELTA;
 import static nz.co.fortytwo.signalk.util.JsonConstants.POLICY_FIXED;
 import static nz.co.fortytwo.signalk.util.JsonConstants.SIGNALK_FORMAT;
 
+import java.util.HashMap;
 import java.util.Queue;
 
 import nz.co.fortytwo.signalk.model.SignalKModel;
@@ -72,8 +73,7 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 			exchange.getIn().setBody(createTree(exchange.getFromRouteId()));
 			setHeaders(exchange);
 			if(logger.isDebugEnabled()){
-				logger.debug("Header set to :" + exchange.getIn().getHeader(SIGNALK_FORMAT));
-				logger.debug("Destination set to :" + exchange.getIn().getHeader(Constants.DESTINATION));
+				logger.debug("Headers set to :" + exchange.getIn().getHeaders());
 				logger.debug("Body set to :" + exchange.getIn().getBody());
 			}
 		} catch (Exception e) {
@@ -91,10 +91,9 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 					exchange.getIn().setHeader(Constants.DESTINATION, sub.getDestination());
 					
 				}
-				if(sub.getOutputType()!=null){
-					exchange.getIn().setHeader(Constants.OUTPUT_TYPE, sub.getOutputType());
-					
-				}
+				exchange.getIn().setHeader(Constants.OUTPUT_TYPE, manager.getOutputType(sub.getWsSession()));
+				exchange.getIn().setHeader(WebsocketConstants.CONNECTION_KEY, sub.getWsSession());
+				
 		}
 		
 	}
@@ -221,7 +220,10 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 						}
 					}
 					if (send) {
-						outProducer.sendBodyAndHeader(temp, WebsocketConstants.CONNECTION_KEY, wsSession);
+						HashMap<String, Object> headers = new HashMap<String, Object>();
+						headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
+						headers.put(Constants.OUTPUT_TYPE, manager.getOutputType(wsSession));
+						outProducer.sendBodyAndHeaders(temp, headers);
 						lastSend = System.currentTimeMillis();
 					}
 					break;

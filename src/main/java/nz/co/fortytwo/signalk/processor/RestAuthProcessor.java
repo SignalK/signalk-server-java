@@ -26,6 +26,7 @@ package nz.co.fortytwo.signalk.processor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import nz.co.fortytwo.signalk.util.Constants;
 import nz.co.fortytwo.signalk.util.JsonConstants;
 
 import org.apache.camel.Exchange;
@@ -86,7 +87,7 @@ public class RestAuthProcessor extends SignalkProcessor implements Processor{
         //breadcrumb = breadcrumb.substring(0,breadcrumb.lastIndexOf("-",breadcrumb.lastIndexOf("-")));
         //manager.add(cookieSetting.getValue(), cookieSetting.getValue());
         if(logger.isDebugEnabled())logger.info("Adding session = "+request.getSession().getId());
-        manager.add(request.getSession().getId(), request.getSession().getId());
+        //manager.add(request.getSession().getId(), request.getSession().getId(), Constants.OUTPUT_WS);
        
         // SEND RESPONSE
         //exchange.getOut().setBody(response.getEntityAsText());

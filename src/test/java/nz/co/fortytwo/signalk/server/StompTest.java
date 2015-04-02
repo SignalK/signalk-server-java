@@ -83,6 +83,8 @@ public class StompTest extends SignalKCamelTestSupport{
 		
 		//subscribe
 		Json subMsg = getSubscribe("vessels." + SELF,"navigation", 1000,0,FORMAT_DELTA, POLICY_FIXED);
+		subMsg.set(nz.co.fortytwo.signalk.util.Constants.OUTPUT_TYPE, nz.co.fortytwo.signalk.util.Constants.OUTPUT_STOMP);
+		subMsg.set(WebsocketConstants.CONNECTION_KEY, uuid);
 		HashMap<String,String> headers = new HashMap<String,String>();
 		
 		//queue>signalk.3202a939-1681-4a74-ad4b-3a90212e4f33.vessels.motu.navigation
