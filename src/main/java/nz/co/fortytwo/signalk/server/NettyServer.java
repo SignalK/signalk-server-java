@@ -50,6 +50,7 @@ import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.util.CharsetUtil;
 import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 
 import java.net.InetSocketAddress;
 import java.util.Properties;
@@ -125,6 +126,7 @@ public class NettyServer implements Processor{
 				.option(ChannelOption.SO_BROADCAST, true)
 				.handler(udpHandler);
 			udpChannel = udpBootstrap.bind(tcpPort-1).sync().channel();
+			logger.info("Server listening on UDP " + udpChannel.localAddress());
 		}
 	}
 
@@ -156,11 +158,11 @@ public class NettyServer implements Processor{
 				//udp
 				if(udpPort>0 && udpChannel!=null&& udpChannel.isWritable()){
 					for(InetSocketAddress client:udpHandler.getSessionList().values()){
-						logger.debug("Sending udp: "+exchange.getIn().getBody());
+						if(logger.isDebugEnabled())logger.debug("Sending udp: "+exchange.getIn().getBody());
 						//udpCtx.pipeline().writeAndFlush(msg+"\r\n");
 						udpChannel.writeAndFlush(new DatagramPacket(
 							Unpooled.copiedBuffer(msg+"\r\n", CharsetUtil.UTF_8),client));
-						logger.debug("Sent udp to "+client);
+						if(logger.isDebugEnabled())logger.debug("Sent udp to "+client);
 					}
 				}
 				//tcp
@@ -171,12 +173,13 @@ public class NettyServer implements Processor{
 			}else{
 				//udp
 				if(udpPort>0 && udpChannel!=null&& udpChannel.isWritable()){
-					InetSocketAddress client = udpHandler.getSessionList().get(session);
-					logger.debug("Sending udp: "+exchange.getIn().getBody());
+					final InetSocketAddress client = udpHandler.getSessionList().get(session);
+					if(logger.isDebugEnabled())logger.debug("Sending udp: "+exchange.getIn().getBody());
 					//udpCtx.pipeline().writeAndFlush(msg+"\r\n");
 					udpChannel.writeAndFlush(new DatagramPacket(
 						Unpooled.copiedBuffer(msg+"\r\n", CharsetUtil.UTF_8),client));
-					logger.debug("Sent udp for session: "+session);
+					if(logger.isDebugEnabled())logger.debug("Sent udp for session: "+session);
+					//TODO: how do we tell when a UDP client is gone
 				}
 				//tcp
 				ChannelHandlerContext ctx = forwardingHandler.getChannel(session);
