@@ -121,9 +121,9 @@ public class SignalkRouteFactory {
 				.onException(Exception.class)
 				.handled(true)
 				.maximumRedeliveries(0)
+				.to("log:nz.co.fortytwo.signalk.model.websocket.tx?level=ERROR&showException=true&showStackTrace=true")
 				.end()
-				//.to("log:nz.co.fortytwo.signalk.model.websocket.tx?level=ERROR&showException=true&showStackTrace=true")
-			.filter(PredicateBuilder.or(p1, p2))
+			//.filter(PredicateBuilder.or(p1, p2))
 			//.process(new OutputFilterProcessor())
 			.to("skWebsocket://0.0.0.0:"+port+JsonConstants.SIGNALK_WS);
 		

@@ -36,6 +36,7 @@ import javax.servlet.http.HttpServletResponse;
 import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
 import nz.co.fortytwo.signalk.util.Constants;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.http.HttpException;
 import org.eclipse.jetty.http.HttpParser;
@@ -71,7 +72,19 @@ public class SignalkWebSocketServlet extends WebsocketComponentServlet {
 				private WebSocketBuffers _buffers = new WebSocketBuffers(8192);
 
 				public void upgrade(HttpServletRequest request, HttpServletResponse response, WebSocket websocket, String protocol) throws IOException {
-					if(logger.isDebugEnabled())logger.debug("Upgrade ws:" + request.getRequestedSessionId());
+					String sessionId = request.getRequestedSessionId();
+					if(logger.isDebugEnabled())logger.debug("Upgrade ws, requested sessionId:" + sessionId);
+					if(StringUtils.isBlank(sessionId)){
+						sessionId=request.getSession().getId();
+						if(logger.isDebugEnabled())logger.debug("Request.sessionId:"+sessionId);
+						
+					}
+					if(StringUtils.isBlank(sessionId)){
+						sessionId=((DefaultWebsocket) websocket).getConnectionKey();
+						if(logger.isDebugEnabled())logger.debug("Request.wsSessionId:"+sessionId);
+						
+					}
+					
 					if (!("websocket".equalsIgnoreCase(request.getHeader("Upgrade"))))
 						throw new IllegalStateException("!Upgrade:websocket");
 					if (!("HTTP/1.1".equals(request.getProtocol()))) {
@@ -168,11 +181,11 @@ public class SignalkWebSocketServlet extends WebsocketComponentServlet {
 
 					connection.fillBuffersFrom(((HttpParser) http.getParser()).getHeaderBuffer());
 					connection.fillBuffersFrom(((HttpParser) http.getParser()).getBodyBuffer());
-
+					
 					//if(logger.isDebugEnabled())logger.debug("Upgraded session " + request.getSession().getId() + " to ws " + ((DefaultWebsocket) websocket).getConnectionKey());
-					if(logger.isDebugEnabled())logger.debug("Upgraded session " + request.getRequestedSessionId() + " to ws " + ((DefaultWebsocket) websocket).getConnectionKey());
+					if(logger.isDebugEnabled())logger.debug("Upgraded session " + sessionId + " to ws " + ((DefaultWebsocket) websocket).getConnectionKey());
 					try {
-						SubscriptionManagerFactory.getInstance().add(request.getRequestedSessionId(), ((DefaultWebsocket) websocket).getConnectionKey(), Constants.OUTPUT_WS);
+						SubscriptionManagerFactory.getInstance().add(sessionId, ((DefaultWebsocket) websocket).getConnectionKey(), Constants.OUTPUT_WS);
 					} catch (Exception e1) {
 						logger.error(e1.getMessage(),e1);
 						throw new IOException(e1);
