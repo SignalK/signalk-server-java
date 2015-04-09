@@ -123,8 +123,7 @@ public class SignalkRouteFactory {
 				.maximumRedeliveries(0)
 				.to("log:nz.co.fortytwo.signalk.model.websocket.tx?level=ERROR&showException=true&showStackTrace=true")
 				.end()
-			//.filter(PredicateBuilder.or(p1, p2))
-			//.process(new OutputFilterProcessor())
+			.filter(PredicateBuilder.or(p1, p2))
 			.to("skWebsocket://0.0.0.0:"+port+JsonConstants.SIGNALK_WS);
 		
 	}
