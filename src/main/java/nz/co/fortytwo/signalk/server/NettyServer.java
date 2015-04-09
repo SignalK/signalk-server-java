@@ -118,7 +118,7 @@ public class NettyServer implements Processor{
 		signalkTcpFuture.channel().closeFuture();
 		
 		if(udpPort>0){
-			udpHandler = new CamelUdpNettyHandler(config);
+			udpHandler = new CamelUdpNettyHandler(config, outputType);
 			 
 			Bootstrap udpBootstrap = new Bootstrap();
 			udpBootstrap.group(group).channel(NioDatagramChannel.class)
@@ -155,7 +155,7 @@ public class NettyServer implements Processor{
 			if(WebsocketConstants.SEND_TO_ALL.equals(session)){
 				//udp
 				if(udpPort>0 && udpChannel!=null&& udpChannel.isWritable()){
-					for(InetSocketAddress client:udpHandler.getClients()){
+					for(InetSocketAddress client:udpHandler.getSessionList().values()){
 						logger.debug("Sending udp: "+exchange.getIn().getBody());
 						//udpCtx.pipeline().writeAndFlush(msg+"\r\n");
 						udpChannel.writeAndFlush(new DatagramPacket(
@@ -163,11 +163,22 @@ public class NettyServer implements Processor{
 						logger.debug("Sent udp to "+client);
 					}
 				}
+				//tcp
 				for(String key: forwardingHandler.getContextList().keySet()){
 					ChannelHandlerContext ctx = forwardingHandler.getChannel(key);
 					if(ctx!=null&& ctx.channel().isWritable())ctx.pipeline().writeAndFlush(msg+"\r\n");
 				}
 			}else{
+				//udp
+				if(udpPort>0 && udpChannel!=null&& udpChannel.isWritable()){
+					InetSocketAddress client = udpHandler.getSessionList().get(session);
+					logger.debug("Sending udp: "+exchange.getIn().getBody());
+					//udpCtx.pipeline().writeAndFlush(msg+"\r\n");
+					udpChannel.writeAndFlush(new DatagramPacket(
+						Unpooled.copiedBuffer(msg+"\r\n", CharsetUtil.UTF_8),client));
+					logger.debug("Sent udp for session: "+session);
+				}
+				//tcp
 				ChannelHandlerContext ctx = forwardingHandler.getChannel(session);
 				if(ctx!=null && ctx.channel().isWritable())ctx.pipeline().writeAndFlush(msg+"\r\n");
 			}

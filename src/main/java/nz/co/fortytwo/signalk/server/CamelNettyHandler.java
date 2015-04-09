@@ -50,7 +50,7 @@ import com.google.common.collect.HashBiMap;
 @Sharable
 public class CamelNettyHandler extends SimpleChannelInboundHandler<String> {
 
-	private Logger logger = Logger.getLogger(CamelNettyHandler.class.getSimpleName());
+	private Logger logger = Logger.getLogger(CamelNettyHandler.class);
 	private BiMap<String,ChannelHandlerContext> contextList = HashBiMap.create();
 	private String outputType;
 	//@Produce(uri = RouteManager.SEDA_INPUT)
@@ -67,7 +67,6 @@ public class CamelNettyHandler extends SimpleChannelInboundHandler<String> {
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
 		// Send greeting for a new connection.
 		ctx.write("Welcome to signalk at " + InetAddress.getLocalHost().getHostName() + "!\r\n");
-		ctx.write("It is " + new Date() + " now.\r\n");
 		ctx.flush();
 		String session = UUID.randomUUID().toString();
 		SubscriptionManagerFactory.getInstance().add(session, session, outputType);

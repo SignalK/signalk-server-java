@@ -24,6 +24,7 @@
  */
 package nz.co.fortytwo.signalk.server;
 
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -32,34 +33,50 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.util.CharsetUtil;
 import io.netty.util.internal.ConcurrentSet;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.UUID;
 
 import mjson.Json;
+import nz.co.fortytwo.signalk.util.Constants;
 
+import org.apache.camel.ProducerTemplate;
+import org.apache.camel.component.websocket.WebsocketConstants;
+import org.apache.camel.impl.DefaultProducerTemplate;
 import org.apache.log4j.Logger;
+
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 
 
 @Sharable
 public class CamelUdpNettyHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
-	private Logger logger = Logger.getLogger(CamelUdpNettyHandler.class.getSimpleName());
+	private Logger logger = Logger.getLogger(CamelUdpNettyHandler.class);
+	private BiMap<String,InetSocketAddress> sessionList = HashBiMap.create();
 	
-	private Set<InetSocketAddress> clients = new ConcurrentSet<InetSocketAddress>();
+	ProducerTemplate producer;
 
+	private String outputType;
 	
 	
-	public CamelUdpNettyHandler(Properties config) throws Exception {
-		
+	public CamelUdpNettyHandler(Properties config, String outputType) throws Exception {
+		this.outputType=outputType;
+		producer= new DefaultProducerTemplate(CamelContextFactory.getInstance());
+		producer.setDefaultEndpointUri(RouteManager.SEDA_INPUT );
+		producer.start();
 	}
 
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
 		// Send greeting for a new connection.
 		NioDatagramChannel udpChannel = (NioDatagramChannel) ctx.channel();
-		
-		if(logger.isDebugEnabled())logger.debug("channelActive:" + udpChannel.remoteAddress());
+		if(logger.isDebugEnabled())logger.debug("channelActive:" + udpChannel.localAddress());
 		
 	}
 
@@ -67,7 +84,18 @@ public class CamelUdpNettyHandler extends SimpleChannelInboundHandler<DatagramPa
 	protected void channelRead0(ChannelHandlerContext ctx, DatagramPacket packet) throws Exception {
 		String request = packet.content().toString(CharsetUtil.UTF_8);
 		if(logger.isDebugEnabled())logger.debug("Sender "+packet.sender()+" sent request:" + request);
-		clients.add(packet.sender());
+
+		if(!sessionList.inverse().containsKey(packet.sender())){
+			String session = UUID.randomUUID().toString();
+			SubscriptionManagerFactory.getInstance().add(session, session, outputType);
+			sessionList.put(session, packet.sender());
+			if(logger.isDebugEnabled())logger.debug("Added Sender "+packet.sender()+", session:" + session);
+			ctx.channel().writeAndFlush(new DatagramPacket(
+					Unpooled.copiedBuffer("Welcome to signalk UDP at " + InetAddress.getLocalHost().getHostName() + "!\r\n", CharsetUtil.UTF_8),packet.sender()));
+		}
+		
+		Map<String, Object> headers = getHeaders(sessionList.inverse().get(packet.sender()));
+		producer.sendBodyAndHeaders(request, headers);
 	}
 
 	@Override
@@ -87,9 +115,15 @@ public class CamelUdpNettyHandler extends SimpleChannelInboundHandler<DatagramPa
 		return super.acceptInboundMessage(msg);
 	}
 
-	protected Set<InetSocketAddress> getClients() {
-		return clients;
+	private Map<String, Object> getHeaders(String wsSession) {
+		Map<String, Object> headers = new HashMap<>();
+		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
+		headers.put(RouteManager.REMOTE_ADDRESS, sessionList.get(wsSession).getHostString());
+		headers.put(Constants.OUTPUT_TYPE, outputType);
+		return headers;
 	}
 
-	
+	protected BiMap<String, InetSocketAddress> getSessionList() {
+		return sessionList;
+	}
 }

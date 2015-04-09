@@ -17,7 +17,7 @@
     ],
     "128275": [
         {
-            "source": "Trip_Log",
+            "source": "Trip Log",
             "node": "navigation.logTrip.value"
         },
         {
@@ -33,12 +33,12 @@
         {
             "source": "COG",
             "node": "navigation.courseOverGroundTrue.value",
-            "filter": "$.fields[?(@.COG_Reference == 'True')]"
+            "filter": "$.fields[?(@.COG Reference == 'True')]"
         },
         {
             "source": "COG",
-            "node": "navigation.courseOverGroundMagnetic",
-            "filter": "$.fields[?(@.COG_Reference == 'Magnetic')]"
+            "node": "navigation.courseOverGroundMagnetic.value",
+            "filter": "$.fields[?(@.COG Reference == 'Magnetic')]"
         }
     ],
     "129025": [
@@ -93,12 +93,12 @@
         {
             "source": "Wind Speed",
             "node": "environment.wind.speedTrue.value",
-            "filter":"$.fields[?(@.Reference=='True_(boat_referenced)')]"
+            "filter":"$.fields[?(@.Reference=='True (boat referenced)')]"
         },
         {
             "source": "Wind Speed",
             "node": "environment.wind.speedOverGround.value",
-            "filter": "$.fields[?(@.Reference=='True_(ground_referenced_to_North)')]"
+            "filter": "$.fields[?(@.Reference=='True (ground referenced to North)')]"
         },
         {
             "source": "Wind Angle",
@@ -108,12 +108,12 @@
         {
             "source": "Wind Angle",
             "node": "environment.wind.angleTrue.value",
-            "filter": "$.fields[?(@.Reference=='True_(boat_referenced)')]"
+            "filter": "$.fields[?(@.Reference=='True (boat referenced)')]"
         },
         {
             "source": "Wind Angle",
             "node": "environment.wind.directionTrue.value",
-            "filter": "$.fields[?(@.Reference=='True_(ground_referenced_to_North)')]"
+            "filter": "$.fields[?(@.Reference=='True (ground referenced to North)')]"
         }
     ],
     "127251": [
@@ -238,7 +238,7 @@
         {
             "source": "COG",
             "node": "navigation.courseOverGroundTrue.value",
-            "filter": "$.fields[?(@.COG_Reference=='True')]"
+            "filter": "$.fields[?(@.COG Reference=='True')]"
             
         },
         {
@@ -248,7 +248,7 @@
         {
             "source": "Set",
             "node": "navigation.current.setTrue",
-            "filter": "$.fields[?(@.COG_Reference=='True' && @.Set)]"
+            "filter": "$.fields[?(@.COG Reference=='True' && @.Set)]"
         },
         {
             "source": "Drift",
@@ -260,7 +260,7 @@
         {
             "source": "Set",
             "node": "navigation.current.setTrue",
-            "filter": "$.fields[?(@.Set_Reference=='True')]"
+            "filter": "$.fields[?(@.Set Reference=='True')]"
         },
         {
             "source": "Drift",
