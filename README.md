@@ -63,7 +63,7 @@ Use the startpc.bat file to launch.
 
 You should now have a SignalK server running:
 
-* hawt.io management console on http://localhost:8000/hawtio
+* hawt.io management console on `http://localhost:8000/hawtio`
 * webserver on `http://localhost:9290` 
 	* REST api on http://localhost:9290/signalk/api
 	* Authentication on http://localhost:9290/signalk/auth - but its a pass all for now so you dont need to login
