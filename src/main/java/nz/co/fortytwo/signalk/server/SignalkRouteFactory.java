@@ -127,7 +127,7 @@ public class SignalkRouteFactory {
 				.to("log:nz.co.fortytwo.signalk.model.websocket.tx?level=ERROR&showException=true&showStackTrace=true")
 				.end()
 			.filter(PredicateBuilder.or(p1, p2))
-			.to("skWebsocket://0.0.0.0:"+port+JsonConstants.SIGNALK_WS);
+			.to("skWebsocket://0.0.0.0:"+port+JsonConstants.SIGNALK_WS).id(getName("Websocket Client"));
 		
 	}
 	/**
@@ -149,7 +149,7 @@ public class SignalkRouteFactory {
 			.end()
 		.process(new WsSessionProcessor()).id(getName(WsSessionProcessor.class.getSimpleName()))
 		//.to("log:nz.co.fortytwo.signalk.model.websocket.rx?level=INFO&showException=true&showStackTrace=true")
-		.to(input);
+		.to(input).id(getName("SEDA_INPUT"));
 		
 	}
 	public static void configureTcpServerRoute(RouteBuilder routeBuilder ,String input, NettyServer nettyServer, String outputType) throws Exception{
@@ -206,16 +206,16 @@ public class SignalkRouteFactory {
 					RouteManager.DIRECT_MQTT, 
 					RouteManager.DIRECT_STOMP,
 					"log:nz.co.fortytwo.signalk.model.output?level=DEBUG"
-					)
+					).id(getName("Multicast Outputs"))
 		.end();
 		routeBuilder.from(RouteManager.DIRECT_MQTT).id(getName("MQTT out"))
 			.filter(routeBuilder.header(Constants.OUTPUT_TYPE).isEqualTo(Constants.OUTPUT_MQTT))
 			.process(new MqttProcessor()).id(getName(MqttProcessor.class.getSimpleName()))
-			.to(RouteManager.MQTT+"?publishTopicName=signalk.dlq");
+			.to(RouteManager.MQTT+"?publishTopicName=signalk.dlq").id(getName("MQTT Broker"));
 		routeBuilder.from(RouteManager.DIRECT_STOMP).id(getName("STOMP out"))
 			.filter(routeBuilder.header(Constants.OUTPUT_TYPE).isEqualTo(Constants.OUTPUT_STOMP))
 			.process(new StompProcessor()).id(getName(StompProcessor.class.getSimpleName()))
-			.to(RouteManager.STOMP);
+			.to(RouteManager.STOMP).id(getName("STOMP Broker"));
 	}
 	
 	public static void configureSubscribeTimer(RouteBuilder routeBuilder ,Subscription sub) throws Exception{
@@ -228,7 +228,7 @@ public class SignalkRouteFactory {
 				.to("log:nz.co.fortytwo.signalk.model.output.subscribe?level=ERROR")
 				.end()
 			.setHeader(WebsocketConstants.CONNECTION_KEY, routeBuilder.constant(wsSession))
-			.to(RouteManager.SEDA_COMMON_OUT)
+			.to(RouteManager.SEDA_COMMON_OUT).id(getName("SEDA_COMMON_OUT"))
 			.end();
 		route.setId(getRouteId(sub));
 		sub.setRouteId(getRouteId(sub));
@@ -275,14 +275,15 @@ public class SignalkRouteFactory {
 		
 	}
 
-	private static String getName(String name) {
+	public static String getName(String name) {
 		int c = 0;
-		while(nameSet.contains(name)){
-			name=name+"-"+c;
+		String tmpName = name;
+		while(nameSet.contains(tmpName)){
+			tmpName=name+"-"+c;
 			c++;
 		}
-		nameSet.add(name);
-		return name;
+		nameSet.add(tmpName);
+		return tmpName;
 	}
 		
 	

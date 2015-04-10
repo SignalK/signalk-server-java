@@ -206,19 +206,19 @@ public class RouteManager extends RouteBuilder {
 		//STOMP
 		from("skStomp:queue:signalk.put").id("STOMP In")
 			.setHeader(Constants.OUTPUT_TYPE, constant(Constants.OUTPUT_STOMP))
-			.to(SEDA_INPUT);
+			.to(SEDA_INPUT).id(SignalkRouteFactory.getName("SEDA_INPUT"));
 		//MQTT
 		from(MQTT+"&subscribeTopicName=signalk.put").id("MQTT In")
 			.transform(body().convertToString())
 			.setHeader(Constants.OUTPUT_TYPE, constant(Constants.OUTPUT_MQTT))
-			.to(SEDA_INPUT);
+			.to(SEDA_INPUT).id(SignalkRouteFactory.getName("SEDA_INPUT"));
 		
 		//WebsocketEndpoint wsEndpoint = (WebsocketEndpoint) getContext().getEndpoint("websocket://0.0.0.0:"+wsPort+JsonConstants.SIGNALK_WS);
 		if (Boolean.valueOf(config.getProperty(Constants.DEMO))) {
 			from("stream:file?fileName=" + streamUrl).id("demo feed")
 				.onException(Exception.class).handled(true).maximumRedeliveries(0)
 				.end()
-			.throttle(50).timePeriodMillis(1000).asyncDelayed().to(SEDA_INPUT).end();
+			.throttle(50).timePeriodMillis(1000).asyncDelayed().to(SEDA_INPUT).id(SignalkRouteFactory.getName("SEDA_INPUT")).end();
 			
 		}
 	}

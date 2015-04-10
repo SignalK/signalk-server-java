@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Properties;
 
+import nz.co.fortytwo.signalk.util.Constants;
 import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.activemq.broker.BrokerService;
@@ -62,44 +63,10 @@ public class SignalKServer {
 		// enable hangup support which mean we detect when the JVM terminates, and stop Camel graceful
 		main.enableHangupSupport();
 
-		//hawtio, auth disabled
-		System.setProperty("hawtio.authenticationEnabled", "false");
-		Server server = new Server(8000);
-		HandlerCollection handlers = new HandlerCollection();
-		handlers.setServer(server);
-		server.setHandler(handlers);
-		WebAppContext webapp = new WebAppContext();
-		webapp.setServer(server);
-		webapp.setContextPath("/hawtio");
-		//String war = findWar("./war");
-		//if (war == null) {
-		//	war = options.getWar();
-		//}
-		//if (war == null) {
-		//	throw new IllegalArgumentException("No war or warLocation options set!");
-		//}
-		webapp.setWar("./hawtio/hawtio-default-offline-1.4.48.war");
-		webapp.setParentLoaderPriority(true);
-		webapp.setLogUrlOnStart(true);
-		//webapp.setExtraClasspath("./hawtio/hawtio-default-offline-1.4.48.war");
-		// lets set a temporary directory so jetty doesn't bork if some process zaps /tmp/*
-		String homeDir = System.getProperty("user.home", ".") + System.getProperty("hawtio.dirname", "/.hawtio");
-		String tempDirPath = homeDir + "/tmp";
-		File tempDir = new File(tempDirPath);
-		tempDir.mkdirs();
-		logger.info("using temp directory for jetty: " + tempDir.getPath());
-		webapp.setTempDirectory(tempDir);
-		// check for 3rd party plugins before we add hawtio, so they are initialized before hawtio
-		//findThirdPartyPlugins(handlers, tempDir);
-		// add hawtio
-		handlers.addHandler(webapp);
-		// create server and add the handlers
-
-		//System.out.println("Embedded hawtio: You can use --help to show usage");
-		//System.out.println(options.usedOptionsSummary());
-
-		server.start();
-
+		if(Boolean.valueOf(config.getProperty(Constants.HAWTIO_START))){
+			server=startHawtio();
+		}
+		
 		/*
 		 * Connector connector = new SelectChannelConnector();
 		 * logger.info("  Webserver http port:"+config.getProperty(Constants.REST_PORT));
@@ -142,55 +109,33 @@ public class SignalKServer {
 		System.exit(0);
 	}
 
-	protected void findThirdPartyPlugins( HandlerCollection handlers, File tempDir) {
-		File dir = new File("hawtio/plugins");
-		if (dir.exists() && dir.isDirectory()) {
-			logger.info("Scanning for 3rd party plugins in directory: " + dir.getName());
-			// find any .war files
-			File[] wars = dir.listFiles(new FilenameFilter() {
-				
-				@Override
-				public boolean accept(File dir, String name) {
-					return isWarFileName(name);
-				}
-			});
-			if (wars != null) {
-				for (File war : wars) {
-					// custom plugins must not use same context-path as hawtio
-					String contextPath = "/" + war.getName();
-					if (contextPath.endsWith(".war")) {
-						contextPath = contextPath.substring(0, contextPath.length() - 4);
-					}
-					if (contextPath.equals("/hawtio")) {
-						throw new IllegalArgumentException("3rd party plugin " + war.getName()
-								+ " cannot have same name as hawtio context path. Rename the plugin file to avoid the clash.");
-					}
-					WebAppContext plugin = new WebAppContext();
-					plugin.setServer(handlers.getServer());
-					plugin.setContextPath(contextPath);
-					plugin.setWar("file://" + war.getAbsolutePath());
-					// plugin.setParentLoaderPriority(true);
-					plugin.setLogUrlOnStart(true);
-					// need to have private sub directory for each plugin
-					File pluginTempDir = new File(tempDir, war.getName());
-					pluginTempDir.mkdirs();
-					plugin.setTempDirectory(pluginTempDir);
-					plugin.setThrowUnavailableOnStartupException(true);
-					try {
-						plugin.start();
-						handlers.addHandler(plugin);
-						logger.info("Added 3rd party plugin with context-path: " + contextPath);
-						System.out.println("Added 3rd party plugin with context-path: " + contextPath);
-					} catch (Exception e) {
-						logger.warn("Failed to add and start 3rd party plugin with context-path: " + contextPath + " due " + e.getMessage(), e);
-					}
-				}
-			}
-		}
-	}
+	private Server startHawtio() throws Exception {
+		//hawtio, auth disabled
+		System.setProperty(Constants.HAWTIO_AUTHENTICATE, config.getProperty(Constants.HAWTIO_AUTHENTICATE));
+		int hawtPort = Integer.valueOf(config.getProperty(Constants.HAWTIO_PORT));
+		Server server = new Server(hawtPort);
+		HandlerCollection handlers = new HandlerCollection();
+		handlers.setServer(server);
+		server.setHandler(handlers);
+		WebAppContext webapp = new WebAppContext();
+		webapp.setServer(server);
+		webapp.setContextPath(config.getProperty(Constants.HAWTIO_CONTEXT));
+		
+		webapp.setWar(config.getProperty(Constants.HAWTIO_WAR));
+		webapp.setParentLoaderPriority(true);
+		webapp.setLogUrlOnStart(true);
+		// lets set a temporary directory so jetty doesn't bork if some process zaps /tmp/*
+		String homeDir = System.getProperty("user.home", ".") + System.getProperty("hawtio.dirname", "/.hawtio");
+		String tempDirPath = homeDir + "/tmp";
+		File tempDir = new File(tempDirPath);
+		tempDir.mkdirs();
+		logger.info("using temp directory for hawtio jetty: " + tempDir.getPath());
+		webapp.setTempDirectory(tempDir);
+		// add hawtio
+		handlers.addHandler(webapp);
 
-	protected boolean isWarFileName(String name) {
-		return name.toLowerCase().endsWith(".war");
+		server.start();
+		return server;
 	}
 
 	private void ensureInstall() {
