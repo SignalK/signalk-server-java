@@ -23,7 +23,9 @@
  */
 package nz.co.fortytwo.signalk.server;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import nz.co.fortytwo.signalk.processor.AISProcessor;
 import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
@@ -68,6 +70,7 @@ import org.apache.log4j.Logger;
 public class SignalkRouteFactory {
 
 	private static Logger logger = Logger.getLogger(SignalkRouteFactory.class);
+	private static Set<String> nameSet = new HashSet<String>();
 	/**
 	 * Configures a route for all input traffic, which will parse the traffic and update the signalk model
 	 * @param routeBuilder
@@ -79,32 +82,32 @@ public class SignalkRouteFactory {
 	 * @throws Exception 
 	 */
 	public static void configureInputRoute(RouteBuilder routeBuilder,String input) {
-		routeBuilder.from(input).id("INPUT")
+		routeBuilder.from(input).id(getName("INPUT"))
 			.onException(Exception.class).handled(true).maximumRedeliveries(0)
 			.to("log:nz.co.fortytwo.signalk.model.receive?level=ERROR&showException=true&showStackTrace=true")
 			.end()
 		// dump misc rubbish
-		.process(new InputFilterProcessor())
+		.process(new InputFilterProcessor()).id(getName(InputFilterProcessor.class.getSimpleName()))
 		//convert NMEA to signalk
-		.process(new NMEAProcessor())
+		.process(new NMEAProcessor()).id(getName(NMEAProcessor.class.getSimpleName()))
 		//convert AIS to signalk
-		.process(new AISProcessor())
+		.process(new AISProcessor()).id(getName(AISProcessor.class.getSimpleName()))
 		//convert n2k
-		.process(new N2KProcessor())
+		.process(new N2KProcessor()).id(getName(N2KProcessor.class.getSimpleName()))
 		//handle list
-		.process(new JsonListProcessor())
+		.process(new JsonListProcessor()).id(getName(JsonListProcessor.class.getSimpleName()))
 		//handle get
-		.process(new JsonGetProcessor())
+		.process(new JsonGetProcessor()).id(getName(JsonGetProcessor.class.getSimpleName()))
 		//handle subscribe messages
-		.process(new JsonSubscribeProcessor())
+		.process(new JsonSubscribeProcessor()).id(getName(JsonSubscribeProcessor.class.getSimpleName()))
 		//deal with delta format
-		.process(new DeltaImportProcessor())
+		.process(new DeltaImportProcessor()).id(getName(DeltaImportProcessor.class.getSimpleName()))
 		//deal with full format
-		.process(new FullImportProcessor())
+		.process(new FullImportProcessor()).id(getName(FullImportProcessor.class.getSimpleName()))
 		//make sure we have timestamp/source
-		.process(new ValidationProcessor())
+		.process(new ValidationProcessor()).id(getName(ValidationProcessor.class.getSimpleName()))
 		//and update signalk model
-		.process(new SignalkModelProcessor());
+		.process(new SignalkModelProcessor()).id(getName(SignalkModelProcessor.class.getSimpleName()));
 		
 	}
 	
@@ -117,7 +120,7 @@ public class SignalkRouteFactory {
 		Predicate p1 = routeBuilder.header(Constants.OUTPUT_TYPE).isEqualTo(Constants.OUTPUT_WS);
 		Predicate p2 = routeBuilder.header(WebsocketConstants.CONNECTION_KEY).isEqualTo(WebsocketConstants.SEND_TO_ALL);
 		//from SEDA_WEBSOCKETS
-			routeBuilder.from(input).id("Websocket Tx")
+			routeBuilder.from(input).id(getName("Websocket Tx"))
 				.onException(Exception.class)
 				.handled(true)
 				.maximumRedeliveries(0)
@@ -139,12 +142,12 @@ public class SignalkRouteFactory {
 		
 		wsEndpoint.setSessionSupport(true);
 		
-		routeBuilder.from(wsEndpoint).id("Websocket Rx")
+		routeBuilder.from(wsEndpoint).id(getName("Websocket Rx"))
 			.onException(Exception.class)
 			.handled(true).maximumRedeliveries(0)
 			.to("log:nz.co.fortytwo.signalk.model.websocket.rx?level=ERROR&showException=true&showStackTrace=true")
 			.end()
-		.process(new WsSessionProcessor())
+		.process(new WsSessionProcessor()).id(getName(WsSessionProcessor.class.getSimpleName()))
 		//.to("log:nz.co.fortytwo.signalk.model.websocket.rx?level=INFO&showException=true&showStackTrace=true")
 		.to(input);
 		
@@ -153,45 +156,50 @@ public class SignalkRouteFactory {
 		// push out via TCPServer.
 		Predicate p1 = routeBuilder.header(Constants.OUTPUT_TYPE).isEqualTo(outputType);
 		Predicate p2 = routeBuilder.header(WebsocketConstants.CONNECTION_KEY).isEqualTo(WebsocketConstants.SEND_TO_ALL);
-		routeBuilder.from(input).id("Netty "+outputType+" Server")
+		routeBuilder.from(input).id(getName("Netty "+outputType+" Server"))
 			.onException(Exception.class)
 			.handled(true)
 			.maximumRedeliveries(0)
 			.end()
 		.filter(PredicateBuilder.or(p1, p2))
-		.process((Processor) nettyServer).end();
+		.process((Processor) nettyServer).id(getName(NettyServer.class.getSimpleName())).end();
 			
 	}
 	
 	public static void configureRestRoute(RouteBuilder routeBuilder ,String input){
-		routeBuilder.from(input).id("REST Api")
+		routeBuilder.from(input).id(getName("REST Api"))
 			.setExchangePattern(ExchangePattern.InOut)
-			.process(new RestApiProcessor())
-			.process(new OutputFilterProcessor());
+			.process(new RestApiProcessor()).id(getName(RestApiProcessor.class.getSimpleName()))
+			.process(new OutputFilterProcessor()).id(getName(OutputFilterProcessor.class.getSimpleName()));
 		}
 	
 	public static void configureAuthRoute(RouteBuilder routeBuilder ,String input){
-		routeBuilder.from(input).id("REST Authenticate")
+		routeBuilder.from(input).id(getName("REST Authenticate"))
 			.setExchangePattern(ExchangePattern.InOut)
-			.process(new RestAuthProcessor());
+			.process(new RestAuthProcessor()).id(getName(RestAuthProcessor.class.getSimpleName()));
 		}
 	
 	public static void configureDeclinationTimer(RouteBuilder routeBuilder ,String input){
-		routeBuilder.from(input).id("Declination").process(new DeclinationProcessor()).to("log:nz.co.fortytwo.signalk.model.update?level=DEBUG").end();
+		routeBuilder.from(input).id(getName("Declination"))
+			.process(new DeclinationProcessor()).id(getName(DeclinationProcessor.class.getSimpleName()))
+			.to("log:nz.co.fortytwo.signalk.model.update?level=DEBUG").end();
 	}
 	
 	public static void configureWindTimer(RouteBuilder routeBuilder ,String input){
-		routeBuilder.from("timer://wind?fixedRate=true&period=1000").id("True Wind").process(new WindProcessor()).to("log:nz.co.fortytwo.signalk.model.update?level=DEBUG").end();
+		routeBuilder.from("timer://wind?fixedRate=true&period=1000").id(getName("True Wind"))
+			.process(new WindProcessor()).id(getName(WindProcessor.class.getSimpleName()))
+			.to("log:nz.co.fortytwo.signalk.model.update?level=DEBUG")
+			.end();
 	}
 	
 	public static void configureCommonOut(RouteBuilder routeBuilder ){
-		routeBuilder.from(RouteManager.SEDA_COMMON_OUT).id("COMMON_OUT")
+		routeBuilder.from(RouteManager.SEDA_COMMON_OUT).id(getName("COMMON_OUT"))
 			.onException(Exception.class).handled(true).maximumRedeliveries(0)
 			.to("log:nz.co.fortytwo.signalk.model.output?level=ERROR")
 			.end()
-		.process(new MapToJsonProcessor())
-		.process(new FullToDeltaProcessor())
-		.process(new OutputFilterProcessor())
+		.process(new MapToJsonProcessor()).id(getName(MapToJsonProcessor.class.getSimpleName()))
+		.process(new FullToDeltaProcessor()).id(getName(FullToDeltaProcessor.class.getSimpleName()))
+		.process(new OutputFilterProcessor()).id(getName(OutputFilterProcessor.class.getSimpleName()))
 		.multicast().parallelProcessing()
 			.to(RouteManager.DIRECT_TCP,
 					RouteManager.SEDA_WEBSOCKETS, 
@@ -200,13 +208,13 @@ public class SignalkRouteFactory {
 					"log:nz.co.fortytwo.signalk.model.output?level=DEBUG"
 					)
 		.end();
-		routeBuilder.from(RouteManager.DIRECT_MQTT).id("MQTT out")
+		routeBuilder.from(RouteManager.DIRECT_MQTT).id(getName("MQTT out"))
 			.filter(routeBuilder.header(Constants.OUTPUT_TYPE).isEqualTo(Constants.OUTPUT_MQTT))
-			.process(new MqttProcessor())
+			.process(new MqttProcessor()).id(getName(MqttProcessor.class.getSimpleName()))
 			.to(RouteManager.MQTT+"?publishTopicName=signalk.dlq");
-		routeBuilder.from(RouteManager.DIRECT_STOMP).id("STOMP out")
+		routeBuilder.from(RouteManager.DIRECT_STOMP).id(getName("STOMP out"))
 			.filter(routeBuilder.header(Constants.OUTPUT_TYPE).isEqualTo(Constants.OUTPUT_STOMP))
-			.process(new StompProcessor())
+			.process(new StompProcessor()).id(getName(StompProcessor.class.getSimpleName()))
 			.to(RouteManager.STOMP);
 	}
 	
@@ -215,7 +223,7 @@ public class SignalkRouteFactory {
 		if(logger.isDebugEnabled())logger.debug("Configuring route "+input);
 		String wsSession = sub.getWsSession();
 		RouteDefinition route = routeBuilder.from(input);
-			route.process(new FullExportProcessor(wsSession))
+			route.process(new FullExportProcessor(wsSession)).id(getName(FullExportProcessor.class.getSimpleName()))
 				.onException(Exception.class).handled(true).maximumRedeliveries(0)
 				.to("log:nz.co.fortytwo.signalk.model.output.subscribe?level=ERROR")
 				.end()
@@ -234,9 +242,9 @@ public class SignalkRouteFactory {
 	}
 
 	public static void configureSubscribeRoute(RouteBuilder routeBuilder, String input) {
-		routeBuilder.from(input).id("REST Subscribe")
+		routeBuilder.from(input).id(getName("REST Subscribe"))
 		.setExchangePattern(ExchangePattern.InOut)
-		.process(new RestSubscribeProcessor());
+		.process(new RestSubscribeProcessor()).id(getName(RestSubscribeProcessor.class.getSimpleName()));
 	}
 
 	public static void removeSubscribeTimers(RouteManager routeManager, List<Subscription> subs) throws Exception {
@@ -259,12 +267,22 @@ public class SignalkRouteFactory {
 
 	public static void configureHeartbeatRoute(RouteBuilder routeBuilder, String input) {
 		
-		routeBuilder.from(input).id("Heartbeat")
+		routeBuilder.from(input).id(getName("Heartbeat"))
 			.onException(Exception.class).handled(true).maximumRedeliveries(0)
 			.to("log:nz.co.fortytwo.signalk.model.output.all?level=ERROR")
 			.end()
-		.process(new HeartbeatProcessor());
+		.process(new HeartbeatProcessor()).id(getName(HeartbeatProcessor.class.getSimpleName()));
 		
+	}
+
+	private static String getName(String name) {
+		int c = 0;
+		while(nameSet.contains(name)){
+			name=name+"-"+c;
+			c++;
+		}
+		nameSet.add(name);
+		return name;
 	}
 		
 	
