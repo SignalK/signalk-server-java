@@ -199,6 +199,7 @@ public class SignalkRouteFactory {
 			.end()
 		.process(new MapToJsonProcessor()).id(getName(MapToJsonProcessor.class.getSimpleName()))
 		.process(new FullToDeltaProcessor()).id(getName(FullToDeltaProcessor.class.getSimpleName()))
+		.split().body()
 		.process(new OutputFilterProcessor()).id(getName(OutputFilterProcessor.class.getSimpleName()))
 		.multicast().parallelProcessing()
 			.to(RouteManager.DIRECT_TCP,

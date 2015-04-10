@@ -24,6 +24,9 @@ package nz.co.fortytwo.signalk.processor;
 
 import static nz.co.fortytwo.signalk.util.JsonConstants.FORMAT_DELTA;
 import static nz.co.fortytwo.signalk.util.JsonConstants.SIGNALK_FORMAT;
+
+import java.util.List;
+
 import mjson.Json;
 import nz.co.fortytwo.signalk.handler.FullToDeltaConverter;
 
@@ -50,7 +53,7 @@ public class FullToDeltaProcessor extends SignalkProcessor implements Processor 
 			if(logger.isDebugEnabled())logger.debug("Processing :" + exchange.getIn());
 			if(!(exchange.getIn().getBody() instanceof Json))return;
 			if (FORMAT_DELTA.equals(exchange.getIn().getHeader(SIGNALK_FORMAT))) {
-				Json json = fullToDelta.handle(exchange.getIn().getBody(Json.class));
+				List<Json> json = fullToDelta.handle(exchange.getIn().getBody(Json.class));
 				if(logger.isDebugEnabled())logger.debug("Converted to delta :" + json);
 				exchange.getIn().setBody(json);
 			}

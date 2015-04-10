@@ -56,10 +56,10 @@ import com.ning.http.client.websocket.WebSocket;
 import com.ning.http.client.websocket.WebSocketTextListener;
 import com.ning.http.client.websocket.WebSocketUpgradeHandler;
 
-public class WebsocketTest3 extends CamelTestSupport {
+public class WebsocketTest3 extends SignalKCamelTestSupport {
  
     private static Logger logger = Logger.getLogger(WebsocketTest3.class);
-	private SignalKModel signalkModel=SignalKModelFactory.getInstance();
+	
 	String jsonDiff = "{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"courseOverGroundTrue\"},{\"value\":3.85,\"path\":\"speedOverGround\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081+00:00\",\"device\":\"/dev/actisense\",\"pgn\":\"128267\",\"src\":\"115\"}}],\"context\":\"vessels."+SELF+".navigation\"}";
 	String jsonPosDiff = "{\"updates\":[{\"values\":[{\"path\": \"log\",\"value\": 17404540},{\"value\":172.9,\"path\":\"courseOverGroundTrue\"},{\"value\":3.85,\"path\":\"speedOverGround\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081+00:00\",\"device\":\"/dev/actisense\",\"pgn\":\"128267\",\"src\":\"115\"}}],\"context\":\"vessels."+SELF+".navigation\"}";
 	
@@ -102,7 +102,11 @@ public class WebsocketTest3 extends CamelTestSupport {
                         public void onMessage(String message) {
                             received.add(message);
                             log.info("received --> " + message);
+                            if(latch.getCount()==0){
+                            	latch4.countDown();
+                            }
                             latch.countDown();
+                            
                         }
 
                         @Override
@@ -132,8 +136,10 @@ public class WebsocketTest3 extends CamelTestSupport {
         //now send position
         template.sendBody(RouteManager.SEDA_INPUT,jsonPosDiff);
         latch4.await(10, TimeUnit.SECONDS);
-        assertEquals(1, received.size());
-        Json json = Json.read("{\"context\":\"vessels."+SELF+"\",\"updates\":[{\"values\":[{\"path\":\"navigation.log\",\"value\":17404540}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}]}");
+        assertEquals(2, received.size());
+        logger.debug("Msg1:" +received.get(0));
+        logger.debug("Msg2:" +received.get(1));
+        Json json = Json.read("{\"context\":\"vessels.motu\",\"updates\":[{\"values\":[{\"path\":\"navigation.log\",\"value\":1740454}]},{\"values\":[{\"path\":\"navigation.log\",\"value\":1740454}]}]}");
         assertEquals(json, Json.read(received.get(0)));
         
         websocket.close();
@@ -141,20 +147,17 @@ public class WebsocketTest3 extends CamelTestSupport {
     }
 	
 	
-	 @Override
-	 protected RouteBuilder createRouteBuilder() {
-	        try {
-				RouteManager routeBuilder = RouteManagerFactory.getInstance(Util.getConfig(null));
-            	CamelContextFactory.getInstance().addComponent("skWebsocket", new SignalkWebsocketComponent());
-				return routeBuilder;
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-	        return null;
-	    }
+	@Override
+	public void configureRouteBuilder(RouteBuilder routeBuilder) {
+		// TODO Auto-generated method stub
+		try {
+			((RouteManager)routeBuilder).configure0();
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			logger.error(e);
+			fail();
+		}
+	}
 
 }

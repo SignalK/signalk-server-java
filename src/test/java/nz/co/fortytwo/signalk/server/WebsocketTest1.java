@@ -56,10 +56,10 @@ import com.ning.http.client.websocket.WebSocket;
 import com.ning.http.client.websocket.WebSocketTextListener;
 import com.ning.http.client.websocket.WebSocketUpgradeHandler;
 
-public class WebsocketTest1 extends CamelTestSupport {
+public class WebsocketTest1 extends SignalKCamelTestSupport {
  
     private static Logger logger = Logger.getLogger(WebsocketTest1.class);
-	private SignalKModel signalkModel=SignalKModelFactory.getInstance();
+	
 	String jsonDiff = "{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"courseOverGroundTrue\"},{\"value\":3.85,\"path\":\"speedOverGround\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081+00:00\",\"device\":\"/dev/actisense\",\"pgn\":\"128267\",\"src\":\"115\"}}],\"context\":\"vessels."+SELF+".navigation\"}";
 	String jsonPosDiff = "{\"updates\":[{\"values\":[{\"path\": \"log\",\"value\": 17404540},{\"value\":172.9,\"path\":\"courseOverGroundTrue\"},{\"value\":3.85,\"path\":\"speedOverGround\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081+00:00\",\"device\":\"/dev/actisense\",\"pgn\":\"128267\",\"src\":\"115\"}}],\"context\":\"vessels."+SELF+".navigation\"}";
 	
@@ -79,7 +79,7 @@ public class WebsocketTest1 extends CamelTestSupport {
 	@Test
     public void shouldReceiveMsgs() throws Exception {
 		final List<String> received = new ArrayList<String>();
-	    final CountDownLatch latch = new CountDownLatch(1);
+	    final CountDownLatch latch = new CountDownLatch(2);
 	    final CountDownLatch latch1 = new CountDownLatch(1);
 	    final CountDownLatch latch2 = new CountDownLatch(1);
 	    final CountDownLatch latch3 = new CountDownLatch(1);
@@ -127,32 +127,29 @@ public class WebsocketTest1 extends CamelTestSupport {
         //websocket.sendTextMessage(jsonDiff);
         assertTrue(latch.await(5, TimeUnit.SECONDS));
 
-        assertEquals(1, received.size());
-       Json json = Json.read("{\"context\":\"vessels\",\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\""+SELF+".navigation.courseOverGroundTrue\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}},{\"values\":[{\"value\":3.85,\"path\":\""+SELF+".navigation.speedOverGround\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}]}");
+        assertEquals(2, received.size());
+       Json json = Json.read("{\"context\":\"vessels.motu\",\"updates\":[{\"values\":[{\"path\":\"navigation.courseOverGroundTrue\",\"value\":172.9},{\"path\":\"navigation.speedOverGround\",\"value\":3.85}]},{\"values\":[{\"path\":\"navigation.courseOverGroundTrue\",\"value\":172.9},{\"path\":\"navigation.speedOverGround\",\"value\":3.85}]}]}");
        
-       
+       logger.debug("Msg1:" +received.get(0));
         assertEquals(json, Json.read(received.get(0)));
+        logger.debug("Msg2:" +received.get(1));
+        assertEquals(json, Json.read(received.get(1)));
         
         websocket.close();
         c.close();
     }
 	
-
-	
-	 @Override
-	 protected RouteBuilder createRouteBuilder() {
-	        try {
-				RouteManager routeBuilder = RouteManagerFactory.getInstance(Util.getConfig(null));
-            	CamelContextFactory.getInstance().addComponent("skWebsocket", new SignalkWebsocketComponent());
-				return routeBuilder;
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-	        return null;
-	    }
+	@Override
+	public void configureRouteBuilder(RouteBuilder routeBuilder) {
+		// TODO Auto-generated method stub
+		try {
+			((RouteManager)routeBuilder).configure0();
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			logger.error(e);
+			fail();
+		}
+	}
 
 }

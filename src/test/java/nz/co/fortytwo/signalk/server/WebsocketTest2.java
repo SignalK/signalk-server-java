@@ -56,10 +56,10 @@ import com.ning.http.client.websocket.WebSocket;
 import com.ning.http.client.websocket.WebSocketTextListener;
 import com.ning.http.client.websocket.WebSocketUpgradeHandler;
 
-public class WebsocketTest2 extends CamelTestSupport {
+public class WebsocketTest2 extends SignalKCamelTestSupport {
  
     private static Logger logger = Logger.getLogger(WebsocketTest2.class);
-	private SignalKModel signalkModel=SignalKModelFactory.getInstance();
+	
 	String jsonDiff = "{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"courseOverGroundTrue\"},{\"value\":3.85,\"path\":\"speedOverGround\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081+00:00\",\"device\":\"/dev/actisense\",\"pgn\":\"128267\",\"src\":\"115\"}}],\"context\":\"vessels."+SELF+".navigation\"}";
 	String jsonPosDiff = "{\"updates\":[{\"values\":[{\"path\": \"log\",\"value\": 17404540},{\"value\":172.9,\"path\":\"courseOverGroundTrue\"},{\"value\":3.85,\"path\":\"speedOverGround\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081+00:00\",\"device\":\"/dev/actisense\",\"pgn\":\"128267\",\"src\":\"115\"}}],\"context\":\"vessels."+SELF+".navigation\"}";
 	
@@ -128,7 +128,7 @@ public class WebsocketTest2 extends CamelTestSupport {
         //{"context":"vessels","updates":[{"values":[{"path":"motu.navigation.courseOverGroundTrue","value":172.9}],"source":{"timestamp":"2014-08-15T16:00:00.081Z","source":"/dev/actisense-N2K-115-128267"}},{"values":[{"path":"motu.navigation.speedOverGround","value":3.85}],"source":{"timestamp":"2014-08-15T16:00:00.081Z","source":"/dev/actisense-N2K-115-128267"}}]}
         //{\"context\":\"vessels\",\"updates\":[{\"values\":[{\"path\":\"motu.navigation.courseOverGroundTrue\",\"value\":172.9}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}},{\"values\":[{\"path\":\"motu.navigation.speedOverGround\",\"value\":3.85}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}]}
        // Json sk = Json.read("{\"context\":\"vessels."+SELF+"\",\"updates\":[{\"values\":[{\"path\":\"navigation.courseOverGroundTrue\",\"value\":172.9}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}},{\"values\":[{\"path\":\"navigation.speedOverGround\",\"value\":3.85}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}]}");
-        Json sk = Json.read("{\"context\":\"vessels\",\"updates\":[{\"values\":[{\"path\":\"motu.navigation.courseOverGroundTrue\",\"value\":172.9}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}},{\"values\":[{\"path\":\"motu.navigation.speedOverGround\",\"value\":3.85}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}]}");
+        Json sk = Json.read("{\"context\":\"vessels.motu\",\"updates\":[{\"values\":[{\"path\":\"navigation.courseOverGroundTrue\",\"value\":172.9},{\"path\":\"navigation.speedOverGround\",\"value\":3.85}]},{\"values\":[{\"path\":\"navigation.courseOverGroundTrue\",\"value\":172.9},{\"path\":\"navigation.speedOverGround\",\"value\":3.85}]}]}");
         logger.debug(received.get(0));
         assertEquals(sk , Json.read(received.get(0)));
         
@@ -138,20 +138,17 @@ public class WebsocketTest2 extends CamelTestSupport {
     }
 	
 	
+	@Override
+	public void configureRouteBuilder(RouteBuilder routeBuilder) {
+		// TODO Auto-generated method stub
+		try {
+			((RouteManager)routeBuilder).configure0();
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			logger.error(e);
+			fail();
+		}
+	}
 	
-	 @Override
-	 protected RouteBuilder createRouteBuilder() {
-	        try {
-				RouteManager routeBuilder = RouteManagerFactory.getInstance(Util.getConfig(null));
-				return routeBuilder;
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-	        return null;
-	    }
-
 }
