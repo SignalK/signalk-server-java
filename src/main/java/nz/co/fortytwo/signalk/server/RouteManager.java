@@ -215,11 +215,18 @@ public class RouteManager extends RouteBuilder {
 		
 		//WebsocketEndpoint wsEndpoint = (WebsocketEndpoint) getContext().getEndpoint("websocket://0.0.0.0:"+wsPort+JsonConstants.SIGNALK_WS);
 		if (Boolean.valueOf(config.getProperty(Constants.DEMO))) {
-			from("stream:file?fileName=" + streamUrl).id("demo feed")
+			from("file://./src/test/resources/samples/?move=done&fileName=" + streamUrl).id("demo feed")
 				.onException(Exception.class).handled(true).maximumRedeliveries(0)
 				.end()
-			.throttle(50).timePeriodMillis(1000).asyncDelayed().to(SEDA_INPUT).id(SignalkRouteFactory.getName("SEDA_INPUT")).end();
-			
+			.split(body(String.class).tokenize("\n")).streaming()
+			.throttle(50).timePeriodMillis(1000).asyncDelayed()
+			.to(SEDA_INPUT).id(SignalkRouteFactory.getName("SEDA_INPUT"))
+			.end();
+			//and copy it back again to rerun it
+			from("file://./src/test/resources/samples/done?fileName=" + streamUrl).id("demo restart")
+				.onException(Exception.class).handled(true).maximumRedeliveries(0)
+				.end()
+			.to("file://./src/test/resources/samples/?fileName=" + streamUrl);
 		}
 	}
 
