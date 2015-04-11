@@ -226,10 +226,10 @@ public class RouteManager extends RouteBuilder {
 			.end();
 			
 			//and copy it back again to rerun it
-			//("file://./src/test/resources/samples/done?fileName=" + streamUrl).id("demo restart")
-			//	.onException(Exception.class).handled(true).maximumRedeliveries(0)
-			//	.end()
-			//.to("file://./src/test/resources/samples/?fileName=" + streamUrl);
+			from("file://./src/test/resources/samples/done?fileName=" + streamUrl).id("demo restart")
+				.onException(Exception.class).handled(true).maximumRedeliveries(0)
+				.end()
+			.to("file://./src/test/resources/samples/?fileName=" + streamUrl);
 		}
 	}
 
