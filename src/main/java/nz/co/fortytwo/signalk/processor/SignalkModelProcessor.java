@@ -57,7 +57,7 @@ public class SignalkModelProcessor extends SignalkProcessor implements Processor
 		if(logger.isDebugEnabled())logger.debug("SignalkModelProcessor  updating "+node );
 		
 		signalkModel.putAll(node.getData());
-		logger.debug(signalkModel);
+		if(logger.isDebugEnabled())logger.debug(signalkModel);
 	}
 
 }

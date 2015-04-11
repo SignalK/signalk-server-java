@@ -27,7 +27,9 @@ package org.apache.camel.component.websocket;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -70,7 +72,7 @@ public class SignalkWebSocketServlet extends WebsocketComponentServlet {
 			if(logger.isDebugEnabled())logger.debug("Upgrade ws, create factory:");
 			this._webSocketFactory = new WebSocketFactory(this, (bs == null) ? 8192 : Integer.parseInt(bs)) {
 				private WebSocketBuffers _buffers = new WebSocketBuffers(8192);
-
+				private Map<WebSocketServletConnection,String> sessionMap = new HashMap<WebSocketServletConnection,String>();
 				public void upgrade(HttpServletRequest request, HttpServletResponse response, WebSocket websocket, String protocol) throws IOException {
 					String sessionId = request.getRequestedSessionId();
 					if(logger.isDebugEnabled())logger.debug("Upgrade ws, requested sessionId:" + sessionId);
@@ -181,11 +183,12 @@ public class SignalkWebSocketServlet extends WebsocketComponentServlet {
 
 					connection.fillBuffersFrom(((HttpParser) http.getParser()).getHeaderBuffer());
 					connection.fillBuffersFrom(((HttpParser) http.getParser()).getBodyBuffer());
-					
+					String wsSession = ((DefaultWebsocket) websocket).getConnectionKey();
 					//if(logger.isDebugEnabled())logger.debug("Upgraded session " + request.getSession().getId() + " to ws " + ((DefaultWebsocket) websocket).getConnectionKey());
-					if(logger.isDebugEnabled())logger.debug("Upgraded session " + sessionId + " to ws " + ((DefaultWebsocket) websocket).getConnectionKey());
+					if(logger.isDebugEnabled())logger.debug("Upgraded session " + sessionId + " to ws " + wsSession);
 					try {
-						SubscriptionManagerFactory.getInstance().add(sessionId, ((DefaultWebsocket) websocket).getConnectionKey(), Constants.OUTPUT_WS);
+						sessionMap.put(connection, wsSession);
+						SubscriptionManagerFactory.getInstance().add(sessionId, wsSession, Constants.OUTPUT_WS);
 					} catch (Exception e1) {
 						logger.error(e1.getMessage(),e1);
 						throw new IOException(e1);
@@ -193,6 +196,20 @@ public class SignalkWebSocketServlet extends WebsocketComponentServlet {
 					// LOG.debug("Websocket upgrade {} {} {} {}", new Object[] { request.getRequestURI(), Integer.valueOf(draft), protocol, connection });
 					request.setAttribute("org.eclipse.jetty.io.Connection", connection);
 				}
+
+				@Override
+				protected boolean removeConnection(WebSocketServletConnection connection) {
+					//unsubscribe and remove websocket session
+					String wsSession=sessionMap.get(connection);
+					if(logger.isDebugEnabled())logger.debug("Ended wsSession " + wsSession);
+					try {
+						SubscriptionManagerFactory.getInstance().removeWsSession(wsSession);
+					} catch (Exception e1) {
+						logger.error(e1.getMessage(),e1);
+					}
+					return super.removeConnection(connection);
+				}
+				
 			};
 			this._webSocketFactory.start();
 
@@ -227,6 +244,8 @@ public class SignalkWebSocketServlet extends WebsocketComponentServlet {
 	public boolean checkOrigin(HttpServletRequest request, String origin) {
 		return true;
 	}
+	
+	
 
 	public void destroy() {
 		try {
@@ -235,4 +254,5 @@ public class SignalkWebSocketServlet extends WebsocketComponentServlet {
 			logger.warn(x.getMessage());
 		}
 	}
+
 }

@@ -32,6 +32,7 @@ import nz.co.fortytwo.signalk.util.JsonConstants;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.websocket.WebsocketConstants;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -53,15 +54,18 @@ public class InputFilterProcessor extends SignalkProcessor implements Processor 
 			msg=msg.trim();
 			//stomp messages are prefixed with 'ascii:'
 			if(msg.startsWith("ascii:"))msg = msg.substring(6).trim();
+			msg=StringUtils.chomp(msg);
 			boolean ok = false;
 			if(msg.startsWith("!AIVDM")){
 				//AIS
 				//!AIVDM,1,1,,B,15MwkRUOidG?GElEa<iQk1JV06Jd,0*6D
+				exchange.getIn().setBody(msg);
 				sendNmea(exchange);
 				ok = true;
 			}else if(msg.startsWith("$")){
 				//NMEA - good
 				//System.out.println(msg);
+				exchange.getIn().setBody(msg);
 				sendNmea(exchange);
 				ok = true;
 			}else if(msg.startsWith("{")&& msg.endsWith("}")){

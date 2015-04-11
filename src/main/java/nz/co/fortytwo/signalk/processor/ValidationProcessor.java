@@ -47,7 +47,7 @@ public class ValidationProcessor extends SignalkProcessor implements Processor{
 		
 		try {
 			if(!(exchange.getIn().getBody() instanceof SignalKModel)){
-				if(logger.isDebugEnabled())logger.debug("Invalid object found:" + exchange.getIn().getBody());
+				if(logger.isDebugEnabled())logger.debug("Invalid object found, type "+exchange.getIn().getBody().getClass()+" : " + exchange.getIn().getBody());
 				exchange.getIn().setBody(null);
 				return;
 			}
