@@ -195,9 +195,9 @@ public class RouteManager extends RouteBuilder {
 		
 		SignalkRouteFactory.configureHeartbeatRoute(this,"timer://heartbeat?fixedRate=true&period=1000");
 		
-		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true&handlers=#staticHandler");//&handlers=#staticHandler
-		SignalkRouteFactory.configureAuthRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_AUTH+"?sessionSupport=true&matchOnUriPrefix=true");
-		SignalkRouteFactory.configureSubscribeRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_SUBSCRIBE+"?sessionSupport=true&matchOnUriPrefix=true");
+		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true&handlers=#staticHandler&enableJMX=true");//&handlers=#staticHandler
+		SignalkRouteFactory.configureAuthRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_AUTH+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true");
+		SignalkRouteFactory.configureSubscribeRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_SUBSCRIBE+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true");
 		
 		// timed actions
 		SignalkRouteFactory.configureDeclinationTimer(this, "timer://declination?fixedRate=true&period=10000");

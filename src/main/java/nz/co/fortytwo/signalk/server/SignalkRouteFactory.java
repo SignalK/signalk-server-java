@@ -139,7 +139,7 @@ public class SignalkRouteFactory {
 	public static void configureWebsocketRxRoute(RouteBuilder routeBuilder ,String input, int port)  {
 		
 		WebsocketEndpoint wsEndpoint = (WebsocketEndpoint) routeBuilder.getContext().getEndpoint("skWebsocket://0.0.0.0:"+port+JsonConstants.SIGNALK_WS);
-		
+		wsEndpoint.setEnableJmx(true);
 		wsEndpoint.setSessionSupport(true);
 		
 		routeBuilder.from(wsEndpoint).id(getName("Websocket Rx"))
