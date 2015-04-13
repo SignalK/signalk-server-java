@@ -75,25 +75,25 @@ public class RestApiTest extends SignalKCamelTestSupport {
     public void shouldGetJsonResponse() throws Exception {
 		
 	    final CountDownLatch latch = new CountDownLatch(1);
-	    final CountDownLatch latch2 = new CountDownLatch(1);
+	    
         final AsyncHttpClient c = new AsyncHttpClient();
         
         template.sendBody(RouteManager.SEDA_INPUT,jsonDiff);
-        
+        latch.await(2,TimeUnit.SECONDS);
         //get a sessionid
-        Response r1 = c.prepareGet("http://localhost:9290/signalk/auth/demoPass").execute().get();
-        latch2.await(3, TimeUnit.SECONDS);
+        Response r1 = c.prepareGet("http://localhost:"+restPort+SIGNALK_AUTH+"/demo/pass").execute().get();
+        //latch2.await(3, TimeUnit.SECONDS);
         assertEquals(200, r1.getStatusCode());
-        Response reponse = c.prepareGet("http://localhost:9290/signalk/api/vessels/"+SELF).setCookies(r1.getCookies()).execute().get();
-        latch.await(3, TimeUnit.SECONDS);
+        Response reponse = c.prepareGet("http://localhost:"+restPort+SIGNALK_API+"/vessels/"+SELF).setCookies(r1.getCookies()).execute().get();
+        //latch.await(3, TimeUnit.SECONDS);
         logger.debug(reponse.getResponseBody());
         assertEquals(200, reponse.getStatusCode());
         
         Json resp = Json.read(reponse.getResponseBody());
         assertEquals(172.9 , resp.at(VESSELS).at(SELF).at(nav).at("courseOverGroundTrue").at("value").asFloat(),0.001);
      
-        reponse = c.prepareGet("http://localhost:9290/signalk/api/vessels/"+SELF+"/navigation").setCookies(r1.getCookies()).execute().get();
-        latch.await(3, TimeUnit.SECONDS);
+        reponse = c.prepareGet("http://localhost:"+restPort+SIGNALK_API+"/vessels/"+SELF+"/navigation").setCookies(r1.getCookies()).execute().get();
+        //latch.await(3, TimeUnit.SECONDS);
         logger.debug(reponse.getResponseBody());
         assertEquals(200, reponse.getStatusCode());
         			//{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"navigation.courseOverGroundTrue\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}],\"context\":\"vessels.self\"}
@@ -106,12 +106,15 @@ public class RestApiTest extends SignalKCamelTestSupport {
 
 	@Override
 	public void configureRouteBuilder(RouteBuilder routeBuilder) {
-		SignalkRouteFactory.configureInputRoute(routeBuilder, RouteManager.SEDA_INPUT);
-		routeBuilder.from(RouteManager.DIRECT_TCP).to("log:nz.co.fortytwo.signalk.model.output.tcp").end();
-		SignalkRouteFactory.configureWebsocketRxRoute(routeBuilder, RouteManager.SEDA_INPUT, 9292);
-		SignalkRouteFactory.configureWebsocketTxRoute(routeBuilder,  RouteManager.SEDA_WEBSOCKETS, 9292);
-		SignalkRouteFactory.configureRestRoute(routeBuilder, "jetty:http://0.0.0.0:9290" + JsonConstants.SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true");
-		SignalkRouteFactory.configureAuthRoute(routeBuilder, "jetty:http://0.0.0.0:9290" + JsonConstants.SIGNALK_AUTH+"?sessionSupport=true&matchOnUriPrefix=true");
+		// TODO Auto-generated method stub
+		try {
+			((RouteManager)routeBuilder).configure0();
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			logger.error(e);
+			fail();
+		}
 	}
 
 }

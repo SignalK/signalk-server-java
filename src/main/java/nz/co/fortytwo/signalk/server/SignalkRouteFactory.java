@@ -45,7 +45,7 @@ import nz.co.fortytwo.signalk.processor.OutputFilterProcessor;
 import nz.co.fortytwo.signalk.processor.RestApiProcessor;
 import nz.co.fortytwo.signalk.processor.RestAuthProcessor;
 import nz.co.fortytwo.signalk.processor.SignalkModelProcessor;
-import nz.co.fortytwo.signalk.processor.RestSubscribeProcessor;
+import nz.co.fortytwo.signalk.processor.WsUrlProcessor;
 import nz.co.fortytwo.signalk.processor.JsonSubscribeProcessor;
 import nz.co.fortytwo.signalk.processor.StompProcessor;
 import nz.co.fortytwo.signalk.processor.ValidationProcessor;
@@ -242,10 +242,10 @@ public class SignalkRouteFactory {
 		return "sub_"+sub.getWsSession();
 	}
 
-	public static void configureSubscribeRoute(RouteBuilder routeBuilder, String input) {
-		routeBuilder.from(input).id(getName("REST Subscribe"))
+	public static void configureWsUrlRoute(RouteBuilder routeBuilder, String input) {
+		routeBuilder.from(input).id(getName("Websocket URL"))
 		.setExchangePattern(ExchangePattern.InOut)
-		.process(new RestSubscribeProcessor()).id(getName(RestSubscribeProcessor.class.getSimpleName()));
+		.process(new WsUrlProcessor()).id(getName(WsUrlProcessor.class.getSimpleName()));
 	}
 
 	public static void removeSubscribeTimers(RouteManager routeManager, List<Subscription> subs) throws Exception {

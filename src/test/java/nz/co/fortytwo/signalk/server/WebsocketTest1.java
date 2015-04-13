@@ -24,27 +24,19 @@
 package nz.co.fortytwo.signalk.server;
 
 import static nz.co.fortytwo.signalk.util.JsonConstants.SELF;
-import static nz.co.fortytwo.signalk.util.JsonConstants.SIGNALK_SUBSCRIBE;
-import static nz.co.fortytwo.signalk.util.JsonConstants.SIGNALK_WS;
+import static nz.co.fortytwo.signalk.util.JsonConstants.SIGNALK_AUTH;
+import static nz.co.fortytwo.signalk.util.JsonConstants.SIGNALK_WS_URL;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import mjson.Json;
-import nz.co.fortytwo.signalk.model.SignalKModel;
-import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
-import nz.co.fortytwo.signalk.util.JsonConstants;
-import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.websocket.SignalkWebsocketComponent;
-import org.apache.camel.test.junit4.CamelTestSupport;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Test;
@@ -82,26 +74,24 @@ public class WebsocketTest1 extends SignalKCamelTestSupport {
 	    final CountDownLatch latch = new CountDownLatch(2);
 	    final CountDownLatch latch1 = new CountDownLatch(1);
 	    final CountDownLatch latch2 = new CountDownLatch(1);
-	    final CountDownLatch latch3 = new CountDownLatch(1);
         final AsyncHttpClient c = new AsyncHttpClient();
         //get a sessionid
-        List<Cookie> cookies = c.prepareGet("http://localhost:9290/signalk/auth/demoPass").execute().get().getCookies();
+        List<Cookie> cookies = c.prepareGet("http://localhost:"+restPort+SIGNALK_AUTH+"/demo/pass").execute().get().getCookies();
+        Response r2 = c.prepareGet("http://localhost:"+restPort+SIGNALK_WS_URL).setCookies(cookies).execute().get();
         latch2.await(5, TimeUnit.SECONDS);
         
-      //subscribe
-        Response reponse = c.prepareGet("http://localhost:9290"+SIGNALK_SUBSCRIBE+"/vessels/"+SELF+"/navigation").setCookies(cookies).execute().get();
-        latch3.await(2, TimeUnit.SECONDS);
-        logger.debug(reponse.getResponseBody());
-        assertEquals(202, reponse.getStatusCode());
+      
         
-        WebSocket websocket = c.prepareGet("ws://127.0.0.1:9292"+SIGNALK_WS+"?format=delta").setCookies(cookies).execute(
+        WebSocket websocket = c.prepareGet(r2.getResponseBody()).setCookies(cookies).execute(
                 new WebSocketUpgradeHandler.Builder()
                     .addWebSocketListener(new WebSocketTextListener() {
                         @Override
                         public void onMessage(String message) {
-                            received.add(message);
+                            
                             log.info("received --> " + message);
+                            if(message.startsWith("{\"context\":\"vessels.self\",\"updates\":[]}"))return; //heartbeats
                             latch.countDown();
+                            received.add(message);
                         }
 
                         @Override
@@ -122,12 +112,16 @@ public class WebsocketTest1 extends SignalKCamelTestSupport {
                             t.printStackTrace();
                         }
                     }).build()).get();
+      //subscribe
+        String subscribeMsg="{\"context\":\"vessels.self\",\"subscribe\":[{\"path\":\"navigation\"}]}";
+		websocket.sendTextMessage(subscribeMsg);
         latch1.await(2, TimeUnit.SECONDS);
+        
         template.sendBody(RouteManager.SEDA_INPUT,jsonDiff);
         //websocket.sendTextMessage(jsonDiff);
         assertTrue(latch.await(5, TimeUnit.SECONDS));
 
-        assertEquals(2, received.size());
+        assertTrue(2<=received.size());
        Json json = Json.read("{\"context\":\"vessels.motu\",\"updates\":[{\"values\":[{\"path\":\"navigation.courseOverGroundTrue\",\"value\":172.9},{\"path\":\"navigation.speedOverGround\",\"value\":3.85}]},{\"values\":[{\"path\":\"navigation.courseOverGroundTrue\",\"value\":172.9},{\"path\":\"navigation.speedOverGround\",\"value\":3.85}]}]}");
        
        logger.debug("Msg1:" +received.get(0));

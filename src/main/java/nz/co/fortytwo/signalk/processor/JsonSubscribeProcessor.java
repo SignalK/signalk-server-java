@@ -23,13 +23,21 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import static nz.co.fortytwo.signalk.util.JsonConstants.*;
+import static nz.co.fortytwo.signalk.util.JsonConstants.CONTEXT;
+import static nz.co.fortytwo.signalk.util.JsonConstants.FORMAT;
+import static nz.co.fortytwo.signalk.util.JsonConstants.FORMAT_DELTA;
+import static nz.co.fortytwo.signalk.util.JsonConstants.MIN_PERIOD;
+import static nz.co.fortytwo.signalk.util.JsonConstants.PATH;
+import static nz.co.fortytwo.signalk.util.JsonConstants.PERIOD;
+import static nz.co.fortytwo.signalk.util.JsonConstants.POLICY;
+import static nz.co.fortytwo.signalk.util.JsonConstants.POLICY_FIXED;
+import static nz.co.fortytwo.signalk.util.JsonConstants.SUBSCRIBE;
+import static nz.co.fortytwo.signalk.util.JsonConstants.UNSUBSCRIBE;
+import static nz.co.fortytwo.signalk.util.JsonConstants.VESSELS;
 
 import java.util.Map;
 
 import mjson.Json;
-import nz.co.fortytwo.signalk.model.SignalKModel;
-import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.server.Subscription;
 import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
 import nz.co.fortytwo.signalk.util.Constants;
@@ -38,9 +46,6 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.log4j.Logger;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 
 /**
  * Updates the subscription manager with this session subs
@@ -51,7 +56,7 @@ import org.joda.time.format.ISODateTimeFormat;
 public class JsonSubscribeProcessor extends SignalkProcessor implements Processor{
 
 	private static Logger logger = Logger.getLogger(JsonSubscribeProcessor.class);
-	private static DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
+	//private static DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
 	
 	public void process(Exchange exchange) throws Exception {
 		

@@ -34,19 +34,15 @@ import java.util.concurrent.CountDownLatch;
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
-import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
-import nz.co.fortytwo.signalk.processor.WindProcessor;
+import nz.co.fortytwo.signalk.util.Constants;
 import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.activemq.broker.BrokerService;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.component.websocket.SignalkWebsocketComponent;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.apache.log4j.Logger;
 import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 
 public abstract class SignalKCamelTestSupport extends CamelTestSupport {
 	static Logger logger = Logger.getLogger(SignalKCamelTestSupport.class);
@@ -54,6 +50,8 @@ public abstract class SignalKCamelTestSupport extends CamelTestSupport {
 	protected RouteManager routeManager = null;
 	protected final CountDownLatch latch = new CountDownLatch(1);
     protected BrokerService broker = null;
+    protected int restPort = Integer.valueOf(Util.getConfigProperty(Constants.REST_PORT));
+    protected int wsPort = Integer.valueOf(Util.getConfigProperty(Constants.WEBSOCKET_PORT));
     
 	public SignalKCamelTestSupport() {
 		super();

@@ -23,10 +23,12 @@
  */
 package nz.co.fortytwo.signalk.server;
 
-import static nz.co.fortytwo.signalk.util.JsonConstants.*;
+import static nz.co.fortytwo.signalk.util.JsonConstants.SELF;
+import static nz.co.fortytwo.signalk.util.JsonConstants.SIGNALK_AUTH;
+import static nz.co.fortytwo.signalk.util.JsonConstants.SIGNALK_WS;
+import static nz.co.fortytwo.signalk.util.JsonConstants.SIGNALK_WS_URL;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,14 +36,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import mjson.Json;
-import nz.co.fortytwo.signalk.util.Constants;
-import nz.co.fortytwo.signalk.util.JsonConstants;
-import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.test.junit4.CamelTestSupport;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.Test;
@@ -57,6 +55,7 @@ public class SubcribeWsTest extends SignalKCamelTestSupport{
     private static Logger logger = Logger.getLogger(SubcribeWsTest.class);
 	String jsonDiff = null;
 	
+	
 	@Produce(uri = "direct:input")
     protected ProducerTemplate template;
 
@@ -69,10 +68,23 @@ public class SubcribeWsTest extends SignalKCamelTestSupport{
 			fail();
 		}
 	}
+	
+	@Test
+    public void shouldGetWsUrl() throws Exception {
+		
+        final AsyncHttpClient c = new AsyncHttpClient();
+        
+        //get a sessionid
+        Response r1 = c.prepareGet("http://localhost:"+restPort+SIGNALK_AUTH+"/demo/pass").execute().get();
+        assertEquals(200, r1.getStatusCode());
+        Response r2 = c.prepareGet("http://localhost:"+restPort+SIGNALK_WS_URL).setCookies(r1.getCookies()).execute().get();
+        assertEquals("ws://localhost:"+wsPort+SIGNALK_WS, r2.getResponseBody());
+        c.close();
+	}
+	
 	@Test
     public void shouldGetSubscribeWsResponse() throws Exception {
 		final List<String> received = new ArrayList<String>();
-	    final CountDownLatch latch = new CountDownLatch(1);
 	    final CountDownLatch latch2 = new CountDownLatch(1);
 	    final CountDownLatch latch3 = new CountDownLatch(2);
 	    final CountDownLatch latch4 = new CountDownLatch(1);
@@ -80,12 +92,12 @@ public class SubcribeWsTest extends SignalKCamelTestSupport{
         
         template.sendBody(RouteManager.SEDA_INPUT,jsonDiff);
         //get a sessionid
-        Response r1 = c.prepareGet("http://localhost:9290/signalk/auth/demoPass").execute().get();
+        Response r1 = c.prepareGet("http://localhost:"+restPort+SIGNALK_AUTH+"/demo/pass").execute().get();
+        Response r2 = c.prepareGet("http://localhost:"+restPort+SIGNALK_WS_URL).setCookies(r1.getCookies()).execute().get();
         latch2.await(3, TimeUnit.SECONDS);
         
-        
       //await messages
-        WebSocket websocket = c.prepareGet("ws://127.0.0.1:9292"+SIGNALK_WS).setCookies(r1.getCookies()).execute(
+        WebSocket websocket = c.prepareGet(r2.getResponseBody()).setCookies(r1.getCookies()).execute(
                 new WebSocketUpgradeHandler.Builder()
                     .addWebSocketListener(new WebSocketTextListener() {
                         @Override
@@ -115,14 +127,11 @@ public class SubcribeWsTest extends SignalKCamelTestSupport{
                         }
                     }).build()).get();
 
-        //websocket.sendTextMessage(jsonDiff);
-        latch4.await(2, TimeUnit.SECONDS);
       //subscribe
-        Response reponse = c.prepareGet("http://localhost:9290"+SIGNALK_SUBSCRIBE+"/vessels/motu/navigation?format=delta").setCookies(r1.getCookies()).execute().get();
-        latch.await(2, TimeUnit.SECONDS);
-        logger.debug("Get response = "+reponse.getStatusCode());
-        assertEquals(202, reponse.getStatusCode());
-        
+        String subscribeMsg="{\"context\":\"vessels.motu\",\"subscribe\":[{\"path\":\"navigation\"}]}";
+		websocket.sendTextMessage(subscribeMsg);
+        latch4.await(2, TimeUnit.SECONDS);
+      
         websocket.sendTextMessage(jsonDiff);
         logger.debug("Sent update = "+jsonDiff);
         latch3.await(10, TimeUnit.SECONDS);

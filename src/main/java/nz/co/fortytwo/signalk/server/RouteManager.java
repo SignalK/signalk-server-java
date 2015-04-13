@@ -31,18 +31,14 @@ import java.util.Properties;
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
-import nz.co.fortytwo.signalk.processor.InputFilterProcessor;
-import nz.co.fortytwo.signalk.processor.JsonSubscribeProcessor;
 import nz.co.fortytwo.signalk.util.Constants;
 import nz.co.fortytwo.signalk.util.JsonConstants;
 import nz.co.fortytwo.signalk.util.JsonSerializer;
 
 import org.apache.camel.Exchange;
-import org.apache.camel.ExchangePattern;
 import org.apache.camel.Predicate;
 import org.apache.camel.builder.PredicateBuilder;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.mqtt.MQTTEndpoint;
 import org.apache.camel.component.restlet.RestletConstants;
 import org.apache.camel.component.stomp.SkStompComponent;
 import org.apache.camel.component.websocket.SignalkWebsocketComponent;
@@ -178,6 +174,8 @@ public class RouteManager extends RouteBuilder {
 		//bind in registry
 		PropertyPlaceholderDelegateRegistry registry = (PropertyPlaceholderDelegateRegistry) CamelContextFactory.getInstance().getRegistry(); 
 		((JndiRegistry)registry.getRegistry()).bind("staticHandler",staticHandler);
+		
+		
 		if(CamelContextFactory.getInstance().getComponent("skWebsocket")==null){
 			CamelContextFactory.getInstance().addComponent("skWebsocket", new SignalkWebsocketComponent());
 		}
@@ -185,6 +183,8 @@ public class RouteManager extends RouteBuilder {
 			CamelContextFactory.getInstance().addComponent("skStomp", new SkStompComponent());
 		}
 		
+		
+		//setup routes
 		SignalkRouteFactory.configureWebsocketTxRoute(this, SEDA_WEBSOCKETS, wsPort);
 		SignalkRouteFactory.configureWebsocketRxRoute(this, SEDA_INPUT, wsPort);
 		SignalkRouteFactory.configureTcpServerRoute(this, DIRECT_TCP, skServer, Constants.OUTPUT_TCP);
@@ -197,7 +197,8 @@ public class RouteManager extends RouteBuilder {
 		
 		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true&handlers=#staticHandler&enableJMX=true");//&handlers=#staticHandler
 		SignalkRouteFactory.configureAuthRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_AUTH+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true");
-		SignalkRouteFactory.configureSubscribeRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_SUBSCRIBE+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true");
+		SignalkRouteFactory.configureWsUrlRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_WS_URL+"?sessionSupport=true&matchOnUriPrefix=true");
+		
 		
 		// timed actions
 		SignalkRouteFactory.configureDeclinationTimer(this, "timer://declination?fixedRate=true&period=10000");
