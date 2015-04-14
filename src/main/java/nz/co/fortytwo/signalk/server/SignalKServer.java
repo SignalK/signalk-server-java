@@ -24,7 +24,6 @@
 package nz.co.fortytwo.signalk.server;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.util.Properties;
 
 import nz.co.fortytwo.signalk.util.Constants;
@@ -44,11 +43,10 @@ public class SignalKServer {
 
 	private static Logger logger = Logger.getLogger(SignalKServer.class);
 
-	private Properties config = null;
-
+	
 	protected SignalKServer(String configDir) throws Exception {
-
-		config = Util.getConfig(configDir);
+		//init config
+		Util.getConfig(configDir);
 		// make sure we have all the correct dirs and files now
 		ensureInstall();
 
@@ -63,37 +61,16 @@ public class SignalKServer {
 		// enable hangup support which mean we detect when the JVM terminates, and stop Camel graceful
 		main.enableHangupSupport();
 
-		if(Boolean.valueOf(config.getProperty(Constants.HAWTIO_START))){
+		if(Boolean.valueOf(Util.getConfigProperty(Constants.HAWTIO_START))){
 			server=startHawtio();
 		}
 		
-		/*
-		 * Connector connector = new SelectChannelConnector();
-		 * logger.info("  Webserver http port:"+config.getProperty(Constants.REST_PORT));
-		 * connector.setPort(Integer.valueOf(config.getProperty(Constants.REST_PORT)));
-		 * 
-		 * server = new Server();
-		 * server.addConnector(connector);
-		 * //serve tracks
-		 * ServletContextHandler trackContext = new ServletContextHandler();
-		 * logger.info("  Tracks url:"+config.getProperty(Constants.STATIC_DIR));
-		 * trackContext.setContextPath(config.getProperty(Constants.STATIC_DIR));
-		 * logger.info("  Tracks resource:"+config.getProperty(Constants.STATIC_DIR));
-		 * trackContext.setResourceBase(config.getProperty(Constants.STATIC_DIR));
-		 * trackContext.addServlet(DefaultServlet.class, "/dist/*");
-		 * 
-		 * HandlerList handlers = new HandlerList();
-		 * 
-		 * handlers.addHandler(trackContext);
-		 * server.setHandler(handlers);
-		 * server.start();
-		 */
-
 		// Start activemq broker
 		BrokerService broker = ActiveMqBrokerFactory.newInstance();
+		
 		broker.start();
 
-		RouteManager routeManager = RouteManagerFactory.getInstance(config);
+		RouteManager routeManager = RouteManagerFactory.getInstance();
 
 		// add our routes to Camel
 		main.addRouteBuilder(routeManager);
@@ -111,17 +88,17 @@ public class SignalKServer {
 
 	private Server startHawtio() throws Exception {
 		//hawtio, auth disabled
-		System.setProperty(Constants.HAWTIO_AUTHENTICATE, config.getProperty(Constants.HAWTIO_AUTHENTICATE));
-		int hawtPort = Integer.valueOf(config.getProperty(Constants.HAWTIO_PORT));
+		System.setProperty(Constants.HAWTIO_AUTHENTICATE, Util.getConfigProperty(Constants.HAWTIO_AUTHENTICATE));
+		int hawtPort = Util.getConfigPropertyInt(Constants.HAWTIO_PORT);
 		Server server = new Server(hawtPort);
 		HandlerCollection handlers = new HandlerCollection();
 		handlers.setServer(server);
 		server.setHandler(handlers);
 		WebAppContext webapp = new WebAppContext();
 		webapp.setServer(server);
-		webapp.setContextPath(config.getProperty(Constants.HAWTIO_CONTEXT));
+		webapp.setContextPath(Util.getConfigProperty(Constants.HAWTIO_CONTEXT));
 		
-		webapp.setWar(config.getProperty(Constants.HAWTIO_WAR));
+		webapp.setWar(Util.getConfigProperty(Constants.HAWTIO_WAR));
 		webapp.setParentLoaderPriority(true);
 		webapp.setLogUrlOnStart(true);
 		// lets set a temporary directory so jetty doesn't bork if some process zaps /tmp/*

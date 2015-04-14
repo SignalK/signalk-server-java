@@ -148,11 +148,11 @@ public abstract class SignalKCamelTestSupport extends CamelTestSupport {
 	protected RouteBuilder createRouteBuilder() {
 	    try {
 	    	try {
-				Properties config=Util.getConfig(null);
+				Util.getConfig(null);
 				
 				broker.start();
 				logger.debug("Started broker");
-				routeManager=new RouteManager(config){
+				routeManager=new RouteManager(){
 					@Override
 					public void configure() throws Exception {
 						if(CamelContextFactory.getInstance().getComponent("skWebsocket")==null){

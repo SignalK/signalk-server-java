@@ -90,7 +90,7 @@ public class FullExportProcessorTest {
 
 	@Test
 	public void shouldPopulateTree() throws Exception {
-		CamelContext ctx = RouteManagerFactory.getInstance(null).getContext();
+		CamelContext ctx = RouteManagerFactory.getInstance().getContext();
 		SignalKModel model = SignalKModelFactory.getInstance();
 		model.getData().clear();
 		model = Util.populateModel(model, new File("src/test/resources/samples/basicModel.txt"));
@@ -106,7 +106,7 @@ public class FullExportProcessorTest {
 
 	@Test
 	public void shouldCreateInstantDelta() throws Exception {
-		CamelContext ctx = RouteManagerFactory.getInstance(null).getContext();
+		CamelContext ctx = RouteManagerFactory.getInstance().getContext();
 
 		SignalKModel model = SignalKModelFactory.getInstance();
 		model.getData().clear();
@@ -145,7 +145,7 @@ public class FullExportProcessorTest {
 
 	private void testScenario(int pos,String session, String subKey, String format, String policy, int rcvdCounter, int mapSizeBefore, int mapSizeAfter, NavigableSet<String> eventSet) throws Exception {
 			
-		CamelContext ctx = RouteManagerFactory.getInstance(null).getContext();
+		CamelContext ctx = RouteManagerFactory.getInstance().getContext();
 			try{
 				Subscription sub = new Subscription(session, subKey, 10, 1000, format, policy);
 				SubscriptionManagerFactory.getInstance().add("ses"+session, session, Constants.OUTPUT_WS);

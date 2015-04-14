@@ -169,7 +169,7 @@ public class JsonSubscribeProcessorTest {
 		Subscription s = subs.get(0);
 		assertEquals("Subscription [wsSession="+wsSession+", path=vessels." + SELF + ".navigation, period=500, format=delta, active=true, destination=null]", s.toString());
 		// see if its created a route
-		RouteManager routeManager = RouteManagerFactory.getInstance(null);
+		RouteManager routeManager = RouteManagerFactory.getInstance();
 		for (RouteDefinition route : routeManager.getRouteCollection().getRoutes()) {
 			logger.debug("Checking route " + route.getId());
 			// assertEquals("sub_wsSession4_/vessels/motu/navigation", route.getId());
@@ -184,7 +184,7 @@ public class JsonSubscribeProcessorTest {
 	public void shouldCreateOneRoute() throws Exception {
 		
 		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
-		RouteManager routeManager = RouteManagerFactory.getInstance(null);
+		RouteManager routeManager = RouteManagerFactory.getInstance();
 		String wsSession = UUID.randomUUID().toString();
 		manager.removeSessionId(wsSession);
 		int routes = routeManager.getRouteCollection().getRoutes().size();
@@ -207,7 +207,7 @@ public class JsonSubscribeProcessorTest {
 	public void shouldCreateTwoRoutes() throws Exception {
 		
 		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
-		RouteManager routeManager = RouteManagerFactory.getInstance(null);
+		RouteManager routeManager = RouteManagerFactory.getInstance();
 		String wsSession = UUID.randomUUID().toString();
 		manager.removeSessionId(wsSession);
 		int routes = routeManager.getRouteCollection().getRoutes().size();
@@ -242,7 +242,7 @@ public class JsonSubscribeProcessorTest {
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(2, subs.size());
 		// see if its created a route
-		RouteManager routeManager = RouteManagerFactory.getInstance(null);
+		RouteManager routeManager = RouteManagerFactory.getInstance();
 		assertEquals(2, routeManager.getRouteCollection().getRoutes().size());
 		Subscription s = subs.get(0);
 
@@ -258,7 +258,7 @@ public class JsonSubscribeProcessorTest {
 
 	@Test
 	public void shouldUnSubscribeAllByWsSession() throws Exception {
-		RouteManager routeManager = RouteManagerFactory.getInstance(null);
+		RouteManager routeManager = RouteManagerFactory.getInstance();
 		int routes = routeManager.getRouteCollection().getRoutes().size();
 		String wsSession = UUID.randomUUID().toString();
 		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
@@ -288,7 +288,7 @@ public class JsonSubscribeProcessorTest {
 
 	@Test
 	public void shouldUnSubscribeAllBySessionId() throws Exception {
-		RouteManager routeManager = RouteManagerFactory.getInstance(null);
+		RouteManager routeManager = RouteManagerFactory.getInstance();
 		int routes = routeManager.getRouteCollection().getRoutes().size();
 		String wsSession = UUID.randomUUID().toString();
 		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();

@@ -25,7 +25,8 @@
  */
 package nz.co.fortytwo.signalk.server;
 
-import java.util.Properties;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import nz.co.fortytwo.signalk.util.Util;
 
@@ -36,15 +37,11 @@ public class RouteManagerFactory {
 	private static Logger logger = Logger.getLogger(RouteManagerFactory.class);
 	static RouteManager manager = null;
 	
-	public static RouteManager getInstance(Properties config){
+	public static RouteManager getInstance() throws FileNotFoundException, IOException{
+		Util.getConfig(null);
 		if(manager==null){
-			if(config==null)
-				try {
-					config=Util.getConfig(null);
-				} catch (Exception e) {
-					logger.error(e);
-				} 
-			manager=new RouteManager(config);
+			
+			manager=new RouteManager();
 			//must do this early!
 			CamelContextFactory.setContext(manager);
 			

@@ -24,8 +24,6 @@
 package nz.co.fortytwo.signalk.server;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
 import mjson.Json;
@@ -34,12 +32,9 @@ import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.util.Constants;
 import nz.co.fortytwo.signalk.util.JsonConstants;
 import nz.co.fortytwo.signalk.util.JsonSerializer;
+import nz.co.fortytwo.signalk.util.Util;
 
-import org.apache.camel.Exchange;
-import org.apache.camel.Predicate;
-import org.apache.camel.builder.PredicateBuilder;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.restlet.RestletConstants;
 import org.apache.camel.component.stomp.SkStompComponent;
 import org.apache.camel.component.websocket.SignalkWebsocketComponent;
 import org.apache.camel.impl.JndiRegistry;
@@ -73,44 +68,33 @@ public class RouteManager extends RouteBuilder {
 	public static final String SEDA_NMEA = "seda:nmeaOutput?purgeWhenStopping=true&size=100";
 	public static final String SEDA_COMMON_OUT = "seda:commonOut?purgeWhenStopping=true&size=100";
 
-	public static final String STOMP = "skStomp:queue:signalk?brokerURL=tcp://localhost:61613";
-	public static final String MQTT = "mqtt:signalk?host=tcp://localhost:1883";
+	public static final String STOMP = "skStomp:queue:signalk?brokerURL=tcp://0.0.0.0:"+Util.getConfigProperty(Constants.STOMP_PORT);
+	public static final String MQTT = "mqtt:signalk?host=tcp://0.0.0.0:"+Util.getConfigProperty(Constants.MQTT_PORT);
 
 	
-	private int wsPort = 9292;
-	private int restPort = 9290;
+	private int wsPort = 3000;
+	private int restPort = 8080;
 	private String streamUrl;
 	
 	private SerialPortManager serialPortManager;
     
-	
-	private Properties config;
 	private SignalKModel signalkModel=SignalKModelFactory.getInstance();
 	
 	private NettyServer skServer;
 	private NettyServer nmeaServer;
 
-	protected RouteManager(Properties config) {
+	protected RouteManager() {
 		signalkModel.getData().clear();
-		this.config = config;
-		// web socket on port 9090
-		logger.info("  Websocket port:"+config.getProperty(Constants.WEBSOCKET_PORT));
-		setWsPort(Integer.valueOf(config.getProperty(Constants.WEBSOCKET_PORT)));
-		logger.info("  Signalk REST API port:"+config.getProperty(Constants.REST_PORT));
-		setRestPort(Integer.valueOf(config.getProperty(Constants.REST_PORT)));
+		// web socket on port 3000
+		logger.info("  Websocket port:"+Util.getConfigProperty(Constants.WEBSOCKET_PORT));
+		wsPort=Util.getConfigPropertyInt(Constants.WEBSOCKET_PORT);
+		logger.info("  Signalk REST API port:"+Util.getConfigProperty(Constants.REST_PORT));
+		restPort=Util.getConfigPropertyInt(Constants.REST_PORT);
 		//are we running demo?
-		if (Boolean.valueOf(config.getProperty(Constants.DEMO))) {
-			logger.info("  Demo streaming url:"+config.getProperty(Constants.STREAM_URL));
-			setStreamUrl(config.getProperty(Constants.STREAM_URL));
+		if (Boolean.valueOf(Util.getConfigProperty(Constants.DEMO))) {
+			logger.info("  Demo streaming url:"+Util.getConfigProperty(Constants.STREAM_URL));
+			setStreamUrl(Util.getConfigProperty(Constants.STREAM_URL));
 		}
-	}
-
-	public int getWsPort() {
-		return wsPort;
-	}
-
-	public void setWsPort(int port) {
-		this.wsPort = port;
 	}
 
 	@Override
@@ -139,22 +123,22 @@ public class RouteManager extends RouteBuilder {
 		
 
 		// dump nulls, but avoid quartz jobs
-		List<Predicate> predicates = new ArrayList<Predicate>();
-		predicates.add(header(Exchange.TIMER_FIRED_TIME).isNull());
-		predicates.add(header(RestletConstants.RESTLET_REQUEST).isNull());
-		predicates.add(body().isNull());
-		Predicate stopNull = PredicateBuilder.and(predicates);
+		//List<Predicate> predicates = new ArrayList<Predicate>();
+		//predicates.add(header(Exchange.TIMER_FIRED_TIME).isNull());
+		//predicates.add(header(RestletConstants.RESTLET_REQUEST).isNull());
+		//predicates.add(body().isNull());
+		//Predicate stopNull = PredicateBuilder.and(predicates);
 		//intercept().when(stopNull).stop();
 		
 		
 		skServer = new NettyServer(null, Constants.OUTPUT_TCP);
-		skServer.setTcpPort(Integer.valueOf(config.getProperty(Constants.TCP_PORT)));
-		skServer.setUdpPort(Integer.valueOf(config.getProperty(Constants.UDP_PORT)));
+		skServer.setTcpPort(Util.getConfigPropertyInt(Constants.TCP_PORT));
+		skServer.setUdpPort(Util.getConfigPropertyInt(Constants.UDP_PORT));
 		skServer.run();
 		
 		nmeaServer = new NettyServer(null, Constants.OUTPUT_NMEA);
-		nmeaServer.setTcpPort(Integer.valueOf(config.getProperty(Constants.TCP_NMEA_PORT)));
-		nmeaServer.setUdpPort(Integer.valueOf(config.getProperty(Constants.UDP_NMEA_PORT)));
+		nmeaServer.setTcpPort(Util.getConfigPropertyInt(Constants.TCP_NMEA_PORT));
+		nmeaServer.setUdpPort(Util.getConfigPropertyInt(Constants.UDP_NMEA_PORT));
 		nmeaServer.run();
 		
 		// start a serial port manager
@@ -165,12 +149,12 @@ public class RouteManager extends RouteBuilder {
 		// put all input into signalk model 
 		SignalkRouteFactory.configureInputRoute(this, SEDA_INPUT);
 		
-		File htmlRoot = new File(config.getProperty(Constants.STATIC_DIR));
+		File htmlRoot = new File(Util.getConfigProperty(Constants.STATIC_DIR));
 		log.info("Serving static files from "+htmlRoot.getAbsolutePath());
 		
 		//restlet
 		ResourceHandler staticHandler = new ResourceHandler();
-		staticHandler.setResourceBase(config.getProperty(Constants.STATIC_DIR));
+		staticHandler.setResourceBase(Util.getConfigProperty(Constants.STATIC_DIR));
 		//bind in registry
 		PropertyPlaceholderDelegateRegistry registry = (PropertyPlaceholderDelegateRegistry) CamelContextFactory.getInstance().getRegistry(); 
 		((JndiRegistry)registry.getRegistry()).bind("staticHandler",staticHandler);
@@ -215,7 +199,7 @@ public class RouteManager extends RouteBuilder {
 			.to(SEDA_INPUT).id(SignalkRouteFactory.getName("SEDA_INPUT"));
 		
 		//WebsocketEndpoint wsEndpoint = (WebsocketEndpoint) getContext().getEndpoint("websocket://0.0.0.0:"+wsPort+JsonConstants.SIGNALK_WS);
-		if (Boolean.valueOf(config.getProperty(Constants.DEMO))) {
+		if (Boolean.valueOf(Util.getConfigProperty(Constants.DEMO))) {
 			from("file://./src/test/resources/samples/?move=done&fileName=" + streamUrl).id("demo feed")
 				.onException(Exception.class).handled(true).maximumRedeliveries(0)
 				.to("log:nz.co.fortytwo.signalk.model.receive?level=ERROR&showException=true&showStackTrace=true")
@@ -263,14 +247,6 @@ public class RouteManager extends RouteBuilder {
 	public void stopSerial() {
 		serialPortManager.stopSerial();
 		//nmeaTcpServer.stop();
-	}
-
-	public int getRestPort() {
-		return restPort;
-	}
-
-	public void setRestPort(int restPort) {
-		this.restPort = restPort;
 	}
 	
 

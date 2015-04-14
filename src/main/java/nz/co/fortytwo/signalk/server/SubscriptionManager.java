@@ -65,7 +65,7 @@ public class SubscriptionManager {
 			subscriptions.add(sub);
 			//create a new route if we have too
 			if(sub.isActive() && !hasExistingRoute(sub)){
-				RouteManager routeManager = RouteManagerFactory.getInstance(null);
+				RouteManager routeManager = RouteManagerFactory.getInstance();
 				SignalkRouteFactory.configureSubscribeTimer(routeManager, sub);
 				heartbeats.remove(sub.getWsSession());
 			}
@@ -99,7 +99,7 @@ public class SubscriptionManager {
 	public void removeSubscription(Subscription sub) throws Exception{
 			subscriptions.remove(sub);
 			if(sub.isActive()&& !hasExistingRoute(sub)){
-				RouteManager routeManager = RouteManagerFactory.getInstance(null);
+				RouteManager routeManager = RouteManagerFactory.getInstance();
 				SignalkRouteFactory.removeSubscribeTimer(routeManager, sub);
 			}
 			//if we have no subs, then we should put a sub for empty updates as heartbeat
@@ -157,7 +157,7 @@ public class SubscriptionManager {
 			}
 			s.setActive(true);
 			if(!hasExistingRoute(s)){
-				RouteManager routeManager = RouteManagerFactory.getInstance(null);
+				RouteManager routeManager = RouteManagerFactory.getInstance();
 				SignalkRouteFactory.configureSubscribeTimer(routeManager, s);
 			}
 			
@@ -174,7 +174,7 @@ public class SubscriptionManager {
 		wsSessionMap.remove(sessionId);
 		outPutMap.remove(wsSession);
 		//remove all subscriptions
-		RouteManager routeManager = RouteManagerFactory.getInstance(null);
+		RouteManager routeManager = RouteManagerFactory.getInstance();
 		SignalkRouteFactory.removeSubscribeTimers(routeManager, getSubscriptions(wsSession));
 		subscriptions.removeAll(getSubscriptions(wsSession));
 		subscriptions.removeAll(getSubscriptions(sessionId));
@@ -185,7 +185,7 @@ public class SubscriptionManager {
 		wsSessionMap.inverse().remove(wsSession);
 		outPutMap.remove(wsSession);
 		//remove all subscriptions
-		RouteManager routeManager = RouteManagerFactory.getInstance(null);
+		RouteManager routeManager = RouteManagerFactory.getInstance();
 		SignalkRouteFactory.removeSubscribeTimers(routeManager, getSubscriptions(wsSession));
 		subscriptions.removeAll(getSubscriptions(wsSession));
 		heartbeats.remove(wsSession);

@@ -29,6 +29,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import nz.co.fortytwo.signalk.util.Constants;
+import nz.co.fortytwo.signalk.util.Util;
+
 import org.apache.activemq.broker.BrokerPlugin;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.broker.TransportConnector;
@@ -47,11 +50,11 @@ public class ActiveMqBrokerFactory {
 		broker.addConnector("ws://localhost:61614");
 		
 		TransportConnector stomp = new TransportConnector();
-		stomp.setUri(new URI("stomp+nio://localhost:61613?transport.hbGracePeriodMultiplier=1.5"));
+		stomp.setUri(new URI("stomp+nio://0.0.0.0:"+Util.getConfigProperty(Constants.STOMP_PORT)+"?transport.hbGracePeriodMultiplier=1.5"));
 		broker.addConnector(stomp);
 		
 		TransportConnector mqtt = new TransportConnector();
-		mqtt.setUri(new URI("mqtt+nio://localhost:1883"));
+		mqtt.setUri(new URI("mqtt+nio://0.0.0.0:"+Util.getConfigProperty(Constants.MQTT_PORT)));
 		broker.addConnector(mqtt);
 		
 		List<BrokerPlugin> plugins = new ArrayList<BrokerPlugin>();

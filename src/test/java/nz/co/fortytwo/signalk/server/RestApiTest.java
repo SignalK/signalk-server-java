@@ -23,35 +23,28 @@
  */
 package nz.co.fortytwo.signalk.server;
 
-import static nz.co.fortytwo.signalk.util.JsonConstants.*;
+import static nz.co.fortytwo.signalk.util.JsonConstants.SELF;
+import static nz.co.fortytwo.signalk.util.JsonConstants.SIGNALK_API;
+import static nz.co.fortytwo.signalk.util.JsonConstants.SIGNALK_AUTH;
+import static nz.co.fortytwo.signalk.util.JsonConstants.VESSELS;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.nav;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import mjson.Json;
-import nz.co.fortytwo.signalk.model.SignalKModel;
-import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
-import nz.co.fortytwo.signalk.util.JsonConstants;
 
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.websocket.SignalkWebsocketComponent;
-import org.apache.camel.test.junit4.CamelTestSupport;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.Response;
-import com.ning.http.client.cookie.Cookie;
-import com.ning.http.client.websocket.WebSocket;
-import com.ning.http.client.websocket.WebSocketTextListener;
-import com.ning.http.client.websocket.WebSocketUpgradeHandler;
 
 public class RestApiTest extends SignalKCamelTestSupport {
  
