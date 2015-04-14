@@ -29,14 +29,15 @@ import java.util.Set;
 
 import nz.co.fortytwo.signalk.processor.AISProcessor;
 import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
+import nz.co.fortytwo.signalk.processor.DeltaImportProcessor;
+import nz.co.fortytwo.signalk.processor.FullExportProcessor;
 import nz.co.fortytwo.signalk.processor.FullImportProcessor;
 import nz.co.fortytwo.signalk.processor.FullToDeltaProcessor;
-import nz.co.fortytwo.signalk.processor.FullExportProcessor;
-import nz.co.fortytwo.signalk.processor.DeltaImportProcessor;
 import nz.co.fortytwo.signalk.processor.HeartbeatProcessor;
 import nz.co.fortytwo.signalk.processor.InputFilterProcessor;
 import nz.co.fortytwo.signalk.processor.JsonGetProcessor;
 import nz.co.fortytwo.signalk.processor.JsonListProcessor;
+import nz.co.fortytwo.signalk.processor.JsonSubscribeProcessor;
 import nz.co.fortytwo.signalk.processor.MapToJsonProcessor;
 import nz.co.fortytwo.signalk.processor.MqttProcessor;
 import nz.co.fortytwo.signalk.processor.N2KProcessor;
@@ -45,8 +46,6 @@ import nz.co.fortytwo.signalk.processor.OutputFilterProcessor;
 import nz.co.fortytwo.signalk.processor.RestApiProcessor;
 import nz.co.fortytwo.signalk.processor.RestAuthProcessor;
 import nz.co.fortytwo.signalk.processor.SignalkModelProcessor;
-import nz.co.fortytwo.signalk.processor.WsUrlProcessor;
-import nz.co.fortytwo.signalk.processor.JsonSubscribeProcessor;
 import nz.co.fortytwo.signalk.processor.StompProcessor;
 import nz.co.fortytwo.signalk.processor.ValidationProcessor;
 import nz.co.fortytwo.signalk.processor.WindProcessor;
@@ -242,11 +241,6 @@ public class SignalkRouteFactory {
 		return "sub_"+sub.getWsSession();
 	}
 
-	public static void configureWsUrlRoute(RouteBuilder routeBuilder, String input) {
-		routeBuilder.from(input).id(getName("Websocket URL"))
-		.setExchangePattern(ExchangePattern.InOut)
-		.process(new WsUrlProcessor()).id(getName(WsUrlProcessor.class.getSimpleName()));
-	}
 
 	public static void removeSubscribeTimers(RouteManager routeManager, List<Subscription> subs) throws Exception {
 		for(Subscription sub : subs){

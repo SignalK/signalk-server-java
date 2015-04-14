@@ -181,7 +181,6 @@ public class RouteManager extends RouteBuilder {
 		
 		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true&handlers=#staticHandler&enableJMX=true");//&handlers=#staticHandler
 		SignalkRouteFactory.configureAuthRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_AUTH+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true");
-		SignalkRouteFactory.configureWsUrlRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_WS_URL+"?sessionSupport=true&matchOnUriPrefix=true");
 		
 		
 		// timed actions

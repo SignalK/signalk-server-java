@@ -23,13 +23,11 @@
  */
 package nz.co.fortytwo.signalk.server;
 
-import static nz.co.fortytwo.signalk.util.JsonConstants.SELF;
-import static nz.co.fortytwo.signalk.util.JsonConstants.SIGNALK_AUTH;
-import static nz.co.fortytwo.signalk.util.JsonConstants.SIGNALK_WS;
-import static nz.co.fortytwo.signalk.util.JsonConstants.SIGNALK_WS_URL;
+import static nz.co.fortytwo.signalk.util.JsonConstants.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -77,8 +75,9 @@ public class SubcribeWsTest extends SignalKCamelTestSupport{
         //get a sessionid
         Response r1 = c.prepareGet("http://localhost:"+restPort+SIGNALK_AUTH+"/demo/pass").execute().get();
         assertEquals(200, r1.getStatusCode());
-        Response r2 = c.prepareGet("http://localhost:"+restPort+SIGNALK_WS_URL).setCookies(r1.getCookies()).execute().get();
-        assertEquals("ws://localhost:"+wsPort+SIGNALK_WS, r2.getResponseBody());
+        Response r2 = c.prepareGet("http://localhost:"+restPort+SIGNALK_API+"/addresses").setCookies(r1.getCookies()).execute().get();
+        Json json = Json.read(r2.getResponseBody());
+        assertEquals("ws://"+InetAddress.getLocalHost().getCanonicalHostName()+":"+wsPort+SIGNALK_WS, json.at(websocketUrl).asString());
         c.close();
 	}
 	
@@ -93,11 +92,11 @@ public class SubcribeWsTest extends SignalKCamelTestSupport{
         template.sendBody(RouteManager.SEDA_INPUT,jsonDiff);
         //get a sessionid
         Response r1 = c.prepareGet("http://localhost:"+restPort+SIGNALK_AUTH+"/demo/pass").execute().get();
-        Response r2 = c.prepareGet("http://localhost:"+restPort+SIGNALK_WS_URL).setCookies(r1.getCookies()).execute().get();
+        Response r2 = c.prepareGet("http://localhost:"+restPort+SIGNALK_API+"/addresses").setCookies(r1.getCookies()).execute().get();
+        Json json = Json.read(r2.getResponseBody());
         latch2.await(3, TimeUnit.SECONDS);
-        
       //await messages
-        WebSocket websocket = c.prepareGet(r2.getResponseBody()).setCookies(r1.getCookies()).execute(
+        WebSocket websocket = c.prepareGet(json.at(websocketUrl).asString()).setCookies(r1.getCookies()).execute(
                 new WebSocketUpgradeHandler.Builder()
                     .addWebSocketListener(new WebSocketTextListener() {
                         @Override

@@ -23,9 +23,8 @@
  */
 package nz.co.fortytwo.signalk.server;
 
-import static nz.co.fortytwo.signalk.util.JsonConstants.SELF;
-import static nz.co.fortytwo.signalk.util.JsonConstants.SIGNALK_AUTH;
-import static nz.co.fortytwo.signalk.util.JsonConstants.SIGNALK_WS_URL;
+import static nz.co.fortytwo.signalk.util.JsonConstants.*;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.websocketUrl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,12 +76,14 @@ public class WebsocketTest1 extends SignalKCamelTestSupport {
         final AsyncHttpClient c = new AsyncHttpClient();
         //get a sessionid
         List<Cookie> cookies = c.prepareGet("http://localhost:"+restPort+SIGNALK_AUTH+"/demo/pass").execute().get().getCookies();
-        Response r2 = c.prepareGet("http://localhost:"+restPort+SIGNALK_WS_URL).setCookies(cookies).execute().get();
+        Response r2 = c.prepareGet("http://localhost:"+restPort+SIGNALK_API+"/addresses").setCookies(cookies).execute().get();
+        Json json = Json.read(r2.getResponseBody());
         latch2.await(5, TimeUnit.SECONDS);
+        
         
       
         
-        WebSocket websocket = c.prepareGet(r2.getResponseBody()).setCookies(cookies).execute(
+        WebSocket websocket = c.prepareGet(json.at(websocketUrl).asString()).setCookies(cookies).execute(
                 new WebSocketUpgradeHandler.Builder()
                     .addWebSocketListener(new WebSocketTextListener() {
                         @Override
@@ -122,7 +123,7 @@ public class WebsocketTest1 extends SignalKCamelTestSupport {
         assertTrue(latch.await(5, TimeUnit.SECONDS));
 
         assertTrue(2<=received.size());
-       Json json = Json.read("{\"context\":\"vessels.motu\",\"updates\":[{\"values\":[{\"path\":\"navigation.courseOverGroundTrue\",\"value\":172.9},{\"path\":\"navigation.speedOverGround\",\"value\":3.85}]},{\"values\":[{\"path\":\"navigation.courseOverGroundTrue\",\"value\":172.9},{\"path\":\"navigation.speedOverGround\",\"value\":3.85}]}]}");
+       json = Json.read("{\"context\":\"vessels.motu\",\"updates\":[{\"values\":[{\"path\":\"navigation.courseOverGroundTrue\",\"value\":172.9},{\"path\":\"navigation.speedOverGround\",\"value\":3.85}]},{\"values\":[{\"path\":\"navigation.courseOverGroundTrue\",\"value\":172.9},{\"path\":\"navigation.speedOverGround\",\"value\":3.85}]}]}");
        
        logger.debug("Msg1:" +received.get(0));
         assertEquals(json, Json.read(received.get(0)));
