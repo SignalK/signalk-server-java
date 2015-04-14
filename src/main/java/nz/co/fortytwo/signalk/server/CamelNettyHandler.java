@@ -37,6 +37,7 @@ import java.util.UUID;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.util.Constants;
+import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.websocket.WebsocketConstants;
@@ -66,7 +67,7 @@ public class CamelNettyHandler extends SimpleChannelInboundHandler<String> {
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
 		// Send greeting for a new connection.
-		ctx.write("Welcome to signalk at " + InetAddress.getLocalHost().getHostName() + "!\r\n");
+		ctx.write(Util.getWelcomeMsg().toString() + "\r\n");
 		ctx.flush();
 		String session = UUID.randomUUID().toString();
 		SubscriptionManagerFactory.getInstance().add(session, session, outputType);

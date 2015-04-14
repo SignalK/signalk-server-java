@@ -31,6 +31,7 @@ import nz.co.fortytwo.signalk.handler.RestApiHandler;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.util.JsonConstants;
 import nz.co.fortytwo.signalk.util.JsonSerializer;
+import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -60,6 +61,18 @@ public class RestApiProcessor extends SignalkProcessor implements Processor{
         if(request.getSession()!=null){
 	        if(request.getMethod().equals("GET")){
 	        	HttpServletResponse response = exchange.getIn(HttpMessage.class).getResponse();
+	        	String path = request.getPathInfo();
+	    		//String path =  exchange.getIn().getHeader(Exchange.HTTP_URI, String.class);
+	    		if(logger.isDebugEnabled())logger.debug("We are processing the path = "+path);
+	            //check addresses request
+	            if(path.startsWith(JsonConstants.SIGNALK_API+"/addresses")){
+	            	 response.setContentType("application/json");
+	                 // SEND RESPONSE
+	                 response.setStatus(HttpServletResponse.SC_OK);
+	                 exchange.getIn().setBody(Util.getAddressesMsg().toString());
+	                 return;
+	            }
+	            //normal request
 	        	SignalKModel model = api.processGet(request, response, signalkModel);
 	        	if(model!=null){
 	        		exchange.getIn().setBody(ser.write(model));

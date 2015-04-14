@@ -37,6 +37,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
 import nz.co.fortytwo.signalk.util.Constants;
+import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -195,6 +196,7 @@ public class SignalkWebSocketServlet extends WebsocketComponentServlet {
 					}
 					// LOG.debug("Websocket upgrade {} {} {} {}", new Object[] { request.getRequestURI(), Integer.valueOf(draft), protocol, connection });
 					request.setAttribute("org.eclipse.jetty.io.Connection", connection);
+					connection.getConnection().sendMessage(Util.getWelcomeMsg().toString());
 				}
 
 				@Override

@@ -44,6 +44,7 @@ import java.util.UUID;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.util.Constants;
+import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.websocket.WebsocketConstants;
@@ -91,7 +92,7 @@ public class CamelUdpNettyHandler extends SimpleChannelInboundHandler<DatagramPa
 			sessionList.put(session, packet.sender());
 			if(logger.isDebugEnabled())logger.debug("Added Sender "+packet.sender()+", session:" + session);
 			ctx.channel().writeAndFlush(new DatagramPacket(
-					Unpooled.copiedBuffer("Welcome to signalk UDP at " + InetAddress.getLocalHost().getHostName() + "!\r\n", CharsetUtil.UTF_8),packet.sender()));
+					Unpooled.copiedBuffer(Util.getWelcomeMsg().toString() + "\r\n", CharsetUtil.UTF_8),packet.sender()));
 		}
 		
 		Map<String, Object> headers = getHeaders(sessionList.inverse().get(packet.sender()));
