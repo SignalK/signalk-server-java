@@ -96,6 +96,39 @@ public class RestApiTest extends SignalKCamelTestSupport {
         c.close();
     }
 
+	@Test
+    public void shouldGetListResponse() throws Exception {
+		
+	    final CountDownLatch latch = new CountDownLatch(1);
+	    
+        final AsyncHttpClient c = new AsyncHttpClient();
+        
+        template.sendBody(RouteManager.SEDA_INPUT,jsonDiff);
+        latch.await(2,TimeUnit.SECONDS);
+        //get a sessionid
+        Response r1 = c.prepareGet("http://localhost:"+restPort+SIGNALK_AUTH+"/demo/pass").execute().get();
+        //latch2.await(3, TimeUnit.SECONDS);
+        assertEquals(200, r1.getStatusCode());
+        Response reponse = c.prepareGet("http://localhost:"+restPort+SIGNALK_API+"/list/vessels/"+SELF+"/*").setCookies(r1.getCookies()).execute().get();
+        //latch.await(3, TimeUnit.SECONDS);
+        logger.debug(reponse.getResponseBody());
+        assertEquals(200, reponse.getStatusCode());
+        
+        Json resp = Json.read(reponse.getResponseBody());
+        assertTrue(resp.isArray());
+        assertTrue(resp.asJsonList().get(0).asString().startsWith("vessels."+SELF));
+     
+        reponse = c.prepareGet("http://localhost:"+restPort+SIGNALK_API+"/list/vessels/*/navigation/*").setCookies(r1.getCookies()).execute().get();
+        //latch.await(3, TimeUnit.SECONDS);
+        logger.debug(reponse.getResponseBody());
+        assertEquals(200, reponse.getStatusCode());
+        			//{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"navigation.courseOverGroundTrue\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}],\"context\":\"vessels.self\"}
+        
+        resp = Json.read(reponse.getResponseBody());
+        assertTrue(resp.isArray());
+        assertTrue(resp.asJsonList().get(0).asString().startsWith("vessels.*.navigation"));
+        c.close();
+    }
 
 	@Override
 	public void configureRouteBuilder(RouteBuilder routeBuilder) {
