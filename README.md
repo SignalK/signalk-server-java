@@ -61,13 +61,15 @@ $ ./startpc.sh
 NOTE: Windows users - DONT put any of this in directories with spaces or anything but simple ascii names. Use something like eg C:\dev\SignalK-server
 Use the startpc.bat file to launch. 
 
+_NOTE: ports have changed to 8080 and 3000, and REST api now has /v1 appended_
+
 You should now have a SignalK server running:
 
 * hawt.io management console on `http://localhost:8000/hawtio`
-* webserver on `http://localhost:9290` 
-	* REST api on http://localhost:9290/signalk/api
-	* Authentication on http://localhost:9290/signalk/auth - but its a pass all for now so you dont need to login
-* websockets server on `http://localhost:9292`. 
+* webserver on `http://localhost:8080` 
+	* REST api on http://localhost:8080/signalk/api/v1
+	* Authentication on http://localhost:8080/signalk/auth - but its a pass all for now so you dont need to login
+* websockets server on `http://localhost:3000`. 
 * signalk output streamed as TCP over port 5555. On linux you can watch this with `$ ncat localhost 5555` **see below for subscriptions
 * signalk output streamed as UDP over port 5554.
 * nmea output will be streamed as TCP over port 5557. On linux you can watch this with `$ ncat localhost 5557`, or use telnet to connect.
@@ -75,9 +77,9 @@ You should now have a SignalK server running:
 
 It will be streaming a demo file and dumping logging to screen. Control logging by editing conf/log4j.properties.
 
-Try `http://localhost:9290/signalk/api/vessels` to see some output. 
+Try `http://localhost:8080/signalk/api/v1/vessels` to see some output. 
 
-You can drill down by adding json fields, eg `http://localhost:9290/signalk/api/vessels/367153070` or `http://localhost:9290/signalk/api/vessels/motu`
+You can drill down by adding json fields, eg `http://localhost:8080/signalk/api/v1/vessels/367153070` or `http://localhost:8080/signalk/api/v1/vessels/motu`
 
 The content mime type is application/json, your browser may not display it directly. On firefox just install https://addons.mozilla.org/en-us/firefox/addon/jsonovich/?src=search
 
