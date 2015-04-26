@@ -67,8 +67,8 @@ You should now have a SignalK server running:
 
 * hawt.io management console on `http://localhost:8000/hawtio`
 * webserver on `http://localhost:8080` 
-	* REST api on http://localhost:8080/signalk/api/v1
-	* Authentication on http://localhost:8080/signalk/auth - but its a pass all for now so you dont need to login
+	* REST api on `http://localhost:8080/signalk/api/v1`
+	* Authentication on `http://localhost:8080/signalk/auth` - but its a pass all for now so you dont need to login
 * websockets server on `http://localhost:3000`. 
 * signalk output streamed as TCP over port 5555. On linux you can watch this with `$ ncat localhost 5555` **see below for subscriptions
 * signalk output streamed as UDP over port 5554.
