@@ -24,6 +24,7 @@
 package nz.co.fortytwo.signalk.server;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.util.Properties;
 
 import mjson.Json;
@@ -40,7 +41,13 @@ import org.apache.camel.component.websocket.SignalkWebsocketComponent;
 import org.apache.camel.impl.JndiRegistry;
 import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry;
 import org.apache.log4j.Logger;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.handler.ContextHandler;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.util.resource.Resource;
+import org.eclipse.jetty.util.resource.ResourceCollection;
 
 /**
  * Main camel route definition to handle input to signalk
@@ -153,16 +160,39 @@ public class RouteManager extends RouteBuilder {
 		log.info("Serving static files from "+htmlRoot.getAbsolutePath());
 		
 		//restlet
+		
 		ResourceHandler staticHandler = new ResourceHandler();
 		staticHandler.setResourceBase(Util.getConfigProperty(Constants.STATIC_DIR));
+		
+		ResourceHandler mapHandler = new ResourceHandler(){
+			private String mapcacheDir = Util.getConfigProperty(Constants.MAP_DIR); 
+			@Override
+			public Resource getResource(String path) throws MalformedURLException {
+				if ((path == null) || (!(path.startsWith("/")))) {
+					throw new MalformedURLException(path);
+				}
+				//
+				if(!path.startsWith(mapcacheDir)){
+					//logger.debug("Wrong map path: "+path);
+					return null;
+				}
+				return super.getResource(path);
+			}
+		};
+		mapHandler.setResourceBase(Util.getConfigProperty(Constants.MAP_DIR));
+		mapHandler.setDirectoriesListed(true);
+		mapHandler.getBaseResource();
+		
 		//bind in registry
 		PropertyPlaceholderDelegateRegistry registry = (PropertyPlaceholderDelegateRegistry) CamelContextFactory.getInstance().getRegistry(); 
-		((JndiRegistry)registry.getRegistry()).bind("staticHandler",staticHandler);
-		
-		
+		//static files
+		((JndiRegistry)registry.getRegistry()).bind("staticHandler",staticHandler );
+		((JndiRegistry)registry.getRegistry()).bind("mapHandler",mapHandler );
+		//websockets
 		if(CamelContextFactory.getInstance().getComponent("skWebsocket")==null){
 			CamelContextFactory.getInstance().addComponent("skWebsocket", new SignalkWebsocketComponent());
 		}
+		//STOMP
 		if(CamelContextFactory.getInstance().getComponent("skStomp")==null){
 			CamelContextFactory.getInstance().addComponent("skStomp", new SkStompComponent());
 		}
@@ -179,7 +209,7 @@ public class RouteManager extends RouteBuilder {
 		
 		SignalkRouteFactory.configureHeartbeatRoute(this,"timer://heartbeat?fixedRate=true&period=1000");
 		
-		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true&handlers=#staticHandler&enableJMX=true");//&handlers=#staticHandler
+		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true&handlers=#mapHandler,#staticHandler&enableJMX=true");//&handlers=#staticHandler
 		SignalkRouteFactory.configureAuthRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_AUTH+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true");
 		
 		
