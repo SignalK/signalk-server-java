@@ -23,11 +23,14 @@
  */
 package nz.co.fortytwo.signalk.server;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import nz.co.fortytwo.signalk.processor.AISProcessor;
+import nz.co.fortytwo.signalk.processor.AlarmProcessor;
+import nz.co.fortytwo.signalk.processor.AnchorWatchProcessor;
 import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
 import nz.co.fortytwo.signalk.processor.DeltaImportProcessor;
 import nz.co.fortytwo.signalk.processor.FullExportProcessor;
@@ -47,6 +50,7 @@ import nz.co.fortytwo.signalk.processor.RestApiProcessor;
 import nz.co.fortytwo.signalk.processor.RestAuthProcessor;
 import nz.co.fortytwo.signalk.processor.SignalkModelProcessor;
 import nz.co.fortytwo.signalk.processor.StompProcessor;
+import nz.co.fortytwo.signalk.processor.StorageProcessor;
 import nz.co.fortytwo.signalk.processor.ValidationProcessor;
 import nz.co.fortytwo.signalk.processor.WindProcessor;
 import nz.co.fortytwo.signalk.processor.WsSessionProcessor;
@@ -78,15 +82,18 @@ public class SignalkRouteFactory {
 	 * @param nmeaProcessor
 	 * @param aisProcessor
 	 * @param signalkModelProcessor
+	 * @throws IOException 
 	 * @throws Exception 
 	 */
-	public static void configureInputRoute(RouteBuilder routeBuilder,String input) {
+	public static void configureInputRoute(RouteBuilder routeBuilder,String input) throws IOException {
 		routeBuilder.from(input).id(getName("INPUT"))
 			.onException(Exception.class).handled(true).maximumRedeliveries(0)
 			.to("log:nz.co.fortytwo.signalk.model.receive?level=ERROR&showException=true&showStackTrace=true")
 			.end()
 		// dump misc rubbish
 		.process(new InputFilterProcessor()).id(getName(InputFilterProcessor.class.getSimpleName()))
+		//swap payloads to storage
+		.process(new StorageProcessor()).id(getName(InputFilterProcessor.class.getSimpleName()))
 		//convert NMEA to signalk
 		.process(new NMEAProcessor()).id(getName(NMEAProcessor.class.getSimpleName()))
 		//convert AIS to signalk
@@ -184,6 +191,18 @@ public class SignalkRouteFactory {
 			.to("log:nz.co.fortytwo.signalk.model.update?level=DEBUG").end();
 	}
 	
+	public static void configureAlarmsTimer(RouteBuilder routeBuilder ,String input){
+		routeBuilder.from(input).id(getName("Alarms"))
+			.process(new AlarmProcessor()).id(getName(AlarmProcessor.class.getSimpleName()))
+			.to("log:nz.co.fortytwo.signalk.model.update?level=DEBUG").end();
+	}
+	
+	public static void configureAnchorWatchTimer(RouteBuilder routeBuilder ,String input){
+		routeBuilder.from(input).id(getName("AnchorWatch"))
+			.process(new AnchorWatchProcessor()).id(getName(AnchorWatchProcessor.class.getSimpleName()))
+			.to("log:nz.co.fortytwo.signalk.model.update?level=DEBUG").end();
+	}
+	
 	public static void configureWindTimer(RouteBuilder routeBuilder ,String input){
 		routeBuilder.from("timer://wind?fixedRate=true&period=1000").id(getName("True Wind"))
 			.process(new WindProcessor()).id(getName(WindProcessor.class.getSimpleName()))
@@ -191,7 +210,7 @@ public class SignalkRouteFactory {
 			.end();
 	}
 	
-	public static void configureCommonOut(RouteBuilder routeBuilder ){
+	public static void configureCommonOut(RouteBuilder routeBuilder ) throws IOException{
 		routeBuilder.from(RouteManager.SEDA_COMMON_OUT).id(getName("COMMON_OUT"))
 			.onException(Exception.class).handled(true).maximumRedeliveries(0)
 			.to("log:nz.co.fortytwo.signalk.model.output?level=ERROR")
@@ -199,6 +218,8 @@ public class SignalkRouteFactory {
 		.process(new MapToJsonProcessor()).id(getName(MapToJsonProcessor.class.getSimpleName()))
 		.process(new FullToDeltaProcessor()).id(getName(FullToDeltaProcessor.class.getSimpleName()))
 		.split().body()
+		//swap payloads from storage
+		.process(new StorageProcessor()).id(getName(InputFilterProcessor.class.getSimpleName()))
 		.process(new OutputFilterProcessor()).id(getName(OutputFilterProcessor.class.getSimpleName()))
 		.multicast().parallelProcessing()
 			.to(RouteManager.DIRECT_TCP,

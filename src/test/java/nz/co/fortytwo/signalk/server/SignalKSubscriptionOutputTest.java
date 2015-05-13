@@ -26,6 +26,7 @@ package nz.co.fortytwo.signalk.server;
 import static nz.co.fortytwo.signalk.util.JsonConstants.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -148,7 +149,13 @@ public class SignalKSubscriptionOutputTest extends SignalKCamelTestSupport {
 	@Override
 	public void configureRouteBuilder(RouteBuilder routeBuilder) {
 		output = (MockEndpoint) routeBuilder.getContext().getEndpoint("mock:output");
-		SignalkRouteFactory.configureInputRoute(routeBuilder, DIRECT_INPUT);
+		try{
+			SignalkRouteFactory.configureInputRoute(routeBuilder, DIRECT_INPUT);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail();
+		}
 		routeBuilder.from(RouteManager.SEDA_COMMON_OUT).to(output);
 		
 	}

@@ -27,6 +27,7 @@ import static nz.co.fortytwo.signalk.util.JsonConstants.SELF;
 import static nz.co.fortytwo.signalk.util.JsonConstants.VESSELS;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.*;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import nz.co.fortytwo.signalk.handler.DeclinationHandler;
@@ -185,7 +186,13 @@ public class SignalKNmeaReceiverTest extends SignalKCamelTestSupport {
 	@Override
 	public void configureRouteBuilder(RouteBuilder routeBuilder) {
 		nmea = (MockEndpoint) routeBuilder.getContext().getEndpoint("mock:output");
-		SignalkRouteFactory.configureInputRoute(routeBuilder, DIRECT_INPUT);
+		try{
+			SignalkRouteFactory.configureInputRoute(routeBuilder, DIRECT_INPUT);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail();
+		}
 		routeBuilder.from(RouteManager.SEDA_NMEA).to(nmea);
 		
 	}

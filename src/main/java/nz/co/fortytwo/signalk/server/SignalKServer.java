@@ -37,6 +37,8 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.webapp.WebAppContext;
 
+import com.sun.tools.jxc.gen.config.Config;
+
 public class SignalKServer {
 
 	private static Server server;
@@ -125,6 +127,11 @@ public class SignalKServer {
 		File logDir = new File(rootDir, "logs");
 		if (!logDir.exists()) {
 			logDir.mkdirs();
+		}
+		// do we have a storage dir?
+		File storageDir = new File(Util.getConfigProperty(Constants.STORAGE_ROOT));
+		if (!storageDir.exists()) {
+			storageDir.mkdirs();
 		}
 
 	}

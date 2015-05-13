@@ -165,7 +165,7 @@ public class RouteManager extends RouteBuilder {
 		staticHandler.setResourceBase(Util.getConfigProperty(Constants.STATIC_DIR));
 		
 		ResourceHandler mapHandler = new ResourceHandler(){
-			private String mapcacheDir = Util.getConfigProperty(Constants.MAP_DIR); 
+			private String mapcacheDir = Util.getConfigProperty(Constants.MAP_DIR_FILTER); 
 			@Override
 			public Resource getResource(String path) throws MalformedURLException {
 				if ((path == null) || (!(path.startsWith("/")))) {
@@ -216,7 +216,8 @@ public class RouteManager extends RouteBuilder {
 		// timed actions
 		SignalkRouteFactory.configureDeclinationTimer(this, "timer://declination?fixedRate=true&period=10000");
 		SignalkRouteFactory.configureWindTimer(this, "timer://wind?fixedRate=true&period=1000");
-		
+		SignalkRouteFactory.configureAnchorWatchTimer(this, "timer://anchorWatch?fixedRate=true&period=1000");
+		SignalkRouteFactory.configureAlarmsTimer(this, "timer://alarms?fixedRate=true&period=1000");
 		//STOMP
 		from("skStomp:queue:signalk.put").id("STOMP In")
 			.setHeader(Constants.OUTPUT_TYPE, constant(Constants.OUTPUT_STOMP))
