@@ -53,14 +53,14 @@ public class StorageProcessor extends SignalkProcessor implements Processor {
 
 		try {
 			if (exchange.getIn().getBody() == null) return;
-			if(logger.isDebugEnabled())logger.debug("Processing :" + exchange.getIn());
+			if(logger.isTraceEnabled())logger.trace("Processing :" + exchange.getIn());
 			if(!(exchange.getIn().getBody() instanceof Json))return;
 			if (FORMAT_DELTA.equals(exchange.getIn().getHeader(SIGNALK_FORMAT))) {
 				Json json = storageHandler.handle(exchange.getIn().getBody(Json.class));
 				if(logger.isDebugEnabled())logger.debug("Processed storage :" + json);
 				exchange.getIn().setBody(json);
 			}
-			if(logger.isDebugEnabled())logger.debug("Outputting :" + exchange.getIn());
+			if(logger.isTraceEnabled())logger.trace("Outputting :" + exchange.getIn());
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}

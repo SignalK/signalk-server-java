@@ -213,6 +213,7 @@ public class SignalkWebSocketServlet extends WebsocketComponentServlet {
 				}
 				
 			};
+			this._webSocketFactory.setMaxTextMessageSize(256*1024);
 			this._webSocketFactory.start();
 
 			String max = getInitParameter("maxIdleTime");
