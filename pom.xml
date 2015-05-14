@@ -9,8 +9,10 @@
 		<!-- <bundle.name>nsb-${project.version}</bundle.name> -->
 		<signalk.core.version>0.0.1-SNAPSHOT</signalk.core.version>
 		<jetty.version>8.1.16.v20140903</jetty.version>
-		<camel.version>2.15.0</camel.version>
-		<camel.core.version>2.15.0</camel.core.version>
+<!-- 		<jetty.version>9.2.9.v20150224</jetty.version> -->
+		
+		<camel.version>2.15.2</camel.version>
+		<camel.core.version>2.15.2</camel.core.version>
 		<jna.version>3.6.0-SNAPSHOT</jna.version>
 		<apollo.version>1.7.1</apollo.version>
 		<activemq.version>5.11.1</activemq.version>

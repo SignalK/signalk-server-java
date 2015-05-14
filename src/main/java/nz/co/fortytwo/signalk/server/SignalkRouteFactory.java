@@ -172,7 +172,7 @@ public class SignalkRouteFactory {
 			
 	}
 	
-	public static void configureRestRoute(RouteBuilder routeBuilder ,String input){
+	public static void configureRestRoute(RouteBuilder routeBuilder ,String input)throws IOException{
 		routeBuilder.from(input).id(getName("REST Api"))
 			.setExchangePattern(ExchangePattern.InOut)
 			.process(new RestApiProcessor()).id(getName(RestApiProcessor.class.getSimpleName()))

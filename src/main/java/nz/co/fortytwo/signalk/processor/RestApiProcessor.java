@@ -23,6 +23,8 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
+import java.io.IOException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -53,7 +55,11 @@ public class RestApiProcessor extends SignalkProcessor implements Processor{
 	private static Logger logger = Logger.getLogger(RestApiProcessor.class);
 	private JsonSerializer ser = new JsonSerializer();
 	
-	private RestApiHandler api = new RestApiHandler();
+	private RestApiHandler api = null;
+	
+	public RestApiProcessor() throws IOException {
+		api =new RestApiHandler();
+	}
 	@Override
 	public void process(Exchange exchange) throws Exception {
 		// the Restlet request should be available if neeeded
@@ -75,9 +81,13 @@ public class RestApiProcessor extends SignalkProcessor implements Processor{
 	                 return;
 	            }
 	            //normal request
-	        	Json model = api.processGet(request, response, signalkModel);
-	        	if(model!=null){
-	        		exchange.getIn().setBody(model.toString());
+	        	Object obj = api.processGet(request, response, signalkModel);
+	        	if(obj!=null){
+	        		if(obj instanceof Json){
+	        			exchange.getIn().setBody(obj.toString());
+	        		}else{
+	        			exchange.getIn().setBody(obj);
+	        		}
 	        	}
 	        	//response codes are set here, so all good now.
 	        }
