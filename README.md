@@ -36,10 +36,10 @@ Current capabilities:
 	* GET - get data matching keys on demand
 	* PUT - send data on demand 
 	* UPDATES - periodic messages.
-	* has http://hawt.io management console on localhost:8000/hawtio
-	
+	* has http://hawt.io management console on localhost:8000/hawtio 
+	* Anchor watch
+	* metadata based alarms and gui configs.
 * Todo:
-	* metadata
 	* _attr based security
 	* on-demand user apps.
 
@@ -50,6 +50,12 @@ You will need Java 1.7+ installed. You need to be able to type 'java' on the com
 
 ```shell
 $ git clone https://github.com/SignalK/signalk-java-server.git
+```
+
+If you want something nice to look at then grab the freeboard-sk project too
+
+```shell
+$ git clone https://github.com/SignalK/freeboard-sk.git
 ```
 
 Then on Linux:
@@ -79,7 +85,7 @@ It will be streaming a demo file and dumping logging to screen. Control logging 
 
 Try `http://localhost:8080/signalk/api/v1/vessels` to see some output. 
 
-You can drill down by adding json fields, eg `http://localhost:8080/signalk/api/v1/vessels/367153070` or `http://localhost:8080/signalk/api/v1/vessels/motu`
+You can drill down by adding json fields, eg `http://localhost:8080/signalk/api/v1/vessels/367153070` or `http://localhost:8080/signalk/api/v1/vessels/self`
 
 The content mime type is application/json, your browser may not display it directly. On firefox just install https://addons.mozilla.org/en-us/firefox/addon/jsonovich/?src=search
 
