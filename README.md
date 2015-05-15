@@ -46,7 +46,9 @@ Current capabilities:
 Installation
 ------------
 
-You will need Java 1.7+ installed. You need to be able to type 'java' on the command line and get java responding, or you need to edit the JAVA_HOME variable in start.sh or start.bat.
+You will need Java 1.7+ installed. You need to be able to type 'java' on the command line and get java responding, or you need to edit the JAVA_HOME variable in start.sh or start.bat. 
+
+Same for `npm`, so install `nodejs` from https://nodejs.org/ The server doesnt need nodejs, but the client installs do use `npm` which comes with it.  
 
 ```shell
 $ git clone https://github.com/SignalK/signalk-java-server.git
