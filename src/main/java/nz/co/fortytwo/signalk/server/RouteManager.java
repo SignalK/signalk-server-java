@@ -164,30 +164,11 @@ public class RouteManager extends RouteBuilder {
 		ResourceHandler staticHandler = new ResourceHandler();
 		staticHandler.setResourceBase(Util.getConfigProperty(Constants.STATIC_DIR));
 		
-		ResourceHandler mapHandler = new ResourceHandler(){
-			private String mapcacheDir = Util.getConfigProperty(Constants.MAP_DIR_FILTER); 
-			@Override
-			public Resource getResource(String path) throws MalformedURLException {
-				if ((path == null) || (!(path.startsWith("/")))) {
-					throw new MalformedURLException(path);
-				}
-				//
-				if(!path.startsWith(mapcacheDir)){
-					//logger.debug("Wrong map path: "+path);
-					return null;
-				}
-				return super.getResource(path);
-			}
-		};
-		mapHandler.setResourceBase(Util.getConfigProperty(Constants.MAP_DIR));
-		mapHandler.setDirectoriesListed(true);
-		mapHandler.getBaseResource();
-		
 		//bind in registry
 		PropertyPlaceholderDelegateRegistry registry = (PropertyPlaceholderDelegateRegistry) CamelContextFactory.getInstance().getRegistry(); 
 		//static files
 		((JndiRegistry)registry.getRegistry()).bind("staticHandler",staticHandler );
-		((JndiRegistry)registry.getRegistry()).bind("mapHandler",mapHandler );
+		
 		//websockets
 		if(CamelContextFactory.getInstance().getComponent("skWebsocket")==null){
 			CamelContextFactory.getInstance().addComponent("skWebsocket", new SignalkWebsocketComponent());
@@ -196,7 +177,6 @@ public class RouteManager extends RouteBuilder {
 		if(CamelContextFactory.getInstance().getComponent("skStomp")==null){
 			CamelContextFactory.getInstance().addComponent("skStomp", new SkStompComponent());
 		}
-		
 		
 		//setup routes
 		SignalkRouteFactory.configureWebsocketTxRoute(this, SEDA_WEBSOCKETS, wsPort);
@@ -209,9 +189,10 @@ public class RouteManager extends RouteBuilder {
 		
 		SignalkRouteFactory.configureHeartbeatRoute(this,"timer://heartbeat?fixedRate=true&period=1000");
 		
-		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true&handlers=#mapHandler,#staticHandler&enableJMX=true");//&handlers=#staticHandler
+		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true&handlers=#staticHandler&enableJMX=true");//&handlers=#mapHandler,#staticHandler
 		SignalkRouteFactory.configureAuthRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_AUTH+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true");
-		
+		SignalkRouteFactory.configureInstallRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_INSTALL+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true", "REST Install");
+		SignalkRouteFactory.configureInstallRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_UPGRADE+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true", "REST Upgrade");
 		
 		// timed actions
 		SignalkRouteFactory.configureDeclinationTimer(this, "timer://declination?fixedRate=true&period=10000");

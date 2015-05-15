@@ -31,6 +31,7 @@ import java.util.Set;
 import nz.co.fortytwo.signalk.processor.AISProcessor;
 import nz.co.fortytwo.signalk.processor.AlarmProcessor;
 import nz.co.fortytwo.signalk.processor.AnchorWatchProcessor;
+import nz.co.fortytwo.signalk.processor.ClientAppProcessor;
 import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
 import nz.co.fortytwo.signalk.processor.DeltaImportProcessor;
 import nz.co.fortytwo.signalk.processor.FullExportProcessor;
@@ -183,6 +184,12 @@ public class SignalkRouteFactory {
 		routeBuilder.from(input).id(getName("REST Authenticate"))
 			.setExchangePattern(ExchangePattern.InOut)
 			.process(new RestAuthProcessor()).id(getName(RestAuthProcessor.class.getSimpleName()));
+		}
+	
+	public static void configureInstallRoute(RouteBuilder routeBuilder ,String input, String name){
+		routeBuilder.from(input).id(getName(name))
+			.setExchangePattern(ExchangePattern.InOut)
+			.process(new ClientAppProcessor()).id(getName(ClientAppProcessor.class.getSimpleName()));
 		}
 	
 	public static void configureDeclinationTimer(RouteBuilder routeBuilder ,String input){
