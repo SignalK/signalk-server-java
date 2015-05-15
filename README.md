@@ -30,6 +30,7 @@ Current capabilities:
 	* Serial
 	* USB
 * Supports:
+    * *NEW: On-demand user apps*, sort of works, anyway :-)  Bit early for some of the apps yet.
 	* Delta and Full signalk formats, and translations between them.
 	* Subscriptions, with * and ? wildcards. Configurable format, period and delivery policy
 	* LIST - get a list of available signalk keys with * and ? wildcard support
@@ -41,7 +42,6 @@ Current capabilities:
 	* metadata based alarms and gui configs.
 * Todo:
 	* _attr based security
-	* on-demand user apps.
 
 Installation
 ------------
@@ -50,12 +50,6 @@ You will need Java 1.7+ installed. You need to be able to type 'java' on the com
 
 ```shell
 $ git clone https://github.com/SignalK/signalk-java-server.git
-```
-
-If you want something nice to look at then grab the freeboard-sk project too
-
-```shell
-$ git clone https://github.com/SignalK/freeboard-sk.git
 ```
 
 Then on Linux:
@@ -69,7 +63,7 @@ Use the startpc.bat file to launch.
 
 _NOTE: ports have changed to 8080 and 3000, and REST api now has /v1 appended_
 
-You should now have a SignalK server running:
+You should now have a SignalK server running, on http://localhost:8080. There is a menu page there that allows you to access the following:
 
 * hawt.io management console on `http://localhost:8000/hawtio`
 * webserver on `http://localhost:8080` 
@@ -82,12 +76,6 @@ You should now have a SignalK server running:
 * nmea output will be streamed as UDP over port 5556.
 
 It will be streaming a demo file and dumping logging to screen. Control logging by editing conf/log4j.properties.
-
-Try `http://localhost:8080/signalk/api/v1/vessels` to see some output. 
-
-You can drill down by adding json fields, eg `http://localhost:8080/signalk/api/v1/vessels/367153070` or `http://localhost:8080/signalk/api/v1/vessels/self`
-
-The content mime type is application/json, your browser may not display it directly. On firefox just install https://addons.mozilla.org/en-us/firefox/addon/jsonovich/?src=search
 
 It currently streams out a demo file taken from a boat sailing in a race in San Francisco. The output includes AIS data. 
 If you edit the `conf/signalk.cfg` file and make `signalk.demo=false` (default=true), then it will stop doing that.
