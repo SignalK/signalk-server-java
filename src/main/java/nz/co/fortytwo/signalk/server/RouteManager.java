@@ -126,9 +126,12 @@ public class RouteManager extends RouteBuilder {
 			log.info("   Saved state not found");
 		}
 		
-		// init processors who depend on this being started
 		
-
+		//set shutdown quickly, 5 min is too long
+		CamelContextFactory.getInstance().getShutdownStrategy().setShutdownNowOnTimeout(true);
+		CamelContextFactory.getInstance().getShutdownStrategy().setTimeout(10000);
+		
+		// init processors who depend on this being started
 		// dump nulls, but avoid quartz jobs
 		//List<Predicate> predicates = new ArrayList<Predicate>();
 		//predicates.add(header(Exchange.TIMER_FIRED_TIME).isNull());
