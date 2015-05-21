@@ -26,6 +26,7 @@ package nz.co.fortytwo.signalk.server;
 import java.io.File;
 import java.util.Properties;
 
+import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.util.Constants;
 import nz.co.fortytwo.signalk.util.Util;
 
@@ -85,6 +86,8 @@ public class SignalKServer {
 		routeManager.stopSerial();
 		server.stop();
 		broker.stop();
+		//write out the signalk model
+		SignalKModelFactory.save(SignalKModelFactory.getInstance());
 		System.exit(0);
 	}
 
@@ -121,7 +124,7 @@ public class SignalKServer {
 
 		File rootDir = new File(".");
 		if (Util.cfg != null) {
-			rootDir = Util.cfg.getParentFile();
+			rootDir = Util.cfg.getParentFile().getParentFile();
 		}
 		// do we have a log dir?
 		File logDir = new File(rootDir, "logs");

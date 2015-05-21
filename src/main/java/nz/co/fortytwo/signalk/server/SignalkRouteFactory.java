@@ -49,6 +49,7 @@ import nz.co.fortytwo.signalk.processor.NMEAProcessor;
 import nz.co.fortytwo.signalk.processor.OutputFilterProcessor;
 import nz.co.fortytwo.signalk.processor.RestApiProcessor;
 import nz.co.fortytwo.signalk.processor.RestAuthProcessor;
+import nz.co.fortytwo.signalk.processor.SaveProcessor;
 import nz.co.fortytwo.signalk.processor.SignalkModelProcessor;
 import nz.co.fortytwo.signalk.processor.StompProcessor;
 import nz.co.fortytwo.signalk.processor.StorageProcessor;
@@ -192,8 +193,9 @@ public class SignalkRouteFactory {
 			.process(new ClientAppProcessor()).id(getName(ClientAppProcessor.class.getSimpleName()));
 		}
 	
-	public static void configureDeclinationTimer(RouteBuilder routeBuilder ,String input){
+	public static void configureBackgroundTimer(RouteBuilder routeBuilder ,String input){
 		routeBuilder.from(input).id(getName("Declination"))
+			.process(new SaveProcessor()).id(getName(SaveProcessor.class.getSimpleName()))
 			.process(new DeclinationProcessor()).id(getName(DeclinationProcessor.class.getSimpleName()))
 			.to("log:nz.co.fortytwo.signalk.model.update?level=DEBUG").end();
 	}

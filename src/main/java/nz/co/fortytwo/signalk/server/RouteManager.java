@@ -110,21 +110,7 @@ public class RouteManager extends RouteBuilder {
 	}
 	public void configure0() throws Exception {
 		
-		File jsonFile = new File("./conf/self.json");
-		log.info("Checking for previous state: "+jsonFile.getAbsolutePath());
-		if(jsonFile.exists()){
-			try{
-				
-				Json temp = Json.read(jsonFile.toURI().toURL());
-				JsonSerializer ser = new JsonSerializer();
-				signalkModel.putAll(ser.read(temp));
-				log.info("   Saved state found");
-			}catch(Exception ex){
-				System.out.println(ex.getMessage());
-			}
-		}else{
-			log.info("   Saved state not found");
-		}
+		SignalKModelFactory.load(signalkModel);
 		
 		
 		//set shutdown quickly, 5 min is too long
@@ -198,7 +184,7 @@ public class RouteManager extends RouteBuilder {
 		SignalkRouteFactory.configureInstallRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_UPGRADE+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true", "REST Upgrade");
 		
 		// timed actions
-		SignalkRouteFactory.configureDeclinationTimer(this, "timer://declination?fixedRate=true&period=10000");
+		SignalkRouteFactory.configureBackgroundTimer(this, "timer://background?fixedRate=true&period=60000");
 		SignalkRouteFactory.configureWindTimer(this, "timer://wind?fixedRate=true&period=1000");
 		SignalkRouteFactory.configureAnchorWatchTimer(this, "timer://anchorWatch?fixedRate=true&period=1000");
 		SignalkRouteFactory.configureAlarmsTimer(this, "timer://alarms?fixedRate=true&period=1000");
