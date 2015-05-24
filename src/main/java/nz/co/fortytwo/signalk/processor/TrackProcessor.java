@@ -51,6 +51,9 @@ import org.joda.time.DateTime;
  */
 public class TrackProcessor extends SignalkProcessor implements Processor {
 
+	private static final String COORDINATES = "coordinates";
+	private static final String GEOMETRY = "geometry";
+	private static final String FEATURES = "features";
 	private static Logger logger = Logger.getLogger(TrackProcessor.class);
 	private static String latKey = vessels_dot_self_dot + nav_position_latitude;
 	private static String lonKey = vessels_dot_self_dot + nav_position_longitude;
@@ -73,10 +76,10 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 		currentTrack.set("type", "routes");
 		currentTrack.set("key", "currentTrack");
 		currentTrack.set("description", "Auto saved current track");
-		currentTrack.set(Constants.MIME_TYPE, "application/vnd.geo+json");
+		currentTrack.set(Constants.MIME_TYPE, Constants.MIME_TYPE_JSON);
 		Json geoJson = Json.read(geojson);
-		geometry = geoJson.at("features").at(0).at("geometry");
-		coords = geometry.at("coordinates");
+		geometry = geoJson.at(FEATURES).at(0).at(GEOMETRY);
+		coords = geometry.at(COORDINATES);
 		currentTrack.set(Constants.PAYLOAD, geoJson);
 		Json values = Json.array();
 		values.add(val);
@@ -126,7 +129,7 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 				//simplify to about 2m out of true (at equator)
 				if(logger.isDebugEnabled())logger.debug("Simplify Track, size:"+coords.asList().size());//+":"+coords);
 				coords = SGImplify.simplifyLine2D(0.00002, coords);
-				geometry.set("coordinates", coords);
+				geometry.set(COORDINATES, coords);
 				if(logger.isDebugEnabled())logger.debug("  done, size:"+coords.asList().size());
 				count = coords.asList().size();
 			}
