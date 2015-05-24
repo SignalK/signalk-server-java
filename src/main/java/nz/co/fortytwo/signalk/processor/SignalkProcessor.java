@@ -58,6 +58,7 @@ public class SignalkProcessor {
 	//@Produce(uri = RouteManager.SEDA_NMEA )
     ProducerTemplate nmeaProducer;
     ProducerTemplate outProducer;
+    ProducerTemplate inProducer;
 	public static final String DOT = ".";
 	public static final String VESSELS_DOT_SELF = JsonConstants.VESSELS + ".self";
     
@@ -68,9 +69,12 @@ public class SignalkProcessor {
 		nmeaProducer.setDefaultEndpointUri(RouteManager.SEDA_NMEA );
 		outProducer= new DefaultProducerTemplate(CamelContextFactory.getInstance());
 		outProducer.setDefaultEndpointUri(RouteManager.SEDA_COMMON_OUT );
+		inProducer= new DefaultProducerTemplate(CamelContextFactory.getInstance());
+		inProducer.setDefaultEndpointUri(RouteManager.SEDA_INPUT );
 		try {
 			nmeaProducer.start();
 			outProducer.start();
+			inProducer.start();
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
 		}

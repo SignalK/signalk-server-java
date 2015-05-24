@@ -23,21 +23,13 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import static nz.co.fortytwo.signalk.util.JsonConstants.POLICY_FIXED;
-
 import java.io.IOException;
-import java.util.HashMap;
 
-import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.event.PathEvent;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
-import nz.co.fortytwo.signalk.processor.FullExportProcessor.MsgSender;
-import nz.co.fortytwo.signalk.server.Subscription;
-import nz.co.fortytwo.signalk.util.Constants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.log4j.Logger;
 
 import com.google.common.eventbus.DeadEvent;
@@ -101,7 +93,7 @@ public class SaveProcessor extends SignalkProcessor implements Processor {
 		public void run() {
 			
 			while (true) {
-				if (System.currentTimeMillis() - lastSave > 10000) {
+				if (System.currentTimeMillis() - lastSave > 60000) {
 					try {
 						SignalKModelFactory.save(signalkModel);
 						lastSave = System.currentTimeMillis();

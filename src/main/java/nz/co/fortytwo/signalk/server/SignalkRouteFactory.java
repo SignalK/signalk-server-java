@@ -53,6 +53,7 @@ import nz.co.fortytwo.signalk.processor.SaveProcessor;
 import nz.co.fortytwo.signalk.processor.SignalkModelProcessor;
 import nz.co.fortytwo.signalk.processor.StompProcessor;
 import nz.co.fortytwo.signalk.processor.StorageProcessor;
+import nz.co.fortytwo.signalk.processor.TrackProcessor;
 import nz.co.fortytwo.signalk.processor.ValidationProcessor;
 import nz.co.fortytwo.signalk.processor.WindProcessor;
 import nz.co.fortytwo.signalk.processor.WsSessionProcessor;
@@ -114,6 +115,8 @@ public class SignalkRouteFactory {
 		.process(new FullImportProcessor()).id(getName(FullImportProcessor.class.getSimpleName()))
 		//make sure we have timestamp/source
 		.process(new ValidationProcessor()).id(getName(ValidationProcessor.class.getSimpleName()))
+		//record track
+		.process(new TrackProcessor()).id(getName(TrackProcessor.class.getSimpleName()))
 		//and update signalk model
 		.process(new SignalkModelProcessor()).id(getName(SignalkModelProcessor.class.getSimpleName()));
 		
