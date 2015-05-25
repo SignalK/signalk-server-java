@@ -88,7 +88,7 @@ public class SignalkRouteFactory {
 	 * @throws IOException 
 	 * @throws Exception 
 	 */
-	public static void configureInputRoute(RouteBuilder routeBuilder,String input) throws IOException {
+	public static void configureInputRoute(RouteBuilder routeBuilder,String input) throws Exception {
 		routeBuilder.from(input).id(getName("INPUT"))
 			.onException(Exception.class).handled(true).maximumRedeliveries(0)
 			.to("log:nz.co.fortytwo.signalk.model.receive?level=ERROR&showException=true&showStackTrace=true")

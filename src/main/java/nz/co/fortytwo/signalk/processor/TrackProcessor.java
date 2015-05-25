@@ -23,7 +23,11 @@
 package nz.co.fortytwo.signalk.processor;
 
 import static nz.co.fortytwo.signalk.util.SignalKConstants.*;
+
+import java.io.IOException;
+
 import mjson.Json;
+import nz.co.fortytwo.signalk.handler.JsonStorageHandler;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.util.Constants;
 import nz.co.fortytwo.signalk.util.JsonConstants;
@@ -50,6 +54,7 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 	private static Logger logger = Logger.getLogger(TrackProcessor.class);
 	private static String latKey = vessels_dot_self_dot + nav_position_latitude;
 	private static String lonKey = vessels_dot_self_dot + nav_position_longitude;
+	private JsonStorageHandler storageHandler = null;
 	private Json msg = Json.object();
 	private Json currentTrack;
 	private Json coords;
@@ -59,8 +64,8 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 	private static int saveCount = 60;
 	private static int count = 0;
 
-	public TrackProcessor() {
-
+	public TrackProcessor() throws Exception {
+		storageHandler = new JsonStorageHandler();
 		Json val = Json.object();
 		val.set(JsonConstants.PATH, resources_routes+dot+SignalKConstants.currentTrack);
 		currentTrack = Json.object();
@@ -70,10 +75,7 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 		currentTrack.set(key, SignalKConstants.currentTrack);
 		currentTrack.set("description", "Auto saved current track");
 		currentTrack.set(Constants.MIME_TYPE, Constants.MIME_TYPE_JSON);
-		Json geoJson = Json.read(geojson);
-		geometry = geoJson.at(FEATURES).at(0).at(GEOMETRY);
-		coords = geometry.at(COORDINATES);
-		currentTrack.set(Constants.PAYLOAD, geoJson);
+		
 		Json values = Json.array();
 		values.add(val);
 
@@ -87,6 +89,20 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 
 		msg.set(JsonConstants.CONTEXT, VESSELS_DOT_SELF);
 		msg.set(JsonConstants.PUT, updates);
+		//do we have an existing one? we dont want to stomp on it
+		currentTrack.set("uri", "vessels/self/resources/routes/currentTrack.geojson");
+		try{
+			storageHandler.handle(msg);
+			//should now have any existing track, so archive it, and start fresh
+			archiveTrack(msg);
+		}catch(IOException io){
+			//no file, or unreadable
+			currentTrack.delAt("uri");
+		}
+		Json geoJson = Json.read(geojson);
+		geometry = geoJson.at(FEATURES).at(0).at(GEOMETRY);
+		coords = geometry.at(COORDINATES);
+		currentTrack.set(Constants.PAYLOAD, geoJson);
 
 	}
 
@@ -115,7 +131,7 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 			// append to file
 			if (count % saveCount == 0) {
 				// save it
-				if(logger.isDebugEnabled())logger.debug("Track:"+msg);
+				//if(logger.isDebugEnabled())logger.debug("Track:"+msg);
 				inProducer.sendBody(msg.toString());
 			}
 			if(count % (saveCount*4) == 0){
@@ -128,19 +144,25 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 			}
 			// reset?
 			if(count>maxCount){
-				Json lastTrack = msg.dup();
-				if(logger.isDebugEnabled())logger.debug("Rotate Track to File, size:"+coords.asList().size());
-				Json val = lastTrack.at(JsonConstants.PUT).at(0).at(JsonConstants.VALUES).at(0);
-				String time = Util.getIsoTimeString();
-				time =  time.substring(0, time.indexOf("."));
-				val.set(JsonConstants.PATH, resources_routes+dot+SignalKConstants.currentTrack+time);
-				val.at(value).set(name, "Track at "+time);
-				currentTrack.set(key, SignalKConstants.currentTrack+time);
-				inProducer.sendBody(lastTrack.toString());
+				archiveTrack(msg);
 				count = 0;
 				coords.asJsonList().clear();
-			
 			}
 		}
+	}
+
+	private void archiveTrack(Json message) {
+		Json lastTrack = message.dup();
+		String time = Util.getIsoTimeString();
+		if(logger.isDebugEnabled())logger.debug("Archive Track to File:"+SignalKConstants.currentTrack+time);
+		Json val = lastTrack.at(JsonConstants.PUT).at(0).at(JsonConstants.VALUES).at(0);
+		
+		time =  time.substring(0, time.indexOf("."));
+		val.set(JsonConstants.PATH, resources_routes+dot+SignalKConstants.currentTrack+time);
+		val.at(value).set(name, "Track at "+time);
+		currentTrack.set(key, SignalKConstants.currentTrack+time);
+		inProducer.sendBody(lastTrack.toString());
+		
+		
 	}
 }

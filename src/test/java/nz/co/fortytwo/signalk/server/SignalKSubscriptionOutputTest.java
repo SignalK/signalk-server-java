@@ -151,7 +151,7 @@ public class SignalKSubscriptionOutputTest extends SignalKCamelTestSupport {
 		output = (MockEndpoint) routeBuilder.getContext().getEndpoint("mock:output");
 		try{
 			SignalkRouteFactory.configureInputRoute(routeBuilder, DIRECT_INPUT);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			fail();
