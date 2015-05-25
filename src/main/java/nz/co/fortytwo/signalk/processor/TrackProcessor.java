@@ -22,20 +22,13 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import static nz.co.fortytwo.signalk.util.SignalKConstants.dot;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.name;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position_latitude;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position_longitude;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.resources_routes;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.source;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.timestamp;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.value;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels_dot_self_dot;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.*;
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.util.Constants;
 import nz.co.fortytwo.signalk.util.JsonConstants;
 import nz.co.fortytwo.signalk.util.SGImplify;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Exchange;
@@ -69,12 +62,12 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 	public TrackProcessor() {
 
 		Json val = Json.object();
-		val.set(JsonConstants.PATH, resources_routes+dot+"currentTrack");
+		val.set(JsonConstants.PATH, resources_routes+dot+SignalKConstants.currentTrack);
 		currentTrack = Json.object();
 		val.set(value, currentTrack);
 		currentTrack.set(name, "Current Track");
-		currentTrack.set("type", "routes");
-		currentTrack.set("key", "currentTrack");
+		currentTrack.set(type, routes);
+		currentTrack.set(key, SignalKConstants.currentTrack);
 		currentTrack.set("description", "Auto saved current track");
 		currentTrack.set(Constants.MIME_TYPE, Constants.MIME_TYPE_JSON);
 		Json geoJson = Json.read(geojson);
@@ -140,9 +133,9 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 				Json val = lastTrack.at(JsonConstants.PUT).at(0).at(JsonConstants.VALUES).at(0);
 				String time = Util.getIsoTimeString();
 				time =  time.substring(0, time.indexOf("."));
-				val.set(JsonConstants.PATH, resources_routes+dot+"currentTrack"+time);
+				val.set(JsonConstants.PATH, resources_routes+dot+SignalKConstants.currentTrack+time);
 				val.at(value).set(name, "Track at "+time);
-				currentTrack.set("key", "currentTrack"+time);
+				currentTrack.set(key, SignalKConstants.currentTrack+time);
 				inProducer.sendBody(lastTrack.toString());
 				count = 0;
 				coords.asJsonList().clear();
