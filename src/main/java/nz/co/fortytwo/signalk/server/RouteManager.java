@@ -30,16 +30,20 @@ import java.util.Properties;
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
+import nz.co.fortytwo.signalk.processor.OutputFilterProcessor;
+import nz.co.fortytwo.signalk.processor.RestApiProcessor;
 import nz.co.fortytwo.signalk.util.Constants;
 import nz.co.fortytwo.signalk.util.JsonConstants;
 import nz.co.fortytwo.signalk.util.JsonSerializer;
 import nz.co.fortytwo.signalk.util.Util;
 
+import org.apache.camel.ExchangePattern;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.stomp.SkStompComponent;
 import org.apache.camel.component.websocket.SignalkWebsocketComponent;
 import org.apache.camel.impl.JndiRegistry;
 import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.handler.ContextHandler;
@@ -198,6 +202,33 @@ public class RouteManager extends RouteBuilder {
 			.setHeader(Constants.OUTPUT_TYPE, constant(Constants.OUTPUT_MQTT))
 			.to(SEDA_INPUT).id(SignalkRouteFactory.getName("SEDA_INPUT"));
 		
+		//start any clients if they exist
+		//TCP
+		String tcpClients = Util.getConfigProperty(Constants.CLIENT_TCP);
+		if(StringUtils.isNotBlank(tcpClients)){
+			//set up listeners
+			String[] clients = tcpClients.split(",");
+			for(String client: clients){
+				from("netty4:tcp://"+client+"?clientMode=true&textline=true").id("TCP Client:"+client)
+					.onException(Exception.class).handled(true).maximumRedeliveries(0)
+						.to("log:nz.co.fortytwo.signalk.client.tcp?level=ERROR&showException=true&showStackTrace=true")
+						.end().transform(body().convertToString())
+					.to(SEDA_INPUT);
+			}
+		}
+		//MQTT
+		String mqttClients = Util.getConfigProperty(Constants.CLIENT_MQTT);
+		if(StringUtils.isNotBlank(mqttClients)){
+			//set up listeners
+			String[] clients = mqttClients.split(",");
+			for(String client: clients){
+				from("mqtt://"+client).id("TCP Client:"+client)
+					.onException(Exception.class).handled(true).maximumRedeliveries(0)
+						.to("log:nz.co.fortytwo.signalk.client.mqtt?level=ERROR&showException=true&showStackTrace=true")
+						.end().transform(body().convertToString())
+					.to(SEDA_INPUT);
+			}
+		}
 		//WebsocketEndpoint wsEndpoint = (WebsocketEndpoint) getContext().getEndpoint("websocket://0.0.0.0:"+wsPort+JsonConstants.SIGNALK_WS);
 		if (Boolean.valueOf(Util.getConfigProperty(Constants.DEMO))) {
 			from("file://./src/test/resources/samples/?move=done&fileName=" + streamUrl).id("demo feed")
