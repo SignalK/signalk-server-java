@@ -30,6 +30,7 @@ Current capabilities:
 	* Serial
 	* USB
 * Supports:
+	* *NEW: TCP and MQTT clients* (listen to remote servers)
     * *NEW: On-demand user apps*, sort of works, anyway :-)  Bit early for some of the apps yet.
 	* Delta and Full signalk formats, and translations between them.
 	* Subscriptions, with * and ? wildcards. Configurable format, period and delivery policy
@@ -40,6 +41,7 @@ Current capabilities:
 	* has http://hawt.io management console on localhost:8000/hawtio 
 	* Anchor watch
 	* metadata based alarms and gui configs.
+	
 * Todo:
 	* _attr based security
 
