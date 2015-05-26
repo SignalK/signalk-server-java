@@ -119,7 +119,7 @@ public class RouteManager extends RouteBuilder {
 		
 		//set shutdown quickly, 5 min is too long
 		CamelContextFactory.getInstance().getShutdownStrategy().setShutdownNowOnTimeout(true);
-		CamelContextFactory.getInstance().getShutdownStrategy().setTimeout(10000);
+		CamelContextFactory.getInstance().getShutdownStrategy().setTimeout(10);
 		
 		// init processors who depend on this being started
 		// dump nulls, but avoid quartz jobs

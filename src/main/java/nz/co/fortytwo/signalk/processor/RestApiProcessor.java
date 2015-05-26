@@ -77,7 +77,7 @@ public class RestApiProcessor extends SignalkProcessor implements Processor{
 	            	response.setContentType("application/json");
 	                 // SEND RESPONSE
 	                 response.setStatus(HttpServletResponse.SC_OK);
-	                 exchange.getIn().setBody(Util.getAddressesMsg().toString());
+	                 exchange.getIn().setBody(Util.getAddressesMsg(request.getServerName()).toString());
 	                 return;
 	            }
 	            //normal request
