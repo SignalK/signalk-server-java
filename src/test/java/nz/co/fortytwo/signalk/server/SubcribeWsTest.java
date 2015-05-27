@@ -77,7 +77,7 @@ public class SubcribeWsTest extends SignalKCamelTestSupport{
         assertEquals(200, r1.getStatusCode());
         Response r2 = c.prepareGet("http://localhost:"+restPort+SIGNALK_API+"/addresses").setCookies(r1.getCookies()).execute().get();
         Json json = Json.read(r2.getResponseBody());
-        assertEquals("ws://"+InetAddress.getLocalHost().getCanonicalHostName()+":"+wsPort+SIGNALK_WS, json.at(websocketUrl).asString());
+        assertEquals("ws://localhost:"+wsPort+SIGNALK_WS, json.at(websocketUrl).asString());
         c.close();
 	}
 	
