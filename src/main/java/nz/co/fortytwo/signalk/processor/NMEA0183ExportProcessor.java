@@ -45,51 +45,29 @@ public class NMEA0183ExportProcessor extends SignalkProcessor implements Process
 	public void process(Exchange exchange) throws Exception {
 		
 		try {
-			String nmea = handler.createRMC(signalkModel);
-			logger.debug("RMC: "+nmea);
-			if(nmea!=null){
-				nmeaProducer.sendBodyAndHeader(nmea, WebsocketConstants.CONNECTION_KEY, WebsocketConstants.SEND_TO_ALL);
-			}
-			nmea = handler.createDBT(signalkModel);
-			logger.debug("RMC: "+nmea);
-			if(nmea!=null){
-				nmeaProducer.sendBodyAndHeader(nmea, WebsocketConstants.CONNECTION_KEY, WebsocketConstants.SEND_TO_ALL);
-			}
-			nmea = handler.createHDG(signalkModel);
-			logger.debug("HDG: "+nmea);
-			if(nmea!=null){
-				nmeaProducer.sendBodyAndHeader(nmea, WebsocketConstants.CONNECTION_KEY, WebsocketConstants.SEND_TO_ALL);
-			}
-			nmea = handler.createHDT(signalkModel);
-			logger.debug("HDT: "+nmea);
-			if(nmea!=null){
-				nmeaProducer.sendBodyAndHeader(nmea, WebsocketConstants.CONNECTION_KEY, WebsocketConstants.SEND_TO_ALL);
-			}
-			nmea = handler.createHDM(signalkModel);
-			logger.debug("HDM: "+nmea);
-			if(nmea!=null){
-				nmeaProducer.sendBodyAndHeader(nmea, WebsocketConstants.CONNECTION_KEY, WebsocketConstants.SEND_TO_ALL);
-			}
-			nmea = handler.createMWVApparent(signalkModel);
-			logger.debug("MWV Apparent: "+nmea);
-			if(nmea!=null){
-				nmeaProducer.sendBodyAndHeader(nmea, WebsocketConstants.CONNECTION_KEY, WebsocketConstants.SEND_TO_ALL);
-			}
-			nmea = handler.createMWVTrue(signalkModel);
-			logger.debug("MWV True: "+nmea);
-			if(nmea!=null){
-				nmeaProducer.sendBodyAndHeader(nmea, WebsocketConstants.CONNECTION_KEY, WebsocketConstants.SEND_TO_ALL);
-			}
-			nmea = handler.createVHW(signalkModel);
-			logger.debug("VHW: "+nmea);
-			if(nmea!=null){
-				nmeaProducer.sendBodyAndHeader(nmea, WebsocketConstants.CONNECTION_KEY, WebsocketConstants.SEND_TO_ALL);
-			}
-				
+			sendNmea(handler.createRMC(signalkModel));
+			sendNmea(handler.createDBT(signalkModel));	
+			sendNmea(handler.createGLL(signalkModel));		
+			sendNmea(handler.createVTG(signalkModel));	
+			sendNmea(handler.createHDG(signalkModel));	
+			sendNmea(handler.createHDT(signalkModel));
+			sendNmea(handler.createHDM(signalkModel));
+			sendNmea(handler.createMWVApparent(signalkModel));	
+			sendNmea(handler.createMWVTrue(signalkModel));	
+			sendNmea(handler.createVHW(signalkModel));
 			
 		} catch (Exception e) {
-			logger.error(e);
+			logger.error(e.getMessage());
+			logger.debug(e.getMessage(),e);
 		}
+	}
+
+	private void sendNmea(String nmea) {
+		if(logger.isDebugEnabled())logger.debug("Sending: "+nmea);
+		if(nmea!=null){
+			nmeaProducer.sendBodyAndHeader(nmea, WebsocketConstants.CONNECTION_KEY, WebsocketConstants.SEND_TO_ALL);
+		}
+		
 	}
 
 }
