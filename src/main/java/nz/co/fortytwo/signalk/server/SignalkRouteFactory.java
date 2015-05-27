@@ -45,6 +45,7 @@ import nz.co.fortytwo.signalk.processor.JsonSubscribeProcessor;
 import nz.co.fortytwo.signalk.processor.MapToJsonProcessor;
 import nz.co.fortytwo.signalk.processor.MqttProcessor;
 import nz.co.fortytwo.signalk.processor.N2KProcessor;
+import nz.co.fortytwo.signalk.processor.NMEA0183ExportProcessor;
 import nz.co.fortytwo.signalk.processor.NMEAProcessor;
 import nz.co.fortytwo.signalk.processor.OutputFilterProcessor;
 import nz.co.fortytwo.signalk.processor.RestApiProcessor;
@@ -206,6 +207,11 @@ public class SignalkRouteFactory {
 	public static void configureAlarmsTimer(RouteBuilder routeBuilder ,String input){
 		routeBuilder.from(input).id(getName("Alarms"))
 			.process(new AlarmProcessor()).id(getName(AlarmProcessor.class.getSimpleName()))
+			.to("log:nz.co.fortytwo.signalk.model.update?level=DEBUG").end();
+	}
+	public static void configureNMEA0183Timer(RouteBuilder routeBuilder ,String input){
+		routeBuilder.from(input).id(getName("NMEA0183"))
+			.process(new NMEA0183ExportProcessor()).id(getName(NMEA0183ExportProcessor.class.getSimpleName()))
 			.to("log:nz.co.fortytwo.signalk.model.update?level=DEBUG").end();
 	}
 	

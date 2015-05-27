@@ -192,6 +192,7 @@ public class RouteManager extends RouteBuilder {
 		SignalkRouteFactory.configureWindTimer(this, "timer://wind?fixedRate=true&period=1000");
 		SignalkRouteFactory.configureAnchorWatchTimer(this, "timer://anchorWatch?fixedRate=true&period=1000");
 		SignalkRouteFactory.configureAlarmsTimer(this, "timer://alarms?fixedRate=true&period=1000");
+		SignalkRouteFactory.configureNMEA0183Timer(this, "timer://nmea0183?fixedRate=true&period=1000");
 		//STOMP
 		from("skStomp:queue:signalk.put").id("STOMP In")
 			.setHeader(Constants.OUTPUT_TYPE, constant(Constants.OUTPUT_STOMP))
@@ -222,14 +223,16 @@ public class RouteManager extends RouteBuilder {
 			//set up listeners
 			String[] clients = mqttClients.split(",");
 			for(String client: clients){
-				from("mqtt://"+client).id("TCP Client:"+client)
+				from("mqtt://"+client).id("MQTT Client:"+client)
 					.onException(Exception.class).handled(true).maximumRedeliveries(0)
 						.to("log:nz.co.fortytwo.signalk.client.mqtt?level=ERROR&showException=true&showStackTrace=true")
 						.end().transform(body().convertToString())
 					.to(SEDA_INPUT);
 			}
 		}
-		//WebsocketEndpoint wsEndpoint = (WebsocketEndpoint) getContext().getEndpoint("websocket://0.0.0.0:"+wsPort+JsonConstants.SIGNALK_WS);
+		
+		
+		//Demo mode
 		if (Boolean.valueOf(Util.getConfigProperty(Constants.DEMO))) {
 			from("file://./src/test/resources/samples/?move=done&fileName=" + streamUrl).id("demo feed")
 				.onException(Exception.class).handled(true).maximumRedeliveries(0)
