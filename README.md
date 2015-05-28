@@ -48,9 +48,20 @@ Current capabilities:
 Installation
 ------------
 
-You will need Java 1.7+ installed. You need to be able to type 'java' on the command line and get java responding, or you need to edit the JAVA_HOME variable in start.sh or start.bat. 
+You will need Java 1.7+ installed, and git. You need to be able to type 'java' on the command line and get java responding, or you need to edit the JAVA_HOME variable in start.sh or start.bat. 
 
-Same for `npm`, so install `nodejs` from https://nodejs.org/ The server doesnt need nodejs, but the client installs do use `npm` which comes with it.  
+Same for `npm`, so install `nodejs` from https://nodejs.org/ The server doesnt need nodejs, but the client installs do use `npm` which comes with it.
+
+On linux just use the package manager, eg for debian:
+```shell
+$ sudo apt-get install npm
+//On debian/ubuntu linux 'node' binary installs as 'nodejs' so you need to do:
+$ sudo ln /usr/bin/nodejs /usr/bin/node  
+//Once npm is installed you need to install bower
+$ sudo npm install -g bower
+```
+
+Thats all the prep, then:
 
 ```shell
 $ git clone https://github.com/SignalK/signalk-java-server.git
@@ -59,7 +70,7 @@ $ git clone https://github.com/SignalK/signalk-java-server.git
 Then on Linux:
 
 ```shell
-$ cd Signalk-server
+$ cd signalk-java-server
 $ ./startpc.sh
 ```
 NOTE: Windows users - DONT put any of this in directories with spaces or anything but simple ascii names. Use something like eg C:\dev\SignalK-server
