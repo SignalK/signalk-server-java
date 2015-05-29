@@ -30,6 +30,7 @@ Current capabilities:
 	* Serial
 	* USB
 * Supports:
+	* *NEW: AIS targets displayed*
 	* *NEW: TCP and MQTT clients* (listen to remote servers)
     * *NEW: On-demand user apps*, sort of works, anyway :-)  Bit early for some of the apps yet.
 	* Delta and Full signalk formats, and translations between them.
