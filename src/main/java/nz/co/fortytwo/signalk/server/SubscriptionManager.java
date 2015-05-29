@@ -175,8 +175,9 @@ public class SubscriptionManager {
 		outPutMap.remove(wsSession);
 		//remove all subscriptions
 		RouteManager routeManager = RouteManagerFactory.getInstance();
-		SignalkRouteFactory.removeSubscribeTimers(routeManager, getSubscriptions(wsSession));
-		subscriptions.removeAll(getSubscriptions(wsSession));
+		List<Subscription> subs = getSubscriptions(wsSession);
+		SignalkRouteFactory.removeSubscribeTimers(routeManager,subs );
+		subscriptions.removeAll(subs);
 		subscriptions.removeAll(getSubscriptions(sessionId));
 		heartbeats.remove(wsSession);
 		
@@ -186,8 +187,9 @@ public class SubscriptionManager {
 		outPutMap.remove(wsSession);
 		//remove all subscriptions
 		RouteManager routeManager = RouteManagerFactory.getInstance();
-		SignalkRouteFactory.removeSubscribeTimers(routeManager, getSubscriptions(wsSession));
-		subscriptions.removeAll(getSubscriptions(wsSession));
+		List<Subscription> subs = getSubscriptions(wsSession);
+		SignalkRouteFactory.removeSubscribeTimers(routeManager, subs);
+		subscriptions.removeAll(subs);
 		heartbeats.remove(wsSession);
 	}
 

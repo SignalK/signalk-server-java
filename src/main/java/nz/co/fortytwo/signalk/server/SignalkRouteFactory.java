@@ -70,6 +70,7 @@ import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.camel.component.websocket.WebsocketEndpoint;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.model.RouteDefinition;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 
@@ -258,26 +259,31 @@ public class SignalkRouteFactory {
 	}
 	
 	public static void configureSubscribeTimer(RouteBuilder routeBuilder ,Subscription sub) throws Exception{
-		String input = "timer://"+getRouteId(sub)+"?fixedRate=true&period="+sub.getPeriod();
+		String routeId = getRouteId(sub);
+		String input = "timer://"+routeId+"?fixedRate=true&period="+sub.getPeriod();
 		if(logger.isDebugEnabled())logger.debug("Configuring route "+input);
 		String wsSession = sub.getWsSession();
 		RouteDefinition route = routeBuilder.from(input);
 			route.process(new FullExportProcessor(wsSession)).id(getName(FullExportProcessor.class.getSimpleName()))
 				.onException(Exception.class).handled(true).maximumRedeliveries(0)
-				.to("log:nz.co.fortytwo.signalk.model.output.subscribe?level=ERROR")
+				.to("log:nz.co.fortytwo.signalk.model.output.subscribe?level=ERROR&maxChars=1000")
 				.end()
 			.setHeader(WebsocketConstants.CONNECTION_KEY, routeBuilder.constant(wsSession))
 			.to(RouteManager.SEDA_COMMON_OUT).id(getName("SEDA_COMMON_OUT"))
 			.end();
-		route.setId(getRouteId(sub));
-		sub.setRouteId(getRouteId(sub));
+		route.setId(routeId);
 		((DefaultCamelContext)CamelContextFactory.getInstance()).addRouteDefinition(route);
 		((DefaultCamelContext)CamelContextFactory.getInstance()).startRoute(route.getId());
 		//routeBuilder.getContext().startAllRoutes();
 	}
 
 	private static String getRouteId(Subscription sub) {
-		return "sub_"+sub.getWsSession();
+		if(StringUtils.isBlank(sub.getRouteId())){
+			String routeId = getName("sub_"+sub.getWsSession());
+			sub.setRouteId(routeId);
+		}
+		
+		return sub.getRouteId();
 	}
 
 
