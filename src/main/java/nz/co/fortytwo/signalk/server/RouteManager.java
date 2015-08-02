@@ -174,8 +174,8 @@ public class RouteManager extends RouteBuilder {
 		//setup routes
 		SignalkRouteFactory.configureWebsocketTxRoute(this, SEDA_WEBSOCKETS, wsPort);
 		SignalkRouteFactory.configureWebsocketRxRoute(this, SEDA_INPUT, wsPort);
-		SignalkRouteFactory.configureTcpServerRoute(this, DIRECT_TCP, skServer, Constants.OUTPUT_TCP);
 		
+		SignalkRouteFactory.configureTcpServerRoute(this, DIRECT_TCP, skServer, Constants.OUTPUT_TCP);
 		SignalkRouteFactory.configureTcpServerRoute(this, SEDA_NMEA, nmeaServer, Constants.OUTPUT_NMEA);
 		
 		SignalkRouteFactory.configureCommonOut(this);
@@ -184,25 +184,37 @@ public class RouteManager extends RouteBuilder {
 		
 		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true&handlers=#staticHandler&enableJMX=true");//&handlers=#mapHandler,#staticHandler
 		SignalkRouteFactory.configureAuthRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_AUTH+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true");
-		SignalkRouteFactory.configureInstallRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_INSTALL+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true", "REST Install");
-		SignalkRouteFactory.configureInstallRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_UPGRADE+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true", "REST Upgrade");
+		
+		if("true".equals(Util.getConfigProperty(Constants.ALLOW_INSTALL))){
+			SignalkRouteFactory.configureInstallRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_INSTALL+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true", "REST Install");
+		}
+		
+		if("true".equals(Util.getConfigProperty(Constants.ALLOW_UPGRADE))){
+			SignalkRouteFactory.configureInstallRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_UPGRADE+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true", "REST Upgrade");
+		}
 		
 		// timed actions
 		SignalkRouteFactory.configureBackgroundTimer(this, "timer://background?fixedRate=true&period=60000");
 		SignalkRouteFactory.configureWindTimer(this, "timer://wind?fixedRate=true&period=1000");
 		SignalkRouteFactory.configureAnchorWatchTimer(this, "timer://anchorWatch?fixedRate=true&period=1000");
 		SignalkRouteFactory.configureAlarmsTimer(this, "timer://alarms?fixedRate=true&period=1000");
-		SignalkRouteFactory.configureNMEA0183Timer(this, "timer://nmea0183?fixedRate=true&period=1000");
-		//STOMP
-		from("skStomp:queue:signalk.put").id("STOMP In")
-			.setHeader(Constants.OUTPUT_TYPE, constant(Constants.OUTPUT_STOMP))
-			.to(SEDA_INPUT).id(SignalkRouteFactory.getName("SEDA_INPUT"));
-		//MQTT
-		from(MQTT+"&subscribeTopicName=signalk.put").id("MQTT In")
-			.transform(body().convertToString())
-			.setHeader(Constants.OUTPUT_TYPE, constant(Constants.OUTPUT_MQTT))
-			.to(SEDA_INPUT).id(SignalkRouteFactory.getName("SEDA_INPUT"));
 		
+		if("true".equals(Util.getConfigProperty(Constants.GENERATE_NMEA0183))){
+			SignalkRouteFactory.configureNMEA0183Timer(this, "timer://nmea0183?fixedRate=true&period=1000");
+		}
+		//STOMP
+		if("true".equals(Util.getConfigProperty(Constants.START_STOMP))){
+			from("skStomp:queue:signalk.put").id("STOMP In")
+				.setHeader(Constants.OUTPUT_TYPE, constant(Constants.OUTPUT_STOMP))
+				.to(SEDA_INPUT).id(SignalkRouteFactory.getName("SEDA_INPUT"));
+		}
+		//MQTT
+		if("true".equals(Util.getConfigProperty(Constants.START_MQTT))){
+			from(MQTT+"&subscribeTopicName=signalk.put").id("MQTT In")
+				.transform(body().convertToString())
+				.setHeader(Constants.OUTPUT_TYPE, constant(Constants.OUTPUT_MQTT))
+				.to(SEDA_INPUT).id(SignalkRouteFactory.getName("SEDA_INPUT"));
+		}
 		//start any clients if they exist
 		//TCP
 		String tcpClients = Util.getConfigProperty(Constants.CLIENT_TCP);

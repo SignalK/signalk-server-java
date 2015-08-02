@@ -24,10 +24,13 @@
 package nz.co.fortytwo.signalk.server.signalk.json;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Properties;
 
 import mjson.Json;
+import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -80,4 +83,26 @@ public class BasicMjsonTest {
 		//fail("Not yet implemented");
 	}
 
+	@Test
+	public void createJsonProperties() throws FileNotFoundException, IOException{
+		Properties config = Util.getConfig(null);
+		Json json = Json.object();
+		for(String key: config.keySet().toArray(new String[]{})){
+			//System.out.println(key);
+			String[] keys = key.split("\\.");
+			Json current = json;
+			for(int x=0;x<keys.length-1;x++){
+				if(!current.has(keys[x])){
+					current.set(keys[x],Json.object());
+				}
+				//System.out.println(keys[x]);
+				current=current.at(keys[x]);
+			}
+			int c = keys.length-1;
+			//System.out.println(c);
+			current.set(keys[c], config.get(key));
+			
+		}
+		System.out.println(json.toString());
+	}
 }
