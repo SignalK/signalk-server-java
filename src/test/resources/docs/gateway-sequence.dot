@@ -1,0 +1,53 @@
+@startuml
+control N2KNetwork
+N2KGateway -> SignalKServer: mDNS discovery
+note right
+	Gateway uses mDNS to discover server
+end note
+SignalKServer -> N2KGateway: basic mDNS info
+N2KGateway -> SignalKServer: request config data
+note right
+	Gateway uses signalK GET messages format:
+	{
+		  "context": "vessels.self", 
+		  "get": [
+		         {
+		                    "path": "_config.myN2kGateway", 
+		                }
+		        ],
+		}
+end note
+SignalKServer -> N2KGateway: requested data
+N2KGateway -> SignalKServer: request static data
+note right
+	{
+		  "context": "vessels.self", 
+		  "get": [
+		         {
+		                    "path": "sensors.gps", 
+		                }
+		        ],
+		}
+end note
+SignalKServer -> N2KGateway: requested data
+N2KGateway -> SignalKServer: subscribe 'navigation.position'
+note right
+Use SUBSCRIBE format:
+	{
+		  "context": "vessels.self", 
+		  "subscribe": [
+		         {
+		                    "path": "navigation.position", 
+		                }
+		        ],
+		}
+end note
+group Signalk updates to gateway
+SignalKServer -> N2KGateway: 'navigation.position messages
+N2KGateway -> N2KNetwork: position pgn
+end
+group n2k updates to signalK
+N2KNetwork -> N2KGateway: pgns
+N2KGateway -> SignalKServer: signalk messages
+end
+@enduml
