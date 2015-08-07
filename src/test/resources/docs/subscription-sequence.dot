@@ -1,0 +1,98 @@
+@startuml
+control "Signal K capable Depth sensor" as DepthDevice 
+DepthDevice -> SignalKServer: mDNS discovery
+note right
+	Client device uses mDNS to discover server
+end note
+SignalKServer -> DepthDevice: basic mDNS info
+DepthDevice -> SignalKServer: optionally request config data
+note right
+	Client device uses signalK GET messages format:
+	{
+		  "context": "vessels.self", 
+		  "get": [
+		         {
+		                    "path": "_config.mydevice device", 
+		                }
+		        ],
+		}
+end note
+SignalKServer -> DepthDevice: requested data
+DepthDevice -> SignalKServer: optionally request static data
+note right
+	{
+		  "context": "vessels.self", 
+		  "get": [
+		         {
+		                    "path": "sensors.gps", 
+		                }
+		        ],
+		}
+end note
+SignalKServer -> DepthDevice: requested data
+DepthDevice -> SignalKServer: subscribe 'navigation.position'
+note right
+Use SUBSCRIBE format:
+	{
+		  "context": "vessels.self", 
+		  "subscribe": [
+		         {
+		                    "path": "navigation.position", 
+		                }
+		        ],
+		}
+end note
+group Signalk updates to device
+SignalKServer -> DepthDevice: 'navigation.position messages
+note right
+{
+  {
+  "context":"vessels.self",
+  "updates":[
+    {
+      "timestamp":"2015-03-23T01:57:02.256Z",
+      "values":[
+        {
+          "path":"navigation.position",
+          "value":{
+            "longitude":4.58006417,
+            "latitude":51.9485185
+          }
+        }
+      ],
+      "source":"vessels.motu.sources.nmea.0183.RMC"
+    }
+  }
+end note
+end
+group device updates to signalK
+DepthDevice -> SignalKServer: signalk messages
+note right
+{
+  "context":"vessels.self",
+  "updates":[
+    {
+      "timestamp":"2015-03-23T01:57:01.831Z",
+      "values":[
+        {
+          "path":"environment.depth.belowTransducer",
+          "value":10.44
+        }
+      ],
+      "source":"vessels.motu.sources.depth-sk"
+    },
+    {
+      "timestamp":"2015-03-23T01:57:01.831Z",
+      "values":[
+        {
+          "path":"sources.nmea.depth-sk",
+          "value":10.44
+        }
+      ],
+      "source":"self"
+    }
+  ]
+}
+end note
+end
+@enduml
