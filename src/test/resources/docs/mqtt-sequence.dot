@@ -1,0 +1,103 @@
+@startuml
+control "MQTT capable sensor" as MQTTDevice 
+MQTTDevice -> MQTTBroker: mDNS discovery
+note right
+	Client device uses mDNS to discover MQTT broker
+end note
+MQTTBroker -> MQTTDevice: basic mDNS info
+MQTTDevice -> MQTTBroker: Authenticate 
+MQTTDevice -> MQTTBroker: subscribe to queue://signalk.put
+
+
+MQTTDevice -> MQTTBroker: subscribe 'navigation.speedThroughWater'
+note right
+Use SUBSCRIBE format:
+	{
+    "context": "vessels.230099999",
+    "websocket.connectionkey":"d2f691ac-a5ed-4cb7-b361-9072a24ce6bc", //a unique session id
+//websocket.connectionkey does not refer to any sort of websocket, its just the original sessionId name thats getting a bit out-dated :-)
+    "reply-to":"signalk.3202a939-1681-4a74-ad4b-3a90212e4f33.vessels.motu.navigation" //a private reply queue
+
+    "subscribe": [
+        {
+                    "path": "navigation.position",
+                    "period": 1000,
+                    "format": "delta",
+                    "policy": "ideal",
+                    "minPeriod": 200
+                },
+         {
+                    "path": "navigation.logTrip",
+                    "period": 10000
+                }
+        ],
+}
+end note
+MQTTBroker->SignalKServer: 
+note right
+pass on to signalk server which listens to queue://signalk.put
+end note
+
+group Signalk updates to temporary queue \nsignalk.3202a939-1681-4a74-ad4b-3a90212e4f33.vessels.motu.navigation
+SignalKServer -> MQTTBroker: 'navigation.position messages
+note right
+{
+  {
+  "context":"vessels.self",
+  "updates":[
+    {
+      "timestamp":"2015-03-23T01:57:02.256Z",
+      "values":[
+        {
+          "path":"navigation.position",
+          "value":{
+            "longitude":4.58006417,
+            "latitude":51.9485185
+          }
+        }
+      ],
+      "source":"vessels.motu.sources.nmea.0183.RMC"
+    }
+  }
+end note
+MQTTBroker ->MQTTDevice
+note right
+pass on to mqtt device which listens to temp queue
+end note
+end
+
+group device updates to signalK queue://signalk.put
+MQTTDevice -> MQTTBroker: signalk messages
+note right
+{
+  "context":"vessels.self",
+  "updates":[
+    {
+      "timestamp":"2015-03-23T01:57:01.831Z",
+      "values":[
+        {
+          "path":"environment.depth.belowTransducer",
+          "value":10.44
+        }
+      ],
+      "source":"vessels.motu.sources.depth-sk"
+    },
+    {
+      "timestamp":"2015-03-23T01:57:01.831Z",
+      "values":[
+        {
+          "path":"sources.nmea.depth-sk",
+          "value":10.44
+        }
+      ],
+      "source":"self"
+    }
+  ]
+}
+end note
+MQTTBroker->SignalKServer
+note right
+pass on to signalk server which listens to queue://signalk.put
+end note
+end
+@enduml
