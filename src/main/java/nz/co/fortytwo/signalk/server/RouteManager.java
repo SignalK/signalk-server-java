@@ -242,6 +242,20 @@ public class RouteManager extends RouteBuilder {
 					.to(SEDA_INPUT);
 			}
 		}
+		//STOMP
+		//TODO: test stomp client actually works!
+		String stompClients = Util.getConfigProperty(Constants.CLIENT_MQTT);
+		if(StringUtils.isNotBlank(stompClients)){
+			//set up listeners
+			String[] clients = stompClients.split(",");
+			for(String client: clients){
+				from("stomp://"+client).id("STOMP Client:"+client)
+					.onException(Exception.class).handled(true).maximumRedeliveries(0)
+						.to("log:nz.co.fortytwo.signalk.client.stomp?level=ERROR&showException=true&showStackTrace=true")
+						.end().transform(body().convertToString())
+					.to(SEDA_INPUT);
+			}
+		}
 		
 		
 		//Demo mode
