@@ -28,6 +28,8 @@ import nz.co.fortytwo.signalk.handler.DeltaToMapConverter;
 import nz.co.fortytwo.signalk.handler.FullToMapConverter;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 
+import static nz.co.fortytwo.signalk.util.JsonConstants.VESSELS;
+
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.log4j.Logger;
@@ -48,11 +50,16 @@ public class FullImportProcessor extends SignalkProcessor implements Processor{
 		
 		try {
 			if(exchange.getIn().getBody()==null ||!(exchange.getIn().getBody() instanceof Json)) return;
-			
-			SignalKModel model = fullToMap.handle(exchange.getIn().getBody(Json.class));
-			if(logger.isDebugEnabled())logger.debug("Converted to:"+model);
-			if(model!=null){
-				exchange.getIn().setBody(model);
+			//we only process full format
+			Json node = exchange.getIn().getBody(Json.class);
+			if(node.has(VESSELS)){
+				SignalKModel model = fullToMap.handle(node);
+				if(logger.isDebugEnabled())logger.debug("Converted to:"+model);
+				if(model!=null){
+					exchange.getIn().setBody(model);
+				}
+			}else{
+				if(logger.isDebugEnabled())logger.debug("Ignored, not update:"+exchange.getIn().getBody(Json.class));
 			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);

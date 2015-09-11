@@ -29,35 +29,45 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.log4j.Logger;
 
+import mjson.Json;
+
 /**
  * Updates the signalkModel with the current json
  * 
  * @author robert
  * 
  */
-public class SignalkModelProcessor extends SignalkProcessor implements Processor{
+public class SignalkModelProcessor extends SignalkProcessor implements Processor {
 
 	private static Logger logger = Logger.getLogger(SignalkModelProcessor.class);
-	
-	
+
 	public void process(Exchange exchange) throws Exception {
-		
+
 		try {
-			if(exchange.getIn().getBody()==null ||!(exchange.getIn().getBody() instanceof SignalKModel)) return;
-			
-			handle(exchange.getIn().getBody(SignalKModel.class));
+
+			if (exchange.getIn().getBody() instanceof SignalKModel) {
+				handle(exchange.getIn().getBody(SignalKModel.class));
+				//we want to stop here
+				exchange.getIn().setBody(null);
+			}else{
+				if(logger.isDebugEnabled())logger.debug("Ignored, not update:"+exchange.getIn().getBody(Json.class));
+			}
+
 		} catch (Exception e) {
-			logger.error(e.getMessage(),e);
+			logger.error(e.getMessage(), e);
 		}
 	}
 
-	//@Override
+	// @Override
 	public void handle(SignalKModel node) {
-		if(node.getData().size()==0)return;
-		if(logger.isDebugEnabled())logger.debug("SignalkModelProcessor  updating "+node );
-		
+		if (node.getData().size() == 0)
+			return;
+		if (logger.isDebugEnabled())
+			logger.debug("SignalkModelProcessor  updating " + node);
+
 		signalkModel.putAll(node.getData());
-		if(logger.isDebugEnabled())logger.debug(signalkModel);
+		if (logger.isDebugEnabled())
+			logger.debug(signalkModel);
 	}
 
 }

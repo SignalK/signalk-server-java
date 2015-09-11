@@ -1,0 +1,717 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://jsonschema.net",
+  "type": "object",
+  "additionalProperties": false,
+  "title": "Root",
+  "description": "",
+  "name": "/",
+  "properties": {
+    "signalk": {
+      "id": "http://jsonschema.net/signalk",
+      "type": "object",
+      "additionalProperties": false,
+      "title": "Signalk",
+      "description": "Configuration for the server",
+      "name": "signalk",
+      "properties": {
+        "demo": {
+          "id": "http://jsonschema.net/signalk/demo",
+          "type": "object",
+          "additionalProperties": false,
+          "title": "Demo Mode",
+          "description": "Demo Mode plays a file as input continuously.",
+          "name": "demo",
+          "properties": {
+            "start": {
+              "id": "http://jsonschema.net/signalk/demo/start",
+              "type": "boolean",
+              "title": "Start",
+              "description": "Run in demo mode on next startup?",
+              "name": "start",
+              "default": false
+            },
+            "file": {
+              "id": "http://jsonschema.net/signalk/demo/file",
+              "type": "string",
+              "minLength": 1,
+              "title": "File",
+              "description": "Demo file, relative to the src/test/resources/samples/ dir",
+              "name": "file",
+              "default": "PacCupStartNMEA.txt"
+            }
+          },
+          "required": [
+            "start",
+            "file"
+          ]
+        },
+        "version": {
+          "id": "http://jsonschema.net/signalk/version",
+          "type": "string",
+          "minLength": 1,
+          "title": "Version",
+          "description": "Current server version",
+          "name": "version",
+          "default": "0.1"
+        },
+        "files": {
+          "id": "http://jsonschema.net/signalk/files",
+          "type": "object",
+          "additionalProperties": false,
+          "title": "Configuration Files",
+          "description": "",
+          "name": "files",
+          "properties": {
+            "static": {
+              "id": "http://jsonschema.net/signalk/files/static",
+              "type": "object",
+              "additionalProperties": false,
+              "title": "Static Web File Directory",
+              "description": "Served as a static html directory by the web server",
+              "name": "static",
+              "properties": {
+                "dir": {
+                  "id": "http://jsonschema.net/signalk/files/static/dir",
+                  "type": "string",
+                  "minLength": 1,
+                  "title": "Directory",
+                  "description": "Relative to the server install root",
+                  "name": "dir",
+                  "default": "./signalk-static"
+                }
+              }
+            },
+            "cfg": {
+              "id": "http://jsonschema.net/signalk/files/cfg",
+              "type": "object",
+              "additionalProperties": false,
+              "title": "Configuration",
+              "description": "",
+              "name": "cfg",
+              "properties": {
+                "file": {
+                  "id": "http://jsonschema.net/signalk/files/cfg/file",
+                  "type": "string",
+                  "minLength": 1,
+                  "title": "File",
+                  "description": "",
+                  "name": "file",
+                  "default": "signalk.cfg"
+                },
+                "dir": {
+                  "id": "http://jsonschema.net/signalk/files/cfg/dir",
+                  "type": "string",
+                  "minLength": 1,
+                  "title": "Directory",
+                  "description": "Relative to server install root",
+                  "name": "dir",
+                  "default": "./conf/"
+                }
+              }
+            },
+            "storage": {
+              "id": "http://jsonschema.net/signalk/files/storage",
+              "type": "object",
+              "additionalProperties": false,
+              "title": "Storage",
+              "description": "Space for storage of large blobs, and misc data",
+              "name": "storage",
+              "properties": {
+                "root": {
+                  "id": "http://jsonschema.net/signalk/files/storage/root",
+                  "type": "string",
+                  "minLength": 1,
+                  "title": "Directory",
+                  "description": "Relative to server install root",
+                  "name": "root",
+                  "default": "./storage/"
+                }
+              }
+            },
+            "usb": {
+              "id": "http://jsonschema.net/signalk/files/usb",
+              "type": "object",
+              "additionalProperties": false,
+              "title": "Usb Storage",
+              "description": "Additional removable storage",
+              "name": "usb",
+              "properties": {
+                "usbdrive": {
+                  "id": "http://jsonschema.net/signalk/files/usb/usbdrive",
+                  "type": "string",
+                  "minLength": 1,
+                  "title": "Usbdrive location",
+                  "description": "Absolute path to USB drive",
+                  "name": "usbdrive",
+                  "default": "/media/usb0"
+                }
+              }
+            }
+          }
+        },
+        "client": {
+          "id": "http://jsonschema.net/signalk/client",
+          "type": "object",
+          "additionalProperties": false,
+          "title": "Client connections",
+          "description": "Connections to other Signalk servers",
+          "name": "client",
+          "properties": {
+            "tcp": {
+              "id": "http://jsonschema.net/signalk/client/tcp",
+              "type": "object",
+              "additionalProperties": false,
+              "title": "Tcp clients",
+              "description": "",
+              "name": "tcp",
+              "properties": {
+                "connect": {
+                  "id": "http://jsonschema.net/signalk/client/tcp/connect",
+                  "type": "array",
+                  "minItems": 0,
+                  "uniqueItems": true,
+                  "additionalItems": true,
+                  "title": "Address",
+                  "description": "server:port for the remote tcp connection, eg localhost:1234",
+                  "name": "connect",
+                  "items": {
+                    "id": "http://jsonschema.net/signalk/client/tcp/connect/0",
+                    "type": "string",
+                    "minLength": 1,
+                    "title": "TCP address",
+                    "description": "",
+                    "name": "0",
+                    "default": ""
+                  }
+                }
+              }
+            },
+            "mqtt": {
+              "id": "http://jsonschema.net/signalk/client/mqtt",
+              "type": "object",
+              "additionalProperties": false,
+              "title": "Mqtt",
+              "description": "",
+              "name": "mqtt",
+              "properties": {
+                "connect": {
+                  "id": "http://jsonschema.net/signalk/client/mqtt/connect",
+                  "type": "array",
+                  "minItems": 0,
+                  "uniqueItems": true,
+                  "additionalItems": true,
+                  "title": "Url",
+                  "description": "Url of the remote MQTT service, eg localhost:1883?subscribeTopicName=signalk.test.mqtt.topic",
+                  "name": "connect",
+                  "items": {
+                    "id": "http://jsonschema.net/signalk/client/mqtt/connect/0",
+                    "type": "string",
+                    "minLength": 1,
+                    "title": "MQTT URL",
+                    "description": "",
+                    "name": "0",
+                    "default": ""
+                  }
+                }
+              }
+            },
+             "stomp": {
+              "id": "http://jsonschema.net/signalk/client/stomp",
+              "type": "object",
+              "additionalProperties": false,
+              "title": "Stomp clients",
+              "description": "",
+              "name": "stomp",
+              "properties": {
+                "connect": {
+                  "id": "http://jsonschema.net/signalk/client/stomp/connect",
+                  "type": "array",
+                  "minItems": 0,
+                  "uniqueItems": true,
+                  "additionalItems": true,
+                  "title": "Url",
+                  "description": "Url of the remote Stomp service, eg localhost:61613?subscribeTopicName=signalk.test.stomp.topic",
+                  "name": "connect",
+                  "items": {
+                    "id": "http://jsonschema.net/signalk/client/stomp/connect/0",
+                    "type": "string",
+                    "minLength": 1,
+                    "title": "Stomp URL",
+                    "description": "",
+                    "name": "0",
+                    "default": ""
+                  }
+                }
+              }
+            }
+          }
+        },
+        "serial": {
+          "id": "http://jsonschema.net/signalk/serial",
+          "type": "object",
+          "additionalProperties": false,
+          "title": "Serial Ports",
+          "description": "",
+          "name": "serial",
+          "properties": {
+            "ports": {
+              "id": "http://jsonschema.net/signalk/serial/ports",
+              "type": "array",
+              "minItems": 0,
+              "uniqueItems": true,
+              "additionalItems": true,
+              "title": "Ports",
+              "description": "Absolute location of the list of serial devices to be monitored",
+              "name": "ports",
+              "items": 
+                {
+                  "id": "http://jsonschema.net/signalk/serial/ports/0",
+                  "type": "string",
+                  "minLength": 1,
+                  "title": "Port",
+                  "description": "The serial port name, eg /dev/ttyUSB0",
+                  "name": "0",
+                  "default": ""
+                }
+              
+            },
+            "baud": {
+              "id": "http://jsonschema.net/signalk/serial/baud",
+              "type": "integer",
+              "title": "Baud Rate",
+              "description": "Baud rate, used for all ports, (8 bit, 1 stop, no parity)",
+              "name": "baud",
+              "default": 38400,
+              "enum":[4800, 9600, 14400, 19200, 38400, 57600, 115200]
+            }
+          }
+        },
+        "clock": {
+          "id": "http://jsonschema.net/signalk/clock",
+          "type": "object",
+          "additionalProperties": false,
+          "title": "Clock",
+          "description": "Set source for system clock",
+          "name": "clock",
+          "properties": {
+            "source": {
+              "id": "http://jsonschema.net/signalk/clock/source",
+              "type": "string",
+              "title": "Source",
+              "description": "",
+              "name": "source",
+              "default": "system",
+	      "enum":["system","gps"]
+            }
+          }
+        },
+        "apps": {
+          "id": "http://jsonschema.net/signalk/apps",
+          "type": "object",
+          "additionalProperties": false,
+          "title": "Applications",
+          "description": "Control the installation and upgrade of applications",
+          "name": "apps",
+          "properties": {
+            "install": {
+              "id": "http://jsonschema.net/signalk/apps/install",
+              "type": "object",
+              "additionalProperties": false,
+              "title": "Install",
+              "description": "",
+              "name": "install",
+              "properties": {
+                "allow": {
+                  "id": "http://jsonschema.net/signalk/apps/install/allow",
+                  "type": "boolean",
+                  "title": "Allow",
+                  "description": "",
+                  "name": "allow",
+                  "default": true
+                }
+              }
+            },
+            "upgrade": {
+              "id": "http://jsonschema.net/signalk/apps/upgrade",
+              "type": "object",
+              "additionalProperties": false,
+              "title": "Upgrade",
+              "description": "",
+              "name": "upgrade",
+              "properties": {
+                "allow": {
+                  "id": "http://jsonschema.net/signalk/apps/upgrade/allow",
+                  "type": "boolean",
+                  "title": "Allow",
+                  "description": "",
+                  "name": "allow",
+                  "default": true
+                }
+              }
+            }
+          }
+        },
+        "server": {
+          "id": "http://jsonschema.net/signalk/server",
+          "type": "object",
+          "additionalProperties": false,
+          "title": "Server configuration",
+          "description": "",
+          "name": "server",
+          "properties": {
+            "mqtt": {
+              "id": "http://jsonschema.net/signalk/server/mqtt",
+              "type": "object",
+              "additionalProperties": false,
+              "title": "Mqtt service",
+              "description": "",
+              "name": "mqtt",
+              "properties": {
+                "port": {
+                  "id": "http://jsonschema.net/signalk/server/mqtt/port",
+                  "type": "integer",
+                  "multipleOf": 1,
+                  "maximum": 65535,
+                  "minimum": 1024,
+                  "exclusiveMaximum": false,
+                  "exclusiveMinimum": false,
+                  "title": "Tcp Port",
+                  "description": "",
+                  "name": "port",
+                  "default": 1883
+                },
+                "start": {
+                  "id": "http://jsonschema.net/signalk/server/mqtt/start",
+                  "type": "boolean",
+                  "title": "Start",
+                  "description": "Start mqtt service on next server restart",
+                  "name": "start",
+                  "default": true
+                }
+              }
+            },
+	    "stomp": {
+              "id": "http://jsonschema.net/signalk/server/stomp",
+              "type": "object",
+              "additionalProperties": false,
+              "title": "Stomp",
+              "description": "",
+              "name": "stomp",
+              "properties": {
+                "port": {
+                  "id": "http://jsonschema.net/signalk/server/stomp/port",
+                  "type": "integer",
+                  "multipleOf": 1,
+                  "maximum": 65535,
+                  "minimum": 1024,
+                  "exclusiveMaximum": false,
+                  "exclusiveMinimum": false,
+                  "title": "Port",
+                  "description": "",
+                  "name": "port",
+                  "default": 61613
+                },
+                "start": {
+                  "id": "http://jsonschema.net/signalk/server/stomp/start",
+                  "type": "boolean",
+                  "title": "Start",
+                  "description": "Start stomp service on next server restart",
+                  "name": "start",
+                  "default": true
+                }
+              }
+            },
+            "udp": {
+              "id": "http://jsonschema.net/signalk/server/udp",
+              "type": "object",
+              "additionalProperties": false,
+              "title": "Udp",
+              "description": "Serve signalk over Udp",
+              "name": "udp",
+              "properties": {
+                "port": {
+                  "id": "http://jsonschema.net/signalk/server/udp/port",
+                  "type": "integer",
+                  "multipleOf": 1,
+                  "maximum": 65535,
+                  "minimum": 1024,
+                  "exclusiveMaximum": false,
+                  "exclusiveMinimum": false,
+                  "title": "Port",
+                  "description": "",
+                  "name": "port",
+                  "default": 5554
+                },
+                "nmea": {
+                  "id": "http://jsonschema.net/signalk/server/udp/nmea",
+                  "type": "object",
+                  "additionalProperties": false,
+                  "title": "Nmea over Udp",
+                  "description": "Serve NMEA0183 over Udp",
+                  "name": "nmea",
+                  "properties": {
+                    "port": {
+                      "id": "http://jsonschema.net/signalk/server/udp/nmea/port",
+                      "type": "integer",
+                      "multipleOf": 1,
+                      "maximum": 65535,
+                      "minimum": 1024,
+                      "exclusiveMaximum": false,
+                      "exclusiveMinimum": false,
+                      "title": "Port",
+                      "description": "",
+                      "name": "port",
+                      "default": 5556
+                    }
+                  }
+                }
+              }
+            },
+            "websocket": {
+              "id": "http://jsonschema.net/signalk/server/websocket",
+              "type": "object",
+              "additionalProperties": false,
+              "title": "Websocket",
+              "description": "",
+              "name": "websocket",
+              "properties": {
+                "port": {
+                  "id": "http://jsonschema.net/signalk/server/websocket/port",
+                  "type": "integer",
+                  "multipleOf": 1,
+                  "maximum": 65535,
+                  "minimum": 1024,
+                  "exclusiveMaximum": false,
+                  "exclusiveMinimum": false,
+                  "title": "Port",
+                  "description": "",
+                  "name": "port",
+                  "default": 3000
+                }
+              }
+            },
+            "rest": {
+              "id": "http://jsonschema.net/signalk/server/rest",
+              "type": "object",
+              "additionalProperties": false,
+              "title": "Rest API",
+              "description": "",
+              "name": "rest",
+              "properties": {
+                "port": {
+                  "id": "http://jsonschema.net/signalk/server/rest/port",
+                  "type": "integer",
+                  "multipleOf": 1,
+                  "maximum": 65535,
+                  "minimum": 1024,
+                  "exclusiveMaximum": false,
+                  "exclusiveMinimum": false,
+                  "title": "Port",
+                  "description": "",
+                  "name": "port",
+                  "default": 8080
+                }
+              }
+            },
+            "tcp": {
+              "id": "http://jsonschema.net/signalk/server/tcp",
+              "type": "object",
+              "additionalProperties": false,
+              "title": "Tcp",
+              "description": "Serve signalk over Tcp",
+              "name": "tcp",
+              "properties": {
+                "port": {
+                  "id": "http://jsonschema.net/signalk/server/tcp/port",
+                  "type": "integer",
+                  "multipleOf": 1,
+                  "maximum": 65535,
+                  "minimum": 1024,
+                  "exclusiveMaximum": false,
+                  "exclusiveMinimum": false,
+                  "title": "Port",
+                  "description": "",
+                  "name": "port",
+                  "default": 5555
+                },
+                "nmea": {
+                  "id": "http://jsonschema.net/signalk/server/tcp/nmea",
+                  "type": "object",
+                  "additionalProperties": false,
+                  "title": "Nmea over Tcp",
+                  "description": "",
+                  "name": "nmea",
+                  "properties": {
+                    "port": {
+                      "id": "http://jsonschema.net/signalk/server/tcp/nmea/port",
+                      "type": "integer",
+                      "multipleOf": 1,
+                      "maximum": 65535,
+                      "minimum": 1024,
+                      "exclusiveMaximum": false,
+                      "exclusiveMinimum": false,
+                      "title": "Port",
+                      "description": "",
+                      "name": "port",
+                      "default": 5557
+                    }
+                  }
+                }
+              }
+            },
+            "hostname": {
+              "id": "http://jsonschema.net/signalk/server/hostname",
+              "type": "string",
+              "minLength": 1,
+              "title": "Hostname",
+              "description": "Server hostname",
+              "name": "hostname",
+              "default": "10.0.0.64"
+            },
+            
+            "nmea": {
+              "id": "http://jsonschema.net/signalk/server/nmea",
+              "type": "object",
+              "additionalProperties": false,
+              "title": "Nmea",
+              "description": "Create NMEA output from signalk input messages",
+              "name": "nmea",
+              "properties": {
+                "generate0183": {
+                  "id": "http://jsonschema.net/signalk/server/nmea/generate0183",
+                  "type": "boolean",
+                  "title": "Generate0183",
+                  "description": "",
+                  "name": "generate0183",
+                  "default": true
+                }
+              }
+            }
+          }
+        },
+        "nmea": {
+          "id": "http://jsonschema.net/signalk/nmea",
+          "type": "object",
+          "additionalProperties": false,
+          "title": "Nmea special sentences",
+          "description": "",
+          "name": "nmea",
+          "properties": {
+            "YXXDR": {
+              "id": "http://jsonschema.net/signalk/nmea/YXXDR",
+              "type": "object",
+              "additionalProperties": false,
+              "title": "YXXDR",
+              "description": "",
+              "name": "YXXDR",
+              "properties": {
+                "PTCHROLL": {
+                  "id": "http://jsonschema.net/signalk/nmea/YXXDR/PTCHROLL",
+                  "type": "string",
+                  "minLength": 1,
+                  "title": "PTCHROLL",
+                  "description": "",
+                  "name": "PTCHROLL",
+                  "default": "PCH,RLL,SKIP,SKIP"
+                }
+              }
+            }
+          }
+        },
+        "vessel": {
+          "id": "http://jsonschema.net/signalk/vessel",
+          "type": "object",
+          "additionalProperties": false,
+          "title": "Vessel",
+          "description": "",
+          "name": "vessel",
+          "properties": {
+            "self": {
+              "id": "http://jsonschema.net/signalk/vessel/self",
+              "type": "string",
+              "minLength": 1,
+              "title": "Self",
+              "description": "Enter MMSI number, or unique vessel identifier",
+              "name": "self",
+              "default": "motu"
+            }
+          }
+        }
+      },
+      "required": [
+        "demo",
+        "version",
+        "files",
+        "client",
+        "serial",
+        "clock",
+        "apps",
+        "server",
+        "nmea",
+        "vessel"
+      ]
+    },
+    "hawtio": {
+      "id": "http://jsonschema.net/hawtio",
+      "type": "object",
+      "additionalProperties": false,
+      "title": "Hawtio Management",
+      "description": "",
+      "name": "hawtio",
+      "properties": {
+        "port": {
+          "id": "http://jsonschema.net/hawtio/port",
+          "type": "integer",
+          "multipleOf": 1,
+          "maximum": 100,
+          "minimum": 1,
+          "exclusiveMaximum": false,
+          "exclusiveMinimum": false,
+          "title": "Port",
+          "description": "",
+          "name": "port",
+          "default": 8000
+        },
+        "context": {
+          "id": "http://jsonschema.net/hawtio/context",
+          "type": "string",
+          "minLength": 1,
+          "title": "Context",
+          "description": "",
+          "name": "context",
+          "default": "/hawtio"
+        },
+        "start": {
+          "id": "http://jsonschema.net/hawtio/start",
+          "type": "boolean",
+          "title": "Start",
+          "description": "Start on next server restart",
+          "name": "start",
+          "default": true
+        },
+        "authenticationEnabled": {
+          "id": "http://jsonschema.net/hawtio/authenticationEnabled",
+          "type": "boolean",
+          "title": "Use Authentication",
+          "description": "",
+          "name": "authenticationEnabled",
+          "default": false
+        },
+        "war": {
+          "id": "http://jsonschema.net/hawtio/war",
+          "type": "string",
+          "minLength": 1,
+          "title": "War location",
+          "description": "the location of the hawtio.war file",
+          "name": "war",
+          "default": "./hawtio/hawtio-default-offline-1.4.48.war"
+        }
+      }
+    }
+  },
+  "required": [
+    "signalk",
+    "hawtio"
+  ]
+}

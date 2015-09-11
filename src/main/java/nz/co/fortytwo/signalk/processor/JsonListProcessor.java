@@ -59,6 +59,7 @@ public class JsonListProcessor extends SignalkProcessor implements Processor{
 			if(exchange.getIn().getBody()==null ||!(exchange.getIn().getBody() instanceof Json)) return;
 			String wsSession = exchange.getIn().getHeader(WebsocketConstants.CONNECTION_KEY, String.class);
 			if(wsSession==null){
+				if(logger.isDebugEnabled())logger.debug("Skipped, no session:"+exchange.getIn().getBody(Json.class));
 				return;
 			}
 			Json json = exchange.getIn().getBody(Json.class);
@@ -72,8 +73,16 @@ public class JsonListProcessor extends SignalkProcessor implements Processor{
 				Map<String, Object> headers = exchange.getIn().getHeaders();
 				
 				json.delAt(LIST);
-				outProducer.sendBodyAndHeaders(json, headers);
-				exchange.getIn().setBody(json);
+				if(exchange.getIn().getHeader(RestApiProcessor.REST_REQUEST)!=null){
+					if(logger.isDebugEnabled())logger.debug("Processed REST LIST request:"+exchange.getIn().getBody(Json.class));
+					exchange.getIn().setBody(json);
+				}else{
+					if(logger.isDebugEnabled())logger.debug("Processed LIST request:"+exchange.getIn().getBody(Json.class));
+					outProducer.sendBodyAndHeaders(json, headers);
+				}
+				
+			}else{
+				if(logger.isDebugEnabled())logger.debug("Skipped, not a LIST request:"+exchange.getIn().getBody(Json.class));
 			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);

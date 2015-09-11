@@ -30,6 +30,7 @@ import java.util.Properties;
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
+import nz.co.fortytwo.signalk.processor.MapToJsonProcessor;
 import nz.co.fortytwo.signalk.processor.OutputFilterProcessor;
 import nz.co.fortytwo.signalk.processor.RestApiProcessor;
 import nz.co.fortytwo.signalk.util.Constants;
@@ -43,6 +44,8 @@ import org.apache.camel.component.stomp.SkStompComponent;
 import org.apache.camel.component.websocket.SignalkWebsocketComponent;
 import org.apache.camel.impl.JndiRegistry;
 import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry;
+import org.apache.camel.model.rest.RestBindingMode;
+import org.apache.camel.model.rest.RestConfigurationDefinition;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Handler;
@@ -113,22 +116,15 @@ public class RouteManager extends RouteBuilder {
 		configure0();
 	}
 	public void configure0() throws Exception {
+		//restConfiguration().component("jetty").port(8080);
+		//sessionSupport=true&matchOnUriPrefix=true&handlers=#staticHandler&enableJMX=true
+		//.componentProperty("handlers", "#staticHandler");
 		
 		SignalKModelFactory.load(signalkModel);
-		
 		
 		//set shutdown quickly, 5 min is too long
 		CamelContextFactory.getInstance().getShutdownStrategy().setShutdownNowOnTimeout(true);
 		CamelContextFactory.getInstance().getShutdownStrategy().setTimeout(10);
-		
-		// init processors who depend on this being started
-		// dump nulls, but avoid quartz jobs
-		//List<Predicate> predicates = new ArrayList<Predicate>();
-		//predicates.add(header(Exchange.TIMER_FIRED_TIME).isNull());
-		//predicates.add(header(RestletConstants.RESTLET_REQUEST).isNull());
-		//predicates.add(body().isNull());
-		//Predicate stopNull = PredicateBuilder.and(predicates);
-		//intercept().when(stopNull).stop();
 		
 		
 		skServer = new NettyServer(null, Constants.OUTPUT_TCP);
@@ -158,9 +154,11 @@ public class RouteManager extends RouteBuilder {
 		staticHandler.setResourceBase(Util.getConfigProperty(Constants.STATIC_DIR));
 		
 		//bind in registry
-		PropertyPlaceholderDelegateRegistry registry = (PropertyPlaceholderDelegateRegistry) CamelContextFactory.getInstance().getRegistry(); 
+		PropertyPlaceholderDelegateRegistry registry = (PropertyPlaceholderDelegateRegistry) CamelContextFactory.getInstance().getRegistry();
+		JndiRegistry reg = (JndiRegistry)registry.getRegistry();
 		//static files
 		((JndiRegistry)registry.getRegistry()).bind("staticHandler",staticHandler );
+		restConfiguration().component("jetty").consumerProperty("matchOnUriPrefix", "true").componentProperty("matchOnUriPrefix", "true").host("0.0.0.0").port(8080);
 		
 		//websockets
 		if(CamelContextFactory.getInstance().getComponent("skWebsocket")==null){
@@ -182,8 +180,10 @@ public class RouteManager extends RouteBuilder {
 		
 		SignalkRouteFactory.configureHeartbeatRoute(this,"timer://heartbeat?fixedRate=true&period=1000");
 		
-		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true&handlers=#staticHandler&enableJMX=true");//&handlers=#mapHandler,#staticHandler
-		SignalkRouteFactory.configureAuthRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_AUTH+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true");
+		SignalkRouteFactory.configureAuthRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_AUTH+"?sessionSupport=true&matchOnUriPrefix=true&handlers=#staticHandler&enableJMX=true");
+		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true","REST Api");
+		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_ENDPOINTS+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true","REST Endpoints");
+		
 		
 		if("true".equals(Util.getConfigProperty(Constants.ALLOW_INSTALL))){
 			SignalkRouteFactory.configureInstallRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_INSTALL+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true", "REST Install");
@@ -256,6 +256,7 @@ public class RouteManager extends RouteBuilder {
 					.to(SEDA_INPUT);
 			}
 		}
+		
 		
 		
 		//Demo mode

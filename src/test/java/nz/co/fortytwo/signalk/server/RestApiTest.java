@@ -35,6 +35,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import mjson.Json;
+import nz.co.fortytwo.signalk.util.JsonConstants;
 
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
@@ -115,8 +116,9 @@ public class RestApiTest extends SignalKCamelTestSupport {
         assertEquals(200, reponse.getStatusCode());
         
         Json resp = Json.read(reponse.getResponseBody());
-        assertTrue(resp.isArray());
-        assertTrue(resp.asJsonList().get(0).asString().startsWith("vessels."+SELF));
+        Json list = resp.at(JsonConstants.PATHLIST);
+        assertTrue(list.isArray());
+        assertTrue(list.asJsonList().get(0).asString().startsWith("vessels."+SELF));
      
         reponse = c.prepareGet("http://localhost:"+restPort+SIGNALK_API+"/list/vessels/*/navigation/*").setCookies(r1.getCookies()).execute().get();
         //latch.await(3, TimeUnit.SECONDS);
@@ -125,8 +127,9 @@ public class RestApiTest extends SignalKCamelTestSupport {
         			//{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"navigation.courseOverGroundTrue\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}],\"context\":\"vessels.self\"}
         
         resp = Json.read(reponse.getResponseBody());
-        assertTrue(resp.isArray());
-        assertTrue(resp.asJsonList().get(0).asString().startsWith("vessels.*.navigation"));
+        list = resp.at(JsonConstants.PATHLIST);
+        assertTrue(list.isArray());
+        assertTrue(list.asJsonList().get(0).asString().startsWith("vessels.*.navigation"));
         c.close();
     }
 

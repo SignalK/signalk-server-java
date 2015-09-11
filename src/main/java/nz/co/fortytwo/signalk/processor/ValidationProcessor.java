@@ -32,8 +32,10 @@ import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
+import mjson.Json;
+
 /**
- * Validate the signalkModel json.
+ * Validate the signalkModel .
  * Make sure it has timestamp and source
  * 
  * @author robert
@@ -46,12 +48,14 @@ public class ValidationProcessor extends SignalkProcessor implements Processor{
 	public void process(Exchange exchange) throws Exception {
 		
 		try {
-			if(!(exchange.getIn().getBody() instanceof SignalKModel)){
-				if(logger.isDebugEnabled())logger.debug("Invalid object found, type "+exchange.getIn().getBody().getClass()+" : " + exchange.getIn().getBody());
-				exchange.getIn().setBody(null);
-				return;
+			//if we have a REST_REPLY send it now
+			
+			if(exchange.getIn().getBody() instanceof SignalKModel){
+				validate(exchange.getIn().getBody(SignalKModel.class));
+			}else{
+				if(logger.isDebugEnabled())logger.debug("Ignored, not update:"+exchange.getIn().getBody(Json.class));
 			}
-			validate(exchange.getIn().getBody(SignalKModel.class));
+			
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
 		}

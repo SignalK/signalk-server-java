@@ -24,15 +24,14 @@
 package nz.co.fortytwo.signalk.processor;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import mjson.Json;
-import nz.co.fortytwo.signalk.handler.JsonListHandler;
 import nz.co.fortytwo.signalk.handler.RestApiHandler;
-import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.util.JsonConstants;
 import nz.co.fortytwo.signalk.util.JsonSerializer;
 import nz.co.fortytwo.signalk.util.Util;
@@ -40,7 +39,11 @@ import nz.co.fortytwo.signalk.util.Util;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.http.HttpMessage;
+import org.apache.camel.component.websocket.WebsocketConstants;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+
+import com.ctc.wstx.util.StringUtil;
 
 /*
  * Processes REST requests for Signal K data
@@ -50,57 +53,139 @@ import org.apache.log4j.Logger;
  * @author robert
  *
  */
-public class RestApiProcessor extends SignalkProcessor implements Processor{
+public class RestApiProcessor extends SignalkProcessor implements Processor {
 
+	public static final String REST_REQUEST = "REST_REQUEST";
+	private static final String SLASH = "/";
+	private static final String LIST = "list";
 	private static Logger logger = Logger.getLogger(RestApiProcessor.class);
-	private JsonSerializer ser = new JsonSerializer();
-	
-	private RestApiHandler api = null;
-	
+
 	public RestApiProcessor() throws IOException {
-		api =new RestApiHandler();
+
 	}
+
 	@Override
 	public void process(Exchange exchange) throws Exception {
-		// the Restlet request should be available if neeeded
+		// the Restlet request should be available if needed
 		HttpServletRequest request = exchange.getIn(HttpMessage.class).getRequest();
-		 HttpSession session = request.getSession();
-		 if(logger.isDebugEnabled())logger.debug("Session = "+session.getId());
-        if(request.getSession()!=null){
-	        if(request.getMethod().equals("GET")){
-	        	HttpServletResponse response = exchange.getIn(HttpMessage.class).getResponse();
-	        	String path = request.getPathInfo();
-	    		//String path =  exchange.getIn().getHeader(Exchange.HTTP_URI, String.class);
-	    		if(logger.isDebugEnabled())logger.debug("We are processing the path = "+path);
-	            //check addresses request
-	            if(path.startsWith(JsonConstants.SIGNALK_API+"/addresses")){
-	            	response.setContentType("application/json");
-	                 // SEND RESPONSE
-	                 response.setStatus(HttpServletResponse.SC_OK);
-	                 exchange.getIn().setBody(Util.getAddressesMsg(request.getServerName()).toString());
-	                 return;
-	            }
-	            //normal request
-	        	Object obj = api.processGet(request, response, signalkModel);
-	        	if(obj!=null){
-	        		if(obj instanceof Json){
-	        			exchange.getIn().setBody(obj.toString());
-	        		}else{
-	        			exchange.getIn().setBody(obj);
-	        		}
-	        	}
-	        	//response codes are set here, so all good now.
-	        }
-	        
-        }else{
-        	HttpServletResponse response = exchange.getIn(HttpMessage.class).getResponse();
-        	response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-        	response.sendRedirect(JsonConstants.SIGNALK_AUTH);
-        	exchange.getIn().setBody(null);
-        }
-     
+		HttpSession session = request.getSession();
+		if (logger.isDebugEnabled()) {
+
+			logger.debug("Request = " + exchange.getIn().getHeader(Exchange.HTTP_SERVLET_REQUEST).getClass());
+			logger.debug("Session = " + session.getId());
+		}
+
+		if (session.getId() != null) {
+			exchange.getIn().setHeader(REST_REQUEST, "true");
+			exchange.getIn().setHeader(WebsocketConstants.CONNECTION_KEY, session.getId());
+			// HttpServletResponse response =
+			// exchange.getIn(HttpMessage.class).getResponse();
+			String path = (String) exchange.getIn().getHeader(Exchange.HTTP_URI);
+			if (logger.isDebugEnabled()) {
+				logger.debug(exchange.getIn().getHeaders());
+				logger.debug(path);
+			}
+
+			if (logger.isDebugEnabled())
+				logger.debug("Processing the path = " + path);
+			if (!isValidPath(path)) {
+				exchange.getIn().setBody("Bad Request");
+				exchange.getIn().setHeader(Exchange.CONTENT_TYPE, "text/plain");
+				exchange.getIn().setHeader(Exchange.HTTP_RESPONSE_CODE, HttpServletResponse.SC_BAD_REQUEST);
+				// response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				return;
+			}
+			if (exchange.getIn().getHeader(Exchange.HTTP_METHOD).equals("GET")) {
+				processGet(exchange, path);
+			}
+			if (exchange.getIn().getHeader(Exchange.HTTP_METHOD).equals("POST")) {
+				Json json = Json.read(exchange.getIn().getBody(String.class));
+				exchange.getIn().setBody(json.toString());
+				// POST here
+				if (logger.isDebugEnabled())
+					logger.debug("Processing the POST request:" + exchange.getIn().getBody());
+			}
+
+		} else {
+			// HttpServletResponse response =
+			// exchange.getIn(HttpMessage.class).getResponse();
+			exchange.getIn().setHeader(Exchange.HTTP_RESPONSE_CODE, HttpServletResponse.SC_MOVED_TEMPORARILY);
+			// constant("http://somewhere.com"))
+			exchange.getIn().setHeader("Location", JsonConstants.SIGNALK_AUTH);
+			exchange.getIn().setBody("Authentication Required");
+		}
+
 	}
 
+	private boolean isValidPath(String path) {
+		if(StringUtils.isBlank(path))return false;
+		if(path.startsWith(JsonConstants.SIGNALK_API))return true;
+		if(path.startsWith(JsonConstants.SIGNALK_ENDPOINTS))return true;
+		return false;
+	}
 
+	private void processGet(Exchange exchange, String path) throws UnknownHostException {
+		// check addresses request
+		if (path.startsWith(JsonConstants.SIGNALK_ENDPOINTS)) {
+			exchange.getIn().setHeader(Exchange.CONTENT_TYPE, "application/json");
+			// SEND RESPONSE
+			exchange.getIn().setHeader(Exchange.HTTP_RESPONSE_CODE, HttpServletResponse.SC_OK);
+			path = path.substring(JsonConstants.SIGNALK_ENDPOINTS.length());
+			String host = (String) exchange.getIn().getHeader(Exchange.HTTP_URL);
+			//could be http://localhost:8080
+			int pos1 = host.indexOf("//") + 2;
+			int pos2 = host.indexOf(":", pos1);
+			if(pos2<0)pos2 = host.indexOf("/", pos1);
+			host = host.substring(pos1, pos2);
+			Json json = Util.getEndpoints(host);
+			exchange.getIn().setBody(json.toString());
+			return;
+		}
+		// normal request, convert to get message
+
+		// check valid request.
+
+		path = path.substring(JsonConstants.SIGNALK_API.length());
+		if (path.startsWith("/"))
+			path = path.substring(1);
+		if (path.endsWith("/"))
+			path = path.substring(0,path.length() - 1);
+
+		path = path.replace("/", ".");
+		if (logger.isDebugEnabled())
+			logger.debug("Processing the path extension:" + path);
+
+		String context = Util.getContext(path);
+		if (logger.isDebugEnabled())
+			logger.debug("Processing the context:" + context);
+		if (path.length() > context.length()) {
+			path = path.substring(context.length() + 1);
+		} else {
+			path = "*";
+		}
+		// list
+		if (context.startsWith(LIST)) {
+			// make LIST obj
+			// "{\"context\":\"vessels.*\",\"list\":[{\"path\":\"navigation.*\"}]}";
+			exchange.getIn().setHeader(Exchange.CONTENT_TYPE, "application/json");
+			Json json = Json.object().set(JsonConstants.CONTEXT, context.substring(LIST.length() + 1));
+			Json array = Json.array().add(Json.object().set(JsonConstants.PATH, path));
+			json.set(JsonConstants.LIST, array);
+			exchange.getIn().setBody(json.toString());
+			if (logger.isDebugEnabled())
+				logger.debug("Processing the LIST request:" + exchange.getIn().getBody());
+			return;
+		}
+		// make GET obj
+		// "{\"context\":\"vessels.*\",\"get\":[{\"path\":\"navigation.*\"}]}";
+		exchange.getIn().setHeader(Exchange.CONTENT_TYPE, "application/json");
+		Json json = Json.object().set(JsonConstants.CONTEXT, context);
+		Json array = Json.array().add(Json.object().set(JsonConstants.PATH, path));
+		json.set(JsonConstants.GET, array);
+		exchange.getIn().setBody(json.toString());
+		if (logger.isDebugEnabled())
+			logger.debug("Processing the GET request:" + exchange.getIn().getBody());
+
+	}
 
 }

@@ -34,6 +34,7 @@ import mjson.Json;
 import nz.co.fortytwo.signalk.handler.JsonGetHandler;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.util.Constants;
+import nz.co.fortytwo.signalk.util.JsonSerializer;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -51,13 +52,14 @@ public class JsonGetProcessor extends SignalkProcessor implements Processor{
 	private static Logger logger = Logger.getLogger(JsonGetProcessor.class);
 	//private static DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
 	private JsonGetHandler handler = new JsonGetHandler();
-	
+	JsonSerializer ser = new JsonSerializer();
 	public void process(Exchange exchange) throws Exception {
 		
 		try {
 			if(exchange.getIn().getBody()==null ||!(exchange.getIn().getBody() instanceof Json)) return;
 			String wsSession = exchange.getIn().getHeader(WebsocketConstants.CONNECTION_KEY, String.class);
 			if(wsSession==null){
+				if(logger.isDebugEnabled())logger.debug("Skipped, no session:"+exchange.getIn().getBody(Json.class));
 				return;
 			}
 			Json json = exchange.getIn().getBody(Json.class);
@@ -65,14 +67,24 @@ public class JsonGetProcessor extends SignalkProcessor implements Processor{
 			if(json.has(VESSELS))return;
 			if(json.has(CONTEXT) && (json.has(GET))){
 				SignalKModel temp = handler.handle(signalkModel, json);
+				logger.debug(temp);
 				//also STOMP headers etc, swap replyTo
 				Map<String, Object> headers = exchange.getIn().getHeaders();
 				headers.put(SIGNALK_FORMAT, handler.getFormat(json));
 				
 				json.delAt(GET);
-				logger.debug("headers:"+headers);
-				outProducer.sendBodyAndHeaders(temp, headers);
-				exchange.getIn().setBody(json);
+				//if(logger.isDebugEnabled())logger.debug("headers:"+headers);
+				
+				
+				if(exchange.getIn().getHeader(RestApiProcessor.REST_REQUEST)!=null){
+					exchange.getIn().setBody(ser.writeJson(temp));
+					if(logger.isDebugEnabled())logger.debug("Processed REST GET request:"+exchange.getIn().getBody(Json.class));
+				}else{
+					if(logger.isDebugEnabled())logger.debug("Processed GET request:"+temp);
+					outProducer.sendBodyAndHeaders(temp, headers);
+				}
+			}else{
+				if(logger.isDebugEnabled())logger.debug("Skipped, not a GET request:"+exchange.getIn().getBody(Json.class));
 			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);

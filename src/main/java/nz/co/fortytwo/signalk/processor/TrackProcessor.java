@@ -67,7 +67,7 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 	public TrackProcessor() throws Exception {
 		storageHandler = new JsonStorageHandler();
 		Json val = Json.object();
-		val.set(JsonConstants.PATH, resources_routes+dot+SignalKConstants.currentTrack);
+		val.set(JsonConstants.PATH, resources_routes + dot + SignalKConstants.currentTrack);
 		currentTrack = Json.object();
 		val.set(value, currentTrack);
 		currentTrack.set(name, "Current Track");
@@ -75,7 +75,7 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 		currentTrack.set(key, SignalKConstants.currentTrack);
 		currentTrack.set("description", "Auto saved current track");
 		currentTrack.set(Constants.MIME_TYPE, Constants.MIME_TYPE_JSON);
-		
+
 		Json values = Json.array();
 		values.add(val);
 
@@ -89,14 +89,15 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 
 		msg.set(JsonConstants.CONTEXT, VESSELS_DOT_SELF);
 		msg.set(JsonConstants.PUT, updates);
-		//do we have an existing one? we dont want to stomp on it
+		// do we have an existing one? we dont want to stomp on it
 		currentTrack.set("uri", "vessels/self/resources/routes/currentTrack.geojson");
-		try{
+		try {
 			storageHandler.handle(msg);
-			//should now have any existing track, so archive it, and start fresh
+			// should now have any existing track, so archive it, and start
+			// fresh
 			archiveTrack(msg);
-		}catch(IOException io){
-			//no file, or unreadable
+		} catch (IOException io) {
+			// no file, or unreadable
 			currentTrack.delAt("uri");
 		}
 		Json geoJson = Json.read(geojson);
@@ -108,10 +109,12 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 
 	public void process(Exchange exchange) throws Exception {
 		try {
-			if (exchange.getIn().getBody() == null || !(exchange.getIn().getBody() instanceof SignalKModel))
-				return;
+			if (exchange.getIn().getBody() instanceof SignalKModel) {
 
-			handle(exchange.getIn().getBody(SignalKModel.class));
+				handle(exchange.getIn().getBody(SignalKModel.class));
+			}else{
+				if(logger.isDebugEnabled())logger.debug("Ignored, not a track:"+exchange.getIn().getBody(Json.class));
+			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -126,24 +129,26 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 			if (logger.isTraceEnabled())
 				logger.trace("TrackProcessor  updating " + node);
 			// we have a track change.
-			coords.add(Json.array(node.get(lonKey),node.get(latKey)));
+			coords.add(Json.array(node.get(lonKey), node.get(latKey)));
 			count++;
 			// append to file
 			if (count % saveCount == 0) {
 				// save it
-				//if(logger.isDebugEnabled())logger.debug("Track:"+msg);
+				// if(logger.isDebugEnabled())logger.debug("Track:"+msg);
 				inProducer.sendBody(msg.toString());
 			}
-			if(count % (saveCount*4) == 0){
-				//simplify to about 2m out of true (at equator)
-				if(logger.isDebugEnabled())logger.debug("Simplify Track, size:"+coords.asList().size());//+":"+coords);
+			if (count % (saveCount * 4) == 0) {
+				// simplify to about 2m out of true (at equator)
+				if (logger.isDebugEnabled())
+					logger.debug("Simplify Track, size:" + coords.asList().size());// +":"+coords);
 				coords = SGImplify.simplifyLine2D(0.00002, coords);
 				geometry.set(COORDINATES, coords);
-				if(logger.isDebugEnabled())logger.debug("  done, size:"+coords.asList().size());
+				if (logger.isDebugEnabled())
+					logger.debug("  done, size:" + coords.asList().size());
 				count = coords.asList().size();
 			}
 			// reset?
-			if(count>maxCount){
+			if (count > maxCount) {
 				archiveTrack(msg);
 				count = 0;
 				coords.asJsonList().clear();
@@ -154,15 +159,15 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 	private void archiveTrack(Json message) {
 		Json lastTrack = message.dup();
 		String time = Util.getIsoTimeString();
-		if(logger.isDebugEnabled())logger.debug("Archive Track to File:"+SignalKConstants.currentTrack+time);
+		if (logger.isDebugEnabled())
+			logger.debug("Archive Track to File:" + SignalKConstants.currentTrack + time);
 		Json val = lastTrack.at(JsonConstants.PUT).at(0).at(JsonConstants.VALUES).at(0);
-		
-		time =  time.substring(0, time.indexOf("."));
-		val.set(JsonConstants.PATH, resources_routes+dot+SignalKConstants.currentTrack+time);
-		val.at(value).set(name, "Track at "+time);
-		currentTrack.set(key, SignalKConstants.currentTrack+time);
+
+		time = time.substring(0, time.indexOf("."));
+		val.set(JsonConstants.PATH, resources_routes + dot + SignalKConstants.currentTrack + time);
+		val.at(value).set(name, "Track at " + time);
+		currentTrack.set(key, SignalKConstants.currentTrack + time);
 		inProducer.sendBody(lastTrack.toString());
-		
-		
+
 	}
 }

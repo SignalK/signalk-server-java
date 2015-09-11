@@ -98,17 +98,13 @@ public class SignalkRouteFactory {
 		// dump misc rubbish
 		.process(new InputFilterProcessor()).id(getName(InputFilterProcessor.class.getSimpleName()))
 		//swap payloads to storage
-		.process(new StorageProcessor()).id(getName(InputFilterProcessor.class.getSimpleName()))
+		.process(new StorageProcessor()).id(getName(StorageProcessor.class.getSimpleName()))
 		//convert NMEA to signalk
 		.process(new NMEAProcessor()).id(getName(NMEAProcessor.class.getSimpleName()))
 		//convert AIS to signalk
 		.process(new AISProcessor()).id(getName(AISProcessor.class.getSimpleName()))
 		//convert n2k
 		.process(new N2KProcessor()).id(getName(N2KProcessor.class.getSimpleName()))
-		//handle list
-		.process(new JsonListProcessor()).id(getName(JsonListProcessor.class.getSimpleName()))
-		//handle get
-		.process(new JsonGetProcessor()).id(getName(JsonGetProcessor.class.getSimpleName()))
 		//handle subscribe messages
 		.process(new JsonSubscribeProcessor()).id(getName(JsonSubscribeProcessor.class.getSimpleName()))
 		//deal with delta format
@@ -120,7 +116,12 @@ public class SignalkRouteFactory {
 		//record track
 		.process(new TrackProcessor()).id(getName(TrackProcessor.class.getSimpleName()))
 		//and update signalk model
-		.process(new SignalkModelProcessor()).id(getName(SignalkModelProcessor.class.getSimpleName()));
+		.process(new SignalkModelProcessor()).id(getName(SignalkModelProcessor.class.getSimpleName()))
+		//we have processed all incoming data now - if there is more left its LIST, GET.
+		//handle list
+		.process(new JsonListProcessor()).id(getName(JsonListProcessor.class.getSimpleName()))
+		//handle get
+		.process(new JsonGetProcessor()).id(getName(JsonGetProcessor.class.getSimpleName()));
 		
 	}
 	
@@ -179,11 +180,18 @@ public class SignalkRouteFactory {
 			
 	}
 	
-	public static void configureRestRoute(RouteBuilder routeBuilder ,String input)throws IOException{
-		routeBuilder.from(input).id(getName("REST Api"))
+	public static void configureRestRoute(RouteBuilder routeBuilder ,String input, String name)throws IOException{
+		routeBuilder.from(input).id(getName(name)) //.setExchangePattern(ExchangePattern.InOut);
 			.setExchangePattern(ExchangePattern.InOut)
-			.process(new RestApiProcessor()).id(getName(RestApiProcessor.class.getSimpleName()))
-			.process(new OutputFilterProcessor()).id(getName(OutputFilterProcessor.class.getSimpleName()));
+			.process(new RestApiProcessor()).to(ExchangePattern.InOut,"seda:inputData?purgeWhenStopping=true&size=100");
+			//.process(new OutputFilterProcessor()).id(getName(OutputFilterProcessor.class.getSimpleName()));
+		
+				
+//		routeBuilder.rest(JsonConstants.SIGNALK_API).id("REST POST Client")
+//			    	.post("/")
+//					.to("log:nz.co.fortytwo.signalk.client.rest?level=INFO&showException=true&showStackTrace=true")
+//					.to("direct:restTest");
+
 		}
 	
 	public static void configureAuthRoute(RouteBuilder routeBuilder ,String input){

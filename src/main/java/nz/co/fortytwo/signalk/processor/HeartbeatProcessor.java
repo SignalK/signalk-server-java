@@ -35,6 +35,8 @@ import nz.co.fortytwo.signalk.server.SubscriptionManager;
 import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
 import nz.co.fortytwo.signalk.util.Constants;
 import nz.co.fortytwo.signalk.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
+import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -66,7 +68,7 @@ public class HeartbeatProcessor extends SignalkProcessor implements Processor{
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
 		}
-		msg=getEmptyDelta();
+		msg=getHeartBeatDelta();
 	}
 	
 	public void process(Exchange exchange) throws Exception {
@@ -88,11 +90,21 @@ public class HeartbeatProcessor extends SignalkProcessor implements Processor{
 	}
 	
 	
-	private Json getEmptyDelta(){
+	/**
+	 *Should return the basic hello message
+	 *<pre> {
+	*	  "version": "0.1",
+	*	  "timestamp": "2015-04-13T01:13:50.524Z",
+	*	  "self": "123456789"
+	*	}
+	*</pre>
+	 * @return
+	 */
+	private Json getHeartBeatDelta(){
 		Json delta = Json.object();
-		delta.set(UPDATES,Json.array());
-		delta.set(JsonConstants.CONTEXT,"vessels.self");
-		
+		delta.set(SignalKConstants.version, Util.getConfigProperty(SignalKConstants.version));
+		delta.set(SignalKConstants.timestamp, Util.getIsoTimeString());
+		delta.set(SignalKConstants.self_str, SignalKConstants.self);		
 		return delta;
 	}
 	
