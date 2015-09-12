@@ -77,19 +77,19 @@ $ ./startpc.sh
 NOTE: Windows users - DONT put any of this in directories with spaces or anything but simple ascii names. Use something like eg C:\dev\SignalK-server
 Use the startpc.bat file to launch. 
 
-_NOTE: ports have changed to 8080 and 3000, and REST api now has /v1 appended_
+_NOTE: ports have changed to 8080 and 3000, and REST api now has /v1 PRE-pended_
 
 You should now have a SignalK server running, on http://localhost:8080. There is a menu page there that allows you to access the following:
 
 * hawt.io management console on `http://localhost:8000/hawtio`
 * webserver on `http://localhost:8080` 
-	* REST api on `http://localhost:8080/signalk/api/v1`
-	* Authentication on `http://localhost:8080/signalk/auth` - but its a pass all for now so you dont need to login
+	* REST api on `http://localhost:8080/signalk/v1/api/`
+	* Authentication on `http://localhost:8080/signalk/v1/auth` - but its a pass all for now so you dont need to login
 * websockets server on `http://localhost:3000`. 
-* signalk output streamed as TCP over port 5555. On linux you can watch this with `$ ncat localhost 5555` **see below for subscriptions
-* signalk output streamed as UDP over port 5554.
-* nmea output will be streamed as TCP over port 5557. On linux you can watch this with `$ ncat localhost 5557`, or use telnet to connect.
-* nmea output will be streamed as UDP over port 5556.
+* signalk output streamed as TCP over port 55555. On linux you can watch this with `$ ncat localhost 55555` **see below for subscriptions
+* signalk output streamed as UDP over port 55554.
+* nmea output will be streamed as TCP over port 55557. On linux you can watch this with `$ ncat localhost 55557`, or use telnet to connect.
+* nmea output will be streamed as UDP over port 55556.
 
 It will be streaming a demo file and dumping logging to screen. Control logging by editing conf/log4j.properties.
 

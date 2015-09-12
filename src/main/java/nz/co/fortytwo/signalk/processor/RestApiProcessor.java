@@ -58,6 +58,7 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 	public static final String REST_REQUEST = "REST_REQUEST";
 	private static final String SLASH = "/";
 	private static final String LIST = "list";
+	public static final String REST_WILDCARD = "REST_WILDCARD";
 	private static Logger logger = Logger.getLogger(RestApiProcessor.class);
 
 	public RestApiProcessor() throws IOException {
@@ -183,9 +184,27 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 		Json array = Json.array().add(Json.object().set(JsonConstants.PATH, path));
 		json.set(JsonConstants.GET, array);
 		exchange.getIn().setBody(json.toString());
+		//If a GET is an absolute object return only the requested object
+		//If its a wildcard, return a full tree
+		if(containsWildcard(context)||containsWildcard(path)){
+			exchange.getIn().setHeader(REST_WILDCARD, "true");
+		}else{
+			exchange.getIn().setHeader(REST_WILDCARD, "false");
+		}
 		if (logger.isDebugEnabled())
 			logger.debug("Processing the GET request:" + exchange.getIn().getBody());
 
+	}
+
+	/**
+	 * true if the path contains any * or ? for a wildcard match
+	 * @param path
+	 * @return
+	 */
+	private boolean containsWildcard(String path) {
+		if(StringUtils.isBlank(path)) return false;
+		if(path.contains("*")||path.contains("?"))return true;
+		return false;
 	}
 
 }

@@ -77,6 +77,12 @@ public class JsonGetProcessor extends SignalkProcessor implements Processor{
 				
 				
 				if(exchange.getIn().getHeader(RestApiProcessor.REST_REQUEST)!=null){
+					//deal with GET
+					//if(exchange.getIn().getHeader(RestApiProcessor.REST_WILDCARD)!=null
+					//		&& exchange.getIn().getHeader(RestApiProcessor.REST_WILDCARD).equals("false")){
+						//then we only send back the object
+						
+					//}
 					exchange.getIn().setBody(ser.writeJson(temp));
 					if(logger.isDebugEnabled())logger.debug("Processed REST GET request:"+exchange.getIn().getBody(Json.class));
 				}else{
