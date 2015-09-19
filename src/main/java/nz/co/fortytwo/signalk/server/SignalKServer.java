@@ -26,8 +26,12 @@ package nz.co.fortytwo.signalk.server;
 import java.io.File;
 import java.util.Properties;
 
+import javax.jmdns.JmDNS;
+import javax.jmdns.ServiceInfo;
+
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.util.Constants;
+import nz.co.fortytwo.signalk.util.JsonConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.activemq.broker.BrokerService;
@@ -38,17 +42,18 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.webapp.WebAppContext;
 
-import com.sun.tools.jxc.gen.config.Config;
-
 public class SignalKServer {
 
 	private static Server server;
 
 	private static Logger logger = Logger.getLogger(SignalKServer.class);
 
-	
 	protected SignalKServer(String configDir) throws Exception {
-		//init config
+		// init config
+		Properties props = System.getProperties();
+		props.setProperty("java.net.preferIPv4Stack", "true");
+		System.setProperties(props);
+
 		Util.getConfig(configDir);
 		// make sure we have all the correct dirs and files now
 		ensureInstall();
@@ -61,16 +66,17 @@ public class SignalKServer {
 		// create a new Camel Main so we can easily start Camel
 		Main main = new Main();
 
-		// enable hangup support which mean we detect when the JVM terminates, and stop Camel graceful
+		// enable hangup support which mean we detect when the JVM terminates,
+		// and stop Camel graceful
 		main.enableHangupSupport();
 
-		if(Boolean.valueOf(Util.getConfigProperty(Constants.HAWTIO_START))){
-			server=startHawtio();
+		if (Boolean.valueOf(Util.getConfigProperty(Constants.HAWTIO_START))) {
+			server = startHawtio();
 		}
-		
+
 		// Start activemq broker
 		BrokerService broker = ActiveMqBrokerFactory.newInstance();
-		
+
 		broker.start();
 
 		RouteManager routeManager = RouteManagerFactory.getInstance();
@@ -78,22 +84,26 @@ public class SignalKServer {
 		// add our routes to Camel
 		main.addRouteBuilder(routeManager);
 
-		// and run, which keeps blocking until we terminate the JVM (or stop CamelContext)
+		
+		// and run, which keeps blocking until we terminate the JVM (or stop
+		// CamelContext)
 		main.run();
 
 		// so now shutdown serial reader and server
 
 		routeManager.stopSerial();
+		routeManager.stopMdns();
 		server.stop();
 		broker.stop();
-		//write out the signalk model
+		// write out the signalk model
 		SignalKModelFactory.save(SignalKModelFactory.getInstance());
 		System.exit(0);
 	}
 
 	private Server startHawtio() throws Exception {
-		//hawtio, auth disabled
-		System.setProperty(Constants.HAWTIO_AUTHENTICATE, Util.getConfigProperty(Constants.HAWTIO_AUTHENTICATE));
+		// hawtio, auth disabled
+		System.setProperty(Constants.HAWTIO_AUTHENTICATE,
+				Util.getConfigProperty(Constants.HAWTIO_AUTHENTICATE));
 		int hawtPort = Util.getConfigPropertyInt(Constants.HAWTIO_PORT);
 		Server server = new Server(hawtPort);
 		HandlerCollection handlers = new HandlerCollection();
@@ -102,16 +112,19 @@ public class SignalKServer {
 		WebAppContext webapp = new WebAppContext();
 		webapp.setServer(server);
 		webapp.setContextPath(Util.getConfigProperty(Constants.HAWTIO_CONTEXT));
-		
+
 		webapp.setWar(Util.getConfigProperty(Constants.HAWTIO_WAR));
 		webapp.setParentLoaderPriority(true);
 		webapp.setLogUrlOnStart(true);
-		// lets set a temporary directory so jetty doesn't bork if some process zaps /tmp/*
-		String homeDir = System.getProperty("user.home", ".") + System.getProperty("hawtio.dirname", "/.hawtio");
+		// lets set a temporary directory so jetty doesn't bork if some process
+		// zaps /tmp/*
+		String homeDir = System.getProperty("user.home", ".")
+				+ System.getProperty("hawtio.dirname", "/.hawtio");
 		String tempDirPath = homeDir + "/tmp";
 		File tempDir = new File(tempDirPath);
 		tempDir.mkdirs();
-		logger.info("using temp directory for hawtio jetty: " + tempDir.getPath());
+		logger.info("using temp directory for hawtio jetty: "
+				+ tempDir.getPath());
 		webapp.setTempDirectory(tempDir);
 		// add hawtio
 		handlers.addHandler(webapp);
@@ -132,7 +145,8 @@ public class SignalKServer {
 			logDir.mkdirs();
 		}
 		// do we have a storage dir?
-		File storageDir = new File(Util.getConfigProperty(Constants.STORAGE_ROOT));
+		File storageDir = new File(
+				Util.getConfigProperty(Constants.STORAGE_ROOT));
 		if (!storageDir.exists()) {
 			storageDir.mkdirs();
 		}
@@ -140,7 +154,8 @@ public class SignalKServer {
 	}
 
 	public static void main(String[] args) throws Exception {
-		// we look for and use a freeboard.cfg in the launch/cfg dir and use that to override defaults
+		// we look for and use a freeboard.cfg in the launch/cfg dir and use
+		// that to override defaults
 		// the only arg is conf dir
 		String conf = null;
 		if (args != null && args.length > 0 && StringUtils.isNotBlank(args[0])) {

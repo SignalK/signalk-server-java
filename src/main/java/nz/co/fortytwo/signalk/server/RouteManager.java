@@ -24,37 +24,30 @@
 package nz.co.fortytwo.signalk.server;
 
 import java.io.File;
-import java.net.MalformedURLException;
-import java.util.Properties;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
-import mjson.Json;
+import javax.jmdns.JmmDNS;
+import javax.jmdns.NetworkTopologyDiscovery;
+import javax.jmdns.ServiceInfo;
+
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
-import nz.co.fortytwo.signalk.processor.MapToJsonProcessor;
-import nz.co.fortytwo.signalk.processor.OutputFilterProcessor;
-import nz.co.fortytwo.signalk.processor.RestApiProcessor;
 import nz.co.fortytwo.signalk.util.Constants;
 import nz.co.fortytwo.signalk.util.JsonConstants;
-import nz.co.fortytwo.signalk.util.JsonSerializer;
 import nz.co.fortytwo.signalk.util.Util;
 
-import org.apache.camel.ExchangePattern;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.stomp.SkStompComponent;
 import org.apache.camel.component.websocket.SignalkWebsocketComponent;
 import org.apache.camel.impl.JndiRegistry;
 import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry;
-import org.apache.camel.model.rest.RestBindingMode;
-import org.apache.camel.model.rest.RestConfigurationDefinition;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.handler.ContextHandler;
-import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
-import org.eclipse.jetty.util.resource.Resource;
-import org.eclipse.jetty.util.resource.ResourceCollection;
+
+
 
 /**
  * Main camel route definition to handle input to signalk
@@ -71,6 +64,10 @@ import org.eclipse.jetty.util.resource.ResourceCollection;
  * 
  */
 public class RouteManager extends RouteBuilder {
+	public static final String _SIGNALK_HTTP_TCP_LOCAL = "_signalk-http._tcp.local.";
+
+	public static final String _SIGNALK_WS_TCP_LOCAL = "_signalk-ws._tcp.local.";
+
 	private static Logger logger = Logger.getLogger(RouteManager.class);
 	
 	public static final String SEDA_INPUT = "seda:inputData?purgeWhenStopping=true&size=100";
@@ -85,7 +82,7 @@ public class RouteManager extends RouteBuilder {
 	public static final String STOMP = "skStomp:queue:signalk?brokerURL=tcp://0.0.0.0:"+Util.getConfigProperty(Constants.STOMP_PORT);
 	public static final String MQTT = "mqtt:signalk?host=tcp://0.0.0.0:"+Util.getConfigProperty(Constants.MQTT_PORT);
 
-	
+	private JmmDNS jmdns = null;
 	private int wsPort = 3000;
 	private int restPort = 8080;
 	private String streamUrl;
@@ -126,7 +123,21 @@ public class RouteManager extends RouteBuilder {
 		CamelContextFactory.getInstance().getShutdownStrategy().setShutdownNowOnTimeout(true);
 		CamelContextFactory.getInstance().getShutdownStrategy().setTimeout(10);
 		
+		//DNS-SD
+		NetworkTopologyDiscovery netTop = NetworkTopologyDiscovery.Factory.getInstance();
 		
+		jmdns = JmmDNS.Factory.getInstance();
+		
+		jmdns.registerServiceType(_SIGNALK_WS_TCP_LOCAL);
+		jmdns.registerServiceType(_SIGNALK_HTTP_TCP_LOCAL);
+		ServiceInfo wsInfo = ServiceInfo.create(_SIGNALK_WS_TCP_LOCAL,"signalk-ws",wsPort, 0,0, getMdnsTxt());
+		jmdns.registerService(wsInfo);
+		
+		ServiceInfo httpInfo = ServiceInfo
+				.create(_SIGNALK_HTTP_TCP_LOCAL, "signalk-http",restPort,0,0, getMdnsTxt());
+		jmdns.registerService(httpInfo);
+		
+		//Netty tcp server
 		skServer = new NettyServer(null, Constants.OUTPUT_TCP);
 		skServer.setTcpPort(Util.getConfigPropertyInt(Constants.TCP_PORT));
 		skServer.setUdpPort(Util.getConfigPropertyInt(Constants.UDP_PORT));
@@ -279,6 +290,17 @@ public class RouteManager extends RouteBuilder {
 		}
 	}
 
+	private Map<String,String> getMdnsTxt() {
+		Map<String,String> txtSet = new HashMap<String, String>();
+		txtSet.put("path", JsonConstants.SIGNALK_ENDPOINTS);
+		txtSet.put("server","signalk-server");
+		txtSet.put("version",Util.getConfigProperty(Constants.VERSION));
+		txtSet.put("vessel_name",Util.getConfigProperty(Constants.SELF));
+		txtSet.put("vessel_mmsi",Util.getConfigProperty(Constants.SELF));
+		txtSet.put("vessel_uuid",Util.getConfigProperty(Constants.SELF));
+		return txtSet;
+	}
+
 	/**
 	 * @return
 	 */
@@ -307,7 +329,17 @@ public class RouteManager extends RouteBuilder {
 	 */
 	public void stopSerial() {
 		serialPortManager.stopSerial();
-		//nmeaTcpServer.stop();
+	}
+	/**
+	 * Stop the DNS-SD server.
+	 * @throws IOException 
+	 */
+	public void stopMdns() throws IOException {
+		if(jmdns!=null){
+			jmdns.unregisterAllServices();
+			jmdns.close();
+			jmdns=null;
+		}
 	}
 	
 
