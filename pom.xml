@@ -37,6 +37,10 @@
 	</developers>
 	<repositories>
 		<repository>
+		    <id>localMvn</id>
+		    <url>file://${basedir}/src/localMvn</url>
+		  </repository>
+		<repository>
 			<id>java.net jni</id>
 			<name>java.nt JNI Snapshot Repository</name>
 			<url>https://maven.java.net/content/repositories/snapshots/</url>
@@ -350,14 +354,10 @@
 			<groupId>javax.jmdns</groupId>
 			<artifactId>jmdns</artifactId>
 			<version>3.4.2-SNAPSHOT</version>
-			<scope>system</scope>
-         	<systemPath>${project.basedir}/src/main/release/jmdns-3.4.2-SNAPSHOT.jar</systemPath>
+<!-- 			<scope>system</scope> -->
+<!--          	<systemPath>${project.basedir}/src/main/release/jmdns-3.4.2-SNAPSHOT.jar</systemPath> -->
 		</dependency>
-<!-- 		<dependency> -->
-<!--             <groupId>dnsjava</groupId> -->
-<!--             <artifactId>dnsjava</artifactId> -->
-<!--             <version>2.1.6</version> -->
-<!--         </dependency> -->
+
 	</dependencies>
 	<build>
 		<plugins>
@@ -393,22 +393,23 @@
 					<target>1.7</target>
 				</configuration>
 			</plugin>
+			
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<version>2.2.1</version>
-				<!-- Tell Maven when to execute this plugin -->
+<!-- 				Tell Maven when to execute this plugin -->
 				<executions>
 					<execution>
 						<id>make-assembly-jar</id>
 						<phase>package</phase>
 						<configuration>
 							<descriptorRefs>
-								<!-- Tell Maven-Assembly to include dependencies in jar -->
+<!-- 								Tell Maven-Assembly to include dependencies in jar -->
 								<descriptorId>jar-with-dependencies</descriptorId>
 							</descriptorRefs>
 							<archive>
 								<manifest>
-									<!-- Specify class to be run at startup -->
+<!-- 									Specify class to be run at startup -->
 									<mainClass>nz.co.fortytwo.signalk.server.SignalKServer</mainClass>
 								</manifest>
 							</archive>
@@ -417,10 +418,12 @@
 							<goal>single</goal>
 						</goals>
 					</execution>
-					<!-- <execution> <id>make-assembly-zip</id> <phase>package</phase> <configuration> 
-						<descriptors> <descriptor>src/main/release/assembly.xml</descriptor> </descriptors> 
-						</configuration> <goals> <goal>single</goal> </goals> </execution> -->
-				</executions>
+<!-- 					<execution> <id>make-assembly-zip</id> <phase>package</phase> <configuration> -->
+<!-- 						<descriptors> 
+								<descriptor>src/main/release/assembly.xml</descriptor> 
+							</descriptors>  -->
+<!-- 						</configuration> <goals> <goal>single</goal> </goals> </execution>  -->
+ 				</executions> 
 			</plugin>
 			<!-- <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>autoincrement-versions-maven-plugin</artifactId> 
 				<version>2.0-SNAPSHOT</version> <executions> <execution> <id>update-pom-versions</id> 
