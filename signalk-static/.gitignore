@@ -1,0 +1,9 @@
+/freeboard-sk
+/instrumentpanel
+/logs
+/sailgauge
+/mapcache/US*
+/mapcache/NZ*
+/mapcache/*.zip
+/mapcache/*.KAP
+/mapcache/*.kap
