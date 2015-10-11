@@ -66,7 +66,7 @@ public class CamelUdpNettyHandler extends SimpleChannelInboundHandler<DatagramPa
 	private String outputType;
 	
 	
-	public CamelUdpNettyHandler(Properties config, String outputType) throws Exception {
+	public CamelUdpNettyHandler( String outputType) throws Exception {
 		this.outputType=outputType;
 		producer= new DefaultProducerTemplate(CamelContextFactory.getInstance());
 		producer.setDefaultEndpointUri(RouteManager.SEDA_INPUT );

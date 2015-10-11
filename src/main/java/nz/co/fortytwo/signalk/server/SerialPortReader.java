@@ -160,7 +160,7 @@ public class SerialPortReader implements Processor {
 			headers.put(JsonConstants.MSG_PORT, portName);
 			uid = Pattern.compile(Constants.UID + ":");
 			if(logger.isDebugEnabled())logger.info("Setup serialReader on :"+portName);
-			sendMessage = new Boolean(Util.getConfig(null).getProperty(Constants.SEND_MESSAGE, "true"));
+			sendMessage = new Boolean(Util.getConfigProperty(Constants.SEND_MESSAGE));
 		}
 
 		

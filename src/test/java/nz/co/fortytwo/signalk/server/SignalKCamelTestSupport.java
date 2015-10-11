@@ -148,7 +148,7 @@ public abstract class SignalKCamelTestSupport extends CamelTestSupport {
 	protected RouteBuilder createRouteBuilder() {
 	    try {
 	    	try {
-				Util.getConfig(null);
+				Util.getConfig();
 				
 				broker.start();
 				logger.debug("Started broker");

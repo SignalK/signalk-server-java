@@ -32,10 +32,12 @@ import javax.jmdns.JmmDNS;
 import javax.jmdns.NetworkTopologyDiscovery;
 import javax.jmdns.ServiceInfo;
 
+import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.util.Constants;
 import nz.co.fortytwo.signalk.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.builder.RouteBuilder;
@@ -79,8 +81,8 @@ public class RouteManager extends RouteBuilder {
 	public static final String SEDA_NMEA = "seda:nmeaOutput?purgeWhenStopping=true&size=100";
 	public static final String SEDA_COMMON_OUT = "seda:commonOut?purgeWhenStopping=true&size=100";
 
-	public static final String STOMP = "skStomp:queue:signalk?brokerURL=tcp://0.0.0.0:"+Util.getConfigProperty(Constants.STOMP_PORT);
-	public static final String MQTT = "mqtt:signalk?host=tcp://0.0.0.0:"+Util.getConfigProperty(Constants.MQTT_PORT);
+	public static final String STOMP = "skStomp:queue:signalk?brokerURL=tcp://0.0.0.0:"+Util.getConfigPropertyDouble(Constants.STOMP_PORT).intValue();
+	public static final String MQTT = "mqtt:signalk?host=tcp://0.0.0.0:"+Util.getConfigPropertyDouble(Constants.MQTT_PORT).intValue();
 
 	private JmmDNS jmdns = null;
 	private int wsPort = 3000;
@@ -95,14 +97,14 @@ public class RouteManager extends RouteBuilder {
 	private NettyServer nmeaServer;
 
 	protected RouteManager() {
-		signalkModel.getData().clear();
+		
 		// web socket on port 3000
-		logger.info("  Websocket port:"+Util.getConfigProperty(Constants.WEBSOCKET_PORT));
+		logger.info("  Websocket port:"+Util.getConfigPropertyInt(Constants.WEBSOCKET_PORT));
 		wsPort=Util.getConfigPropertyInt(Constants.WEBSOCKET_PORT);
-		logger.info("  Signalk REST API port:"+Util.getConfigProperty(Constants.REST_PORT));
+		logger.info("  Signalk REST API port:"+Util.getConfigPropertyInt(Constants.REST_PORT));
 		restPort=Util.getConfigPropertyInt(Constants.REST_PORT);
 		//are we running demo?
-		if (Boolean.valueOf(Util.getConfigProperty(Constants.DEMO))) {
+		if (Boolean.valueOf(Util.getConfigPropertyBoolean(Constants.DEMO))) {
 			logger.info("  Demo streaming url:"+Util.getConfigProperty(Constants.STREAM_URL));
 			setStreamUrl(Util.getConfigProperty(Constants.STREAM_URL));
 		}
@@ -196,11 +198,11 @@ public class RouteManager extends RouteBuilder {
 		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_ENDPOINTS+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true","REST Endpoints");
 		
 		
-		if("true".equals(Util.getConfigProperty(Constants.ALLOW_INSTALL))){
+		if(Util.getConfigPropertyBoolean(Constants.ALLOW_INSTALL)){
 			SignalkRouteFactory.configureInstallRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_INSTALL+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true", "REST Install");
 		}
 		
-		if("true".equals(Util.getConfigProperty(Constants.ALLOW_UPGRADE))){
+		if(Util.getConfigPropertyBoolean(Constants.ALLOW_UPGRADE)){
 			SignalkRouteFactory.configureInstallRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_UPGRADE+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true", "REST Upgrade");
 		}
 		
@@ -210,17 +212,17 @@ public class RouteManager extends RouteBuilder {
 		SignalkRouteFactory.configureAnchorWatchTimer(this, "timer://anchorWatch?fixedRate=true&period=1000");
 		SignalkRouteFactory.configureAlarmsTimer(this, "timer://alarms?fixedRate=true&period=1000");
 		
-		if("true".equals(Util.getConfigProperty(Constants.GENERATE_NMEA0183))){
+		if(Util.getConfigPropertyBoolean(Constants.GENERATE_NMEA0183)){
 			SignalkRouteFactory.configureNMEA0183Timer(this, "timer://nmea0183?fixedRate=true&period=1000");
 		}
 		//STOMP
-		if("true".equals(Util.getConfigProperty(Constants.START_STOMP))){
+		if(Util.getConfigPropertyBoolean(Constants.START_STOMP)){
 			from("skStomp:queue:signalk.put").id("STOMP In")
 				.setHeader(Constants.OUTPUT_TYPE, constant(Constants.OUTPUT_STOMP))
 				.to(SEDA_INPUT).id(SignalkRouteFactory.getName("SEDA_INPUT"));
 		}
 		//MQTT
-		if("true".equals(Util.getConfigProperty(Constants.START_MQTT))){
+		if(Util.getConfigPropertyBoolean(Constants.START_MQTT)){
 			from(MQTT+"&subscribeTopicName=signalk.put").id("MQTT In")
 				.transform(body().convertToString())
 				.setHeader(Constants.OUTPUT_TYPE, constant(Constants.OUTPUT_MQTT))
@@ -228,11 +230,9 @@ public class RouteManager extends RouteBuilder {
 		}
 		//start any clients if they exist
 		//TCP
-		String tcpClients = Util.getConfigProperty(Constants.CLIENT_TCP);
-		if(StringUtils.isNotBlank(tcpClients)){
-			//set up listeners
-			String[] clients = tcpClients.split(",");
-			for(String client: clients){
+		Json tcpClients = Util.getConfigJsonArray(Constants.CLIENT_TCP);
+		if(tcpClients!=null){
+			for(Object client: tcpClients.asList()){
 				from("netty4:tcp://"+client+"?clientMode=true&textline=true").id("TCP Client:"+client)
 					.onException(Exception.class).handled(true).maximumRedeliveries(0)
 						.to("log:nz.co.fortytwo.signalk.client.tcp?level=ERROR&showException=true&showStackTrace=true")
@@ -241,25 +241,22 @@ public class RouteManager extends RouteBuilder {
 			}
 		}
 		//MQTT
-		String mqttClients = Util.getConfigProperty(Constants.CLIENT_MQTT);
-		if(StringUtils.isNotBlank(mqttClients)){
-			//set up listeners
-			String[] clients = mqttClients.split(",");
-			for(String client: clients){
-				from("mqtt://"+client).id("MQTT Client:"+client)
-					.onException(Exception.class).handled(true).maximumRedeliveries(0)
-						.to("log:nz.co.fortytwo.signalk.client.mqtt?level=ERROR&showException=true&showStackTrace=true")
-						.end().transform(body().convertToString())
-					.to(SEDA_INPUT);
+			Json mqttClients = Util.getConfigJsonArray(Constants.CLIENT_MQTT);
+			if(mqttClients!=null){
+				for(Object client: mqttClients.asList()){
+					from("mqtt://"+client).id("MQTT Client:"+client)
+						.onException(Exception.class).handled(true).maximumRedeliveries(0)
+							.to("log:nz.co.fortytwo.signalk.client.mqtt?level=ERROR&showException=true&showStackTrace=true")
+							.end().transform(body().convertToString())
+						.to(SEDA_INPUT);
+				}
 			}
-		}
+		
 		//STOMP
 		//TODO: test stomp client actually works!
-		String stompClients = Util.getConfigProperty(Constants.CLIENT_MQTT);
-		if(StringUtils.isNotBlank(stompClients)){
-			//set up listeners
-			String[] clients = stompClients.split(",");
-			for(String client: clients){
+		Json stompClients = Util.getConfigJsonArray(Constants.CLIENT_STOMP);
+		if(stompClients!=null){
+			for(Object client: stompClients.asList()){
 				from("stomp://"+client).id("STOMP Client:"+client)
 					.onException(Exception.class).handled(true).maximumRedeliveries(0)
 						.to("log:nz.co.fortytwo.signalk.client.stomp?level=ERROR&showException=true&showStackTrace=true")
@@ -271,7 +268,7 @@ public class RouteManager extends RouteBuilder {
 		
 		
 		//Demo mode
-		if (Boolean.valueOf(Util.getConfigProperty(Constants.DEMO))) {
+		if (Util.getConfigPropertyBoolean(Constants.DEMO)) {
 			from("file://./src/test/resources/samples/?move=done&fileName=" + streamUrl).id("demo feed")
 				.onException(Exception.class).handled(true).maximumRedeliveries(0)
 				.to("log:nz.co.fortytwo.signalk.model.receive?level=ERROR&showException=true&showStackTrace=true")

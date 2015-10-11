@@ -30,9 +30,10 @@ Current capabilities:
 	* Serial
 	* USB
 * Supports:
-	* *NEW: AIS targets displayed*
-	* *NEW: TCP and MQTT clients* (listen to remote servers)
-    * *NEW: On-demand user apps*, sort of works, anyway :-)  Bit early for some of the apps yet.
+	* *NEW: provides discovery over Bonjour, Zeroconf and DNS-SD*
+	* AIS targets displayed
+	* TCP and MQTT clients (listen to remote servers)
+    * On-demand user apps, sort of works, anyway :-)  Bit early for some of the apps yet.
 	* Delta and Full signalk formats, and translations between them.
 	* Subscriptions, with * and ? wildcards. Configurable format, period and delivery policy
 	* LIST - get a list of available signalk keys with * and ? wildcard support

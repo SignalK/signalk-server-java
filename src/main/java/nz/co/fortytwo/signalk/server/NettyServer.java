@@ -65,7 +65,7 @@ import org.apache.log4j.Logger;
 
 public class NettyServer implements Processor{
 
-	private Properties config;
+	
 	private final EventLoopGroup group;
 	private final EventLoopGroup workerGroup;
 
@@ -83,7 +83,7 @@ public class NettyServer implements Processor{
 	 * @throws Exception 
 	 */
 	public NettyServer(String configDir,String outputType) throws Exception {
-		config = Util.getConfig(configDir);
+		
 		group = new NioEventLoopGroup();
 		workerGroup = new NioEventLoopGroup();
 		this.outputType=outputType;
@@ -97,7 +97,7 @@ public class NettyServer implements Processor{
 	}
 	
 	public void run() throws Exception{
-		forwardingHandler = new CamelNettyHandler(config, outputType);
+		forwardingHandler = new CamelNettyHandler(outputType);
 		// The generic TCP socket server
 		ServerBootstrap skBootstrap = new ServerBootstrap();
 		skBootstrap.group(group, workerGroup).channel(NioServerSocketChannel.class).localAddress(tcpPort)
@@ -119,7 +119,7 @@ public class NettyServer implements Processor{
 		signalkTcpFuture.channel().closeFuture();
 		
 		if(udpPort>0){
-			udpHandler = new CamelUdpNettyHandler(config, outputType);
+			udpHandler = new CamelUdpNettyHandler(outputType);
 			 
 			Bootstrap udpBootstrap = new Bootstrap();
 			udpBootstrap.group(group).channel(NioDatagramChannel.class)

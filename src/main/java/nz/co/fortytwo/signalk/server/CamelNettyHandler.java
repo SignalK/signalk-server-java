@@ -57,7 +57,7 @@ public class CamelNettyHandler extends SimpleChannelInboundHandler<String> {
 	//@Produce(uri = RouteManager.SEDA_INPUT)
     ProducerTemplate producer;
 	
-	public CamelNettyHandler(Properties config, String outputType) throws Exception {
+	public CamelNettyHandler( String outputType) throws Exception {
 		this.outputType=outputType;
 		producer= new DefaultProducerTemplate(CamelContextFactory.getInstance());
 		producer.setDefaultEndpointUri(RouteManager.SEDA_INPUT );

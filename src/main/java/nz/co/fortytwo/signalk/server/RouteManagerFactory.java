@@ -38,7 +38,7 @@ public class RouteManagerFactory {
 	static RouteManager manager = null;
 	
 	public static RouteManager getInstance() throws FileNotFoundException, IOException{
-		Util.getConfig(null);
+		Util.getConfig();
 		if(manager==null){
 			
 			manager=new RouteManager();

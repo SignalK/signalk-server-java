@@ -29,6 +29,7 @@ import java.util.Properties;
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
 
+import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.util.Constants;
 import nz.co.fortytwo.signalk.util.JsonConstants;
@@ -54,14 +55,15 @@ public class SignalKServer {
 		props.setProperty("java.net.preferIPv4Stack", "true");
 		System.setProperties(props);
 
-		Util.getConfig(configDir);
+		
+		Util.getConfig();
 		// make sure we have all the correct dirs and files now
 		ensureInstall();
 
-		logger.info("Freeboard starting....");
+		logger.info("SignalKServer starting....");
 
 		// do we have a USB drive connected?
-		logger.info("USB drive " + Util.getUSBFile());
+		//logger.info("USB drive " + Util.getUSBFile());
 
 		// create a new Camel Main so we can easily start Camel
 		Main main = new Main();
@@ -70,7 +72,7 @@ public class SignalKServer {
 		// and stop Camel graceful
 		main.enableHangupSupport();
 
-		if (Boolean.valueOf(Util.getConfigProperty(Constants.HAWTIO_START))) {
+		if (Util.getConfigPropertyBoolean(Constants.HAWTIO_START)) {
 			server = startHawtio();
 		}
 
@@ -103,7 +105,7 @@ public class SignalKServer {
 	private Server startHawtio() throws Exception {
 		// hawtio, auth disabled
 		System.setProperty(Constants.HAWTIO_AUTHENTICATE,
-				Util.getConfigProperty(Constants.HAWTIO_AUTHENTICATE));
+				Util.getConfigPropertyBoolean(Constants.HAWTIO_AUTHENTICATE).toString());
 		int hawtPort = Util.getConfigPropertyInt(Constants.HAWTIO_PORT);
 		Server server = new Server(hawtPort);
 		HandlerCollection handlers = new HandlerCollection();

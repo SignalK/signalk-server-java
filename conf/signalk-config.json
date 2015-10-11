@@ -1,0 +1,96 @@
+{
+   "config": {
+      "hawtio": {
+         "authenticationEnabled": true,
+         "context": "/hawtio",
+         "port": 8000.0,
+         "start": false,
+         "war": "./hawtio/hawtio-default-offline-1.4.48.war"
+      },
+      "server": {
+         "apps": {
+            "install": {
+               "allow": true
+            },
+            "upgrade": {
+               "allow": true
+            }
+         },
+         "client": {
+            "mqtt": {
+               "connect": null
+            },
+            "stomp": {
+               "connect": null
+            },
+            "tcp": {
+               "connect": null
+            }
+         },
+         "clock": {
+            "source": "system"
+         },
+         "demo": {
+            "file": "./src/test/resources/motu.log&scanStream=true&scanStreamDelay=500",
+            "start": false
+         },
+         "files": {
+            "cfg": {
+               "dir": "./conf/",
+               "file": "signalk.cfg"
+            },
+            "maps": {
+               "dir": "./mapcache"
+            },
+            "static": {
+               "dir": "./signalk-static"
+            },
+            "storage": {
+               "root": "./storage/"
+            },
+            "usb": {
+               "usbdrive": "/media/usb0"
+            }
+         },
+         "serial": {
+            "baud": 38400.0,
+            "ports": ["/dev/ttyUSB0","/dev/ttyUSB1","/dev/ttyUSB2","/dev/ttyACM0","/dev/ttyACM1","/dev/ttyACM2"]
+         },
+         "server": {
+            "mqtt": {
+               "port": 1883.0,
+               "start": false
+            },
+            "nmea": {
+               "generate0183": true
+            },
+            "rest": {
+               "port": 8080.0
+            },
+            "stomp": {
+               "port": 61613.0,
+               "start": false
+            },
+            "tcp": {
+               "nmea": {
+                  "port": 5557.0
+               },
+               "port": 55555.0
+            },
+            "udp": {
+               "nmea": {
+                  "port": 5556.0
+               },
+               "port": 55554.0
+            },
+            "websocket": {
+               "port": 3000.0
+            }
+         },
+         "version": "0.1",
+         "vessel": {
+            "self": "self"
+         }
+      }
+   }
+}

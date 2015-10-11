@@ -23,7 +23,11 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
+import java.io.IOException;
+
 import nz.co.fortytwo.signalk.model.SignalKModel;
+import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
+import nz.co.fortytwo.signalk.util.JsonConstants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -59,13 +63,16 @@ public class SignalkModelProcessor extends SignalkProcessor implements Processor
 	}
 
 	// @Override
-	public void handle(SignalKModel node) {
+	public void handle(SignalKModel node) throws IOException {
 		if (node.getData().size() == 0)
 			return;
 		if (logger.isDebugEnabled())
 			logger.debug("SignalkModelProcessor  updating " + node);
 
 		signalkModel.putAll(node.getData());
+		if(node.getSubMap(JsonConstants.CONFIG)!=null){
+			SignalKModelFactory.saveConfig(signalkModel);
+		}
 		if (logger.isDebugEnabled())
 			logger.debug(signalkModel);
 	}

@@ -23,12 +23,11 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
+import static nz.co.fortytwo.signalk.util.JsonConstants.CONFIG;
+import static nz.co.fortytwo.signalk.util.JsonConstants.VESSELS;
 import mjson.Json;
-import nz.co.fortytwo.signalk.handler.DeltaToMapConverter;
 import nz.co.fortytwo.signalk.handler.FullToMapConverter;
 import nz.co.fortytwo.signalk.model.SignalKModel;
-
-import static nz.co.fortytwo.signalk.util.JsonConstants.VESSELS;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -52,7 +51,7 @@ public class FullImportProcessor extends SignalkProcessor implements Processor{
 			if(exchange.getIn().getBody()==null ||!(exchange.getIn().getBody() instanceof Json)) return;
 			//we only process full format
 			Json node = exchange.getIn().getBody(Json.class);
-			if(node.has(VESSELS)){
+			if(node.has(VESSELS) || node.has(CONFIG)){
 				SignalKModel model = fullToMap.handle(node);
 				if(logger.isDebugEnabled())logger.debug("Converted to:"+model);
 				if(model!=null){
