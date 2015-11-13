@@ -71,6 +71,8 @@ public class MqttTest extends SignalKCamelTestSupport{
 		//fill the model with data
 		SignalKModel model = SignalKModelFactory.getInstance();
 		model.getData().clear();
+		SignalKModelFactory.loadConfig(model);
+		
 		model = Util.populateModel(model, new File("src/test/resources/samples/basicModel.txt"));
 		
 		//create MQTT connection
@@ -128,6 +130,7 @@ public class MqttTest extends SignalKCamelTestSupport{
 		//fill the model with data
 		SignalKModel model = SignalKModelFactory.getInstance();
 		model.getData().clear();
+		SignalKModelFactory.loadConfig(model);
 		
 		
 		//create MQTT connection
@@ -143,6 +146,7 @@ public class MqttTest extends SignalKCamelTestSupport{
 		connection.publish("signalk.put", FileUtils.readFileToByteArray(new File("src/test/resources/samples/windAngleUpdate.json.txt")),QoS.AT_LEAST_ONCE, false);
 		
 		latch.await(2, TimeUnit.SECONDS);
+		log.debug("model:"+model);
 		assertEquals(338.0,model.getValue(vessels_dot_self_dot+env_wind_angleApparent));
 		assertEquals(6.8986404,model.getValue(vessels_dot_self_dot+env_wind_speedApparent));
 		//disconnect
@@ -155,6 +159,8 @@ public class MqttTest extends SignalKCamelTestSupport{
 				
 				SignalKModel model = SignalKModelFactory.getInstance();
 				model.getData().clear();
+				SignalKModelFactory.loadConfig(model);
+				
 				model = Util.populateModel(model, new File("src/test/resources/samples/basicModel.txt"));
 				
 				//create MQTT connection
@@ -211,6 +217,8 @@ public class MqttTest extends SignalKCamelTestSupport{
 		//fill the model with data
 				SignalKModel model = SignalKModelFactory.getInstance();
 				model.getData().clear();
+				SignalKModelFactory.loadConfig(model);
+				
 				model = Util.populateModel(model, new File("src/test/resources/samples/basicModel.txt"));
 				
 				//create MQTT connection
@@ -266,8 +274,10 @@ public class MqttTest extends SignalKCamelTestSupport{
 	@Test
 	public void testSendingGetDelta() throws Exception {
 		//fill the model with data
-				SignalKModel model = SignalKModelFactory.getInstance();
-				model.getData().clear();
+		SignalKModel model = SignalKModelFactory.getInstance();
+		model.getData().clear();
+		SignalKModelFactory.loadConfig(model);
+		
 				model = Util.populateModel(model, new File("src/test/resources/samples/basicModel.txt"));
 				
 				//create STOMP connection

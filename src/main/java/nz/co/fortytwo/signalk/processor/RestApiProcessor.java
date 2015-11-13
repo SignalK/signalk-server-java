@@ -62,7 +62,7 @@ import com.ctc.wstx.util.StringUtil;
 public class RestApiProcessor extends SignalkProcessor implements Processor {
 
 	public static final String REST_REQUEST = "REST_REQUEST";
-	private static final String SLASH = "/";
+	//private static final String SLASH = "/";
 	private static final String LIST = "list";
 	public static final String REST_WILDCARD = "REST_WILDCARD";
 	private static Logger logger = Logger.getLogger(RestApiProcessor.class);
@@ -87,10 +87,16 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 
 		if (session.getId() != null) {
 			exchange.getIn().setHeader(REST_REQUEST, "true");
+			String remoteAddress = request.getRemoteAddr();
+			String localAddress = request.getLocalAddr();
+			if(Util.sameNetwork(localAddress, remoteAddress)){
+				exchange.getIn().setHeader(JsonConstants.MSG_TYPE, JsonConstants.INTERNAL_IP);
+			}else{
+				exchange.getIn().setHeader(JsonConstants.MSG_TYPE, JsonConstants.EXTERNAL_IP);
+			}
 			exchange.getIn().setHeader(WebsocketConstants.CONNECTION_KEY,
 					session.getId());
-			// HttpServletResponse response =
-			// exchange.getIn(HttpMessage.class).getResponse();
+			
 			String path = (String) exchange.getIn()
 					.getHeader(Exchange.HTTP_URI);
 			if (logger.isDebugEnabled()) {

@@ -27,8 +27,12 @@ package nz.co.fortytwo.signalk.server;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.util.AttributeKey;
 
 import java.net.InetAddress;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
+import java.net.SocketAddress;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,6 +41,7 @@ import java.util.UUID;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.util.Constants;
+import nz.co.fortytwo.signalk.util.JsonConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.ProducerTemplate;
@@ -56,12 +61,16 @@ public class CamelNettyHandler extends SimpleChannelInboundHandler<String> {
 	private String outputType;
 	//@Produce(uri = RouteManager.SEDA_INPUT)
     ProducerTemplate producer;
+    
+    private final AttributeKey<Map<String, Object>> msgHeaders =
+            AttributeKey.valueOf("msgHeaders");
 	
 	public CamelNettyHandler( String outputType) throws Exception {
 		this.outputType=outputType;
 		producer= new DefaultProducerTemplate(CamelContextFactory.getInstance());
 		producer.setDefaultEndpointUri(RouteManager.SEDA_INPUT );
 		producer.start();
+		
 	}
 
 	@Override
@@ -72,6 +81,9 @@ public class CamelNettyHandler extends SimpleChannelInboundHandler<String> {
 		String session = UUID.randomUUID().toString();
 		SubscriptionManagerFactory.getInstance().add(session, session, outputType);
 		contextList.put(session, ctx);
+		//make up headers
+		ctx.attr(msgHeaders).set(getHeaders(ctx));
+		
 	}
 
 	@Override
@@ -84,15 +96,23 @@ public class CamelNettyHandler extends SimpleChannelInboundHandler<String> {
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, String request) throws Exception {
 		if(logger.isDebugEnabled())logger.debug("Request:" + request);
-		Map<String, Object> headers = getHeaders(ctx);
-		producer.sendBodyAndHeaders(request, headers);
+		
+		producer.sendBodyAndHeaders(request, ctx.attr(msgHeaders).get());
 	}
 
-	private Map<String, Object> getHeaders(ChannelHandlerContext ctx) {
+	private Map<String, Object> getHeaders(ChannelHandlerContext ctx) throws Exception {
 		Map<String, Object> headers = new HashMap<>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, contextList.inverse().get(ctx));
-		headers.put(RouteManager.REMOTE_ADDRESS, ctx.channel().remoteAddress().toString());
+		String remoteAddress = ctx.channel().remoteAddress().toString();
+		headers.put(RouteManager.REMOTE_ADDRESS, remoteAddress);
 		headers.put(Constants.OUTPUT_TYPE, outputType);
+		String localAddress = ctx.channel().localAddress().toString();
+		
+		if(Util.sameNetwork(localAddress, remoteAddress)){
+			headers.put(JsonConstants.MSG_TYPE, JsonConstants.INTERNAL_IP);
+		}else{
+			headers.put(JsonConstants.MSG_TYPE, JsonConstants.EXTERNAL_IP);
+		}
 		return headers;
 	}
 

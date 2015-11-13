@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
+import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelImpl;
 import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
 import nz.co.fortytwo.signalk.processor.WindProcessor;
@@ -68,7 +69,9 @@ public class SignalKSubscriptionOutputTest extends SignalKCamelTestSupport {
 		template= new DefaultProducerTemplate(routeManager.getContext());
 		template.setDefaultEndpointUri(DIRECT_INPUT);
 		template.start();
-		SignalKModel model = new SignalKModelImpl();
+		SignalKModel model = SignalKModelFactory.getCleanInstance();
+		SignalKModelFactory.loadConfig(signalkModel);
+		logger.debug("SignalKModel at init:"+signalkModel);
 		model = Util.populateModel(model, new File("src/test/resources/samples/basicModel.txt"));
 		JsonSerializer ser = new JsonSerializer();
 		jsonString=ser.write(model);
@@ -141,6 +144,7 @@ public class SignalKSubscriptionOutputTest extends SignalKCamelTestSupport {
 		 output.assertIsSatisfied();
 		 SignalKModel out = output.getReceivedExchanges().get(0).getIn().getBody(SignalKModel.class);
 		 logger.debug("Received msg: "+out);
+		 logger.debug("Getting: "+vessels_dot_self_dot + nav_position_latitude);
 		 assertEquals(-41.29369354d,(double)out.get(vessels_dot_self_dot + nav_position_latitude), 0.001d);
 		 assertEquals(0.0,(double)out.getValue(vessels_dot_self_dot + env_wind_speedApparent), 0.001d);
     }

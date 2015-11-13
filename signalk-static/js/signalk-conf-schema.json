@@ -770,15 +770,15 @@
 							"name": "vessel",
 							"properties": 
 							{
-								"self": 
+								"uuid": 
 								{
 									"id": "http://jsonschema.net/signalk/config/server/vessel/self",
 									"type": "string",
 									"minLength": 1,
 									"title": "Self",
 									"description": "Enter MMSI number, or unique vessel identifier",
-									"name": "self",
-									"default": "motu"
+									"name": "uuid",
+									"default": "self"
 								}
 							}
 						}

@@ -34,6 +34,7 @@ import nz.co.fortytwo.signalk.handler.DeclinationHandler;
 import nz.co.fortytwo.signalk.handler.TrueWindHandler;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.util.SignalKConstants;
+import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
@@ -41,6 +42,7 @@ import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.impl.DefaultProducerTemplate;
 import org.apache.log4j.Logger;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class SignalKNmeaReceiverTest extends SignalKCamelTestSupport {
@@ -56,6 +58,7 @@ public class SignalKNmeaReceiverTest extends SignalKCamelTestSupport {
 	//@Produce(uri = RouteManager.SEDA_INPUT)
     protected ProducerTemplate template;
 	
+    
 	@Before
 	public void before() throws Exception {
 

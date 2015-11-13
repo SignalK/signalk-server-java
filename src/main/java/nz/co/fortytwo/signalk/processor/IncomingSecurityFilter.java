@@ -49,7 +49,7 @@ public class IncomingSecurityFilter extends SignalkProcessor implements Processo
 	public void process(Exchange exchange) throws Exception {
 		
 		try {
-			//we trust serial
+			//we trust local serial
 			String type = exchange.getIn().getHeader(JsonConstants.MSG_TYPE, String.class);
 			if(JsonConstants.SERIAL.equals(type)) return;
 			//we trust INTERNAL_IP

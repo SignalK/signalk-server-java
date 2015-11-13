@@ -72,6 +72,7 @@ import org.apache.camel.test.junit4.CamelTestSupport;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.google.common.eventbus.EventBus;
@@ -79,6 +80,11 @@ import com.google.common.eventbus.EventBus;
 public class FullExportProcessorTest {
 	private static Logger logger = Logger.getLogger(FullExportProcessorTest.class);
 
+	@BeforeClass
+	public static void setClass() throws Exception {
+		Util.getConfig();
+		Util.setSelf("motu");
+	}
 	@Before
 	public void setUp() throws Exception {
 		
@@ -92,12 +98,14 @@ public class FullExportProcessorTest {
 	public void shouldPopulateTree() throws Exception {
 		CamelContext ctx = RouteManagerFactory.getInstance().getContext();
 		SignalKModel model = SignalKModelFactory.getInstance();
-		model.getData().clear();
+		SignalKModelFactory.loadConfig(model);
+		
 		model = Util.populateModel(model, new File("src/test/resources/samples/basicModel.txt"));
 		model = Util.populateModel(model, new File("src/test/resources/samples/otherModel.txt"));
 		
 		SignalkProcessor processor = new FullExportProcessor("gsggsgs");
 		SignalKModel m = SignalKModelFactory.getCleanInstance();
+		Util.setSelf("motu");
 		processor.populateTree(m, "vessels.motu.navigation");
 		logger.debug("Output SignalKModel:"+m);
 		assertNull(m.get("vessels.navigation"));
@@ -109,6 +117,7 @@ public class FullExportProcessorTest {
 		CamelContext ctx = RouteManagerFactory.getInstance().getContext();
 
 		SignalKModel model = SignalKModelFactory.getInstance();
+		Util.setSelf("motu");
 		model.getData().clear();
 		model = Util.populateModel(model, new File("src/test/resources/samples/basicModel.txt"));
 		model = Util.populateModel(model, new File("src/test/resources/samples/otherModel.txt"));

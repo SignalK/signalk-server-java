@@ -75,8 +75,8 @@ public class NettyServer implements Processor{
 	private CamelNettyHandler forwardingHandler = null;
 	private CamelUdpNettyHandler udpHandler = null;
 	private Channel udpChannel = null;
-	private int tcpPort = 5555;
-	private int udpPort = 5554;
+	private int tcpPort = Util.getConfigPropertyInt(Constants.TCP_PORT);
+	private int udpPort = Util.getConfigPropertyInt(Constants.UDP_PORT);
 	private String outputType;
 	/**
 	 * @param configDir

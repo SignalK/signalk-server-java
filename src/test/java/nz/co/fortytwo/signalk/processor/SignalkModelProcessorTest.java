@@ -36,7 +36,9 @@ import java.util.NavigableMap;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.server.RouteManagerFactory;
+import nz.co.fortytwo.signalk.util.JsonConstants;
 import nz.co.fortytwo.signalk.util.JsonSerializer;
+import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
@@ -45,10 +47,16 @@ import org.apache.camel.impl.DefaultExchange;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class SignalkModelProcessorTest extends CamelTestSupport {
 
+	@BeforeClass
+	public static void init() throws Exception {
+		Util.getConfig();
+		Util.setSelf("motu");
+	}
 	@Before
 	public void setUp() throws Exception {
 		RouteManagerFactory.getInstance();
@@ -64,7 +72,7 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 		signalkModel.put(vessels+dot+self, null);
 		signalkModel.put(vessels+dot+"366951720", null);
 		SignalkModelProcessor p = new SignalkModelProcessor();
-		assertEquals(signalkModel.toString(),"{}");
+		assertEquals(null,signalkModel.get(vessels));
 		
 		JsonSerializer ser = new JsonSerializer();
 		NavigableMap<String, Object> tmp = ser.read("{\"vessels\":{\""+SELF+"\":{\"navigation\":{\"courseOverGroundTrue\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":172.9},\"speedOverGround\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":3.85}}}}}");
@@ -79,14 +87,14 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 		signalkModel.put(vessels+dot+self, null);
 		signalkModel.put(vessels+dot+"366951720", null);
 		SignalkModelProcessor p = new SignalkModelProcessor();
-		assertEquals(signalkModel.toString(),"{}");
+		assertEquals(null,signalkModel.get(vessels));
 		JsonSerializer ser = new JsonSerializer();
 		NavigableMap<String, Object> tmp = ser.read("{\"invalid\":{\""+SELF+"\":{\"navigation\":{\"courseOverGroundTrue\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":172.9},\"speedOverGround\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":3.85}}}}}");
 		p.handle(SignalKModelFactory.getWrappedInstance(tmp));
 		
 		Double cog = (Double) signalkModel.getValue(vessels_dot_self_dot+nav_courseOverGroundTrue);
 		assertNull(cog);
-		assertEquals(signalkModel.toString(),"{}");
+		assertEquals(null,signalkModel.get(vessels));
 		
 	}
 	@Test
@@ -95,13 +103,13 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 		signalkModel.put(vessels+dot+self, null);
 		signalkModel.put(vessels+dot+"366951720", null);
 		SignalkModelProcessor p = new SignalkModelProcessor();
-		assertEquals(signalkModel.toString(),"{}");
+		assertEquals(null,signalkModel.get(vessels));
 		//make an exchange here
 		CamelContext ctx = new DefaultCamelContext(); 
 	    Exchange ex = new DefaultExchange(ctx);
 	    ex.getIn().setBody("$GPRMC,144629.30,A,5156.91115,N,00434.80383,E,1.689,,011113,,,A*73");
 	    p.process(ex);
-		assertEquals(signalkModel.toString(),"{}");
+	    assertEquals(null,signalkModel.get(vessels));
 		
 	}
 	@Test
@@ -110,13 +118,13 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 		signalkModel.put(vessels+dot+self, null);
 		signalkModel.put(vessels+dot+"366951720", null);
 		SignalkModelProcessor p = new SignalkModelProcessor();
-		assertEquals(signalkModel.toString(),"{}");
+		assertEquals(null,signalkModel.get(vessels));
 		//make an exchange here
 		CamelContext ctx = new DefaultCamelContext(); 
 	    Exchange ex = new DefaultExchange(ctx);
 	    ex.getIn().setBody("!AIVDM,1,1,,B,15MwkRUOidG?GElEa<iQk1JV06Jd,0*6D");
 	    p.process(ex);
-		assertEquals(signalkModel.toString(),"{}");
+	    assertEquals(null,signalkModel.get(vessels));
 		
 	}
 	@Test
@@ -125,13 +133,13 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 		signalkModel.put(vessels+dot+self, null);
 		signalkModel.put(vessels+dot+"366951720", null);
 		SignalkModelProcessor p = new SignalkModelProcessor();
-		assertEquals(signalkModel.toString(),"{}");
+		assertEquals(null,signalkModel.get(vessels));
 		//make an exchange here
 		CamelContext ctx = new DefaultCamelContext(); 
 	    Exchange ex = new DefaultExchange(ctx);
 	    ex.getIn().setBody(null);
 	    p.process(ex);
-		assertEquals(signalkModel.toString(),"{}");
+	    assertEquals(null,signalkModel.get(vessels));
 	}
 	
 	

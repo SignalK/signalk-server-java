@@ -81,8 +81,8 @@ public class RouteManager extends RouteBuilder {
 	public static final String SEDA_NMEA = "seda:nmeaOutput?purgeWhenStopping=true&size=100";
 	public static final String SEDA_COMMON_OUT = "seda:commonOut?purgeWhenStopping=true&size=100";
 
-	public static final String STOMP = "skStomp:queue:signalk?brokerURL=tcp://0.0.0.0:"+Util.getConfigPropertyDouble(Constants.STOMP_PORT).intValue();
-	public static final String MQTT = "mqtt:signalk?host=tcp://0.0.0.0:"+Util.getConfigPropertyDouble(Constants.MQTT_PORT).intValue();
+	public static final String STOMP = "skStomp:queue:signalk?brokerURL=tcp://0.0.0.0:"+Util.getConfigPropertyInt(Constants.STOMP_PORT);
+	public static final String MQTT = "mqtt:signalk?host=tcp://0.0.0.0:"+Util.getConfigPropertyInt(Constants.MQTT_PORT);
 
 	private JmmDNS jmdns = null;
 	private int wsPort = 3000;

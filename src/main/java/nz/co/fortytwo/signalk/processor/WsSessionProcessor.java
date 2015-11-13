@@ -24,6 +24,8 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
+import nz.co.fortytwo.signalk.util.JsonConstants;
+
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.websocket.WebsocketComponent;
@@ -38,7 +40,8 @@ public class WsSessionProcessor extends SignalkProcessor implements Processor {
 
 	@Override
 	public void process(Exchange exchange) throws Exception {
-		
+		//check the client
+		//exchange.getIn().setHeader(JsonConstants.MSG_TYPE, JsonConstants.INTERNAL_IP);
 		if(logger.isDebugEnabled()){
 			String connectionKey = exchange.getIn().getHeader(WebsocketConstants.CONNECTION_KEY, String.class);
 			logger.debug("WS connection key is " + connectionKey);

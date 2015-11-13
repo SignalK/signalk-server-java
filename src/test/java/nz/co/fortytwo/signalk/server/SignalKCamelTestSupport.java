@@ -43,6 +43,7 @@ import org.apache.camel.component.websocket.SignalkWebsocketComponent;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.apache.log4j.Logger;
 import org.junit.After;
+import org.junit.BeforeClass;
 
 public abstract class SignalKCamelTestSupport extends CamelTestSupport {
 	static Logger logger = Logger.getLogger(SignalKCamelTestSupport.class);
@@ -50,8 +51,14 @@ public abstract class SignalKCamelTestSupport extends CamelTestSupport {
 	protected RouteManager routeManager = null;
 	protected final CountDownLatch latch = new CountDownLatch(1);
     protected BrokerService broker = null;
-    protected int restPort = Integer.valueOf(Util.getConfigProperty(Constants.REST_PORT));
-    protected int wsPort = Integer.valueOf(Util.getConfigProperty(Constants.WEBSOCKET_PORT));
+    protected int restPort = Util.getConfigPropertyInt(Constants.REST_PORT);
+    protected int wsPort = Util.getConfigPropertyInt(Constants.WEBSOCKET_PORT);
+    
+    @BeforeClass
+	public static void setClass() throws Exception {
+		Util.getConfig();
+		Util.setSelf("motu");
+	}
     
 	public SignalKCamelTestSupport() {
 		super();
@@ -148,7 +155,7 @@ public abstract class SignalKCamelTestSupport extends CamelTestSupport {
 	protected RouteBuilder createRouteBuilder() {
 	    try {
 	    	try {
-				Util.getConfig();
+				//Util.getConfig();
 				
 				broker.start();
 				logger.debug("Started broker");

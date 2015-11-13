@@ -111,6 +111,7 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 		// we need the routeId.
 		// Multimap<String,String> vesselList = TreeMultimap.create();
 		SignalKModel temp = SignalKModelFactory.getCleanInstance();
+		
 		for (Subscription sub : manager.getSubscriptions(wsSession)) {
 			if (sub == null || !sub.isActive() || !routeId.equals(sub.getRouteId()))
 				continue;

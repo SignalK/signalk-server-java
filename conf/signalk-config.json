@@ -1,7 +1,7 @@
 {
    "config": {
       "hawtio": {
-         "authenticationEnabled": true,
+         "authenticationEnabled": false,
          "context": "/hawtio",
          "port": 8000.0,
          "start": false,
@@ -14,17 +14,6 @@
             },
             "upgrade": {
                "allow": true
-            }
-         },
-         "client": {
-            "mqtt": {
-               "connect": null
-            },
-            "stomp": {
-               "connect": null
-            },
-            "tcp": {
-               "connect": null
             }
          },
          "clock": {
@@ -59,7 +48,7 @@
          "server": {
             "mqtt": {
                "port": 1883.0,
-               "start": false
+               "start": true
             },
             "nmea": {
                "generate0183": true
@@ -69,17 +58,17 @@
             },
             "stomp": {
                "port": 61613.0,
-               "start": false
+               "start": true
             },
             "tcp": {
                "nmea": {
-                  "port": 5557.0
+                  "port": 55557.0
                },
                "port": 55555.0
             },
             "udp": {
                "nmea": {
-                  "port": 5556.0
+                  "port": 55556.0
                },
                "port": 55554.0
             },
@@ -89,7 +78,7 @@
          },
          "version": "0.1",
          "vessel": {
-            "self": "self"
+            "uuid": "motu"
          }
       }
    }

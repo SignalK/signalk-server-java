@@ -28,13 +28,21 @@ package nz.co.fortytwo.signalk.processor;
 import static org.junit.Assert.*;
 import nz.co.fortytwo.signalk.server.Subscription;
 import nz.co.fortytwo.signalk.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.Util;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class SubscriptionTest {
 
+	@BeforeClass
+	public static void setClass() throws Exception {
+		Util.getConfig();
+		Util.setSelf("motu");
+	}
+	
 	@Before
 	public void setUp() throws Exception {
 	}
