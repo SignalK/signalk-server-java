@@ -20,8 +20,8 @@
             "source": "system"
          },
          "demo": {
-            "file": "./src/test/resources/motu.log&scanStream=true&scanStreamDelay=500",
-            "start": false
+            "file": "PacCupStartNMEA.txt",
+            "start": true
          },
          "files": {
             "cfg": {
@@ -78,7 +78,7 @@
          },
          "version": "0.1",
          "vessel": {
-            "uuid": "self"
+            "uuid": "motu"
          }
       }
    }

@@ -57,8 +57,10 @@ public class SignalkModelProcessor extends SignalkProcessor implements Processor
 				if(logger.isDebugEnabled())logger.debug("Ignored, not update:"+exchange.getIn().getBody(Json.class));
 			}
 
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+		} catch (IllegalArgumentException e) {
+			logger.info(e.getMessage());
+		}catch (Exception e) {
+				logger.error(e.getMessage(), e);
 		}
 	}
 

@@ -275,7 +275,7 @@ public class RouteManager extends RouteBuilder {
 				.end()
 			.split(body().tokenize("\n")).streaming()
 			.transform(body().convertToString())
-			.throttle(50).timePeriodMillis(1000)
+			.throttle(2).timePeriodMillis(500)
 			.to(SEDA_INPUT).id(SignalkRouteFactory.getName("SEDA_INPUT"))
 			.end();
 			
