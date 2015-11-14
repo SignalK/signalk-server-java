@@ -54,8 +54,7 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 
 	@BeforeClass
 	public static void init() throws Exception {
-		Util.getConfig();
-		Util.setSelf("motu");
+		SignalKModelFactory.getMotuTestInstance();
 	}
 	@Before
 	public void setUp() throws Exception {

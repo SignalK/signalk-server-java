@@ -61,10 +61,10 @@
 			</div>
 			<div class="col-md-8">
 				<div class="col-md-3">
-					<a class="btn  btn-default" role="button" href="/signalk/install/v1/freeboard-sk">Install</a>
+					<a class="btn  btn-default" role="button" href="/signalk/v1/install/freeboard-sk">Install</a>
 				</div>
 				<div class="col-md-3">
-					<a class="btn b btn-default" role="button" href="/signalk/upgrade/v1/freeboard-sk">Upgrade</a>
+					<a class="btn b btn-default" role="button" href="/signalk/v1/upgrade/freeboard-sk">Upgrade</a>
 				</div>
 				<p>The Freeboard Chartplotter, ported to Signal K <br/><a href="https://github.com/SignalK/freeboard-sk">https://github.com/SignalK/freeboard-sk</a></p>
 			</div>
@@ -75,10 +75,10 @@
 			</div>
 			<div class="col-md-8">
 				<div class="col-md-3">
-					<a class="btn  btn-default" role="button" href="/signalk/install/v1/instrumentpanel">Install</a>
+					<a class="btn  btn-default" role="button" href="/signalk/v1/install/instrumentpanel">Install</a>
 				</div>
 				<div class="col-md-3">
-					<a class="btn b btn-default" role="button" href="/signalk/upgrade/v1/instrumentpanel">Upgrade</a>
+					<a class="btn b btn-default" role="button" href="/signalk/v1/upgrade/instrumentpanel">Upgrade</a>
 				</div>
 				<p>The Signal K instrumentpanel project <br/> <a href="https://github.com/SignalK/instrumentpanel">https://github.com/SignalK/instrumentpanel</a></p>
 			</div>
@@ -90,10 +90,10 @@
 			</div>
 			<div class="col-md-8">
 				<div class="col-md-3">
-					<a class="btn  btn-default" role="button" href="/signalk/install/v1/sailgauge">Install</a>
+					<a class="btn  btn-default" role="button" href="/signalk/v1/install/sailgauge">Install</a>
 				</div>
 				<div class="col-md-3">
-					<a class="btn b btn-default" role="button" href="/signalk/upgrade/v1/sailgauge">Upgrade</a>
+					<a class="btn b btn-default" role="button" href="/signalk/v1/upgrade/sailgauge">Upgrade</a>
 				</div>
 				<p>The Signal K Sailgauge project <br/><a href="https://github.com/SignalK/sailgauge">https://github.com/SignalK/sailgauge</a></p>
 			</div>
@@ -111,12 +111,12 @@
 		</div>
 		<div class="row">
 			<div class="col-md-4">
-				<a class="btn btn-default btn-lg" role="button" href="/signalk/api/v1/vessels">Signal K REST API</a>
+				<a class="btn btn-default btn-lg" role="button" href="/signalk/v1/api/vessels/*">Signal K REST API</a>
 			</div>
 			<div class="col-md-8">
-				<p>The REST API lets you make calls with a web browser to get data from the Signal K server. By default it will open at <i>http://localhost:8080/signalk/api/v1/vessels</i></p>
+				<p>The REST API lets you make calls with a web browser to get data from the Signal K server. By default it will open at <i>http://localhost:8080/signalk/v1/api/vessels/*</i></p>
 				<p>You can navigate through the tree by appending directories as you would for files, 
-					eg <a href="/signalk/api/v1/vessels/self/navigation" >http://..../signalk/api/v1/vessels/self/navigation</a> or <a href="/signalk/api/v1/vessels/self/environment" >http://.../signalk/api/v1/vessels/self/environment</a></p>
+					eg <a href="/signalk/v1/api/vessels/self/navigation" >http://..../signalk/v1/api/vessels/self/navigation</a> or <a href="/signalk/v1/api/vessels/self/environment" >http://.../signalk/v1/api/vessels/self/environment</a></p>
 				<p>The content mime type is application/json, your browser may not display it directly. 
 					On firefox just install <a href="https://addons.mozilla.org/en-us/firefox/addon/jsonovich/?src=search">https://addons.mozilla.org/en-us/firefox/addon/jsonovich/?src=search</a></p>
 			</div>
@@ -129,7 +129,7 @@
 			jQuery('#hawtioBtn').attr('href', url );
 		
 		$.ajax({
-			url : "/signalk/api/v1/addresses",
+			url : "/signalk/endpoints/v1",
 			dataType: "text",
 			success : function (data) {
 				var jsonData = JSON.parse(data);

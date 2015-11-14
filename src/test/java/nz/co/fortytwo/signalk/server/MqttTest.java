@@ -69,9 +69,7 @@ public class MqttTest extends SignalKCamelTestSupport{
 	@Test
 	public void testSubscribe() throws Exception {
 		//fill the model with data
-		SignalKModel model = SignalKModelFactory.getInstance();
-		model.getData().clear();
-		SignalKModelFactory.loadConfig(model);
+		SignalKModel model = SignalKModelFactory.getMotuTestInstance();
 		
 		model = Util.populateModel(model, new File("src/test/resources/samples/basicModel.txt"));
 		
@@ -128,10 +126,7 @@ public class MqttTest extends SignalKCamelTestSupport{
 	@Test
 	public void testSendingUpdate() throws Exception {
 		//fill the model with data
-		SignalKModel model = SignalKModelFactory.getInstance();
-		model.getData().clear();
-		SignalKModelFactory.loadConfig(model);
-		
+		SignalKModel model = SignalKModelFactory.getMotuTestInstance();
 		
 		//create MQTT connection
 		MQTT mqtt = new MQTT();
@@ -157,9 +152,7 @@ public class MqttTest extends SignalKCamelTestSupport{
 		//fill the model with data
 			
 				
-				SignalKModel model = SignalKModelFactory.getInstance();
-				model.getData().clear();
-				SignalKModelFactory.loadConfig(model);
+				SignalKModel model = SignalKModelFactory.getMotuTestInstance();
 				
 				model = Util.populateModel(model, new File("src/test/resources/samples/basicModel.txt"));
 				
@@ -215,9 +208,7 @@ public class MqttTest extends SignalKCamelTestSupport{
 	@Test
 	public void testSendingGetFull() throws Exception {
 		//fill the model with data
-				SignalKModel model = SignalKModelFactory.getInstance();
-				model.getData().clear();
-				SignalKModelFactory.loadConfig(model);
+				SignalKModel model = SignalKModelFactory.getMotuTestInstance();
 				
 				model = Util.populateModel(model, new File("src/test/resources/samples/basicModel.txt"));
 				
@@ -274,9 +265,7 @@ public class MqttTest extends SignalKCamelTestSupport{
 	@Test
 	public void testSendingGetDelta() throws Exception {
 		//fill the model with data
-		SignalKModel model = SignalKModelFactory.getInstance();
-		model.getData().clear();
-		SignalKModelFactory.loadConfig(model);
+		SignalKModel model = SignalKModelFactory.getMotuTestInstance();
 		
 				model = Util.populateModel(model, new File("src/test/resources/samples/basicModel.txt"));
 				

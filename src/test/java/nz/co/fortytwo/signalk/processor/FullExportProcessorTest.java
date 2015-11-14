@@ -97,8 +97,7 @@ public class FullExportProcessorTest {
 	@Test
 	public void shouldPopulateTree() throws Exception {
 		CamelContext ctx = RouteManagerFactory.getInstance().getContext();
-		SignalKModel model = SignalKModelFactory.getInstance();
-		SignalKModelFactory.loadConfig(model);
+		SignalKModel model = SignalKModelFactory.getMotuTestInstance();
 		
 		model = Util.populateModel(model, new File("src/test/resources/samples/basicModel.txt"));
 		model = Util.populateModel(model, new File("src/test/resources/samples/otherModel.txt"));
@@ -116,9 +115,7 @@ public class FullExportProcessorTest {
 	public void shouldCreateInstantDelta() throws Exception {
 		CamelContext ctx = RouteManagerFactory.getInstance().getContext();
 
-		SignalKModel model = SignalKModelFactory.getInstance();
-		Util.setSelf("motu");
-		model.getData().clear();
+		SignalKModel model = SignalKModelFactory.getMotuTestInstance();
 		model = Util.populateModel(model, new File("src/test/resources/samples/basicModel.txt"));
 		model = Util.populateModel(model, new File("src/test/resources/samples/otherModel.txt"));
 		

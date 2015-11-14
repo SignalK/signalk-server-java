@@ -78,7 +78,7 @@
          },
          "version": "0.1",
          "vessel": {
-            "uuid": "motu"
+            "uuid": "self"
          }
       }
    }
