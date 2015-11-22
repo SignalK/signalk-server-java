@@ -27,7 +27,7 @@ package nz.co.fortytwo.signalk.processor;
 import static nz.co.fortytwo.signalk.util.JsonConstants.FORMAT_DELTA;
 import static nz.co.fortytwo.signalk.util.JsonConstants.POLICY_FIXED;
 import static nz.co.fortytwo.signalk.util.JsonConstants.SELF;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -154,12 +154,25 @@ public class JsonSubscribeProcessorTest {
 	}
 
 	@Test
+	public void shouldSubscribeWithIp() throws Exception {
+		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
+		String wsSession = UUID.randomUUID().toString();
+		manager.removeSessionId(wsSession);
+		// now add webSocket
+		manager.add(wsSession, wsSession,Constants.OUTPUT_WS,"10.1.1.100","10.1.1.128");
+		assertEquals("10.1.1.128", manager.getRemoteIpAddress(wsSession));
+		assertEquals("10.1.1.100", manager.getLocalIpAddress(wsSession));
+		manager.removeSessionId(wsSession);
+		assertNull( manager.getRemoteIpAddress(wsSession));
+		assertNull( manager.getLocalIpAddress(wsSession));
+	}
+	@Test
 	public void shouldUnSubscribe() throws Exception {
 		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
 		String wsSession = UUID.randomUUID().toString();
 		manager.removeSessionId(wsSession);
 		// now add webSocket
-		manager.add(wsSession, wsSession,Constants.OUTPUT_WS);
+		manager.add(wsSession, wsSession,Constants.OUTPUT_WS,"127.0.0.1","127.0.0.1");
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
 		HashMap<String, Object> headers = new HashMap<String, Object>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
@@ -184,12 +197,12 @@ public class JsonSubscribeProcessorTest {
 	public void shouldCreateOneRoute() throws Exception {
 		
 		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
-		RouteManager routeManager = RouteManagerFactory.getInstance();
+		RouteManager routeManager = RouteManagerFactory.getMotuTestInstance();
 		String wsSession = UUID.randomUUID().toString();
 		manager.removeSessionId(wsSession);
 		int routes = routeManager.getRouteCollection().getRoutes().size();
 		// now add webSocket
-		manager.add(wsSession, wsSession,Constants.OUTPUT_WS);
+		manager.add(wsSession, wsSession,Constants.OUTPUT_WS,"127.0.0.1","127.0.0.1");
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
 		HashMap<String, Object> headers = new HashMap<String, Object>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
@@ -207,12 +220,12 @@ public class JsonSubscribeProcessorTest {
 	public void shouldCreateTwoRoutes() throws Exception {
 		
 		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
-		RouteManager routeManager = RouteManagerFactory.getInstance();
+		RouteManager routeManager = RouteManagerFactory.getMotuTestInstance();
 		String wsSession = UUID.randomUUID().toString();
 		manager.removeSessionId(wsSession);
 		int routes = routeManager.getRouteCollection().getRoutes().size();
 		// now add webSocket
-		manager.add(wsSession, wsSession,Constants.OUTPUT_WS);
+		manager.add(wsSession, wsSession,Constants.OUTPUT_WS,"127.0.0.1","127.0.0.1");
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
 		HashMap<String, Object> headers = new HashMap<String, Object>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
@@ -233,7 +246,7 @@ public class JsonSubscribeProcessorTest {
 		String wsSession = UUID.randomUUID().toString();
 		manager.removeSessionId(wsSession);
 		// now add webSocket
-		manager.add(wsSession, wsSession,Constants.OUTPUT_WS);
+		manager.add(wsSession, wsSession,Constants.OUTPUT_WS,"127.0.0.1","127.0.0.1");
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
 		HashMap<String, Object> headers = new HashMap<String, Object>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
@@ -242,7 +255,7 @@ public class JsonSubscribeProcessorTest {
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(2, subs.size());
 		// see if its created a route
-		RouteManager routeManager = RouteManagerFactory.getInstance();
+		RouteManager routeManager = RouteManagerFactory.getMotuTestInstance();
 		assertEquals(2, routeManager.getRouteCollection().getRoutes().size());
 		Subscription s = subs.get(0);
 
@@ -258,13 +271,13 @@ public class JsonSubscribeProcessorTest {
 
 	@Test
 	public void shouldUnSubscribeAllByWsSession() throws Exception {
-		RouteManager routeManager = RouteManagerFactory.getInstance();
+		RouteManager routeManager = RouteManagerFactory.getMotuTestInstance();
 		int routes = routeManager.getRouteCollection().getRoutes().size();
 		String wsSession = UUID.randomUUID().toString();
 		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
 		manager.removeSessionId(wsSession);
 		// now add webSocket
-		manager.add(wsSession, wsSession,Constants.OUTPUT_WS);
+		manager.add(wsSession, wsSession,Constants.OUTPUT_WS,"127.0.0.1","127.0.0.1");
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
 		HashMap<String, Object> headers = new HashMap<String, Object>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
@@ -288,13 +301,13 @@ public class JsonSubscribeProcessorTest {
 
 	@Test
 	public void shouldUnSubscribeAllBySessionId() throws Exception {
-		RouteManager routeManager = RouteManagerFactory.getInstance();
+		RouteManager routeManager = RouteManagerFactory.getMotuTestInstance();
 		int routes = routeManager.getRouteCollection().getRoutes().size();
 		String wsSession = UUID.randomUUID().toString();
 		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
 		manager.removeSessionId(wsSession);
 		// now add webSocket
-		manager.add(wsSession, wsSession,Constants.OUTPUT_WS);
+		manager.add(wsSession, wsSession,Constants.OUTPUT_WS,"127.0.0.1","127.0.0.1");
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
 		HashMap<String, Object> headers = new HashMap<String, Object>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
@@ -323,7 +336,7 @@ public class JsonSubscribeProcessorTest {
 		String wsSession = UUID.randomUUID().toString();
 		manager.removeSessionId(wsSession);
 		// now add webSocket
-		manager.add(wsSession, wsSession,Constants.OUTPUT_WS);
+		manager.add(wsSession, wsSession,Constants.OUTPUT_WS,"127.0.0.1","127.0.0.1");
 		
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
 		HashMap<String, Object> headers = new HashMap<String, Object>();

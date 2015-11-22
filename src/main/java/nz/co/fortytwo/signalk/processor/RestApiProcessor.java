@@ -94,6 +94,9 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 			}else{
 				exchange.getIn().setHeader(JsonConstants.MSG_TYPE, JsonConstants.EXTERNAL_IP);
 			}
+			exchange.getIn().setHeader(JsonConstants.MSG_SRC_IP, remoteAddress);
+			exchange.getIn().setHeader(JsonConstants.MSG_SRC_IP_PORT, request.getRemotePort());
+			
 			exchange.getIn().setHeader(WebsocketConstants.CONNECTION_KEY,
 					session.getId());
 			

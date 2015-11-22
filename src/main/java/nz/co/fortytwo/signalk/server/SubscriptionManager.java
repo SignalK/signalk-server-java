@@ -50,6 +50,7 @@ public class SubscriptionManager {
 	//hold sessionid <> wsSessionId
 	BiMap<String, String> wsSessionMap = HashBiMap.create();
 	Map<String, String> outPutMap = new HashMap<String, String>();
+	Map<String, String> ipMap = new HashMap<String, String>();
 	//wsSessionId>Subscription
 	List<Subscription> subscriptions = new ArrayList<Subscription>();
 	List<String> heartbeats = new ArrayList<String>();
@@ -139,13 +140,16 @@ public class SubscriptionManager {
 	 * If this is a new connection with no subs then nothing will be tx'd
 	 * @param sessionId
 	 * @param wsSession
+	 * @param ipAddress 
+	 * @param string 
 	 * @throws Exception 
 	 */
-	public void add(String sessionId, String wsSession, String outputType) throws Exception{
+	public void add(String sessionId, String wsSession, String outputType, String localIpAddress, String remoteIpAddress) throws Exception{
 		if(StringUtils.isBlank(wsSession) ||  StringUtils.isBlank(sessionId))return; 
 		wsSessionMap.put(sessionId, wsSession);
 		outPutMap.put(wsSession, outputType);
-		logger.debug("Adding "+sessionId+"/"+wsSession+", outputType="+outputType);
+		ipMap.put(wsSession, localIpAddress+"#"+remoteIpAddress);
+		logger.debug("Adding "+sessionId+"/"+wsSession+", outputType="+outputType+", localAddress:"+localIpAddress+", remoteAddress:"+remoteIpAddress);
 		//now update any subscriptions for sessionId
 		List<Subscription> subs = getSubscriptions(sessionId);
 
@@ -173,6 +177,7 @@ public class SubscriptionManager {
 		String wsSession = wsSessionMap.get(sessionId);
 		wsSessionMap.remove(sessionId);
 		outPutMap.remove(wsSession);
+		ipMap.remove(wsSession);
 		//remove all subscriptions
 		RouteManager routeManager = RouteManagerFactory.getInstance();
 		List<Subscription> subs = getSubscriptions(wsSession);
@@ -185,6 +190,7 @@ public class SubscriptionManager {
 	public void removeWsSession(String wsSession) throws Exception{
 		wsSessionMap.inverse().remove(wsSession);
 		outPutMap.remove(wsSession);
+		ipMap.remove(wsSession);
 		//remove all subscriptions
 		RouteManager routeManager = RouteManagerFactory.getInstance();
 		List<Subscription> subs = getSubscriptions(wsSession);
@@ -204,6 +210,23 @@ public class SubscriptionManager {
 	
 	public String getOutputType(String wsSession){
 		return outPutMap.get(wsSession);
+	}
+	
+	/**
+	 * Return the ipAddress of the cleint on this websocket session
+	 * @param wsSession
+	 * @return
+	 */
+	public String getRemoteIpAddress(String wsSession){
+		String ips = ipMap.get(wsSession);
+		if(StringUtils.isBlank(ips)) return null;
+		return ips.split("#")[1];
+	}
+	
+	public String getLocalIpAddress(String wsSession){
+		String ips = ipMap.get(wsSession);
+		if(StringUtils.isBlank(ips)) return null;
+		return ips.split("#")[0];
 	}
 	/**
 	 * Gets a Set of all the current wsSessions

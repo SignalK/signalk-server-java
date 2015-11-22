@@ -186,10 +186,10 @@ public class SignalkWebSocketServlet extends WebsocketComponentServlet {
 					connection.fillBuffersFrom(((HttpParser) http.getParser()).getBodyBuffer());
 					String wsSession = ((DefaultWebsocket) websocket).getConnectionKey();
 					//if(logger.isDebugEnabled())logger.debug("Upgraded session " + request.getSession().getId() + " to ws " + ((DefaultWebsocket) websocket).getConnectionKey());
-					if(logger.isDebugEnabled())logger.debug("Upgraded session " + sessionId + " to ws " + wsSession);
+					if(logger.isDebugEnabled())logger.debug("Upgraded session " + sessionId + " to ws " + wsSession+ " from remote ip:"+request.getRemoteAddr());
 					try {
 						sessionMap.put(connection, wsSession);
-						SubscriptionManagerFactory.getInstance().add(sessionId, wsSession, Constants.OUTPUT_WS);
+						SubscriptionManagerFactory.getInstance().add(sessionId, wsSession, Constants.OUTPUT_WS, request.getLocalAddr(),request.getRemoteAddr());
 					} catch (Exception e1) {
 						logger.error(e1.getMessage(),e1);
 						throw new IOException(e1);

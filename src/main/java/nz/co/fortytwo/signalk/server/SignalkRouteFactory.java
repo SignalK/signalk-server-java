@@ -38,6 +38,7 @@ import nz.co.fortytwo.signalk.processor.FullExportProcessor;
 import nz.co.fortytwo.signalk.processor.FullImportProcessor;
 import nz.co.fortytwo.signalk.processor.FullToDeltaProcessor;
 import nz.co.fortytwo.signalk.processor.HeartbeatProcessor;
+import nz.co.fortytwo.signalk.processor.IncomingSecurityFilter;
 import nz.co.fortytwo.signalk.processor.InputFilterProcessor;
 import nz.co.fortytwo.signalk.processor.JsonGetProcessor;
 import nz.co.fortytwo.signalk.processor.JsonListProcessor;
@@ -97,6 +98,8 @@ public class SignalkRouteFactory {
 			.end()
 		// dump misc rubbish
 		.process(new InputFilterProcessor()).id(getName(InputFilterProcessor.class.getSimpleName()))
+		//now filter security
+		.process(new IncomingSecurityFilter()).id(getName(IncomingSecurityFilter.class.getSimpleName()))
 		//swap payloads to storage
 		.process(new StorageProcessor()).id(getName(StorageProcessor.class.getSimpleName()))
 		//convert NMEA to signalk
@@ -155,6 +158,8 @@ public class SignalkRouteFactory {
 		WebsocketEndpoint wsEndpoint = (WebsocketEndpoint) routeBuilder.getContext().getEndpoint("skWebsocket://0.0.0.0:"+port+JsonConstants.SIGNALK_WS);
 		wsEndpoint.setEnableJmx(true);
 		wsEndpoint.setSessionSupport(true);
+		wsEndpoint.setCrossOriginFilterOn(true);
+		wsEndpoint.setAllowedOrigins("*");
 		
 		routeBuilder.from(wsEndpoint).id(getName("Websocket Rx"))
 			.onException(Exception.class)

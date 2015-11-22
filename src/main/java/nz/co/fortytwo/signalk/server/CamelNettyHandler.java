@@ -79,7 +79,9 @@ public class CamelNettyHandler extends SimpleChannelInboundHandler<String> {
 		ctx.write(Util.getWelcomeMsg().toString() + "\r\n");
 		ctx.flush();
 		String session = UUID.randomUUID().toString();
-		SubscriptionManagerFactory.getInstance().add(session, session, outputType);
+		String localAddress = ctx.channel().localAddress().toString();
+		String remoteAddress = ctx.channel().remoteAddress().toString();
+		SubscriptionManagerFactory.getInstance().add(session, session, outputType,localAddress, remoteAddress);
 		contextList.put(session, ctx);
 		//make up headers
 		ctx.attr(msgHeaders).set(getHeaders(ctx));
@@ -104,7 +106,7 @@ public class CamelNettyHandler extends SimpleChannelInboundHandler<String> {
 		Map<String, Object> headers = new HashMap<>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, contextList.inverse().get(ctx));
 		String remoteAddress = ctx.channel().remoteAddress().toString();
-		headers.put(RouteManager.REMOTE_ADDRESS, remoteAddress);
+		headers.put(JsonConstants.MSG_SRC_IP, remoteAddress);
 		headers.put(Constants.OUTPUT_TYPE, outputType);
 		String localAddress = ctx.channel().localAddress().toString();
 		

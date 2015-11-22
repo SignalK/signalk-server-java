@@ -28,6 +28,8 @@ package nz.co.fortytwo.signalk.server;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import nz.co.fortytwo.signalk.model.SignalKModel;
+import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.log4j.Logger;
@@ -39,6 +41,25 @@ public class RouteManagerFactory {
 	
 	public static RouteManager getInstance() throws FileNotFoundException, IOException{
 		Util.getConfig();
+		if(manager==null){
+			
+			manager=new RouteManager();
+			//must do this early!
+			CamelContextFactory.setContext(manager);
+			
+		}
+		return manager;
+	}
+	
+	/**
+	 * Returns an env setup with the test config.
+	 * @return
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	public static RouteManager getMotuTestInstance() throws FileNotFoundException, IOException{
+		SignalKModel model = SignalKModelFactory.getMotuTestInstance();
+		Util.setConfig(model);
 		if(manager==null){
 			
 			manager=new RouteManager();

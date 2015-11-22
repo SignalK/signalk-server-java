@@ -67,7 +67,7 @@ public class JsonGetProcessor extends SignalkProcessor implements Processor{
 			if(json.has(VESSELS))return;
 			if(json.has(CONTEXT) && (json.has(GET))){
 				SignalKModel temp = handler.handle(signalkModel, json);
-				logger.debug(temp);
+				if(logger.isDebugEnabled())logger.debug("Retrieved:"+temp);
 				//also STOMP headers etc, swap replyTo
 				Map<String, Object> headers = exchange.getIn().getHeaders();
 				headers.put(SIGNALK_FORMAT, handler.getFormat(json));

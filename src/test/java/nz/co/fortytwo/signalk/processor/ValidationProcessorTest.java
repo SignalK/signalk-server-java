@@ -48,7 +48,7 @@ public class ValidationProcessorTest {
 	private JsonSerializer ser = new JsonSerializer();
 	@Before
 	public void setUp() throws Exception {
-		RouteManagerFactory.getInstance();
+		RouteManagerFactory.getMotuTestInstance();
 	}
 
 	@After

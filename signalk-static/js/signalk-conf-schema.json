@@ -28,6 +28,40 @@
 					"name": "server",
 					"properties": 
 					{
+						"vessel": 
+						{
+							"id": "http://jsonschema.net/signalk/config/server/vessel",
+							"type": "object",
+							"additionalProperties": false,
+							"title": "Vessel",
+							"description": "",
+							"name": "vessel",
+							"properties": 
+							{
+								"uuid": 
+								{
+									"id": "http://jsonschema.net/signalk/config/server/vessel/self",
+									"type": "string",
+									"minLength": 1,
+									"title": "Self",
+									"description": "Enter MMSI number, or unique vessel identifier",
+									"name": "uuid",
+									"default": "self"
+								}
+							}
+						},
+
+						"version": 
+						{
+							"id": "http://jsonschema.net/signalk/config/server/version",
+							"type": "string",
+							"minLength": 1,
+							"title": "Version",
+							"description": "Current server version",
+							"name": "version",
+							"default": "0.1"
+						},
+
 						"demo": 
 						{
 							"id": "http://jsonschema.net/signalk/config/server/demo",
@@ -36,6 +70,7 @@
 							"title": "Demo Mode",
 							"description": "Demo Mode plays a file as input continuously.",
 							"name": "demo",
+							"format": "grid",
 							"properties": 
 							{
 								"start": 
@@ -67,17 +102,6 @@
 							]
 						},
 
-						"version": 
-						{
-							"id": "http://jsonschema.net/signalk/config/server/version",
-							"type": "string",
-							"minLength": 1,
-							"title": "Version",
-							"description": "Current server version",
-							"name": "version",
-							"default": "0.1"
-						},
-
 						"files": 
 						{
 							"id": "http://jsonschema.net/signalk/config/server/files",
@@ -107,40 +131,6 @@
 											"description": "Relative to the server install root",
 											"name": "dir",
 											"default": "./signalk-static"
-										}
-									}
-								},
-
-								"cfg": 
-								{
-									"id": "http://jsonschema.net/signalk/config/server/files/cfg",
-									"type": "object",
-									"additionalProperties": false,
-									"title": "Configuration",
-									"description": "",
-									"name": "cfg",
-									"properties": 
-									{
-										"file": 
-										{
-											"id": "http://jsonschema.net/signalk/config/server/files/cfg/file",
-											"type": "string",
-											"minLength": 1,
-											"title": "File",
-											"description": "",
-											"name": "file",
-											"default": "signalk.cfg"
-										},
-
-										"dir": 
-										{
-											"id": "http://jsonschema.net/signalk/config/server/files/cfg/dir",
-											"type": "string",
-											"minLength": 1,
-											"title": "Directory",
-											"description": "Relative to server install root",
-											"name": "dir",
-											"default": "./conf/"
 										}
 									}
 								},
@@ -193,6 +183,145 @@
 							}
 						},
 
+						"security": 
+						{
+							"id": "http://jsonschema.net/signalk/config/server/security",
+							"type": "object",
+							"additionalProperties": false,
+							"title": "Security",
+							"description": "Control access and updates",
+							"name": "security",
+							"required": 
+							[
+								"deny",
+								"white",
+								"config"
+							],
+
+							"properties": 
+							{
+								"deny": 
+								{
+									"id": "http://jsonschema.net/signalk/config/server/security/deny",
+									"type": "object",
+									"additionalProperties": false,
+									"title": "Deny List",
+									"description": "",
+									"name": "deny",
+									"required": 
+									[
+										"ip"
+									],
+
+									"properties": 
+									{
+										"ip": 
+										{
+											"id": "http://jsonschema.net/signalk/config/server/security/deny/ip",
+											"type": "array",
+											"minItems": 0,
+											"uniqueItems": true,
+											"additionalItems": true,
+											"title": "IP Address",
+											"description": "IP address of denied clients, eg 192.168.0.1",
+											"name": "ip",
+											"format": "table",
+											"items": 
+											{
+												"id": "http://jsonschema.net/signalk/config/server/security/deny/ip/0",
+												"type": "string",
+												"minLength": 1,
+												"title": "IP address",
+												"description": "",
+												"name": "0",
+												"default": ""
+											}
+										}
+									}
+								},
+							
+								"white": 
+								{
+									"id": "http://jsonschema.net/signalk/config/server/security/white",
+									"type": "object",
+									"additionalProperties": false,
+									"title": "White List",
+									"description": "",
+									"name": "white",
+									"required": 
+									[
+										"ip"
+									],
+
+									"properties": 
+									{
+										"ip": 
+										{
+											"id": "http://jsonschema.net/signalk/config/server/security/white/ip",
+											"type": "array",
+											"minItems": 0,
+											"uniqueItems": true,
+											"additionalItems": true,
+											"title": "IP Address",
+											"description": "IP address of trusted clients, eg 192.168.0.1",
+											"name": "ip",
+											"format": "table",
+											"items": 
+											{
+												"id": "http://jsonschema.net/signalk/config/server/security/white/ip/0",
+												"type": "string",
+												"minLength": 1,
+												"title": "IP address",
+												"description": "",
+												"name": "0",
+												"default": ""
+											}
+										}
+									}
+								},
+						
+								"config": 
+								{
+									"id": "http://jsonschema.net/signalk/config/server/security/config",
+									"type": "object",
+									"additionalProperties": false,
+									"title": "Config List",
+									"description": "",
+									"name": "config",
+									"required": 
+									[
+										"ip"
+									],
+
+									"properties": 
+									{
+										"ip": 
+										{
+											"id": "http://jsonschema.net/signalk/config/server/security/config/ip",
+											"type": "array",
+											"minItems": 0,
+											"uniqueItems": true,
+											"additionalItems": true,
+											"title": "IP Address",
+											"description": "IP address of clients that can change configuration, eg 192.168.0.1",
+											"name": "ip",
+											"format": "table",
+											"items": 
+											{
+												"id": "http://jsonschema.net/signalk/config/server/security/config/ip/0",
+												"type": "string",
+												"minLength": 1,
+												"title": "IP address",
+												"description": "",
+												"name": "0",
+												"default": ""
+											}
+										}
+									}
+								}
+							}
+						},
+
 						"client": 
 						{
 							"id": "http://jsonschema.net/signalk/config/server/client",
@@ -201,6 +330,13 @@
 							"title": "Client connections",
 							"description": "Connections to other Signalk servers",
 							"name": "client",
+							"required": 
+							[
+								"tcp",
+								"mqtt",
+								"stomp"
+							],
+
 							"properties": 
 							{
 								"tcp": 
@@ -211,6 +347,11 @@
 									"title": "Tcp clients",
 									"description": "",
 									"name": "tcp",
+									"required": 
+									[
+										"connect"
+									],
+
 									"properties": 
 									{
 										"connect": 
@@ -223,6 +364,7 @@
 											"title": "Address",
 											"description": "server:port for the remote tcp connection, eg localhost:1234",
 											"name": "connect",
+											"format": "table",
 											"items": 
 											{
 												"id": "http://jsonschema.net/signalk/config/server/client/tcp/connect/0",
@@ -245,6 +387,11 @@
 									"title": "Mqtt",
 									"description": "",
 									"name": "mqtt",
+									"required": 
+									[
+										"connect"
+									],
+
 									"properties": 
 									{
 										"connect": 
@@ -257,6 +404,7 @@
 											"title": "Url",
 											"description": "Url of the remote MQTT service, eg localhost:1883?subscribeTopicName=signalk.test.mqtt.topic",
 											"name": "connect",
+											"format": "table",
 											"items": 
 											{
 												"id": "http://jsonschema.net/signalk/config/server/client/mqtt/connect/0",
@@ -279,6 +427,11 @@
 									"title": "Stomp clients",
 									"description": "",
 									"name": "stomp",
+									"required": 
+									[
+										"connect"
+									],
+
 									"properties": 
 									{
 										"connect": 
@@ -291,6 +444,7 @@
 											"title": "Url",
 											"description": "Url of the remote Stomp service, eg localhost:61613?subscribeTopicName=signalk.test.stomp.topic",
 											"name": "connect",
+											"format": "table",
 											"items": 
 											{
 												"id": "http://jsonschema.net/signalk/config/server/client/stomp/connect/0",
@@ -325,6 +479,7 @@
 									"uniqueItems": true,
 									"additionalItems": true,
 									"title": "Ports",
+									"format": "table",
 									"description": "Absolute location of the list of serial devices to be monitored",
 									"name": "ports",
 									"items": 
@@ -396,6 +551,7 @@
 							"title": "Applications",
 							"description": "Control the installation and upgrade of applications",
 							"name": "apps",
+							"format": "grid",
 							"properties": 
 							{
 								"install": 
@@ -452,6 +608,7 @@
 							"title": "Server configuration",
 							"description": "",
 							"name": "server",
+							"format": "grid",
 							"properties": 
 							{
 								"mqtt": 
@@ -462,6 +619,7 @@
 									"title": "Mqtt service",
 									"description": "",
 									"name": "mqtt",
+									"format": "grid",
 									"properties": 
 									{
 										"port": 
@@ -499,6 +657,7 @@
 									"title": "Stomp",
 									"description": "",
 									"name": "stomp",
+									"format": "grid",
 									"properties": 
 									{
 										"port": 
@@ -536,6 +695,7 @@
 									"title": "Udp",
 									"description": "Serve signalk over Udp",
 									"name": "udp",
+									"format": "grid",
 									"properties": 
 									{
 										"port": 
@@ -723,79 +883,21 @@
 									}
 								}
 							}
-						},
-
-						"nmea": 
-						{
-							"id": "http://jsonschema.net/signalk/config/server/nmea",
-							"type": "object",
-							"additionalProperties": false,
-							"title": "Nmea special sentences",
-							"description": "",
-							"name": "nmea",
-							"properties": 
-							{
-								"YXXDR": 
-								{
-									"id": "http://jsonschema.net/signalk/config/server/nmea/YXXDR",
-									"type": "object",
-									"additionalProperties": false,
-									"title": "YXXDR",
-									"description": "",
-									"name": "YXXDR",
-									"properties": 
-									{
-										"PTCHROLL": 
-										{
-											"id": "http://jsonschema.net/signalk/config/server/nmea/YXXDR/PTCHROLL",
-											"type": "string",
-											"minLength": 1,
-											"title": "PTCHROLL",
-											"description": "",
-											"name": "PTCHROLL",
-											"default": "PCH,RLL,SKIP,SKIP"
-										}
-									}
-								}
-							}
-						},
-
-						"vessel": 
-						{
-							"id": "http://jsonschema.net/signalk/config/server/vessel",
-							"type": "object",
-							"additionalProperties": false,
-							"title": "Vessel",
-							"description": "",
-							"name": "vessel",
-							"properties": 
-							{
-								"uuid": 
-								{
-									"id": "http://jsonschema.net/signalk/config/server/vessel/self",
-									"type": "string",
-									"minLength": 1,
-									"title": "Self",
-									"description": "Enter MMSI number, or unique vessel identifier",
-									"name": "uuid",
-									"default": "self"
-								}
-							}
 						}
 					},
 
 					"required": 
 					[
+						"vessel",
 						"demo",
 						"version",
 						"files",
+						"security",
 						"client",
 						"serial",
 						"clock",
 						"apps",
-						"server",
-						"nmea",
-						"vessel"
+						"server"
 					]
 				},
 
@@ -807,6 +909,7 @@
 					"title": "Hawtio Management",
 					"description": "",
 					"name": "hawtio",
+					"format": "grid",
 					"properties": 
 					{
 						"port": 
@@ -868,6 +971,7 @@
 					}
 				}
 			},
+
 			"required": 
 			[
 				"server",

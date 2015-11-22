@@ -96,7 +96,7 @@ public class FullExportProcessorTest {
 
 	@Test
 	public void shouldPopulateTree() throws Exception {
-		CamelContext ctx = RouteManagerFactory.getInstance().getContext();
+		CamelContext ctx = RouteManagerFactory.getMotuTestInstance().getContext();
 		SignalKModel model = SignalKModelFactory.getMotuTestInstance();
 		
 		model = Util.populateModel(model, new File("src/test/resources/samples/basicModel.txt"));
@@ -113,7 +113,7 @@ public class FullExportProcessorTest {
 
 	@Test
 	public void shouldCreateInstantDelta() throws Exception {
-		CamelContext ctx = RouteManagerFactory.getInstance().getContext();
+		CamelContext ctx = RouteManagerFactory.getMotuTestInstance().getContext();
 
 		SignalKModel model = SignalKModelFactory.getMotuTestInstance();
 		model = Util.populateModel(model, new File("src/test/resources/samples/basicModel.txt"));
@@ -151,10 +151,10 @@ public class FullExportProcessorTest {
 
 	private void testScenario(int pos,String session, String subKey, String format, String policy, int rcvdCounter, int mapSizeBefore, int mapSizeAfter, NavigableSet<String> eventSet) throws Exception {
 			
-		CamelContext ctx = RouteManagerFactory.getInstance().getContext();
+		CamelContext ctx = RouteManagerFactory.getMotuTestInstance().getContext();
 			try{
 				Subscription sub = new Subscription(session, subKey, 10, 1000, format, policy);
-				SubscriptionManagerFactory.getInstance().add("ses"+session, session, Constants.OUTPUT_WS);
+				SubscriptionManagerFactory.getInstance().add("ses"+session, session, Constants.OUTPUT_WS, "127.0.0.1","127.0.0.1");
 				SubscriptionManagerFactory.getInstance().addSubscription(sub);
 				
 				//make a mock Endpoint

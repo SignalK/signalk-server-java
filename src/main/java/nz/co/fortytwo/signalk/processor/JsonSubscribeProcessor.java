@@ -122,7 +122,7 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
 				String wsSession = node.at(WebsocketConstants.CONNECTION_KEY).asString();
 				if(node.has(Constants.OUTPUT_TYPE)){
 					String outputType = node.at(Constants.OUTPUT_TYPE).asString();
-					SubscriptionManagerFactory.getInstance().add(wsSession, wsSession, outputType);
+					SubscriptionManagerFactory.getInstance().add(wsSession, wsSession, outputType,"127.0.0.1","127.0.0.1");
 				}
 			}
 			if(subscriptions.isArray()){

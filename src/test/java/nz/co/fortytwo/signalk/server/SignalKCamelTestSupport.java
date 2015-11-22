@@ -51,17 +51,19 @@ public abstract class SignalKCamelTestSupport extends CamelTestSupport {
 	protected RouteManager routeManager = null;
 	protected final CountDownLatch latch = new CountDownLatch(1);
     protected BrokerService broker = null;
-    protected int restPort = Util.getConfigPropertyInt(Constants.REST_PORT);
-    protected int wsPort = Util.getConfigPropertyInt(Constants.WEBSOCKET_PORT);
+    protected int restPort = 0;
+    protected int wsPort = 0;
     
     @BeforeClass
 	public static void setClass() throws Exception {
-		Util.getConfig();
-		Util.setSelf("motu");
+		Util.setConfig(SignalKModelFactory.getMotuTestInstance());
+		
 	}
     
 	public SignalKCamelTestSupport() {
 		super();
+		restPort= Util.getConfigPropertyInt(Constants.REST_PORT);
+		wsPort=Util.getConfigPropertyInt(Constants.WEBSOCKET_PORT);
 		try {
 			broker = ActiveMqBrokerFactory.newInstance();
 		} catch (Exception e) {

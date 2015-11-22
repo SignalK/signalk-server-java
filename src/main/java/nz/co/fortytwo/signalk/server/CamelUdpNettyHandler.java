@@ -44,6 +44,7 @@ import java.util.UUID;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.util.Constants;
+import nz.co.fortytwo.signalk.util.JsonConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.ProducerTemplate;
@@ -88,7 +89,9 @@ public class CamelUdpNettyHandler extends SimpleChannelInboundHandler<DatagramPa
 
 		if(!sessionList.inverse().containsKey(packet.sender())){
 			String session = UUID.randomUUID().toString();
-			SubscriptionManagerFactory.getInstance().add(session, session, outputType);
+			String localAddress = ctx.channel().localAddress().toString();
+			String remoteAddress = ctx.channel().remoteAddress().toString();
+			SubscriptionManagerFactory.getInstance().add(session, session, outputType, localAddress, remoteAddress);
 			sessionList.put(session, packet.sender());
 			if(logger.isDebugEnabled())logger.debug("Added Sender "+packet.sender()+", session:" + session);
 			ctx.channel().writeAndFlush(new DatagramPacket(
@@ -119,7 +122,7 @@ public class CamelUdpNettyHandler extends SimpleChannelInboundHandler<DatagramPa
 	private Map<String, Object> getHeaders(String wsSession) {
 		Map<String, Object> headers = new HashMap<>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
-		headers.put(RouteManager.REMOTE_ADDRESS, sessionList.get(wsSession).getHostString());
+		headers.put(JsonConstants.MSG_SRC_IP, sessionList.get(wsSession).getHostString());
 		headers.put(Constants.OUTPUT_TYPE, outputType);
 		return headers;
 	}

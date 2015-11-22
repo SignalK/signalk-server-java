@@ -66,12 +66,12 @@ public class SignalkModelProcessor extends SignalkProcessor implements Processor
 
 	// @Override
 	public void handle(SignalKModel node) throws IOException {
-		if (node.getData().size() == 0)
+		if (node.getFullData().size() == 0)
 			return;
 		if (logger.isDebugEnabled())
 			logger.debug("SignalkModelProcessor  updating " + node);
 
-		signalkModel.putAll(node.getData());
+		signalkModel.putAll(node.getFullData());
 		if(node.getSubMap(JsonConstants.CONFIG)!=null){
 			SignalKModelFactory.saveConfig(signalkModel);
 		}

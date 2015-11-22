@@ -27,7 +27,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import mjson.Json;
+import nz.co.fortytwo.signalk.util.Constants;
 import nz.co.fortytwo.signalk.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
+import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -40,52 +43,132 @@ import org.joda.time.DateTime;
  * @author robert
  * 
  */
-public class IncomingSecurityFilter extends SignalkProcessor implements Processor{
+public class IncomingSecurityFilter extends SignalkProcessor implements
+		Processor {
 
-	private static Logger logger = Logger.getLogger(IncomingSecurityFilter.class);
-	private List<String> acceptList = new ArrayList<String>();
+	private static Logger logger = Logger
+			.getLogger(IncomingSecurityFilter.class);
+	private List<String> whiteList = new ArrayList<String>();
+	private List<String> configAcceptList = new ArrayList<String>();
 	private List<String> denyList = new ArrayList<String>();
-	
-	public void process(Exchange exchange) throws Exception {
-		
-		try {
-			//we trust local serial
-			String type = exchange.getIn().getHeader(JsonConstants.MSG_TYPE, String.class);
-			if(JsonConstants.SERIAL.equals(type)) return;
-			//we trust INTERNAL_IP
-			if(JsonConstants.INTERNAL_IP.equals(type)) return;
-			//we filter EXTERNAL_IP
-			String srcIp = exchange.getIn().getHeader(JsonConstants.MSG_PORT, String.class);
-			if(denyList.contains(srcIp)){
-				exchange.getIn().setBody(null);
-				return;
+
+	public IncomingSecurityFilter() {
+		// load lists now
+		Json deny = Util.getConfigJsonArray(JsonConstants.CONFIG + DOT
+				+ "server.security.deny.ip");
+		Json white = Util.getConfigJsonArray(JsonConstants.CONFIG + DOT
+				+ "server.security.white.ip");
+		Json config = Util.getConfigJsonArray(JsonConstants.CONFIG + DOT
+				+ "server.security.config.ip");
+		if (deny != null) {
+			for (Object o : deny.asList()) {
+				denyList.add((String) o);
 			}
-			if(acceptList.contains(srcIp))return;
-			
-			//new incoming, so flag for acceptance
-			exchange.getIn().setHeader(JsonConstants.MSG_APPROVAL, JsonConstants.REQUIRED);
-			//filter for evil
-			Json node = exchange.getIn().getBody(Json.class);
-			//cant be for this vessel since its external
-			if(node.at(JsonConstants.VESSELS).at(JsonConstants.SELF)!=null){
-				exchange.getIn().setBody(null);
-				return;
+		}
+		if (white != null) {
+			for (Object o : white.asList()) {
+				whiteList.add((String) o);
 			}
-			//filter(node);
-		} catch (Exception e) {
-			logger.error(e.getMessage(),e);
+		}
+		if (config != null) {
+			for (Object o : config.asList()) {
+				configAcceptList.add((String) o);
+			}
 		}
 	}
 
-	
-	public void filter(Json node){
-		//apply rules to this object
-		
-		//recurse into object
-		for(Json n : node.asJsonMap().values()){
+	public void process(Exchange exchange) throws Exception {
+
+		try {
+			// we trust local serial
+			String type = exchange.getIn().getHeader(JsonConstants.MSG_TYPE,
+					String.class);
+			if (JsonConstants.SERIAL.equals(type))
+				return;
+
+			// we filter on ip
+			String srcIp = exchange.getIn().getHeader(JsonConstants.MSG_SRC_IP,
+					String.class);
+			if (logger.isDebugEnabled())
+				logger.debug("Checking src ip:" + srcIp);
+			if (srcIp == null) {
+				logger.debug(exchange);
+				return;
+			}
+			// denied - drop now
+			if (denyList.contains(srcIp)) {
+				if (logger.isDebugEnabled())
+					logger.debug("Message DENIED for src ip(denyList):" + srcIp);
+				exchange.getIn().setBody(null);
+				return;
+			}
+
+			// save config only from allowed ips
+			String configSave = exchange.getIn().getHeader(
+					JsonConstants.CONFIG_ACTION, String.class);
+			if (JsonConstants.CONFIG_ACTION_SAVE.equals(configSave)) {
+				// must be in the configAcceptlist!
+				if (configAcceptList.contains(srcIp)) {
+					if (logger.isDebugEnabled())
+						logger.debug("Config save allowed for src ip:" + srcIp);
+					return;
+				} else {
+					if (logger.isDebugEnabled())
+						logger.debug("Config save DENIED for src ip:" + srcIp);
+					exchange.getIn().setBody(null);
+					return;
+				}
+			}
+			// we trust INTERNAL_IP
+			if (JsonConstants.INTERNAL_IP.equals(type)) {
+				if (logger.isDebugEnabled())
+					logger.debug("Message allowed for src ip (internal):"
+							+ srcIp);
+				return;
+			}
+
+			// we trust our whitelist
+			if (whiteList.contains(srcIp)) {
+				if (logger.isDebugEnabled())
+					logger.debug("Message allowed for src ip (whitelist):"
+							+ srcIp);
+				return;
+			}
+
+			// now we look for anomalies
+
+			// new incoming, so flag for acceptance
+			// exchange.getIn().setHeader(JsonConstants.MSG_APPROVAL,
+			// JsonConstants.REQUIRED);
+			// filter for evil
+			Json node = exchange.getIn().getBody(Json.class);
+
+			if (node.at(JsonConstants.UPDATES) != null
+					|| node.at(JsonConstants.PUT) != null) {
+				// cant be an update or put for this vessel since its external
+				if (node.at(JsonConstants.CONTEXT).asString()
+						.contains(SignalKConstants.self)) {
+					if (logger.isDebugEnabled())
+						logger.debug("Message DENIED for src ip (spoofing self):"
+								+ srcIp);
+					exchange.getIn().setBody(null);
+					return;
+				}
+			}
+			// filter(node);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+	}
+
+	public void filter(Json node) {
+		// apply rules to this object
+
+		// recurse into object
+		for (Json n : node.asJsonMap().values()) {
 			filter(n);
 		}
-		
+
 	}
 
 }

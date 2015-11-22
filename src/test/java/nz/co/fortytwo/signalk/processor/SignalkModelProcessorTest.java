@@ -58,7 +58,7 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 	}
 	@Before
 	public void setUp() throws Exception {
-		RouteManagerFactory.getInstance();
+		RouteManagerFactory.getMotuTestInstance();
 	}
 
 	@After

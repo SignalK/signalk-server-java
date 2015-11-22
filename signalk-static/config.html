@@ -70,9 +70,10 @@ body {
 								var editor = new JSONEditor(document.getElementById("editor_holder"),{
 									schema:schemaData,
 									startval: null,
-									disable_collapse: false,
+									disable_collapse: true,
 									disable_edit_json: true,
-									disable_properties: true
+									disable_properties: true,
+									disable_array_reorder: true
 									});
 		
 								// Get the current config 

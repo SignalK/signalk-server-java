@@ -98,6 +98,11 @@ public class InputFilterProcessor extends SignalkProcessor implements Processor 
 				if (json.has(Constants.REPLY_TO)) {
 					exchange.getIn().setHeader(Constants.DESTINATION, (json.at(Constants.REPLY_TO).asString()));
 				}
+				//if it has a config object, flag it as such
+				if (json.has(JsonConstants.CONFIG)
+						||(json.has(JsonConstants.CONTEXT) && StringUtils.startsWith(json.at(JsonConstants.CONTEXT).toString(),JsonConstants.CONFIG))) {
+					exchange.getIn().setHeader(JsonConstants.CONFIG_ACTION, JsonConstants.CONFIG_ACTION_SAVE);
+				}
 				// json
 				exchange.getIn().setBody(json);
 				ok = true;

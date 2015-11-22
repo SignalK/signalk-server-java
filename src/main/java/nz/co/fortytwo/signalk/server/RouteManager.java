@@ -48,6 +48,9 @@ import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.servlet.FilterHolder;
+import org.eclipse.jetty.servlet.FilterMapping;
+import org.eclipse.jetty.servlets.CrossOriginFilter;
 
 
 
@@ -77,7 +80,7 @@ public class RouteManager extends RouteBuilder {
 	public static final String DIRECT_STOMP = "direct:stomp";
 	public static final String DIRECT_MQTT = "direct:mqtt";
 	public static final String DIRECT_TCP = "seda:tcp?purgeWhenStopping=true&size=100";
-	public static final String REMOTE_ADDRESS = "remote.address";
+	
 	public static final String SEDA_NMEA = "seda:nmeaOutput?purgeWhenStopping=true&size=100";
 	public static final String SEDA_COMMON_OUT = "seda:commonOut?purgeWhenStopping=true&size=100";
 
@@ -161,6 +164,18 @@ public class RouteManager extends RouteBuilder {
 		File htmlRoot = new File(Util.getConfigProperty(Constants.STATIC_DIR));
 		log.info("Serving static files from "+htmlRoot.getAbsolutePath());
 		
+		//cors
+		/*FilterHolder holder = new FilterHolder(CrossOriginFilter.class);
+		holder.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, "*");
+		holder.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, "*");
+		holder.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM, "GET,POST,HEAD");
+		holder.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, "X-Requested-With,Content-Type,Accept,Origin");
+		holder.setName("cross-origin");
+		FilterMapping fm = new FilterMapping();
+		fm.setFilterName("cross-origin");
+		fm.setPathSpec("*");
+		handler.addFilter(holder, fm );*/
+
 		//restlet
 		
 		ResourceHandler staticHandler = new ResourceHandler();
@@ -171,11 +186,21 @@ public class RouteManager extends RouteBuilder {
 		JndiRegistry reg = (JndiRegistry)registry.getRegistry();
 		//static files
 		((JndiRegistry)registry.getRegistry()).bind("staticHandler",staticHandler );
-		restConfiguration().component("jetty").consumerProperty("matchOnUriPrefix", "true").componentProperty("matchOnUriPrefix", "true").host("0.0.0.0").port(8080);
+		restConfiguration().component("jetty")
+			//.corsHeaderProperty(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, "*")
+			//.corsHeaderProperty(CrossOriginFilter.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, "*")
+			//.corsHeaderProperty(CrossOriginFilter.ALLOWED_METHODS_PARAM, "GET,POST,HEAD")
+			//.corsHeaderProperty(CrossOriginFilter.ALLOWED_HEADERS_PARAM, "X-Requested-With,Content-Type,Accept,Origin")
+			//.enableCORS(true)
+			.consumerProperty("matchOnUriPrefix", "true")
+			.componentProperty("matchOnUriPrefix", "true")
+			.host("0.0.0.0").port(8080);
 		
 		//websockets
+		
 		if(CamelContextFactory.getInstance().getComponent("skWebsocket")==null){
-			CamelContextFactory.getInstance().addComponent("skWebsocket", new SignalkWebsocketComponent());
+			SignalkWebsocketComponent skws = new SignalkWebsocketComponent(); 
+			CamelContextFactory.getInstance().addComponent("skWebsocket", skws);
 		}
 		//STOMP
 		if(CamelContextFactory.getInstance().getComponent("skStomp")==null){
@@ -193,9 +218,9 @@ public class RouteManager extends RouteBuilder {
 		
 		SignalkRouteFactory.configureHeartbeatRoute(this,"timer://heartbeat?fixedRate=true&period=1000");
 		
-		SignalkRouteFactory.configureAuthRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_AUTH+"?sessionSupport=true&matchOnUriPrefix=true&handlers=#staticHandler&enableJMX=true");
-		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true","REST Api");
-		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_ENDPOINTS+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true","REST Endpoints");
+		SignalkRouteFactory.configureAuthRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_AUTH+"?sessionSupport=true&matchOnUriPrefix=true&handlers=#staticHandler&enableJMX=true&enableCORS=true");
+		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true&enableCORS=true","REST Api");
+		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_ENDPOINTS+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true&enableCORS=true","REST Endpoints");
 		
 		
 		if(Util.getConfigPropertyBoolean(Constants.ALLOW_INSTALL)){

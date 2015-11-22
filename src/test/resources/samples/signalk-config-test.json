@@ -18,13 +18,13 @@
          },
          "client": {
             "mqtt": {
-               "connect": []
+               "connect": null
             },
             "stomp": {
-               "connect": []
+               "connect": null
             },
             "tcp": {
-               "connect": []
+               "connect": null
             }
          },
          "clock": {
@@ -57,10 +57,10 @@
                "ip": ["10.1.1.64","127.0.0.1"]
             },
             "deny": {
-               "ip": []
+               "ip": null
             },
             "white": {
-               "ip": ["10.1.1.64"]
+               "ip": null
             }
          },
          "serial": {
@@ -76,7 +76,7 @@
                "generate0183": true
             },
             "rest": {
-               "port": 8080.0
+               "port": 8080
             },
             "stomp": {
                "port": 61613.0,
@@ -100,7 +100,7 @@
          },
          "version": "0.1",
          "vessel": {
-            "uuid": "motu"
+            "uuid": "self"
          }
       }
    }
