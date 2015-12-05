@@ -23,7 +23,8 @@
  */
 package nz.co.fortytwo.signalk.server;
 
-import static nz.co.fortytwo.signalk.util.JsonConstants.*;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_API;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_AUTH;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.websocketUrl;
 
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import mjson.Json;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
 
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
@@ -51,8 +53,8 @@ public class WebsocketTest1 extends SignalKCamelTestSupport {
  
     private static Logger logger = Logger.getLogger(WebsocketTest1.class);
 	
-	String jsonDiff = "{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"courseOverGroundTrue\"},{\"value\":3.85,\"path\":\"speedOverGround\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081+00:00\",\"device\":\"/dev/actisense\",\"pgn\":\"128267\",\"src\":\"115\"}}],\"context\":\"vessels."+SELF+".navigation\"}";
-	String jsonPosDiff = "{\"updates\":[{\"values\":[{\"path\": \"log\",\"value\": 17404540},{\"value\":172.9,\"path\":\"courseOverGroundTrue\"},{\"value\":3.85,\"path\":\"speedOverGround\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081+00:00\",\"device\":\"/dev/actisense\",\"pgn\":\"128267\",\"src\":\"115\"}}],\"context\":\"vessels."+SELF+".navigation\"}";
+	String jsonDiff = "{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"courseOverGroundTrue\"},{\"value\":3.85,\"path\":\"speedOverGround\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081+00:00\",\"device\":\"/dev/actisense\",\"pgn\":\"128267\",\"src\":\"115\"}}],\"context\":\"vessels."+SignalKConstants.self+".navigation\"}";
+	String jsonPosDiff = "{\"updates\":[{\"values\":[{\"path\": \"log\",\"value\": 17404540},{\"value\":172.9,\"path\":\"courseOverGroundTrue\"},{\"value\":3.85,\"path\":\"speedOverGround\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081+00:00\",\"device\":\"/dev/actisense\",\"pgn\":\"128267\",\"src\":\"115\"}}],\"context\":\"vessels."+SignalKConstants.self+".navigation\"}";
 	
 	@Produce(uri = "direct:input")
     protected ProducerTemplate template;

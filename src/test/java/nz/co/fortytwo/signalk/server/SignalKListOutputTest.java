@@ -23,20 +23,23 @@
  */
 package nz.co.fortytwo.signalk.server;
 
-import static nz.co.fortytwo.signalk.util.JsonConstants.*;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.dot;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_courseOverGroundMagnetic;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_courseOverGroundTrue;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position_altitude;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position_latitude;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position_longitude;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.source;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels_dot_self_dot;
 
-import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
-import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
-import nz.co.fortytwo.signalk.processor.WindProcessor;
-import nz.co.fortytwo.signalk.util.JsonSerializer;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Exchange;
@@ -104,7 +107,7 @@ public class SignalKListOutputTest extends SignalKCamelTestSupport {
 		 logger.debug("Lat :"+signalkModel.getValue(vessels_dot_self_dot + nav_position_latitude));
 		 
 		 //request list
-		 Json sub = getList("vessels." + SELF,"navigation.position.*");
+		 Json sub = getList("vessels." + SignalKConstants.self,"navigation.position.*");
 		 template.sendBodyAndHeader(DIRECT_INPUT, sub.toString(),WebsocketConstants.CONNECTION_KEY, wsSession);
 		 output.assertIsSatisfied();
 		 Exchange exch = output.getReceivedExchanges().get(0);

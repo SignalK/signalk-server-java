@@ -25,12 +25,7 @@ package nz.co.fortytwo.signalk.server.signalk.json;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -41,6 +36,7 @@ import mjson.Json;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class GetSignalkKeysTest {
@@ -57,6 +53,7 @@ public class GetSignalkKeysTest {
 	}
 
 	@Test
+	@Ignore
 	public void printKeys() throws IOException{
 
 		getAlarmKeys();

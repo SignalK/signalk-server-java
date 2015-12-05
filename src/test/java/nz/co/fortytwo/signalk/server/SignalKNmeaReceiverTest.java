@@ -23,18 +23,20 @@
  */
 package nz.co.fortytwo.signalk.server;
 
-import static nz.co.fortytwo.signalk.util.JsonConstants.SELF;
-import static nz.co.fortytwo.signalk.util.JsonConstants.VESSELS;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.*;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.env_depth_belowTransducer;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.env_wind_speedApparent;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.env_wind_speedTrue;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_magneticVariation;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position_latitude;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position_longitude;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels_dot_self_dot;
 
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import nz.co.fortytwo.signalk.handler.DeclinationHandler;
 import nz.co.fortytwo.signalk.handler.TrueWindHandler;
-import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.util.SignalKConstants;
-import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
@@ -42,7 +44,6 @@ import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.impl.DefaultProducerTemplate;
 import org.apache.log4j.Logger;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class SignalKNmeaReceiverTest extends SignalKCamelTestSupport {
@@ -99,7 +100,7 @@ public class SignalKNmeaReceiverTest extends SignalKCamelTestSupport {
         template.sendBody(DIRECT_INPUT,"!AIVDM,1,1,,B,15MwkRUOidG?GElEa<iQk1JV06Jd,0*6D");
         latch.await(2,TimeUnit.SECONDS);
 		 logger.debug("SignalKModel:"+signalkModel);
-		 //assertNotNull(signalkModel.atPath(VESSELS,"366998410"));
+		 //assertNotNull(signalkModel.atPath(vessels,"366998410"));
 		 assertEquals(37.8251d,(double)signalkModel.get(vessels+".366998410."+nav_position_latitude),0.001);
 		 logger.debug("Lat :"+signalkModel.get(vessels+".366998410." + nav_position_latitude));
 		 nmea.assertIsSatisfied();
@@ -110,7 +111,7 @@ public class SignalKNmeaReceiverTest extends SignalKCamelTestSupport {
         assertNotNull(template);
         nmea.reset();
         nmea.expectedMessageCount(1);
-        String jStr = "{\"vessels\":{\""+SELF+"\":{\"environment\":{\"wind\":{\"angleApparent\":{\"value\":90.0000000000},\"directionTrue\":{\"value\":0.0000000000},\"speedApparent\":{\"value\":20.0000000000},\"speedTrue\":{\"value\":0.0000000000}}}}}}";
+        String jStr = "{\"vessels\":{\""+SignalKConstants.self+"\":{\"environment\":{\"wind\":{\"angleApparent\":{\"value\":90.0000000000},\"directionTrue\":{\"value\":0.0000000000},\"speedApparent\":{\"value\":20.0000000000},\"speedTrue\":{\"value\":0.0000000000}}}}}}";
         template.sendBody(DIRECT_INPUT,"$GPRMC,144629.20,A,5156.91111,N,00434.80385,E,0.295,,011113,,,A*78");
         template.sendBody(DIRECT_INPUT,jStr);
         latch.await(2,TimeUnit.SECONDS);
@@ -127,7 +128,7 @@ public class SignalKNmeaReceiverTest extends SignalKCamelTestSupport {
         assertNotNull(template);
         nmea.reset();
         nmea.expectedMessageCount(1);
-        String jStr = "{\"vessels\":{\""+SELF+"\":{\"environment\":{\"wind\":{\"angleApparent\":{\"value\":90.0000000000},\"directionTrue\":{\"value\":0.0000000000},\"speedApparent\":{\"value\":20.0000000000},\"speedTrue\":{\"value\":0.0000000000}}}}}}";
+        String jStr = "{\"vessels\":{\""+SignalKConstants.self+"\":{\"environment\":{\"wind\":{\"angleApparent\":{\"value\":90.0000000000},\"directionTrue\":{\"value\":0.0000000000},\"speedApparent\":{\"value\":20.0000000000},\"speedTrue\":{\"value\":0.0000000000}}}}}}";
         template.sendBody(DIRECT_INPUT,"$GPRMC,144629.20,A,5156.91111,N,00434.80385,E,0.295,,011113,,,A*78");
         template.sendBody(DIRECT_INPUT,jStr);
         latch.await(2,TimeUnit.SECONDS);
@@ -146,7 +147,7 @@ public class SignalKNmeaReceiverTest extends SignalKCamelTestSupport {
         assertNotNull(template);
         nmea.reset();
         nmea.expectedMessageCount(1);
-        String jStr = "{\"vessels\":{\""+SELF+"\":{\"environment\":{\"wind\":{\"angleApparent\":{\"value\":90.0000000000},\"directionTrue\":{\"value\":0.0000000000},\"speedApparent\":{\"value\":20.0000000000},\"speedTrue\":{\"value\":0.0000000000}}}}}}";
+        String jStr = "{\"vessels\":{\""+SignalKConstants.self+"\":{\"environment\":{\"wind\":{\"angleApparent\":{\"value\":90.0000000000},\"directionTrue\":{\"value\":0.0000000000},\"speedApparent\":{\"value\":20.0000000000},\"speedTrue\":{\"value\":0.0000000000}}}}}}";
         template.sendBody(DIRECT_INPUT,"$GPRMC,144629.20,A,5156.91111,N,00434.80385,E,0.295,,011113,,,A*78");
         template.sendBody(DIRECT_INPUT,jStr);
         latch.await(2,TimeUnit.SECONDS);

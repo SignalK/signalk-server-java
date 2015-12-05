@@ -25,8 +25,8 @@ package nz.co.fortytwo.signalk.processor;
 import java.util.Map;
 
 import mjson.Json;
-import nz.co.fortytwo.signalk.util.Constants;
-import nz.co.fortytwo.signalk.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.ConfigConstants;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -72,16 +72,16 @@ public class InputFilterProcessor extends SignalkProcessor implements Processor 
 			} else if (msg.startsWith("{") && msg.endsWith("}")) {
 				Json json = Json.read(msg);
 				// n2k
-				if (json.has(JsonConstants.PGN)) {
-					exchange.getIn().setHeader(JsonConstants.N2K_MESSAGE, msg);
+				if (json.has(SignalKConstants.pgn)) {
+					exchange.getIn().setHeader(SignalKConstants.N2K_MESSAGE, msg);
 				}
 				// full or delta format
-				if (exchange.getIn().getHeader(JsonConstants.SIGNALK_FORMAT) == null) {
-					if (json.has(JsonConstants.CONTEXT)) {
-						exchange.getIn().setHeader(JsonConstants.SIGNALK_FORMAT, JsonConstants.FORMAT_DELTA);
+				if (exchange.getIn().getHeader(SignalKConstants.SIGNALK_FORMAT) == null) {
+					if (json.has(SignalKConstants.CONTEXT)) {
+						exchange.getIn().setHeader(SignalKConstants.SIGNALK_FORMAT, SignalKConstants.FORMAT_DELTA);
 					}
-					if (json.has(JsonConstants.VESSELS)) {
-						exchange.getIn().setHeader(JsonConstants.SIGNALK_FORMAT, JsonConstants.FORMAT_FULL);
+					if (json.has(SignalKConstants.vessels)) {
+						exchange.getIn().setHeader(SignalKConstants.SIGNALK_FORMAT, SignalKConstants.FORMAT_FULL);
 					}
 				}
 				// compensate for MQTT and STOMP sessionid
@@ -90,18 +90,18 @@ public class InputFilterProcessor extends SignalkProcessor implements Processor 
 				}
 				// deal with REPLY_TO
 				Map<String, Object> headers = exchange.getIn().getHeaders();
-				if (headers != null && headers.containsKey(Constants.REPLY_TO)) {
-					exchange.getIn().setHeader(Constants.DESTINATION, headers.get(Constants.REPLY_TO));
+				if (headers != null && headers.containsKey(ConfigConstants.REPLY_TO)) {
+					exchange.getIn().setHeader(ConfigConstants.DESTINATION, headers.get(ConfigConstants.REPLY_TO));
 					// headers.remove(Constants.REPLY_TO);
 				}
 				// for MQTT
-				if (json.has(Constants.REPLY_TO)) {
-					exchange.getIn().setHeader(Constants.DESTINATION, (json.at(Constants.REPLY_TO).asString()));
+				if (json.has(ConfigConstants.REPLY_TO)) {
+					exchange.getIn().setHeader(ConfigConstants.DESTINATION, (json.at(ConfigConstants.REPLY_TO).asString()));
 				}
 				//if it has a config object, flag it as such
-				if (json.has(JsonConstants.CONFIG)
-						||(json.has(JsonConstants.CONTEXT) && StringUtils.startsWith(json.at(JsonConstants.CONTEXT).toString(),JsonConstants.CONFIG))) {
-					exchange.getIn().setHeader(JsonConstants.CONFIG_ACTION, JsonConstants.CONFIG_ACTION_SAVE);
+				if (json.has(SignalKConstants.CONFIG)
+						||(json.has(SignalKConstants.CONTEXT) && StringUtils.startsWith(json.at(SignalKConstants.CONTEXT).toString(),SignalKConstants.CONFIG))) {
+					exchange.getIn().setHeader(SignalKConstants.CONFIG_ACTION, SignalKConstants.CONFIG_ACTION_SAVE);
 				}
 				// json
 				exchange.getIn().setBody(json);

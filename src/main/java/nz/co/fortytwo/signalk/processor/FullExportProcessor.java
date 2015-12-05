@@ -22,9 +22,9 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import static nz.co.fortytwo.signalk.util.JsonConstants.FORMAT_DELTA;
-import static nz.co.fortytwo.signalk.util.JsonConstants.POLICY_FIXED;
-import static nz.co.fortytwo.signalk.util.JsonConstants.SIGNALK_FORMAT;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.FORMAT_DELTA;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.POLICY_FIXED;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_FORMAT;
 
 import java.util.HashMap;
 import java.util.Queue;
@@ -33,7 +33,7 @@ import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.event.PathEvent;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.server.Subscription;
-import nz.co.fortytwo.signalk.util.Constants;
+import nz.co.fortytwo.signalk.util.ConfigConstants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -88,10 +88,10 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 				continue;
 				exchange.getIn().setHeader(SIGNALK_FORMAT, sub.getFormat());
 				if(sub.getDestination()!=null){
-					exchange.getIn().setHeader(Constants.DESTINATION, sub.getDestination());
+					exchange.getIn().setHeader(ConfigConstants.DESTINATION, sub.getDestination());
 					
 				}
-				exchange.getIn().setHeader(Constants.OUTPUT_TYPE, manager.getOutputType(sub.getWsSession()));
+				exchange.getIn().setHeader(ConfigConstants.OUTPUT_TYPE, manager.getOutputType(sub.getWsSession()));
 				exchange.getIn().setHeader(WebsocketConstants.CONNECTION_KEY, sub.getWsSession());
 				
 		}
@@ -223,7 +223,7 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 					if (send) {
 						HashMap<String, Object> headers = new HashMap<String, Object>();
 						headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
-						headers.put(Constants.OUTPUT_TYPE, manager.getOutputType(wsSession));
+						headers.put(ConfigConstants.OUTPUT_TYPE, manager.getOutputType(wsSession));
 						outProducer.sendBodyAndHeaders(temp, headers);
 						lastSend = System.currentTimeMillis();
 					}

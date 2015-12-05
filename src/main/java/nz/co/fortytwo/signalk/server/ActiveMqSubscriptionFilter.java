@@ -27,7 +27,6 @@ package nz.co.fortytwo.signalk.server;
 
 import org.apache.activemq.broker.Broker;
 import org.apache.activemq.broker.BrokerFilter;
-import org.apache.activemq.broker.BrokerPlugin;
 import org.apache.activemq.broker.ConnectionContext;
 import org.apache.activemq.broker.region.Subscription;
 import org.apache.activemq.command.ConsumerInfo;

@@ -35,8 +35,7 @@ import javax.jmdns.ServiceInfo;
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
-import nz.co.fortytwo.signalk.util.Constants;
-import nz.co.fortytwo.signalk.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.ConfigConstants;
 import nz.co.fortytwo.signalk.util.SignalKConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
@@ -45,12 +44,8 @@ import org.apache.camel.component.stomp.SkStompComponent;
 import org.apache.camel.component.websocket.SignalkWebsocketComponent;
 import org.apache.camel.impl.JndiRegistry;
 import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.handler.ResourceHandler;
-import org.eclipse.jetty.servlet.FilterHolder;
-import org.eclipse.jetty.servlet.FilterMapping;
-import org.eclipse.jetty.servlets.CrossOriginFilter;
 
 
 
@@ -84,8 +79,8 @@ public class RouteManager extends RouteBuilder {
 	public static final String SEDA_NMEA = "seda:nmeaOutput?purgeWhenStopping=true&size=100";
 	public static final String SEDA_COMMON_OUT = "seda:commonOut?purgeWhenStopping=true&size=100";
 
-	public static final String STOMP = "skStomp:queue:signalk?brokerURL=tcp://0.0.0.0:"+Util.getConfigPropertyInt(Constants.STOMP_PORT);
-	public static final String MQTT = "mqtt:signalk?host=tcp://0.0.0.0:"+Util.getConfigPropertyInt(Constants.MQTT_PORT);
+	public static final String STOMP = "skStomp:queue:signalk?brokerURL=tcp://0.0.0.0:"+Util.getConfigPropertyInt(ConfigConstants.STOMP_PORT);
+	public static final String MQTT = "mqtt:signalk?host=tcp://0.0.0.0:"+Util.getConfigPropertyInt(ConfigConstants.MQTT_PORT);
 
 	private JmmDNS jmdns = null;
 	private int wsPort = 3000;
@@ -102,10 +97,10 @@ public class RouteManager extends RouteBuilder {
 	protected RouteManager() {
 		
 		// web socket on port 3000
-		logger.info("  Websocket port:"+Util.getConfigPropertyInt(Constants.WEBSOCKET_PORT));
-		wsPort=Util.getConfigPropertyInt(Constants.WEBSOCKET_PORT);
-		logger.info("  Signalk REST API port:"+Util.getConfigPropertyInt(Constants.REST_PORT));
-		restPort=Util.getConfigPropertyInt(Constants.REST_PORT);
+		logger.info("  Websocket port:"+Util.getConfigPropertyInt(ConfigConstants.WEBSOCKET_PORT));
+		wsPort=Util.getConfigPropertyInt(ConfigConstants.WEBSOCKET_PORT);
+		logger.info("  Signalk REST API port:"+Util.getConfigPropertyInt(ConfigConstants.REST_PORT));
+		restPort=Util.getConfigPropertyInt(ConfigConstants.REST_PORT);
 		
 	}
 
@@ -139,14 +134,14 @@ public class RouteManager extends RouteBuilder {
 		jmdns.registerService(httpInfo);
 		
 		//Netty tcp server
-		skServer = new NettyServer(null, Constants.OUTPUT_TCP);
-		skServer.setTcpPort(Util.getConfigPropertyInt(Constants.TCP_PORT));
-		skServer.setUdpPort(Util.getConfigPropertyInt(Constants.UDP_PORT));
+		skServer = new NettyServer(null, ConfigConstants.OUTPUT_TCP);
+		skServer.setTcpPort(Util.getConfigPropertyInt(ConfigConstants.TCP_PORT));
+		skServer.setUdpPort(Util.getConfigPropertyInt(ConfigConstants.UDP_PORT));
 		skServer.run();
 		
-		nmeaServer = new NettyServer(null, Constants.OUTPUT_NMEA);
-		nmeaServer.setTcpPort(Util.getConfigPropertyInt(Constants.TCP_NMEA_PORT));
-		nmeaServer.setUdpPort(Util.getConfigPropertyInt(Constants.UDP_NMEA_PORT));
+		nmeaServer = new NettyServer(null, ConfigConstants.OUTPUT_NMEA);
+		nmeaServer.setTcpPort(Util.getConfigPropertyInt(ConfigConstants.TCP_NMEA_PORT));
+		nmeaServer.setUdpPort(Util.getConfigPropertyInt(ConfigConstants.UDP_NMEA_PORT));
 		nmeaServer.run();
 		
 		// start a serial port manager
@@ -157,7 +152,7 @@ public class RouteManager extends RouteBuilder {
 		// put all input into signalk model 
 		SignalkRouteFactory.configureInputRoute(this, SEDA_INPUT);
 		
-		File htmlRoot = new File(Util.getConfigProperty(Constants.STATIC_DIR));
+		File htmlRoot = new File(Util.getConfigProperty(ConfigConstants.STATIC_DIR));
 		log.info("Serving static files from "+htmlRoot.getAbsolutePath());
 		
 		//cors
@@ -175,7 +170,7 @@ public class RouteManager extends RouteBuilder {
 		//restlet
 		
 		ResourceHandler staticHandler = new ResourceHandler();
-		staticHandler.setResourceBase(Util.getConfigProperty(Constants.STATIC_DIR));
+		staticHandler.setResourceBase(Util.getConfigProperty(ConfigConstants.STATIC_DIR));
 		
 		//bind in registry
 		PropertyPlaceholderDelegateRegistry registry = (PropertyPlaceholderDelegateRegistry) CamelContextFactory.getInstance().getRegistry();
@@ -207,24 +202,24 @@ public class RouteManager extends RouteBuilder {
 		SignalkRouteFactory.configureWebsocketTxRoute(this, SEDA_WEBSOCKETS, wsPort);
 		SignalkRouteFactory.configureWebsocketRxRoute(this, SEDA_INPUT, wsPort);
 		
-		SignalkRouteFactory.configureTcpServerRoute(this, DIRECT_TCP, skServer, Constants.OUTPUT_TCP);
-		SignalkRouteFactory.configureTcpServerRoute(this, SEDA_NMEA, nmeaServer, Constants.OUTPUT_NMEA);
+		SignalkRouteFactory.configureTcpServerRoute(this, DIRECT_TCP, skServer, ConfigConstants.OUTPUT_TCP);
+		SignalkRouteFactory.configureTcpServerRoute(this, SEDA_NMEA, nmeaServer, ConfigConstants.OUTPUT_NMEA);
 		
 		SignalkRouteFactory.configureCommonOut(this);
 		
 		SignalkRouteFactory.configureHeartbeatRoute(this,"timer://heartbeat?fixedRate=true&period=1000");
 		
-		SignalkRouteFactory.configureAuthRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_AUTH+"?sessionSupport=true&matchOnUriPrefix=true&handlers=#staticHandler&enableJMX=true&enableCORS=true");
-		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true&enableCORS=true","REST Api");
-		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_ENDPOINTS+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true&enableCORS=true","REST Endpoints");
+		SignalkRouteFactory.configureAuthRoute(this, "jetty:http://0.0.0.0:" + restPort + SignalKConstants.SIGNALK_AUTH+"?sessionSupport=true&matchOnUriPrefix=true&handlers=#staticHandler&enableJMX=true&enableCORS=true");
+		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + SignalKConstants.SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true&enableCORS=true","REST Api");
+		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + SignalKConstants.SIGNALK_ENDPOINTS+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true&enableCORS=true","REST Endpoints");
 		
 		
-		if(Util.getConfigPropertyBoolean(Constants.ALLOW_INSTALL)){
-			SignalkRouteFactory.configureInstallRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_INSTALL+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true", "REST Install");
+		if(Util.getConfigPropertyBoolean(ConfigConstants.ALLOW_INSTALL)){
+			SignalkRouteFactory.configureInstallRoute(this, "jetty:http://0.0.0.0:" + restPort + SignalKConstants.SIGNALK_INSTALL+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true", "REST Install");
 		}
 		
-		if(Util.getConfigPropertyBoolean(Constants.ALLOW_UPGRADE)){
-			SignalkRouteFactory.configureInstallRoute(this, "jetty:http://0.0.0.0:" + restPort + JsonConstants.SIGNALK_UPGRADE+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true", "REST Upgrade");
+		if(Util.getConfigPropertyBoolean(ConfigConstants.ALLOW_UPGRADE)){
+			SignalkRouteFactory.configureInstallRoute(this, "jetty:http://0.0.0.0:" + restPort + SignalKConstants.SIGNALK_UPGRADE+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true", "REST Upgrade");
 		}
 		
 		// timed actions
@@ -233,25 +228,25 @@ public class RouteManager extends RouteBuilder {
 		SignalkRouteFactory.configureAnchorWatchTimer(this, "timer://anchorWatch?fixedRate=true&period=1000");
 		SignalkRouteFactory.configureAlarmsTimer(this, "timer://alarms?fixedRate=true&period=1000");
 		
-		if(Util.getConfigPropertyBoolean(Constants.GENERATE_NMEA0183)){
+		if(Util.getConfigPropertyBoolean(ConfigConstants.GENERATE_NMEA0183)){
 			SignalkRouteFactory.configureNMEA0183Timer(this, "timer://nmea0183?fixedRate=true&period=1000");
 		}
 		//STOMP
-		if(Util.getConfigPropertyBoolean(Constants.START_STOMP)){
+		if(Util.getConfigPropertyBoolean(ConfigConstants.START_STOMP)){
 			from("skStomp:queue:signalk.put").id("STOMP In")
-				.setHeader(Constants.OUTPUT_TYPE, constant(Constants.OUTPUT_STOMP))
+				.setHeader(ConfigConstants.OUTPUT_TYPE, constant(ConfigConstants.OUTPUT_STOMP))
 				.to(SEDA_INPUT).id(SignalkRouteFactory.getName("SEDA_INPUT"));
 		}
 		//MQTT
-		if(Util.getConfigPropertyBoolean(Constants.START_MQTT)){
+		if(Util.getConfigPropertyBoolean(ConfigConstants.START_MQTT)){
 			from(MQTT+"&subscribeTopicName=signalk.put").id("MQTT In")
 				.transform(body().convertToString())
-				.setHeader(Constants.OUTPUT_TYPE, constant(Constants.OUTPUT_MQTT))
+				.setHeader(ConfigConstants.OUTPUT_TYPE, constant(ConfigConstants.OUTPUT_MQTT))
 				.to(SEDA_INPUT).id(SignalkRouteFactory.getName("SEDA_INPUT"));
 		}
 		//start any clients if they exist
 		//TCP
-		Json tcpClients = Util.getConfigJsonArray(Constants.CLIENT_TCP);
+		Json tcpClients = Util.getConfigJsonArray(ConfigConstants.CLIENT_TCP);
 		if(tcpClients!=null){
 			for(Object client: tcpClients.asList()){
 				from("netty4:tcp://"+client+"?clientMode=true&textline=true").id("TCP Client:"+client)
@@ -262,7 +257,7 @@ public class RouteManager extends RouteBuilder {
 			}
 		}
 		//MQTT
-			Json mqttClients = Util.getConfigJsonArray(Constants.CLIENT_MQTT);
+			Json mqttClients = Util.getConfigJsonArray(ConfigConstants.CLIENT_MQTT);
 			if(mqttClients!=null){
 				for(Object client: mqttClients.asList()){
 					from("mqtt://"+client).id("MQTT Client:"+client)
@@ -275,7 +270,7 @@ public class RouteManager extends RouteBuilder {
 		
 		//STOMP
 		//TODO: test stomp client actually works!
-		Json stompClients = Util.getConfigJsonArray(Constants.CLIENT_STOMP);
+		Json stompClients = Util.getConfigJsonArray(ConfigConstants.CLIENT_STOMP);
 		if(stompClients!=null){
 			for(Object client: stompClients.asList()){
 				from("stomp://"+client).id("STOMP Client:"+client)
@@ -289,9 +284,9 @@ public class RouteManager extends RouteBuilder {
 		
 		
 		//Demo mode
-		if (Util.getConfigPropertyBoolean(Constants.DEMO)) {
-			String streamUrl = Util.getConfigProperty(Constants.STREAM_URL);
-			logger.info("  Demo streaming url:"+Util.getConfigProperty(Constants.STREAM_URL));
+		if (Util.getConfigPropertyBoolean(ConfigConstants.DEMO)) {
+			String streamUrl = Util.getConfigProperty(ConfigConstants.STREAM_URL);
+			logger.info("  Demo streaming url:"+Util.getConfigProperty(ConfigConstants.STREAM_URL));
 			from("file://./src/test/resources/samples/?move=done&fileName=" + streamUrl).id("demo feed")
 				.onException(Exception.class).handled(true).maximumRedeliveries(0)
 				.to("log:nz.co.fortytwo.signalk.model.receive?level=ERROR&showException=true&showStackTrace=true")
@@ -312,12 +307,12 @@ public class RouteManager extends RouteBuilder {
 
 	private Map<String,String> getMdnsTxt() {
 		Map<String,String> txtSet = new HashMap<String, String>();
-		txtSet.put("path", JsonConstants.SIGNALK_ENDPOINTS);
+		txtSet.put("path", SignalKConstants.SIGNALK_ENDPOINTS);
 		txtSet.put("server","signalk-server");
-		txtSet.put("version",Util.getConfigProperty(Constants.VERSION));
-		txtSet.put("vessel_name",Util.getConfigProperty(Constants.SELF));
-		txtSet.put("vessel_mmsi",Util.getConfigProperty(Constants.SELF));
-		txtSet.put("vessel_uuid",Util.getConfigProperty(Constants.SELF));
+		txtSet.put("version",Util.getConfigProperty(ConfigConstants.VERSION));
+		txtSet.put("vessel_name",Util.getConfigProperty(ConfigConstants.UUID));
+		txtSet.put("vessel_mmsi",Util.getConfigProperty(ConfigConstants.UUID));
+		txtSet.put("vessel_uuid",Util.getConfigProperty(ConfigConstants.UUID));
 		return txtSet;
 	}
 

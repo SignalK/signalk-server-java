@@ -26,8 +26,7 @@ package nz.co.fortytwo.signalk.processor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import nz.co.fortytwo.signalk.util.Constants;
-import nz.co.fortytwo.signalk.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -69,7 +68,7 @@ public class RestAuthProcessor extends SignalkProcessor implements Processor{
         if(logger.isDebugEnabled())logger.debug("We are processing the path = "+path);
         
         //check valid request.
-        if(path.length()<=JsonConstants.SIGNALK_AUTH.length()){
+        if(path.length()<=SignalKConstants.SIGNALK_AUTH.length()){
         	response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         	return;
         }

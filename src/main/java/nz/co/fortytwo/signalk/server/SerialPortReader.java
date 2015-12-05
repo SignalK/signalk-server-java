@@ -36,8 +36,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-import nz.co.fortytwo.signalk.util.Constants;
-import nz.co.fortytwo.signalk.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.ConfigConstants;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Exchange;
@@ -156,11 +156,11 @@ public class SerialPortReader implements Processor {
 			
 			//this.in = new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
 			this.in = new BufferedInputStream(serialPort.getInputStream());
-			headers.put(JsonConstants.MSG_TYPE, JsonConstants.SERIAL);
-			headers.put(JsonConstants.MSG_SERIAL_PORT, portName);
-			uid = Pattern.compile(Constants.UID + ":");
+			headers.put(SignalKConstants.MSG_TYPE, SignalKConstants.SERIAL);
+			headers.put(SignalKConstants.MSG_SERIAL_PORT, portName);
+			uid = Pattern.compile(ConfigConstants.UID + ":");
 			if(logger.isDebugEnabled())logger.info("Setup serialReader on :"+portName);
-			sendMessage = new Boolean(Util.getConfigProperty(Constants.SEND_MESSAGE));
+			sendMessage = new Boolean(Util.getConfigProperty(ConfigConstants.SEND_MESSAGE));
 		}
 
 		
@@ -291,7 +291,7 @@ public class SerialPortReader implements Processor {
 		logger.debug(portName + ":msg received for device:" + message);
 		if (StringUtils.isNotBlank(message)) {
 			// check its valid for this device
-			if (running && deviceType == null || message.contains(Constants.UID + ":" + deviceType)) {
+			if (running && deviceType == null || message.contains(ConfigConstants.UID + ":" + deviceType)) {
 				if(logger.isDebugEnabled())logger.debug(portName + ":wrote out to device:" + message);
 				// queue them and write in background
 				if(!queue.offer(message)){

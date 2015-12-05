@@ -2,11 +2,11 @@
     "126992": [
         {
             "source": "Date",
-            "node": "environment.date.value"
+            "node": "environment.time.date.value"
         },
         {
             "source": "Time",
-            "node": "environment.time.value"
+            "node": "environment.time.time.value"
         }
     ],
     "128267": [

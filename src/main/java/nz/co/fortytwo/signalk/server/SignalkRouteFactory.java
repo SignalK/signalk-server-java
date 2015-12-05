@@ -59,8 +59,8 @@ import nz.co.fortytwo.signalk.processor.TrackProcessor;
 import nz.co.fortytwo.signalk.processor.ValidationProcessor;
 import nz.co.fortytwo.signalk.processor.WindProcessor;
 import nz.co.fortytwo.signalk.processor.WsSessionProcessor;
-import nz.co.fortytwo.signalk.util.Constants;
-import nz.co.fortytwo.signalk.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.ConfigConstants;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
 
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.Predicate;
@@ -134,7 +134,7 @@ public class SignalkRouteFactory {
 	 * @param input
 	 */
 	public static void configureWebsocketTxRoute(RouteBuilder routeBuilder ,String input, int port){
-		Predicate p1 = routeBuilder.header(Constants.OUTPUT_TYPE).isEqualTo(Constants.OUTPUT_WS);
+		Predicate p1 = routeBuilder.header(ConfigConstants.OUTPUT_TYPE).isEqualTo(ConfigConstants.OUTPUT_WS);
 		Predicate p2 = routeBuilder.header(WebsocketConstants.CONNECTION_KEY).isEqualTo(WebsocketConstants.SEND_TO_ALL);
 		//from SEDA_WEBSOCKETS
 			routeBuilder.from(input).id(getName("Websocket Tx"))
@@ -144,7 +144,7 @@ public class SignalkRouteFactory {
 				.to("log:nz.co.fortytwo.signalk.model.websocket.tx?level=ERROR&showException=true&showStackTrace=true")
 				.end()
 			.filter(PredicateBuilder.or(p1, p2))
-			.to("skWebsocket://0.0.0.0:"+port+JsonConstants.SIGNALK_WS).id(getName("Websocket Client"));
+			.to("skWebsocket://0.0.0.0:"+port+SignalKConstants.SIGNALK_WS).id(getName("Websocket Client"));
 		
 	}
 	/**
@@ -155,7 +155,7 @@ public class SignalkRouteFactory {
 	 */
 	public static void configureWebsocketRxRoute(RouteBuilder routeBuilder ,String input, int port)  {
 		
-		WebsocketEndpoint wsEndpoint = (WebsocketEndpoint) routeBuilder.getContext().getEndpoint("skWebsocket://0.0.0.0:"+port+JsonConstants.SIGNALK_WS);
+		WebsocketEndpoint wsEndpoint = (WebsocketEndpoint) routeBuilder.getContext().getEndpoint("skWebsocket://0.0.0.0:"+port+SignalKConstants.SIGNALK_WS);
 		wsEndpoint.setEnableJmx(true);
 		wsEndpoint.setSessionSupport(true);
 		wsEndpoint.setCrossOriginFilterOn(true);
@@ -173,7 +173,7 @@ public class SignalkRouteFactory {
 	}
 	public static void configureTcpServerRoute(RouteBuilder routeBuilder ,String input, NettyServer nettyServer, String outputType) throws Exception{
 		// push out via TCPServer.
-		Predicate p1 = routeBuilder.header(Constants.OUTPUT_TYPE).isEqualTo(outputType);
+		Predicate p1 = routeBuilder.header(ConfigConstants.OUTPUT_TYPE).isEqualTo(outputType);
 		Predicate p2 = routeBuilder.header(WebsocketConstants.CONNECTION_KEY).isEqualTo(WebsocketConstants.SEND_TO_ALL);
 		routeBuilder.from(input).id(getName("Netty "+outputType+" Server"))
 			.onException(Exception.class)
@@ -192,7 +192,7 @@ public class SignalkRouteFactory {
 			//.process(new OutputFilterProcessor()).id(getName(OutputFilterProcessor.class.getSimpleName()));
 		
 				
-//		routeBuilder.rest(JsonConstants.SIGNALK_API).id("REST POST Client")
+//		routeBuilder.rest(SignalKConstants.SIGNALK_API).id("REST POST Client")
 //			    	.post("/")
 //					.to("log:nz.co.fortytwo.signalk.client.rest?level=INFO&showException=true&showStackTrace=true")
 //					.to("direct:restTest");
@@ -262,11 +262,11 @@ public class SignalkRouteFactory {
 					).id(getName("Multicast Outputs"))
 		.end();
 		routeBuilder.from(RouteManager.DIRECT_MQTT).id(getName("MQTT out"))
-			.filter(routeBuilder.header(Constants.OUTPUT_TYPE).isEqualTo(Constants.OUTPUT_MQTT))
+			.filter(routeBuilder.header(ConfigConstants.OUTPUT_TYPE).isEqualTo(ConfigConstants.OUTPUT_MQTT))
 			.process(new MqttProcessor()).id(getName(MqttProcessor.class.getSimpleName()))
 			.to(RouteManager.MQTT+"?publishTopicName=signalk.dlq").id(getName("MQTT Broker"));
 		routeBuilder.from(RouteManager.DIRECT_STOMP).id(getName("STOMP out"))
-			.filter(routeBuilder.header(Constants.OUTPUT_TYPE).isEqualTo(Constants.OUTPUT_STOMP))
+			.filter(routeBuilder.header(ConfigConstants.OUTPUT_TYPE).isEqualTo(ConfigConstants.OUTPUT_STOMP))
 			.process(new StompProcessor()).id(getName(StompProcessor.class.getSimpleName()))
 			.to(RouteManager.STOMP).id(getName("STOMP Broker"));
 	}

@@ -23,16 +23,18 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
+import static nz.co.fortytwo.signalk.util.SignalKConstants.dot;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.source;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.timestamp;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.value;
+import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.*;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-
-import mjson.Json;
 
 /**
  * Validate the signalkModel .

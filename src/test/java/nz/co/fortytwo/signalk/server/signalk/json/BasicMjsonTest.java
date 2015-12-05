@@ -24,17 +24,15 @@
 package nz.co.fortytwo.signalk.server.signalk.json;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Properties;
 
 import mjson.Json;
-import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class BasicMjsonTest {
@@ -68,6 +66,7 @@ public class BasicMjsonTest {
 		
 	}
 	@Test
+	@Ignore
 	public void test() throws URISyntaxException, IOException {
 		//Json.Schema schema = Json.schema(new URI("https://raw.githubusercontent.com/SignalK/specification/master/schemas/signalk.json"));
 		Json basicNav = Json.read(FileUtils.readFileToString(new File("./src/test/resources/samples/basic_nav.json")));

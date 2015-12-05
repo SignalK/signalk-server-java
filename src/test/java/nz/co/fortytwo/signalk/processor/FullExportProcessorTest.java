@@ -22,55 +22,39 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import static org.junit.Assert.*;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.dot;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.env_wind_angleApparent;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_courseOverGroundTrue;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels;
+//import static nz.co.fortytwo.signalk.util.SignalKConstants.*;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels_dot_self_dot;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NavigableMap;
 import java.util.NavigableSet;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.event.PathEvent;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
-import nz.co.fortytwo.signalk.model.impl.SignalKModelImpl;
-import nz.co.fortytwo.signalk.processor.FullExportProcessor;
 import nz.co.fortytwo.signalk.server.CamelContextFactory;
-import nz.co.fortytwo.signalk.server.NettyServer;
-import nz.co.fortytwo.signalk.server.RouteManager;
 import nz.co.fortytwo.signalk.server.RouteManagerFactory;
-import nz.co.fortytwo.signalk.server.SignalkRouteFactory;
 import nz.co.fortytwo.signalk.server.Subscription;
 import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
-import nz.co.fortytwo.signalk.util.Constants;
-import nz.co.fortytwo.signalk.util.JsonConstants;
-import nz.co.fortytwo.signalk.util.JsonSerializer;
-import nz.co.fortytwo.signalk.util.Util;
+import nz.co.fortytwo.signalk.util.ConfigConstants;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
 import nz.co.fortytwo.signalk.util.TestHelper;
-//import static nz.co.fortytwo.signalk.util.JsonConstants.*;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.*;
+import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.ProducerTemplate;
-import org.apache.camel.builder.AdviceWithRouteBuilder;
-import org.apache.camel.builder.ExchangeBuilder;
-import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
-import org.apache.camel.component.websocket.SignalkWebsocketComponent;
-import org.apache.camel.impl.DefaultCamelContext;
-import org.apache.camel.impl.DefaultExchange;
 import org.apache.camel.impl.DefaultProducerTemplate;
-import org.apache.camel.impl.JndiRegistry;
-import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry;
-import org.apache.camel.model.ModelCamelContext;
-import org.apache.camel.model.RouteDefinition;
-import org.apache.camel.test.junit4.CamelTestSupport;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
@@ -121,23 +105,23 @@ public class FullExportProcessorTest {
 		model.putAll(TestHelper.getBasicModel().getFullData());
 		model.putAll(TestHelper.getOtherModel().getFullData());
 		
-		testScenario(1,UUID.randomUUID().toString(), "vessels.self.navigation", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 1, 0, 0, getJsonForEvent( self, nav_courseOverGroundTrue));
-		testScenario(2,UUID.randomUUID().toString(), "vessels.self.navigation", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_INSTANT, 1, 0, 0, getJsonForEvent( self, nav_courseOverGroundTrue));
+		testScenario(1,UUID.randomUUID().toString(), "vessels.self.navigation", SignalKConstants.FORMAT_DELTA, SignalKConstants.POLICY_IDEAL, 1, 0, 0, getJsonForEvent( SignalKConstants.self, nav_courseOverGroundTrue));
+		testScenario(2,UUID.randomUUID().toString(), "vessels.self.navigation", SignalKConstants.FORMAT_DELTA, SignalKConstants.POLICY_INSTANT, 1, 0, 0, getJsonForEvent( SignalKConstants.self, nav_courseOverGroundTrue));
 		
-		testScenario(3,UUID.randomUUID().toString(), "vessels.self.navigation", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_FIXED, 0, 0, 0, getJsonForEvent( self, nav_courseOverGroundTrue));
+		testScenario(3,UUID.randomUUID().toString(), "vessels.self.navigation", SignalKConstants.FORMAT_DELTA, SignalKConstants.POLICY_FIXED, 0, 0, 0, getJsonForEvent( SignalKConstants.self, nav_courseOverGroundTrue));
 		
-		testScenario(4,UUID.randomUUID().toString(), "vessels.self.invalid", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 0, 0, 0, getJsonForEvent( self, nav_courseOverGroundTrue));
-		testScenario(5,UUID.randomUUID().toString(), "vessels.self.environment", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 1, 0, 0, getJsonForEvent( self, env_wind_angleApparent));
+		testScenario(4,UUID.randomUUID().toString(), "vessels.self.invalid", SignalKConstants.FORMAT_DELTA, SignalKConstants.POLICY_IDEAL, 0, 0, 0, getJsonForEvent( SignalKConstants.self, nav_courseOverGroundTrue));
+		testScenario(5,UUID.randomUUID().toString(), "vessels.self.environment", SignalKConstants.FORMAT_DELTA, SignalKConstants.POLICY_IDEAL, 1, 0, 0, getJsonForEvent( SignalKConstants.self, env_wind_angleApparent));
 		
-		testScenario(6,UUID.randomUUID().toString(), "vessels.*.environment", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 1, 0, 0, getJsonForEvent( self, env_wind_angleApparent));
-		testScenario(7,UUID.randomUUID().toString(), "vessels.*.environment", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 1, 0, 0, getJsonForEvent( "other", env_wind_angleApparent));
+		testScenario(6,UUID.randomUUID().toString(), "vessels.*.environment", SignalKConstants.FORMAT_DELTA, SignalKConstants.POLICY_IDEAL, 1, 0, 0, getJsonForEvent( SignalKConstants.self, env_wind_angleApparent));
+		testScenario(7,UUID.randomUUID().toString(), "vessels.*.environment", SignalKConstants.FORMAT_DELTA, SignalKConstants.POLICY_IDEAL, 1, 0, 0, getJsonForEvent( "other", env_wind_angleApparent));
 		
-		testScenario(8,UUID.randomUUID().toString(), "vessels.other.environment", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 1, 0, 0, getJsonForEvent( "other", env_wind_angleApparent));
-		testScenario(9,UUID.randomUUID().toString(), "vessels.other.environment", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 0, 0, 0, getJsonForEvent( self, env_wind_angleApparent));
-		ConcurrentSkipListSet<String> event = new ConcurrentSkipListSet<String>(getJsonForEvent(self, nav_courseOverGroundTrue));
+		testScenario(8,UUID.randomUUID().toString(), "vessels.other.environment", SignalKConstants.FORMAT_DELTA, SignalKConstants.POLICY_IDEAL, 1, 0, 0, getJsonForEvent( "other", env_wind_angleApparent));
+		testScenario(9,UUID.randomUUID().toString(), "vessels.other.environment", SignalKConstants.FORMAT_DELTA, SignalKConstants.POLICY_IDEAL, 0, 0, 0, getJsonForEvent( SignalKConstants.self, env_wind_angleApparent));
+		ConcurrentSkipListSet<String> event = new ConcurrentSkipListSet<String>(getJsonForEvent(SignalKConstants.self, nav_courseOverGroundTrue));
 		event.addAll(getJsonForEvent("other", env_wind_angleApparent));
-		testScenario(10,UUID.randomUUID().toString(), "vessels.*.environment", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 1, 0, 0, event);
-		testScenario(11,UUID.randomUUID().toString(), "vessels.*", JsonConstants.FORMAT_DELTA, JsonConstants.POLICY_IDEAL, 1, 0, 0, event);
+		testScenario(10,UUID.randomUUID().toString(), "vessels.*.environment", SignalKConstants.FORMAT_DELTA, SignalKConstants.POLICY_IDEAL, 1, 0, 0, event);
+		testScenario(11,UUID.randomUUID().toString(), "vessels.*", SignalKConstants.FORMAT_DELTA, SignalKConstants.POLICY_IDEAL, 1, 0, 0, event);
 		
 		final CountDownLatch latch = new CountDownLatch(1);
 		latch.await(10, TimeUnit.SECONDS);
@@ -156,7 +140,7 @@ public class FullExportProcessorTest {
 		CamelContext ctx = CamelContextFactory.getInstance();//RouteManagerFactory.getMotuTestInstance().getContext();
 			try{
 				Subscription sub = new Subscription(session, subKey, 10, 1000, format, policy);
-				SubscriptionManagerFactory.getInstance().add("ses"+session, session, Constants.OUTPUT_WS, "127.0.0.1","127.0.0.1");
+				SubscriptionManagerFactory.getInstance().add("ses"+session, session, ConfigConstants.OUTPUT_WS, "127.0.0.1","127.0.0.1");
 				SubscriptionManagerFactory.getInstance().addSubscription(sub);
 				
 				//make a mock Endpoint

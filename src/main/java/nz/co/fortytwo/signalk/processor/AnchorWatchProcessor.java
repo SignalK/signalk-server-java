@@ -30,6 +30,7 @@ import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_anchor_position_l
 import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_anchor_position_longitude;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position_latitude;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position_longitude;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels_dot_self;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels_dot_self_dot;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.zones;
 import mjson.Json;
@@ -67,7 +68,7 @@ public class AnchorWatchProcessor extends SignalkProcessor implements Processor 
 				//workout distance
 				double distance = Util.haversineMeters(lat,lon,anchorLat, anchorLon);
 				logger.debug("Updating anchor distance:"+distance);
-				signalkModel.put(radiusKey,distance,VESSELS_DOT_SELF);
+				signalkModel.put(radiusKey,distance,vessels_dot_self);
 			}
 			
 		} catch (Exception e) {

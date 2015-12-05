@@ -25,14 +25,11 @@
 package nz.co.fortytwo.signalk.server;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import nz.co.fortytwo.signalk.model.SignalKModel;
-import nz.co.fortytwo.signalk.util.Constants;
+import nz.co.fortytwo.signalk.util.ConfigConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Exchange;
@@ -76,7 +73,7 @@ public class SerialPortManager implements Runnable, Processor {
 			serialPortList.removeAll(tmpPortList);
 			
 			String portStr ="/dev/ttyUSB0,/dev/ttyUSB1,/dev/ttyUSB2";
-			portStr = Util.getConfigProperty(Constants.SERIAL_PORTS);
+			portStr = Util.getConfigProperty(ConfigConstants.SERIAL_PORTS);
 			
 			String[] ports = portStr.split(",");
 			for (String port:ports) {
@@ -107,15 +104,15 @@ public class SerialPortManager implements Runnable, Processor {
 					SerialPortReader serial = new SerialPortReader();
 					serial.setProducer(producer);
 					//default 38400, then freeboard.cfg default, then freeboard.cfg per port
-					String baudStr = Util.getConfigProperty(Constants.SERIAL_PORT_BAUD);
+					String baudStr = Util.getConfigProperty(ConfigConstants.SERIAL_PORT_BAUD);
 					if(logger.isDebugEnabled())logger.debug("Comm port default found and connecting at "+baudStr+"...");
 					//get port name
 					String portName = port;
 					if(port.indexOf("/")>0){
 						portName=port.substring(port.lastIndexOf("/")+1);
 					}
-					baudStr = Util.getConfigProperty(Constants.SERIAL_PORT_BAUD+"."+portName);
-					if(logger.isDebugEnabled())logger.debug("Comm port "+Constants.SERIAL_PORT_BAUD+"."+portName+" override="+Util.getConfigProperty(Constants.SERIAL_PORT_BAUD+"."+portName));
+					baudStr = Util.getConfigProperty(ConfigConstants.SERIAL_PORT_BAUD+"."+portName);
+					if(logger.isDebugEnabled())logger.debug("Comm port "+ConfigConstants.SERIAL_PORT_BAUD+"."+portName+" override="+Util.getConfigProperty(ConfigConstants.SERIAL_PORT_BAUD+"."+portName));
 					int baudRate = Integer.valueOf(baudStr);
 					if(logger.isDebugEnabled())logger.debug("Comm port " + port + " found and connecting at "+baudRate+"...");
 					serial.connect(port, baudRate);

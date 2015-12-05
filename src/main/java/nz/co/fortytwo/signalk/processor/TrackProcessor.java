@@ -22,15 +22,25 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import static nz.co.fortytwo.signalk.util.SignalKConstants.*;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.dot;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.key;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.name;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position_latitude;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position_longitude;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.resources_routes;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.routes;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.source;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.timestamp;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.type;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.value;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels_dot_self_dot;
 
 import java.io.IOException;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.handler.JsonStorageHandler;
 import nz.co.fortytwo.signalk.model.SignalKModel;
-import nz.co.fortytwo.signalk.util.Constants;
-import nz.co.fortytwo.signalk.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.ConfigConstants;
 import nz.co.fortytwo.signalk.util.SGImplify;
 import nz.co.fortytwo.signalk.util.SignalKConstants;
 import nz.co.fortytwo.signalk.util.Util;
@@ -67,14 +77,14 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 	public TrackProcessor() throws Exception {
 		storageHandler = new JsonStorageHandler();
 		Json val = Json.object();
-		val.set(JsonConstants.PATH, resources_routes + dot + SignalKConstants.currentTrack);
+		val.set(SignalKConstants.PATH, resources_routes + dot + SignalKConstants.currentTrack);
 		currentTrack = Json.object();
 		val.set(value, currentTrack);
 		currentTrack.set(name, "Current Track");
 		currentTrack.set(type, routes);
 		currentTrack.set(key, SignalKConstants.currentTrack);
 		currentTrack.set("description", "Auto saved current track");
-		currentTrack.set(Constants.MIME_TYPE, Constants.MIME_TYPE_JSON);
+		currentTrack.set(ConfigConstants.MIME_TYPE, ConfigConstants.MIME_TYPE_JSON);
 
 		Json values = Json.array();
 		values.add(val);
@@ -82,13 +92,13 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 		Json update = Json.object();
 		update.set(timestamp, DateTime.now().toDateTimeISO().toString());
 		update.set(source, VESSELS_DOT_SELF);
-		update.set(JsonConstants.VALUES, values);
+		update.set(SignalKConstants.values, values);
 
 		Json updates = Json.array();
 		updates.add(update);
 
-		msg.set(JsonConstants.CONTEXT, VESSELS_DOT_SELF);
-		msg.set(JsonConstants.PUT, updates);
+		msg.set(SignalKConstants.CONTEXT, VESSELS_DOT_SELF);
+		msg.set(SignalKConstants.PUT, updates);
 		// do we have an existing one? we dont want to stomp on it
 		currentTrack.set("uri", "vessels/self/resources/routes/currentTrack.geojson");
 		try {
@@ -103,7 +113,7 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 		Json geoJson = Json.read(geojson);
 		geometry = geoJson.at(FEATURES).at(0).at(GEOMETRY);
 		coords = geometry.at(COORDINATES);
-		currentTrack.set(Constants.PAYLOAD, geoJson);
+		currentTrack.set(ConfigConstants.PAYLOAD, geoJson);
 
 	}
 
@@ -161,10 +171,10 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 		String time = Util.getIsoTimeString();
 		if (logger.isDebugEnabled())
 			logger.debug("Archive Track to File:" + SignalKConstants.currentTrack + time);
-		Json val = lastTrack.at(JsonConstants.PUT).at(0).at(JsonConstants.VALUES).at(0);
+		Json val = lastTrack.at(SignalKConstants.PUT).at(0).at(SignalKConstants.values).at(0);
 
 		time = time.substring(0, time.indexOf("."));
-		val.set(JsonConstants.PATH, resources_routes + dot + SignalKConstants.currentTrack + time);
+		val.set(SignalKConstants.PATH, resources_routes + dot + SignalKConstants.currentTrack + time);
 		val.at(value).set(name, "Track at " + time);
 		currentTrack.set(key, SignalKConstants.currentTrack + time);
 		inProducer.sendBody(lastTrack.toString());

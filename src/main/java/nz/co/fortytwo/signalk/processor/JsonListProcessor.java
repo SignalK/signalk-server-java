@@ -23,16 +23,15 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import static nz.co.fortytwo.signalk.util.JsonConstants.CONTEXT;
-import static nz.co.fortytwo.signalk.util.JsonConstants.LIST;
-import static nz.co.fortytwo.signalk.util.JsonConstants.PATHLIST;
-import static nz.co.fortytwo.signalk.util.JsonConstants.VESSELS;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.CONTEXT;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.LIST;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.PATHLIST;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels;
 
 import java.util.Map;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.handler.JsonListHandler;
-import nz.co.fortytwo.signalk.util.Constants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -64,7 +63,7 @@ public class JsonListProcessor extends SignalkProcessor implements Processor{
 			}
 			Json json = exchange.getIn().getBody(Json.class);
 			//avoid full signalk syntax
-			if(json.has(VESSELS))return;
+			if(json.has(vessels))return;
 			if(json.has(CONTEXT) && (json.has(LIST))){
 				Json pathList = listHandler.handle(json);
 				json.set(PATHLIST, pathList);

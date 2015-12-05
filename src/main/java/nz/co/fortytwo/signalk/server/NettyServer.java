@@ -50,12 +50,10 @@ import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.util.CharsetUtil;
 import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
 
 import java.net.InetSocketAddress;
-import java.util.Properties;
 
-import nz.co.fortytwo.signalk.util.Constants;
+import nz.co.fortytwo.signalk.util.ConfigConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Exchange;
@@ -75,8 +73,8 @@ public class NettyServer implements Processor{
 	private CamelNettyHandler forwardingHandler = null;
 	private CamelUdpNettyHandler udpHandler = null;
 	private Channel udpChannel = null;
-	private int tcpPort = Util.getConfigPropertyInt(Constants.TCP_PORT);
-	private int udpPort = Util.getConfigPropertyInt(Constants.UDP_PORT);
+	private int tcpPort = Util.getConfigPropertyInt(ConfigConstants.TCP_PORT);
+	private int udpPort = Util.getConfigPropertyInt(ConfigConstants.UDP_PORT);
 	private String outputType;
 	/**
 	 * @param configDir

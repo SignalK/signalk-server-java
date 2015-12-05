@@ -22,8 +22,8 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import static nz.co.fortytwo.signalk.util.JsonConstants.FORMAT_DELTA;
-import static nz.co.fortytwo.signalk.util.JsonConstants.SIGNALK_FORMAT;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.FORMAT_DELTA;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_FORMAT;
 
 import java.util.List;
 

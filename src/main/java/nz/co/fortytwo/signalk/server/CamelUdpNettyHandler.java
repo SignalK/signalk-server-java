@@ -31,20 +31,15 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.util.CharsetUtil;
-import io.netty.util.internal.ConcurrentSet;
 
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
 import java.util.UUID;
 
 import mjson.Json;
-import nz.co.fortytwo.signalk.util.Constants;
-import nz.co.fortytwo.signalk.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.ConfigConstants;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.ProducerTemplate;
@@ -122,8 +117,8 @@ public class CamelUdpNettyHandler extends SimpleChannelInboundHandler<DatagramPa
 	private Map<String, Object> getHeaders(String wsSession) {
 		Map<String, Object> headers = new HashMap<>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
-		headers.put(JsonConstants.MSG_SRC_IP, sessionList.get(wsSession).getHostString());
-		headers.put(Constants.OUTPUT_TYPE, outputType);
+		headers.put(SignalKConstants.MSG_SRC_IP, sessionList.get(wsSession).getHostString());
+		headers.put(ConfigConstants.OUTPUT_TYPE, outputType);
 		return headers;
 	}
 

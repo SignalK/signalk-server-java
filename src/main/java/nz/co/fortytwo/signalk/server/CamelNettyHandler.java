@@ -29,19 +29,13 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.AttributeKey;
 
-import java.net.InetAddress;
-import java.net.InterfaceAddress;
-import java.net.NetworkInterface;
-import java.net.SocketAddress;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.UUID;
 
 import mjson.Json;
-import nz.co.fortytwo.signalk.util.Constants;
-import nz.co.fortytwo.signalk.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.ConfigConstants;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.ProducerTemplate;
@@ -106,14 +100,14 @@ public class CamelNettyHandler extends SimpleChannelInboundHandler<String> {
 		Map<String, Object> headers = new HashMap<>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, contextList.inverse().get(ctx));
 		String remoteAddress = ctx.channel().remoteAddress().toString();
-		headers.put(JsonConstants.MSG_SRC_IP, remoteAddress);
-		headers.put(Constants.OUTPUT_TYPE, outputType);
+		headers.put(SignalKConstants.MSG_SRC_IP, remoteAddress);
+		headers.put(ConfigConstants.OUTPUT_TYPE, outputType);
 		String localAddress = ctx.channel().localAddress().toString();
 		
 		if(Util.sameNetwork(localAddress, remoteAddress)){
-			headers.put(JsonConstants.MSG_TYPE, JsonConstants.INTERNAL_IP);
+			headers.put(SignalKConstants.MSG_TYPE, SignalKConstants.INTERNAL_IP);
 		}else{
-			headers.put(JsonConstants.MSG_TYPE, JsonConstants.EXTERNAL_IP);
+			headers.put(SignalKConstants.MSG_TYPE, SignalKConstants.EXTERNAL_IP);
 		}
 		return headers;
 	}

@@ -24,15 +24,12 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import nz.co.fortytwo.signalk.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.camel.component.websocket.WebsocketComponent;
 import org.apache.camel.component.websocket.WebsocketConstants;
-import org.apache.camel.component.websocket.WebsocketEndpoint;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 public class WsSessionProcessor extends SignalkProcessor implements Processor {
@@ -42,8 +39,8 @@ public class WsSessionProcessor extends SignalkProcessor implements Processor {
 	@Override
 	public void process(Exchange exchange) throws Exception {
 		// check the client
-		// exchange.getIn().setHeader(JsonConstants.MSG_TYPE,
-		// JsonConstants.INTERNAL_IP);
+		// exchange.getIn().setHeader(SignalKConstants.MSG_TYPE,
+		// SignalKConstants.INTERNAL_IP);
 		String wsSession = exchange.getIn().getHeader(
 				WebsocketConstants.CONNECTION_KEY, String.class);
 		if (logger.isDebugEnabled()) {
@@ -62,13 +59,13 @@ public class WsSessionProcessor extends SignalkProcessor implements Processor {
 		String remoteAddress = manager.getRemoteIpAddress(wsSession);
 		String localAddress = manager.getLocalIpAddress(wsSession);
 
-		exchange.getIn().setHeader(JsonConstants.MSG_SRC_IP, remoteAddress);
+		exchange.getIn().setHeader(SignalKConstants.MSG_SRC_IP, remoteAddress);
 		if (Util.sameNetwork(localAddress, remoteAddress)) {
-			exchange.getIn().setHeader(JsonConstants.MSG_TYPE,
-					JsonConstants.INTERNAL_IP);
+			exchange.getIn().setHeader(SignalKConstants.MSG_TYPE,
+					SignalKConstants.INTERNAL_IP);
 		} else {
-			exchange.getIn().setHeader(JsonConstants.MSG_TYPE,
-					JsonConstants.EXTERNAL_IP);
+			exchange.getIn().setHeader(SignalKConstants.MSG_TYPE,
+					SignalKConstants.EXTERNAL_IP);
 		}
 
 	}

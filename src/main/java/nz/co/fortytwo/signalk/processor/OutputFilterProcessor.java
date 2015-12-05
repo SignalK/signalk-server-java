@@ -26,7 +26,6 @@ package nz.co.fortytwo.signalk.processor;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
-import nz.co.fortytwo.signalk.util.JsonConstants;
 import nz.co.fortytwo.signalk.util.JsonSerializer;
 import nz.co.fortytwo.signalk.util.SignalKConstants;
 
@@ -54,11 +53,11 @@ public class OutputFilterProcessor extends SignalkProcessor implements Processor
 			Json json = (Json)exchange.getIn().getBody();
 			//remove _arduino
 			try{
-				json.at(JsonConstants.VESSELS).at(JsonConstants.SELF).delAt("_arduino");
+				json.at(SignalKConstants.vessels).at(SignalKConstants.self).delAt("_arduino");
 			}catch(NullPointerException npe){}
 			//remove _config
 			try{
-				json.at(JsonConstants.VESSELS).at(JsonConstants.SELF).delAt("_config");
+				json.at(SignalKConstants.vessels).at(SignalKConstants.self).delAt("_config");
 			}catch(NullPointerException npe){}
 			
 			exchange.getIn().setBody(json.toString());

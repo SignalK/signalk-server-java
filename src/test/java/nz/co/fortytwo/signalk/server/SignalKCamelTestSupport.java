@@ -24,17 +24,16 @@
  */
 package nz.co.fortytwo.signalk.server;
 
-import static nz.co.fortytwo.signalk.util.JsonConstants.FORMAT;
-import static nz.co.fortytwo.signalk.util.JsonConstants.GET;
-import static nz.co.fortytwo.signalk.util.JsonConstants.PATH;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.FORMAT;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.GET;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.PATH;
 
-import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
-import nz.co.fortytwo.signalk.util.Constants;
+import nz.co.fortytwo.signalk.util.ConfigConstants;
 import nz.co.fortytwo.signalk.util.JsonSerializer;
 import nz.co.fortytwo.signalk.util.Util;
 
@@ -64,8 +63,8 @@ public abstract class SignalKCamelTestSupport extends CamelTestSupport {
     
 	public SignalKCamelTestSupport() {
 		super();
-		restPort= Util.getConfigPropertyInt(Constants.REST_PORT);
-		wsPort=Util.getConfigPropertyInt(Constants.WEBSOCKET_PORT);
+		restPort= Util.getConfigPropertyInt(ConfigConstants.REST_PORT);
+		wsPort=Util.getConfigPropertyInt(ConfigConstants.WEBSOCKET_PORT);
 		try {
 			broker = ActiveMqBrokerFactory.newInstance();
 		} catch (Exception e) {

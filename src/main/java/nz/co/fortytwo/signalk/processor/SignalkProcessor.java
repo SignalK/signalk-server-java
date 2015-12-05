@@ -27,18 +27,16 @@ package nz.co.fortytwo.signalk.processor;
 import java.util.NavigableMap;
 import java.util.regex.Pattern;
 
-import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.server.CamelContextFactory;
 import nz.co.fortytwo.signalk.server.RouteManager;
 import nz.co.fortytwo.signalk.server.SubscriptionManager;
 import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
-import nz.co.fortytwo.signalk.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Exchange;
-import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.camel.impl.DefaultProducerTemplate;
@@ -59,8 +57,8 @@ public class SignalkProcessor {
     ProducerTemplate nmeaProducer;
     ProducerTemplate outProducer;
     ProducerTemplate inProducer;
-	public static final String DOT = ".";
-	public static final String VESSELS_DOT_SELF = JsonConstants.VESSELS + ".self";
+	//public static final String DOT = ".";
+	public static final String VESSELS_DOT_SELF = SignalKConstants.vessels + ".self";
     
 	
 	
@@ -113,12 +111,12 @@ public class SignalkProcessor {
 
 	public static String sanitizePath(String newPath) {
 		newPath = newPath.replace('/', '.');
-		if (newPath.startsWith(SignalkProcessor.DOT))
+		if (newPath.startsWith(SignalKConstants.dot))
 			newPath = newPath.substring(1);
 		if (SignalkProcessor.VESSELS_DOT_SELF.equals(newPath)){
-			newPath = JsonConstants.VESSELS + SignalkProcessor.DOT + JsonConstants.SELF;
+			newPath = SignalKConstants.vessels_dot_self;
 		}
-		newPath = newPath.replace(SignalkProcessor.VESSELS_DOT_SELF + SignalkProcessor.DOT, JsonConstants.VESSELS + SignalkProcessor.DOT + JsonConstants.SELF + SignalkProcessor.DOT);
+		newPath = newPath.replace(SignalkProcessor.VESSELS_DOT_SELF + SignalKConstants.dot, SignalKConstants.vessels_dot_self_dot);
 		return newPath;
 	}
 	

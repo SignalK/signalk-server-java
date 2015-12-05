@@ -26,13 +26,8 @@ package nz.co.fortytwo.signalk.server;
 import java.io.File;
 import java.util.Properties;
 
-import javax.jmdns.JmDNS;
-import javax.jmdns.ServiceInfo;
-
-import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
-import nz.co.fortytwo.signalk.util.Constants;
-import nz.co.fortytwo.signalk.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.ConfigConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.activemq.broker.BrokerService;
@@ -72,7 +67,7 @@ public class SignalKServer {
 		// and stop Camel graceful
 		main.enableHangupSupport();
 
-		if (Util.getConfigPropertyBoolean(Constants.HAWTIO_START)) {
+		if (Util.getConfigPropertyBoolean(ConfigConstants.HAWTIO_START)) {
 			server = startHawtio();
 		}
 
@@ -104,18 +99,18 @@ public class SignalKServer {
 
 	private Server startHawtio() throws Exception {
 		// hawtio, auth disabled
-		System.setProperty(Constants.HAWTIO_AUTHENTICATE,
-				Util.getConfigPropertyBoolean(Constants.HAWTIO_AUTHENTICATE).toString());
-		int hawtPort = Util.getConfigPropertyInt(Constants.HAWTIO_PORT);
+		System.setProperty(ConfigConstants.HAWTIO_AUTHENTICATE,
+				Util.getConfigPropertyBoolean(ConfigConstants.HAWTIO_AUTHENTICATE).toString());
+		int hawtPort = Util.getConfigPropertyInt(ConfigConstants.HAWTIO_PORT);
 		Server server = new Server(hawtPort);
 		HandlerCollection handlers = new HandlerCollection();
 		handlers.setServer(server);
 		server.setHandler(handlers);
 		WebAppContext webapp = new WebAppContext();
 		webapp.setServer(server);
-		webapp.setContextPath(Util.getConfigProperty(Constants.HAWTIO_CONTEXT));
+		webapp.setContextPath(Util.getConfigProperty(ConfigConstants.HAWTIO_CONTEXT));
 
-		webapp.setWar(Util.getConfigProperty(Constants.HAWTIO_WAR));
+		webapp.setWar(Util.getConfigProperty(ConfigConstants.HAWTIO_WAR));
 		webapp.setParentLoaderPriority(true);
 		webapp.setLogUrlOnStart(true);
 		// lets set a temporary directory so jetty doesn't bork if some process
@@ -148,7 +143,7 @@ public class SignalKServer {
 		}
 		// do we have a storage dir?
 		File storageDir = new File(
-				Util.getConfigProperty(Constants.STORAGE_ROOT));
+				Util.getConfigProperty(ConfigConstants.STORAGE_ROOT));
 		if (!storageDir.exists()) {
 			storageDir.mkdirs();
 		}

@@ -22,28 +22,20 @@
  */
 package nz.co.fortytwo.signalk.server;
 
-import static nz.co.fortytwo.signalk.util.JsonConstants.*;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.FORMAT_DELTA;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_FORMAT;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_courseOverGroundTrue;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position_latitude;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels_dot_self_dot;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.NavigableMap;
-import java.util.NavigableSet;
-import java.util.SortedMap;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
-import nz.co.fortytwo.signalk.model.impl.SignalKModelImpl;
-import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
-import nz.co.fortytwo.signalk.processor.WindProcessor;
-import nz.co.fortytwo.signalk.util.JsonConstants;
 import nz.co.fortytwo.signalk.util.JsonSerializer;
 import nz.co.fortytwo.signalk.util.SignalKConstants;
-import nz.co.fortytwo.signalk.util.Util;
 import nz.co.fortytwo.signalk.util.TestHelper;
 
 import org.apache.camel.Exchange;
@@ -55,8 +47,6 @@ import org.apache.camel.impl.DefaultProducerTemplate;
 import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.google.common.eventbus.EventBus;
 
 public class SignalKGetOutputTest extends SignalKCamelTestSupport {
 
@@ -100,7 +90,7 @@ public class SignalKGetOutputTest extends SignalKCamelTestSupport {
 		logger.debug("Lat :" + signalkModel.getValue(SignalKConstants.vessels_dot_self_dot+ nav_position_latitude));
 
 		// request list
-		Json sub = getGet("vessels." + SELF, "navigation.position.*", JsonConstants.FORMAT_DELTA);
+		Json sub = getGet("vessels." + SignalKConstants.self, "navigation.position.*", SignalKConstants.FORMAT_DELTA);
 		template.sendBodyAndHeader(DIRECT_INPUT, sub.toString(), WebsocketConstants.CONNECTION_KEY, wsSession);
 		output.assertIsSatisfied();
 		

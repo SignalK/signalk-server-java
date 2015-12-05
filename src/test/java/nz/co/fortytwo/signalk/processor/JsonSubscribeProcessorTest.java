@@ -24,10 +24,10 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import static nz.co.fortytwo.signalk.util.JsonConstants.FORMAT_DELTA;
-import static nz.co.fortytwo.signalk.util.JsonConstants.POLICY_FIXED;
-import static nz.co.fortytwo.signalk.util.JsonConstants.SELF;
-import static org.junit.Assert.*;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.FORMAT_DELTA;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.POLICY_FIXED;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.util.HashMap;
 import java.util.List;
@@ -39,7 +39,8 @@ import nz.co.fortytwo.signalk.server.RouteManagerFactory;
 import nz.co.fortytwo.signalk.server.Subscription;
 import nz.co.fortytwo.signalk.server.SubscriptionManager;
 import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
-import nz.co.fortytwo.signalk.util.Constants;
+import nz.co.fortytwo.signalk.util.ConfigConstants;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
 
 import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.camel.model.RouteDefinition;
@@ -69,11 +70,11 @@ public class JsonSubscribeProcessorTest {
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
 		HashMap<String, Object> headers = new HashMap<String, Object>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
-		subscribe.handle(getJson("vessels." + SELF,"navigation", 1000,0,FORMAT_DELTA, POLICY_FIXED), headers);
+		subscribe.handle(getJson("vessels." + SignalKConstants.self,"navigation", 1000,0,FORMAT_DELTA, POLICY_FIXED), headers);
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(1, subs.size());
 		Subscription s = subs.get(0);
-		assertEquals("Subscription [wsSession="+wsSession+", path=vessels." + SELF + ".navigation, period=1000, format=delta, active=true, destination=null]", s.toString());
+		assertEquals("Subscription [wsSession="+wsSession+", path=vessels." + SignalKConstants.self + ".navigation, period=1000, format=delta, active=true, destination=null]", s.toString());
 	}
 
 	/**
@@ -128,11 +129,11 @@ public class JsonSubscribeProcessorTest {
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
 		HashMap<String, Object> headers = new HashMap<String, Object>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
-		subscribe.handle(getJson("vessels." + SELF,"navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED),headers);
+		subscribe.handle(getJson("vessels." + SignalKConstants.self,"navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED),headers);
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(1, subs.size());
 		Subscription s = subs.get(0);
-		assertEquals("Subscription [wsSession="+wsSession+", path=vessels." + SELF + ".navigation, period=500, format=delta, active=true, destination=null]", s.toString());
+		assertEquals("Subscription [wsSession="+wsSession+", path=vessels." + SignalKConstants.self + ".navigation, period=500, format=delta, active=true, destination=null]", s.toString());
 		manager.removeSessionId(wsSession);
 		subs = manager.getSubscriptions(wsSession);
 		assertEquals(0, subs.size());
@@ -146,11 +147,11 @@ public class JsonSubscribeProcessorTest {
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
 		HashMap<String, Object> headers = new HashMap<String, Object>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
-		subscribe.handle(getJson("vessels." + SELF,"navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED),headers);
+		subscribe.handle(getJson("vessels." + SignalKConstants.self,"navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED),headers);
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(1, subs.size());
 		Subscription s = subs.get(0);
-		assertEquals("Subscription [wsSession="+wsSession+", path=vessels." + SELF + ".navigation, period=500, format=delta, active=true, destination=null]", s.toString());
+		assertEquals("Subscription [wsSession="+wsSession+", path=vessels." + SignalKConstants.self + ".navigation, period=500, format=delta, active=true, destination=null]", s.toString());
 	}
 
 	@Test
@@ -159,7 +160,7 @@ public class JsonSubscribeProcessorTest {
 		String wsSession = UUID.randomUUID().toString();
 		manager.removeSessionId(wsSession);
 		// now add webSocket
-		manager.add(wsSession, wsSession,Constants.OUTPUT_WS,"10.1.1.100","10.1.1.128");
+		manager.add(wsSession, wsSession,ConfigConstants.OUTPUT_WS,"10.1.1.100","10.1.1.128");
 		assertEquals("10.1.1.128", manager.getRemoteIpAddress(wsSession));
 		assertEquals("10.1.1.100", manager.getLocalIpAddress(wsSession));
 		manager.removeSessionId(wsSession);
@@ -172,15 +173,15 @@ public class JsonSubscribeProcessorTest {
 		String wsSession = UUID.randomUUID().toString();
 		manager.removeSessionId(wsSession);
 		// now add webSocket
-		manager.add(wsSession, wsSession,Constants.OUTPUT_WS,"127.0.0.1","127.0.0.1");
+		manager.add(wsSession, wsSession,ConfigConstants.OUTPUT_WS,"127.0.0.1","127.0.0.1");
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
 		HashMap<String, Object> headers = new HashMap<String, Object>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
-		subscribe.handle(getJson("vessels." + SELF,"navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED),headers);
+		subscribe.handle(getJson("vessels." + SignalKConstants.self,"navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED),headers);
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(1, subs.size());
 		Subscription s = subs.get(0);
-		assertEquals("Subscription [wsSession="+wsSession+", path=vessels." + SELF + ".navigation, period=500, format=delta, active=true, destination=null]", s.toString());
+		assertEquals("Subscription [wsSession="+wsSession+", path=vessels." + SignalKConstants.self + ".navigation, period=500, format=delta, active=true, destination=null]", s.toString());
 		// see if its created a route
 		RouteManager routeManager = RouteManagerFactory.getInstance();
 		for (RouteDefinition route : routeManager.getRouteCollection().getRoutes()) {
@@ -202,12 +203,12 @@ public class JsonSubscribeProcessorTest {
 		manager.removeSessionId(wsSession);
 		int routes = routeManager.getRouteCollection().getRoutes().size();
 		// now add webSocket
-		manager.add(wsSession, wsSession,Constants.OUTPUT_WS,"127.0.0.1","127.0.0.1");
+		manager.add(wsSession, wsSession,ConfigConstants.OUTPUT_WS,"127.0.0.1","127.0.0.1");
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
 		HashMap<String, Object> headers = new HashMap<String, Object>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
-		subscribe.handle(getJson("vessels." + SELF,"navigation", 500,0,FORMAT_DELTA, POLICY_FIXED), headers);
-		subscribe.handle(getJson("vessels." + SELF,"environment", 500, 0,FORMAT_DELTA, POLICY_FIXED),headers);
+		subscribe.handle(getJson("vessels." + SignalKConstants.self,"navigation", 500,0,FORMAT_DELTA, POLICY_FIXED), headers);
+		subscribe.handle(getJson("vessels." + SignalKConstants.self,"environment", 500, 0,FORMAT_DELTA, POLICY_FIXED),headers);
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(2, subs.size());
 		// see if its created a route
@@ -225,12 +226,12 @@ public class JsonSubscribeProcessorTest {
 		manager.removeSessionId(wsSession);
 		int routes = routeManager.getRouteCollection().getRoutes().size();
 		// now add webSocket
-		manager.add(wsSession, wsSession,Constants.OUTPUT_WS,"127.0.0.1","127.0.0.1");
+		manager.add(wsSession, wsSession,ConfigConstants.OUTPUT_WS,"127.0.0.1","127.0.0.1");
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
 		HashMap<String, Object> headers = new HashMap<String, Object>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
-		subscribe.handle(getJson("vessels." + SELF,"navigation", 500,0,FORMAT_DELTA, POLICY_FIXED), headers);
-		subscribe.handle(getJson("vessels." + SELF,"environment", 1500, 0,FORMAT_DELTA, POLICY_FIXED),headers);
+		subscribe.handle(getJson("vessels." + SignalKConstants.self,"navigation", 500,0,FORMAT_DELTA, POLICY_FIXED), headers);
+		subscribe.handle(getJson("vessels." + SignalKConstants.self,"environment", 1500, 0,FORMAT_DELTA, POLICY_FIXED),headers);
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(2, subs.size());
 		// see if its created a route
@@ -246,12 +247,12 @@ public class JsonSubscribeProcessorTest {
 		String wsSession = UUID.randomUUID().toString();
 		manager.removeSessionId(wsSession);
 		// now add webSocket
-		manager.add(wsSession, wsSession,Constants.OUTPUT_WS,"127.0.0.1","127.0.0.1");
+		manager.add(wsSession, wsSession,ConfigConstants.OUTPUT_WS,"127.0.0.1","127.0.0.1");
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
 		HashMap<String, Object> headers = new HashMap<String, Object>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
-		subscribe.handle(getJson("vessels." + SELF,"navigation", 500,0,FORMAT_DELTA, POLICY_FIXED), headers);
-		subscribe.handle(getJson("vessels." + SELF,"environment", 1500, 0,FORMAT_DELTA, POLICY_FIXED),headers);
+		subscribe.handle(getJson("vessels." + SignalKConstants.self,"navigation", 500,0,FORMAT_DELTA, POLICY_FIXED), headers);
+		subscribe.handle(getJson("vessels." + SignalKConstants.self,"environment", 1500, 0,FORMAT_DELTA, POLICY_FIXED),headers);
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(2, subs.size());
 		// see if its created a route
@@ -277,12 +278,12 @@ public class JsonSubscribeProcessorTest {
 		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
 		manager.removeSessionId(wsSession);
 		// now add webSocket
-		manager.add(wsSession, wsSession,Constants.OUTPUT_WS,"127.0.0.1","127.0.0.1");
+		manager.add(wsSession, wsSession,ConfigConstants.OUTPUT_WS,"127.0.0.1","127.0.0.1");
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
 		HashMap<String, Object> headers = new HashMap<String, Object>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
-		subscribe.handle(getJson("vessels." + SELF,"navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED),headers);
-		subscribe.handle(getJson("vessels." + SELF, "environment", 1000, 0,FORMAT_DELTA, POLICY_FIXED),headers);
+		subscribe.handle(getJson("vessels." + SignalKConstants.self,"navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED),headers);
+		subscribe.handle(getJson("vessels." + SignalKConstants.self, "environment", 1000, 0,FORMAT_DELTA, POLICY_FIXED),headers);
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(2, subs.size());
 		// see if its created a route
@@ -307,12 +308,12 @@ public class JsonSubscribeProcessorTest {
 		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
 		manager.removeSessionId(wsSession);
 		// now add webSocket
-		manager.add(wsSession, wsSession,Constants.OUTPUT_WS,"127.0.0.1","127.0.0.1");
+		manager.add(wsSession, wsSession,ConfigConstants.OUTPUT_WS,"127.0.0.1","127.0.0.1");
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
 		HashMap<String, Object> headers = new HashMap<String, Object>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
-		subscribe.handle(getJson("vessels." + SELF,"navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED),headers);
-		subscribe.handle(getJson("vessels." + SELF,"environment", 500, 0,FORMAT_DELTA, POLICY_FIXED),headers);
+		subscribe.handle(getJson("vessels." + SignalKConstants.self,"navigation", 500, 0,FORMAT_DELTA, POLICY_FIXED),headers);
+		subscribe.handle(getJson("vessels." + SignalKConstants.self,"environment", 500, 0,FORMAT_DELTA, POLICY_FIXED),headers);
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(2, subs.size());
 		// see if its created a route
@@ -336,12 +337,12 @@ public class JsonSubscribeProcessorTest {
 		String wsSession = UUID.randomUUID().toString();
 		manager.removeSessionId(wsSession);
 		// now add webSocket
-		manager.add(wsSession, wsSession,Constants.OUTPUT_WS,"127.0.0.1","127.0.0.1");
+		manager.add(wsSession, wsSession,ConfigConstants.OUTPUT_WS,"127.0.0.1","127.0.0.1");
 		
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
 		HashMap<String, Object> headers = new HashMap<String, Object>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
-		Json sub = getJson("vess." + SELF,"navigation",1000,0,FORMAT_DELTA, POLICY_FIXED);
+		Json sub = getJson("vess." + SignalKConstants.self,"navigation",1000,0,FORMAT_DELTA, POLICY_FIXED);
 		Json json = subscribe.handle(sub, headers);
 		assertEquals(sub, json);
 		List<Subscription> subs = manager.getSubscriptions(wsSession);

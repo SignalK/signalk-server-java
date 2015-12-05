@@ -25,9 +25,10 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import nz.co.fortytwo.signalk.server.Subscription;
-import nz.co.fortytwo.signalk.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
 import org.junit.After;
@@ -53,20 +54,20 @@ public class SubscriptionTest {
 
 	@Test
 	public void shouldBeSubscribed() {
-		Subscription sub = new Subscription("wsSession", "vessels.self.navigation", 10, 1000, JsonConstants.FORMAT_FULL, JsonConstants.POLICY_FIXED);
+		Subscription sub = new Subscription("wsSession", "vessels.self.navigation", 10, 1000, SignalKConstants.FORMAT_FULL, SignalKConstants.POLICY_FIXED);
 		assertTrue(sub.isSubscribed("vessels.motu.navigation.courseOverGroundTrue"));
 	}
 	
 	@Test
 	public void shouldBeWildcardSubscribed() {
-		Subscription sub = new Subscription("wsSession", "vessels.*.navigation", 10, 1000, JsonConstants.FORMAT_FULL, JsonConstants.POLICY_FIXED);
+		Subscription sub = new Subscription("wsSession", "vessels.*.navigation", 10, 1000, SignalKConstants.FORMAT_FULL, SignalKConstants.POLICY_FIXED);
 		assertTrue(sub.isSubscribed("vessels.motu.navigation.courseOverGroundTrue"));
 		assertTrue(sub.isSubscribed("vessels.notMotu.navigation.courseOverGroundTrue"));
 	}
 	
 	@Test
 	public void shouldBeCharWildcardSubscribed() {
-		Subscription sub = new Subscription("wsSession", "vessels.motu?.navigation", 10, 1000, JsonConstants.FORMAT_FULL, JsonConstants.POLICY_FIXED);
+		Subscription sub = new Subscription("wsSession", "vessels.motu?.navigation", 10, 1000, SignalKConstants.FORMAT_FULL, SignalKConstants.POLICY_FIXED);
 		assertFalse(sub.isSubscribed("vessels.motu.navigation.courseOverGroundTrue"));
 		assertFalse(sub.isSubscribed("vessels.Motu.navigation.courseOverGroundTrue"));
 		assertTrue(sub.isSubscribed("vessels.motux.navigation.courseOverGroundTrue"));
@@ -74,7 +75,7 @@ public class SubscriptionTest {
 	
 	@Test
 	public void shouldBePartialWildcardSubscribed() {
-		Subscription sub = new Subscription("wsSession", "vessels.*.navigation.course*True", 10, 1000, JsonConstants.FORMAT_FULL, JsonConstants.POLICY_FIXED);
+		Subscription sub = new Subscription("wsSession", "vessels.*.navigation.course*True", 10, 1000, SignalKConstants.FORMAT_FULL, SignalKConstants.POLICY_FIXED);
 		assertTrue(sub.isSubscribed("vessels.motu.navigation.courseOverGroundTrue"));
 		assertTrue(sub.isSubscribed("vessels.notMotu.navigation.courseOverWaterTrue"));
 		assertFalse(sub.isSubscribed("vessels.notMotu.navigation.courseOverWaterApparent"));
@@ -82,26 +83,26 @@ public class SubscriptionTest {
 	
 	@Test
 	public void shouldNotBeSubscribed() {
-		Subscription sub = new Subscription("wsSession", "vessels.self.navigation", 10, 1000, JsonConstants.FORMAT_FULL, JsonConstants.POLICY_FIXED);
+		Subscription sub = new Subscription("wsSession", "vessels.self.navigation", 10, 1000, SignalKConstants.FORMAT_FULL, SignalKConstants.POLICY_FIXED);
 		
 		assertFalse(sub.isSubscribed("vessels.notMotu.navigation.courseOverGroundTrue"));
 	}
 	@Test
 	public void shouldNotBeWildcardSubscribed() {
-		Subscription sub = new Subscription("wsSession", "vessels.*.navigation", 10, 1000, JsonConstants.FORMAT_FULL, JsonConstants.POLICY_FIXED);
+		Subscription sub = new Subscription("wsSession", "vessels.*.navigation", 10, 1000, SignalKConstants.FORMAT_FULL, SignalKConstants.POLICY_FIXED);
 		assertTrue(sub.isSubscribed("vessels.notMotu.navigation.courseOverGroundTrue"));
 		assertFalse(sub.isSubscribed("vessels.notMotu.environment.wind"));
 	}
 	@Test
 	public void shouldNotBePartialWildcardSubscribed() {
-		Subscription sub = new Subscription("wsSession", "vessels.*.navigation.course*", 10, 1000, JsonConstants.FORMAT_FULL, JsonConstants.POLICY_FIXED);
+		Subscription sub = new Subscription("wsSession", "vessels.*.navigation.course*", 10, 1000, SignalKConstants.FORMAT_FULL, SignalKConstants.POLICY_FIXED);
 		assertTrue(sub.isSubscribed("vessels.notMotu.navigation.courseOverGroundTrue"));
 		assertFalse(sub.isSubscribed("vessels.notMotu.navigation.position"));
 	}
 	
 	@Test
 	public void shouldNotBeSubscribedToParents() {
-		Subscription sub = new Subscription("wsSession", "vessels.*.navigation.course*", 10, 1000, JsonConstants.FORMAT_FULL, JsonConstants.POLICY_FIXED);
+		Subscription sub = new Subscription("wsSession", "vessels.*.navigation.course*", 10, 1000, SignalKConstants.FORMAT_FULL, SignalKConstants.POLICY_FIXED);
 		assertFalse(sub.isSubscribed("vessels.notMotu.navigation"));
 		assertFalse(sub.isSubscribed("vessels.notMotu"));
 	}

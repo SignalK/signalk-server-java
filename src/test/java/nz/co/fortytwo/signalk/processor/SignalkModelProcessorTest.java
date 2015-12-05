@@ -23,10 +23,11 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import static nz.co.fortytwo.signalk.util.JsonConstants.SELF;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.dot;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_courseOverGroundTrue;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.self;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.source;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.timestamp;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.value;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels_dot_self_dot;
 
@@ -36,9 +37,8 @@ import java.util.NavigableMap;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.server.RouteManagerFactory;
-import nz.co.fortytwo.signalk.util.JsonConstants;
 import nz.co.fortytwo.signalk.util.JsonSerializer;
-import nz.co.fortytwo.signalk.util.Util;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
@@ -68,27 +68,31 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 	@Test
 	public void shouldMerge() throws IOException {
 		SignalKModel signalkModel=SignalKModelFactory.getInstance();
-		signalkModel.put(vessels+dot+self, null);
+		signalkModel.put(vessels+dot+SignalKConstants.self, null);
 		signalkModel.put(vessels+dot+"366951720", null);
 		SignalkModelProcessor p = new SignalkModelProcessor();
 		assertEquals(null,signalkModel.get(vessels));
 		
-		JsonSerializer ser = new JsonSerializer();
-		NavigableMap<String, Object> tmp = ser.read("{\"vessels\":{\""+SELF+"\":{\"navigation\":{\"courseOverGroundTrue\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":172.9},\"speedOverGround\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":3.85}}}}}");
+		SignalKModel basic=SignalKModelFactory.getCleanInstance();
 		
-		p.handle(SignalKModelFactory.getWrappedInstance(tmp));
+		basic.put(vessels_dot_self_dot+nav_courseOverGroundTrue+dot+source,"unknown");
+		basic.put(vessels_dot_self_dot+nav_courseOverGroundTrue+dot+timestamp,"2015-03-16T03:31:22.332Z");
+		basic.put(vessels_dot_self_dot+nav_courseOverGroundTrue+dot+value,172.9d);
+		
+		p.handle(basic);
 		double cog = (double) signalkModel.getValue(vessels_dot_self_dot+nav_courseOverGroundTrue);
 		assertEquals(172.9,cog, 0.001);
 	}
 	@Test
 	public void shouldNotMergeOtherJson() throws IOException {
 		SignalKModel signalkModel=SignalKModelFactory.getInstance();
-		signalkModel.put(vessels+dot+self, null);
+		signalkModel.put(vessels+dot+SignalKConstants.self, null);
 		signalkModel.put(vessels+dot+"366951720", null);
 		SignalkModelProcessor p = new SignalkModelProcessor();
 		assertEquals(null,signalkModel.get(vessels));
 		JsonSerializer ser = new JsonSerializer();
-		NavigableMap<String, Object> tmp = ser.read("{\"invalid\":{\""+SELF+"\":{\"navigation\":{\"courseOverGroundTrue\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":172.9},\"speedOverGround\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":3.85}}}}}");
+		NavigableMap<String, Object> tmp = ser.read("{\"invalid\":{\""+SignalKConstants.self+"\":{\"navigation\":{\"courseOverGroundTrue\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":172.9},\"speedOverGround\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":3.85}}}}}");
+		
 		p.handle(SignalKModelFactory.getWrappedInstance(tmp));
 		
 		Double cog = (Double) signalkModel.getValue(vessels_dot_self_dot+nav_courseOverGroundTrue);
@@ -99,7 +103,7 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 	@Test
 	public void shouldNotMergeNmea() throws Exception {
 		SignalKModel signalkModel=SignalKModelFactory.getInstance();
-		signalkModel.put(vessels+dot+self, null);
+		signalkModel.put(vessels+dot+SignalKConstants.self, null);
 		signalkModel.put(vessels+dot+"366951720", null);
 		SignalkModelProcessor p = new SignalkModelProcessor();
 		assertEquals(null,signalkModel.get(vessels));
@@ -114,7 +118,7 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 	@Test
 	public void shouldNotMergeAis() throws Exception {
 		SignalKModel signalkModel=SignalKModelFactory.getInstance();
-		signalkModel.put(vessels+dot+self, null);
+		signalkModel.put(vessels+dot+SignalKConstants.self, null);
 		signalkModel.put(vessels+dot+"366951720", null);
 		SignalkModelProcessor p = new SignalkModelProcessor();
 		assertEquals(null,signalkModel.get(vessels));
@@ -129,7 +133,7 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 	@Test
 	public void shouldHandleNull() throws Exception{
 		SignalKModel signalkModel=SignalKModelFactory.getInstance();
-		signalkModel.put(vessels+dot+self, null);
+		signalkModel.put(vessels+dot+SignalKConstants.self, null);
 		signalkModel.put(vessels+dot+"366951720", null);
 		SignalkModelProcessor p = new SignalkModelProcessor();
 		assertEquals(null,signalkModel.get(vessels));

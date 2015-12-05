@@ -22,35 +22,14 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import static nz.co.fortytwo.signalk.util.JsonConstants.*;
-
-import java.io.File;
-import java.io.IOException;
-import java.text.NumberFormat;
-import java.text.ParseException;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Pattern;
-
+import static nz.co.fortytwo.signalk.util.SignalKConstants.N2K_MESSAGE;
 import mjson.Json;
 import nz.co.fortytwo.signalk.handler.N2KHandler;
 import nz.co.fortytwo.signalk.model.SignalKModel;
-import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
-
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.DocumentContext;
-import com.jayway.jsonpath.JsonPath;
 
 /**
  * Updates the convert n2k json to signalk tree

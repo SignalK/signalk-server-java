@@ -24,7 +24,7 @@
  */
 package nz.co.fortytwo.signalk.server;
 
-import static nz.co.fortytwo.signalk.util.JsonConstants.VESSELS;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels;
 import io.netty.util.internal.ConcurrentSet;
 
 import java.util.ArrayList;
@@ -190,7 +190,7 @@ public class Subscription {
 	 */
 	public String getVesselPath() {
 		if (vesselPath == null) {
-			if (!path.startsWith(VESSELS))
+			if (!path.startsWith(vessels))
 				return null;
 			int pos = path.indexOf(".") + 1;
 			// could be just 'vessels'

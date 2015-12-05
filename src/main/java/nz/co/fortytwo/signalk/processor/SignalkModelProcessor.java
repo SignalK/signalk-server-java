@@ -25,15 +25,14 @@ package nz.co.fortytwo.signalk.processor;
 
 import java.io.IOException;
 
+import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
-import nz.co.fortytwo.signalk.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.log4j.Logger;
-
-import mjson.Json;
 
 /**
  * Updates the signalkModel with the current json
@@ -72,7 +71,7 @@ public class SignalkModelProcessor extends SignalkProcessor implements Processor
 			logger.debug("SignalkModelProcessor  updating " + node);
 
 		signalkModel.putAll(node.getFullData());
-		if(node.getSubMap(JsonConstants.CONFIG)!=null){
+		if(node.getSubMap(SignalKConstants.CONFIG)!=null){
 			SignalKModelFactory.saveConfig(signalkModel);
 		}
 		if (logger.isDebugEnabled())

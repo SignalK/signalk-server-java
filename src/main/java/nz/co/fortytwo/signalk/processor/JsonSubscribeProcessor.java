@@ -23,24 +23,24 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import static nz.co.fortytwo.signalk.util.JsonConstants.CONTEXT;
-import static nz.co.fortytwo.signalk.util.JsonConstants.FORMAT;
-import static nz.co.fortytwo.signalk.util.JsonConstants.FORMAT_DELTA;
-import static nz.co.fortytwo.signalk.util.JsonConstants.MIN_PERIOD;
-import static nz.co.fortytwo.signalk.util.JsonConstants.PATH;
-import static nz.co.fortytwo.signalk.util.JsonConstants.PERIOD;
-import static nz.co.fortytwo.signalk.util.JsonConstants.POLICY;
-import static nz.co.fortytwo.signalk.util.JsonConstants.POLICY_FIXED;
-import static nz.co.fortytwo.signalk.util.JsonConstants.SUBSCRIBE;
-import static nz.co.fortytwo.signalk.util.JsonConstants.UNSUBSCRIBE;
-import static nz.co.fortytwo.signalk.util.JsonConstants.VESSELS;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.CONTEXT;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.FORMAT;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.FORMAT_DELTA;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.MIN_PERIOD;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.PATH;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.PERIOD;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.POLICY;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.POLICY_FIXED;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.SUBSCRIBE;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.UNSUBSCRIBE;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels;
 
 import java.util.Map;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.server.Subscription;
 import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
-import nz.co.fortytwo.signalk.util.Constants;
+import nz.co.fortytwo.signalk.util.ConfigConstants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -69,7 +69,7 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
 			}
 			Json json = exchange.getIn().getBody(Json.class);
 			//avoid full signalk syntax
-			if(json.has(VESSELS))return;
+			if(json.has(vessels))return;
 			if(json.has(CONTEXT) && (json.has(SUBSCRIBE) || json.has(UNSUBSCRIBE))){
 				json = handle(json, exchange.getIn().getHeaders());
 				exchange.getIn().setBody(json);
@@ -120,8 +120,8 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
 			//MQTT and STOMP wont have created proper session links
 			if(node.has(WebsocketConstants.CONNECTION_KEY)){
 				String wsSession = node.at(WebsocketConstants.CONNECTION_KEY).asString();
-				if(node.has(Constants.OUTPUT_TYPE)){
-					String outputType = node.at(Constants.OUTPUT_TYPE).asString();
+				if(node.has(ConfigConstants.OUTPUT_TYPE)){
+					String outputType = node.at(ConfigConstants.OUTPUT_TYPE).asString();
 					SubscriptionManagerFactory.getInstance().add(wsSession, wsSession, outputType,"127.0.0.1","127.0.0.1");
 				}
 			}
@@ -179,8 +179,8 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
 		Subscription sub = new Subscription(wsSession, path, period, minPeriod, format, policy);
 		
 		//STOMP, MQTT
-		if(headers.containsKey(Constants.DESTINATION)){
-			sub.setDestination( headers.get(Constants.DESTINATION).toString());
+		if(headers.containsKey(ConfigConstants.DESTINATION)){
+			sub.setDestination( headers.get(ConfigConstants.DESTINATION).toString());
 		}
 		
 		//sub.setActive(false);

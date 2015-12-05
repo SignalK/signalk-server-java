@@ -23,11 +23,10 @@
  */
 package nz.co.fortytwo.signalk.server;
 
-import static nz.co.fortytwo.signalk.util.JsonConstants.SELF;
-import static nz.co.fortytwo.signalk.util.JsonConstants.SIGNALK_API;
-import static nz.co.fortytwo.signalk.util.JsonConstants.SIGNALK_AUTH;
-import static nz.co.fortytwo.signalk.util.JsonConstants.VESSELS;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_API;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_AUTH;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.nav;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,7 +34,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import mjson.Json;
-import nz.co.fortytwo.signalk.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
 
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
@@ -58,7 +57,7 @@ public class RestApiTest extends SignalKCamelTestSupport {
 	public RestApiTest(){
 		try {
 			jsonDiff = FileUtils.readFileToString(new File("src/test/resources/samples/testUpdate.json"));
-			jsonDiff=jsonDiff.replaceAll("SELF", SELF);
+			jsonDiff=jsonDiff.replaceAll("self", SignalKConstants.self);
 		} catch (IOException e) {
 			logger.error(e);
 			fail();
@@ -79,22 +78,22 @@ public class RestApiTest extends SignalKCamelTestSupport {
         Response r1 = c.prepareGet("http://localhost:"+restPort+SIGNALK_AUTH+"/demo/pass").execute().get();
         //latch2.await(3, TimeUnit.SECONDS);
         assertEquals(200, r1.getStatusCode());
-        Response reponse = c.prepareGet("http://localhost:"+restPort+SIGNALK_API+"/vessels/"+SELF).setCookies(r1.getCookies()).execute().get();
+        Response reponse = c.prepareGet("http://localhost:"+restPort+SIGNALK_API+"/vessels/"+SignalKConstants.self).setCookies(r1.getCookies()).execute().get();
         //latch.await(3, TimeUnit.SECONDS);
         logger.debug(reponse.getResponseBody());
         assertEquals(200, reponse.getStatusCode());
         
         Json resp = Json.read(reponse.getResponseBody());
-        assertEquals(172.9 , resp.at(VESSELS).at(SELF).at(nav).at("courseOverGroundTrue").at("value").asFloat(),0.001);
+        assertEquals(172.9 , resp.at(vessels).at(SignalKConstants.self).at(nav).at("courseOverGroundTrue").at("value").asFloat(),0.001);
      
-        reponse = c.prepareGet("http://localhost:"+restPort+SIGNALK_API+"/vessels/"+SELF+"/navigation").setCookies(r1.getCookies()).execute().get();
+        reponse = c.prepareGet("http://localhost:"+restPort+SIGNALK_API+"/vessels/"+SignalKConstants.self+"/navigation").setCookies(r1.getCookies()).execute().get();
         //latch.await(3, TimeUnit.SECONDS);
         logger.debug(reponse.getResponseBody());
         assertEquals(200, reponse.getStatusCode());
         			//{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"navigation.courseOverGroundTrue\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}],\"context\":\"vessels.self\"}
         
         resp = Json.read(reponse.getResponseBody());
-        assertEquals(172.9 , resp.at(VESSELS).at(SELF).at(nav).at("courseOverGroundTrue").at("value").asFloat(),0.001);
+        assertEquals(172.9 , resp.at(vessels).at(SignalKConstants.self).at(nav).at("courseOverGroundTrue").at("value").asFloat(),0.001);
         c.close();
     }
 
@@ -111,15 +110,15 @@ public class RestApiTest extends SignalKCamelTestSupport {
         Response r1 = c.prepareGet("http://localhost:"+restPort+SIGNALK_AUTH+"/demo/pass").execute().get();
         //latch2.await(3, TimeUnit.SECONDS);
         assertEquals(200, r1.getStatusCode());
-        Response reponse = c.prepareGet("http://localhost:"+restPort+SIGNALK_API+"/list/vessels/"+SELF+"/*").setCookies(r1.getCookies()).execute().get();
+        Response reponse = c.prepareGet("http://localhost:"+restPort+SIGNALK_API+"/list/vessels/"+SignalKConstants.self+"/*").setCookies(r1.getCookies()).execute().get();
         //latch.await(3, TimeUnit.SECONDS);
         logger.debug(reponse.getResponseBody());
         assertEquals(200, reponse.getStatusCode());
         
         Json resp = Json.read(reponse.getResponseBody());
-        Json list = resp.at(JsonConstants.PATHLIST);
+        Json list = resp.at(SignalKConstants.PATHLIST);
         assertTrue(list.isArray());
-        assertTrue(list.asJsonList().get(0).asString().startsWith("vessels."+SELF));
+        assertTrue(list.asJsonList().get(0).asString().startsWith("vessels."+SignalKConstants.self));
      
         reponse = c.prepareGet("http://localhost:"+restPort+SIGNALK_API+"/list/vessels/*/navigation/*").setCookies(r1.getCookies()).execute().get();
         //latch.await(3, TimeUnit.SECONDS);
@@ -128,7 +127,7 @@ public class RestApiTest extends SignalKCamelTestSupport {
         			//{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"navigation.courseOverGroundTrue\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}],\"context\":\"vessels.self\"}
         
         resp = Json.read(reponse.getResponseBody());
-        list = resp.at(JsonConstants.PATHLIST);
+        list = resp.at(SignalKConstants.PATHLIST);
         assertTrue(list.isArray());
         assertTrue(list.asJsonList().get(0).asString().startsWith("vessels.*.navigation"));
         c.close();

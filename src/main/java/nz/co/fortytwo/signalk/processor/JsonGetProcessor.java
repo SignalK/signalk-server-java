@@ -23,17 +23,16 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import static nz.co.fortytwo.signalk.util.JsonConstants.CONTEXT;
-import static nz.co.fortytwo.signalk.util.JsonConstants.GET;
-import static nz.co.fortytwo.signalk.util.JsonConstants.SIGNALK_FORMAT;
-import static nz.co.fortytwo.signalk.util.JsonConstants.VESSELS;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.CONTEXT;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.GET;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_FORMAT;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels;
 
 import java.util.Map;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.handler.JsonGetHandler;
 import nz.co.fortytwo.signalk.model.SignalKModel;
-import nz.co.fortytwo.signalk.util.Constants;
 import nz.co.fortytwo.signalk.util.JsonSerializer;
 
 import org.apache.camel.Exchange;
@@ -64,7 +63,7 @@ public class JsonGetProcessor extends SignalkProcessor implements Processor{
 			}
 			Json json = exchange.getIn().getBody(Json.class);
 			//avoid full signalk syntax
-			if(json.has(VESSELS))return;
+			if(json.has(vessels))return;
 			if(json.has(CONTEXT) && (json.has(GET))){
 				SignalKModel temp = handler.handle(signalkModel, json);
 				if(logger.isDebugEnabled())logger.debug("Retrieved:"+temp);

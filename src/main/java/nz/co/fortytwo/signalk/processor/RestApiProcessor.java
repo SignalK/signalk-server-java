@@ -25,7 +25,6 @@ package nz.co.fortytwo.signalk.processor;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.net.UnknownHostException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -33,9 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import mjson.Json;
-import nz.co.fortytwo.signalk.handler.RestApiHandler;
-import nz.co.fortytwo.signalk.util.JsonConstants;
-import nz.co.fortytwo.signalk.util.JsonSerializer;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Exchange;
@@ -43,13 +40,8 @@ import org.apache.camel.Processor;
 import org.apache.camel.StreamCache;
 import org.apache.camel.component.http.HttpMessage;
 import org.apache.camel.component.websocket.WebsocketConstants;
-import org.apache.camel.converter.stream.InputStreamCache;
-import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.restlet.engine.io.IoUtils;
-
-import com.ctc.wstx.util.StringUtil;
 
 /*
  * Processes REST requests for Signal K data
@@ -90,12 +82,12 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 			String remoteAddress = request.getRemoteAddr();
 			String localAddress = request.getLocalAddr();
 			if(Util.sameNetwork(localAddress, remoteAddress)){
-				exchange.getIn().setHeader(JsonConstants.MSG_TYPE, JsonConstants.INTERNAL_IP);
+				exchange.getIn().setHeader(SignalKConstants.MSG_TYPE, SignalKConstants.INTERNAL_IP);
 			}else{
-				exchange.getIn().setHeader(JsonConstants.MSG_TYPE, JsonConstants.EXTERNAL_IP);
+				exchange.getIn().setHeader(SignalKConstants.MSG_TYPE, SignalKConstants.EXTERNAL_IP);
 			}
-			exchange.getIn().setHeader(JsonConstants.MSG_SRC_IP, remoteAddress);
-			exchange.getIn().setHeader(JsonConstants.MSG_SRC_IP_PORT, request.getRemotePort());
+			exchange.getIn().setHeader(SignalKConstants.MSG_SRC_IP, remoteAddress);
+			exchange.getIn().setHeader(SignalKConstants.MSG_SRC_IP_PORT, request.getRemotePort());
 			
 			exchange.getIn().setHeader(WebsocketConstants.CONNECTION_KEY,
 					session.getId());
@@ -149,14 +141,14 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 			exchange.getIn().setHeader(Exchange.HTTP_RESPONSE_CODE,
 					HttpServletResponse.SC_MOVED_TEMPORARILY);
 			// constant("http://somewhere.com"))
-			exchange.getIn().setHeader("Location", JsonConstants.SIGNALK_AUTH);
+			exchange.getIn().setHeader("Location", SignalKConstants.SIGNALK_AUTH);
 			exchange.getIn().setBody("Authentication Required");
 		}
 
 	}
 
 	private void processPut(Exchange exchange, String path) {
-		if (path.startsWith(JsonConstants.SIGNALK_ENDPOINTS)) {
+		if (path.startsWith(SignalKConstants.SIGNALK_ENDPOINTS)) {
 			// cant PUT here
 			return;
 		}
@@ -171,17 +163,17 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 		// make PUT object
 		// "{\"context\":\"vessels.*\",\"put\":[{"values":{\"path\":\"navigation.courseOverGroundTrue\", "value": 172.3}, "source": {"device": "/dev/actisense", "timestamp": "2014-08-15-16:00:00.081","src": "115", "pgn": "128267" }]}";
 		exchange.getIn().setHeader(Exchange.CONTENT_TYPE, "application/json");
-		Json json = Json.object().set(JsonConstants.CONTEXT, context);
+		Json json = Json.object().set(SignalKConstants.CONTEXT, context);
 		Json array = Json.array();
-		json.set(JsonConstants.PUT, array);
+		json.set(SignalKConstants.PUT, array);
 		Json entry = Json.object();
 		// add the source
-		entry.set(JsonConstants.source, Json.object());
+		entry.set(SignalKConstants.source, Json.object());
 		// add the value
 		Json values = Json.array();
-		entry.set(JsonConstants.VALUES, values);
-		values.set(JsonConstants.PATH, path);
-		values.set(JsonConstants.VALUE,
+		entry.set(SignalKConstants.values, values);
+		values.set(SignalKConstants.PATH, path);
+		values.set(SignalKConstants.value,
 				Json.read(exchange.getIn().getBody(String.class)));
 
 		exchange.getIn().setBody(json.toString());
@@ -195,9 +187,9 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 	private boolean isValidPath(String path) {
 		if (StringUtils.isBlank(path))
 			return false;
-		if (path.startsWith(JsonConstants.SIGNALK_API))
+		if (path.startsWith(SignalKConstants.SIGNALK_API))
 			return true;
-		if (path.startsWith(JsonConstants.SIGNALK_ENDPOINTS))
+		if (path.startsWith(SignalKConstants.SIGNALK_ENDPOINTS))
 			return true;
 		return false;
 	}
@@ -205,13 +197,13 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 	private void processGet(Exchange exchange, String path)
 			throws UnknownHostException {
 		// check addresses request
-		if (path.startsWith(JsonConstants.SIGNALK_ENDPOINTS)) {
+		if (path.startsWith(SignalKConstants.SIGNALK_ENDPOINTS)) {
 			exchange.getIn().setHeader(Exchange.CONTENT_TYPE,
 					"application/json");
 			// SEND RESPONSE
 			exchange.getIn().setHeader(Exchange.HTTP_RESPONSE_CODE,
 					HttpServletResponse.SC_OK);
-			path = path.substring(JsonConstants.SIGNALK_ENDPOINTS.length());
+			path = path.substring(SignalKConstants.SIGNALK_ENDPOINTS.length());
 			String host = (String) exchange.getIn()
 					.getHeader(Exchange.HTTP_URL);
 			// could be http://localhost:8080
@@ -240,11 +232,11 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 			// "{\"context\":\"vessels.*\",\"list\":[{\"path\":\"navigation.*\"}]}";
 			exchange.getIn().setHeader(Exchange.CONTENT_TYPE,
 					"application/json");
-			Json json = Json.object().set(JsonConstants.CONTEXT,
+			Json json = Json.object().set(SignalKConstants.CONTEXT,
 					context.substring(LIST.length() + 1));
 			Json array = Json.array().add(
-					Json.object().set(JsonConstants.PATH, path));
-			json.set(JsonConstants.LIST, array);
+					Json.object().set(SignalKConstants.PATH, path));
+			json.set(SignalKConstants.LIST, array);
 			exchange.getIn().setBody(json.toString());
 			if (logger.isDebugEnabled())
 				logger.debug("Processing the LIST request:"
@@ -254,10 +246,10 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 		// make GET obj
 		// "{\"context\":\"vessels.*\",\"get\":[{\"path\":\"navigation.*\"}]}";
 		exchange.getIn().setHeader(Exchange.CONTENT_TYPE, "application/json");
-		Json json = Json.object().set(JsonConstants.CONTEXT, context);
+		Json json = Json.object().set(SignalKConstants.CONTEXT, context);
 		Json array = Json.array().add(
-				Json.object().set(JsonConstants.PATH, path));
-		json.set(JsonConstants.GET, array);
+				Json.object().set(SignalKConstants.PATH, path));
+		json.set(SignalKConstants.GET, array);
 		exchange.getIn().setBody(json.toString());
 		// If a GET is an absolute object return only the requested object
 		// If its a wildcard, return a full tree
@@ -276,7 +268,7 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 
 		// check valid request.
 
-		path = path.substring(JsonConstants.SIGNALK_API.length());
+		path = path.substring(SignalKConstants.SIGNALK_API.length());
 		if (path.startsWith("/"))
 			path = path.substring(1);
 		if (path.endsWith("/"))

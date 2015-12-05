@@ -16,32 +16,6 @@
  */
 package org.apache.camel.component.stomp;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import nz.co.fortytwo.signalk.processor.JsonSubscribeProcessor;
-
-import org.apache.camel.AsyncCallback;
-import org.apache.camel.Consumer;
-import org.apache.camel.Exchange;
-import org.apache.camel.Message;
-import org.apache.camel.Processor;
-import org.apache.camel.Producer;
-import org.apache.camel.impl.DefaultEndpoint;
-import org.apache.log4j.Logger;
-import org.fusesource.hawtbuf.AsciiBuffer;
-import org.fusesource.hawtbuf.Buffer;
-import org.fusesource.hawtbuf.UTF8Buffer;
-import org.fusesource.hawtdispatch.Task;
-import org.fusesource.stomp.client.Callback;
-import org.fusesource.stomp.client.CallbackConnection;
-import org.fusesource.stomp.client.Constants;
-import org.fusesource.stomp.client.Promise;
-import org.fusesource.stomp.client.Stomp;
-import org.fusesource.stomp.codec.StompFrame;
-import org.fusesource.stomp.codec.StompFrame.HeaderEntry;
-
 import static org.fusesource.hawtbuf.UTF8Buffer.utf8;
 import static org.fusesource.stomp.client.Constants.DESTINATION;
 import static org.fusesource.stomp.client.Constants.DISCONNECT;
@@ -49,6 +23,26 @@ import static org.fusesource.stomp.client.Constants.ID;
 import static org.fusesource.stomp.client.Constants.SEND;
 import static org.fusesource.stomp.client.Constants.SUBSCRIBE;
 import static org.fusesource.stomp.client.Constants.UNSUBSCRIBE;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import org.apache.camel.AsyncCallback;
+import org.apache.camel.Consumer;
+import org.apache.camel.Exchange;
+import org.apache.camel.Processor;
+import org.apache.camel.Producer;
+import org.apache.log4j.Logger;
+import org.fusesource.hawtbuf.AsciiBuffer;
+import org.fusesource.hawtbuf.Buffer;
+import org.fusesource.hawtdispatch.Task;
+import org.fusesource.stomp.client.Callback;
+import org.fusesource.stomp.client.CallbackConnection;
+import org.fusesource.stomp.client.Promise;
+import org.fusesource.stomp.client.Stomp;
+import org.fusesource.stomp.codec.StompFrame;
+import org.fusesource.stomp.codec.StompFrame.HeaderEntry;
 
 public class SkStompEndpoint extends StompEndpoint {
 

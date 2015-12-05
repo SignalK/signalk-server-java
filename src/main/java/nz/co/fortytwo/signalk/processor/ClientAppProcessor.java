@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import nz.co.fortytwo.signalk.handler.GitHandler;
-import nz.co.fortytwo.signalk.util.JsonConstants;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -60,11 +60,11 @@ public class ClientAppProcessor extends SignalkProcessor implements Processor {
 				if (logger.isDebugEnabled())
 					logger.debug("We are processing the path = " + path);
 				// check addresses request
-				if (path.startsWith(JsonConstants.SIGNALK_INSTALL)) {
+				if (path.startsWith(SignalKConstants.SIGNALK_INSTALL)) {
 					handler.processInstall(request, response);
 					return;
 				}
-				if (path.startsWith(JsonConstants.SIGNALK_UPGRADE)) {
+				if (path.startsWith(SignalKConstants.SIGNALK_UPGRADE)) {
 					handler.processUpgrade(request, response);
 					return;
 				}
@@ -74,7 +74,7 @@ public class ClientAppProcessor extends SignalkProcessor implements Processor {
 		} else {
 			HttpServletResponse response = exchange.getIn(HttpMessage.class).getResponse();
 			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-			response.sendRedirect(JsonConstants.SIGNALK_AUTH);
+			response.sendRedirect(SignalKConstants.SIGNALK_AUTH);
 			exchange.getIn().setBody(null);
 		}
 

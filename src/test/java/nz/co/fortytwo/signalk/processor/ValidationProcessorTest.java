@@ -23,19 +23,22 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import static org.junit.Assert.*;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.dot;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.env_wind_directionChangeAlarm;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.env_wind_speedAlarm;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.source;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.timestamp;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.value;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels_dot_self_dot;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
-import java.util.NavigableMap;
 
-import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
-import nz.co.fortytwo.signalk.processor.ValidationProcessor;
 import nz.co.fortytwo.signalk.server.RouteManagerFactory;
 import nz.co.fortytwo.signalk.util.JsonSerializer;
-import static nz.co.fortytwo.signalk.util.JsonConstants.*;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.*;
 
 import org.apache.log4j.Logger;
 import org.junit.After;
@@ -58,46 +61,69 @@ public class ValidationProcessorTest {
 	@Test
 	public void shouldAddTimestamp() throws IOException {
 		ValidationProcessor validationProcessor = new ValidationProcessor();
-		//{\"vessels\":{\""+self+"\":{\"environment\":{\"wind\":
-		SignalKModel wind = SignalKModelFactory.getWrappedInstance(ser.read("{\"vessels\":{\""+self+"\":{\"environment\":{\"wind\":{\"speedAlarm\": {\"value\":0.0000000000},\"directionChangeAlarm\": {\"value\":0.0000000000},\"angleApparent\": {\"value\":0.0000000000},\"directionTrue\": {\"value\":0.0000000000},\"speedApparent\": {\"value\":0.0000000000},\"speedTrue\": {\"value\":7.68}}}}}}"));
-		assertNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+TIMESTAMP));
+		//{\"vessels\":{\""+SignalKConstants.self+"\":{\"environment\":{\"wind\":
+		SignalKModel wind = SignalKModelFactory.getCleanInstance();
+		wind.put(vessels_dot_self_dot+env_wind_speedAlarm+dot+source,"unknown");
+		//wind.put(vessels_dot_self_dot+env_wind_speedAlarm+dot+timestamp,"2015-03-16T03:31:22.327Z");
+		wind.put(vessels_dot_self_dot+env_wind_speedAlarm+dot+value,0d);
+		
+		assertNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+timestamp));
 		validationProcessor.validate(wind);
 		
-		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+TIMESTAMP));
+		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+timestamp));
 		logger.debug(wind);
 	}
 	@Test
 	public void shouldNotAddTimestamp() throws IOException{
 		ValidationProcessor validationProcessor = new ValidationProcessor();
-		SignalKModel wind = SignalKModelFactory.getWrappedInstance(ser.read("{\"vessels\":{\""+self+"\":{\"environment\":{\"wind\":{\"speedAlarm\": {\"value\":0.0000000000,\"timestamp\":\"2014-10-22T21:32:43.313+13:00\",\"source\":\"unknown\"},\"directionChangeAlarm\": {\"value\":0.0000000000},\"angleApparent\": {\"value\":0.0000000000},\"directionTrue\": {\"value\":0.0000000000},\"speedApparent\": {\"value\":0.0000000000},\"speedTrue\": {\"value\":7.68}}}}}}"));
-		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+TIMESTAMP));
-		assertNull(wind.get(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+TIMESTAMP));
+		SignalKModel wind = SignalKModelFactory.getCleanInstance();
+		wind.put(vessels_dot_self_dot+env_wind_speedAlarm+dot+source,"unknown");
+		wind.put(vessels_dot_self_dot+env_wind_speedAlarm+dot+timestamp,"2015-03-16T03:31:22.327Z");
+		wind.put(vessels_dot_self_dot+env_wind_speedAlarm+dot+value,0d);
+		wind.put(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+source,"unknown");
+		//wind.put(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+timestamp,"2015-03-16T03:31:22.326Z");
+		wind.put(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+value,0d);
+		
+		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+timestamp));
+		assertNull(wind.get(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+timestamp));
 		validationProcessor.validate(wind);
 		logger.debug(wind);
-		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+TIMESTAMP));
-		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+TIMESTAMP));
+		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+timestamp));
+		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+timestamp));
 		logger.debug(wind);
 	}
 	
 	@Test
 	public void shouldAddSource()throws IOException {
 		ValidationProcessor validationProcessor = new ValidationProcessor();
-		SignalKModel wind = SignalKModelFactory.getWrappedInstance(ser.read("{\"vessels\":{\""+self+"\":{\"environment\":{\"wind\":{\"speedAlarm\": {\"value\":0.0000000000},\"directionChangeAlarm\": {\"value\":0.0000000000},\"angleApparent\": {\"value\":0.0000000000},\"directionTrue\": {\"value\":0.0000000000},\"speedApparent\": {\"value\":0.0000000000},\"speedTrue\": {\"value\":7.68}}}}}}"));
-		assertNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+SOURCE));
+		
+		SignalKModel wind = SignalKModelFactory.getCleanInstance();
+		//wind.put(vessels_dot_self_dot+env_wind_speedAlarm+dot+source,"unknown");
+		wind.put(vessels_dot_self_dot+env_wind_speedAlarm+dot+timestamp,"2015-03-16T03:31:22.327Z");
+		wind.put(vessels_dot_self_dot+env_wind_speedAlarm+dot+value,0d);
+		
+		assertNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+source));
 		validationProcessor.validate(wind);
 		logger.debug(wind);
-		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+SOURCE));
+		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+source));
 		logger.debug(wind);
 	}
 	@Test
 	public void shouldNotAddSource() throws IOException{
 		ValidationProcessor validationProcessor = new ValidationProcessor();
-		SignalKModel wind = SignalKModelFactory.getWrappedInstance(ser.read("{\"vessels\":{\""+self+"\":{\"environment\":{\"wind\":{\"speedAlarm\": {\"value\":0.0000000000,\"timestamp\":\"2014-10-22T21:32:43.313+13:00\",\"source\":\"unknown\"},\"directionChangeAlarm\": {\"value\":0.0000000000},\"angleApparent\": {\"value\":0.0000000000},\"directionTrue\": {\"value\":0.0000000000},\"speedApparent\": {\"value\":0.0000000000},\"speedTrue\": {\"value\":7.68}}}}}}"));
-		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+SOURCE));
-		assertNull(wind.get(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+SOURCE));
+		SignalKModel wind = SignalKModelFactory.getCleanInstance();
+		wind.put(vessels_dot_self_dot+env_wind_speedAlarm+dot+source,"unknown");
+		wind.put(vessels_dot_self_dot+env_wind_speedAlarm+dot+timestamp,"2015-03-16T03:31:22.327Z");
+		wind.put(vessels_dot_self_dot+env_wind_speedAlarm+dot+value,0d);
+		//wind.put(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+source,"unknown");
+		wind.put(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+timestamp,"2015-03-16T03:31:22.326Z");
+		wind.put(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+value,0d);
+		
+		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+source));
+		assertNull(wind.get(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+source));
 		validationProcessor.validate(wind);
-		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+SOURCE));
-		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+SOURCE));
+		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+source));
+		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+source));
 		logger.debug(wind);
 	}
 	

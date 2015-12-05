@@ -23,21 +23,24 @@
  */
 package nz.co.fortytwo.signalk.server;
 
-import static nz.co.fortytwo.signalk.util.JsonConstants.*;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.FORMAT_FULL;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.POLICY_FIXED;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.env;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.env_wind;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.env_wind_speedApparent;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_courseOverGroundTrue;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position_latitude;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels_dot_self_dot;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
-import nz.co.fortytwo.signalk.model.impl.SignalKModelImpl;
-import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
-import nz.co.fortytwo.signalk.processor.WindProcessor;
 import nz.co.fortytwo.signalk.util.JsonSerializer;
-import nz.co.fortytwo.signalk.util.Util;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
 import nz.co.fortytwo.signalk.util.TestHelper;
 
 import org.apache.camel.ProducerTemplate;
@@ -95,7 +98,7 @@ public class SignalKSubscriptionOutputTest extends SignalKCamelTestSupport {
 		 logger.debug("Lat :"+(double)signalkModel.get(vessels_dot_self_dot + nav_position_latitude));
 		 
 		 //add a sub
-		 Json sub = getSubscribe("vessels." + SELF,"navigation", 500, 0,FORMAT_FULL, POLICY_FIXED);
+		 Json sub = getSubscribe("vessels." + SignalKConstants.self,"navigation", 500, 0,FORMAT_FULL, POLICY_FIXED);
 		 template.sendBodyAndHeader(DIRECT_INPUT, sub.toString(),WebsocketConstants.CONNECTION_KEY, wsSession);
 		 
 		 output.assertIsSatisfied();
@@ -116,7 +119,7 @@ public class SignalKSubscriptionOutputTest extends SignalKCamelTestSupport {
 		 logger.debug("Lat :"+(double)signalkModel.get(vessels_dot_self_dot + nav_position_latitude));
 		 
 		 //add a sub
-		 Json sub = getSubscribe("vessels." + SELF,nav_position, 500, 0,FORMAT_FULL, POLICY_FIXED);
+		 Json sub = getSubscribe("vessels." + SignalKConstants.self,nav_position, 500, 0,FORMAT_FULL, POLICY_FIXED);
 		 template.sendBodyAndHeader(DIRECT_INPUT, sub.toString(),WebsocketConstants.CONNECTION_KEY, wsSession);
 		 output.assertIsSatisfied();
 		 SignalKModel out = (SignalKModel)output.getReceivedExchanges().get(0).getIn().getBody(SignalKModel.class);
@@ -139,9 +142,9 @@ public class SignalKSubscriptionOutputTest extends SignalKCamelTestSupport {
 		 logger.debug("Lat :"+(double)signalkModel.get(vessels_dot_self_dot + nav_position_latitude));
 		 
 		 //add a sub
-		 Json sub = getSubscribe("vessels." + SELF,nav_position, 500, 0,FORMAT_FULL, POLICY_FIXED);
+		 Json sub = getSubscribe("vessels." + SignalKConstants.self,nav_position, 500, 0,FORMAT_FULL, POLICY_FIXED);
 		 template.sendBodyAndHeader(DIRECT_INPUT, sub.toString(),WebsocketConstants.CONNECTION_KEY, wsSession);
-		 sub = getSubscribe("vessels." + SELF,env_wind, 500, 0,FORMAT_FULL, POLICY_FIXED);
+		 sub = getSubscribe("vessels." + SignalKConstants.self,env_wind, 500, 0,FORMAT_FULL, POLICY_FIXED);
 		 template.sendBodyAndHeader(DIRECT_INPUT, sub.toString(),WebsocketConstants.CONNECTION_KEY, wsSession);
 		 
 		 output.assertIsSatisfied();

@@ -25,6 +25,7 @@
 package org.apache.camel.component.websocket;
 
 import java.util.Map;
+
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 

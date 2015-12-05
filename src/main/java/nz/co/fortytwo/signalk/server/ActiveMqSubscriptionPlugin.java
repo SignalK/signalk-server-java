@@ -26,14 +26,7 @@
 package nz.co.fortytwo.signalk.server;
 
 import org.apache.activemq.broker.Broker;
-import org.apache.activemq.broker.BrokerFilter;
 import org.apache.activemq.broker.BrokerPlugin;
-import org.apache.activemq.broker.ConnectionContext;
-import org.apache.activemq.broker.region.Subscription;
-import org.apache.activemq.command.ConsumerInfo;
-import org.apache.activemq.command.RemoveSubscriptionInfo;
-import org.apache.activemq.util.IntrospectionSupport;
-import org.apache.log4j.Logger;
 
 public class ActiveMqSubscriptionPlugin implements BrokerPlugin{
 	

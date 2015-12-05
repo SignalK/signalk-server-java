@@ -23,19 +23,28 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
+import static nz.co.fortytwo.signalk.util.SignalKConstants.CONFIG;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.CONFIG_ACTION;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.CONFIG_ACTION_SAVE;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.CONTEXT;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.INTERNAL_IP;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.MSG_SRC_IP;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.MSG_TYPE;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.PUT;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.SERIAL;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.UPDATES;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.dot;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.self;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import mjson.Json;
-import nz.co.fortytwo.signalk.util.Constants;
-import nz.co.fortytwo.signalk.util.JsonConstants;
-import nz.co.fortytwo.signalk.util.SignalKConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.log4j.Logger;
-import org.joda.time.DateTime;
 
 /**
  * Parse the signalkModel json and remove anything that violates security
@@ -54,11 +63,11 @@ public class IncomingSecurityFilter extends SignalkProcessor implements
 
 	public IncomingSecurityFilter() {
 		// load lists now
-		Json deny = Util.getConfigJsonArray(JsonConstants.CONFIG + DOT
+		Json deny = Util.getConfigJsonArray(CONFIG + dot
 				+ "server.security.deny.ip");
-		Json white = Util.getConfigJsonArray(JsonConstants.CONFIG + DOT
+		Json white = Util.getConfigJsonArray(CONFIG + dot
 				+ "server.security.white.ip");
-		Json config = Util.getConfigJsonArray(JsonConstants.CONFIG + DOT
+		Json config = Util.getConfigJsonArray(CONFIG + dot
 				+ "server.security.config.ip");
 		if (deny != null) {
 			for (Object o : deny.asList()) {
@@ -81,13 +90,13 @@ public class IncomingSecurityFilter extends SignalkProcessor implements
 
 		try {
 			// we trust local serial
-			String type = exchange.getIn().getHeader(JsonConstants.MSG_TYPE,
+			String type = exchange.getIn().getHeader(MSG_TYPE,
 					String.class);
-			if (JsonConstants.SERIAL.equals(type))
+			if (SERIAL.equals(type))
 				return;
 
 			// we filter on ip
-			String srcIp = exchange.getIn().getHeader(JsonConstants.MSG_SRC_IP,
+			String srcIp = exchange.getIn().getHeader(MSG_SRC_IP,
 					String.class);
 			if (logger.isDebugEnabled())
 				logger.debug("Checking src ip:" + srcIp);
@@ -105,8 +114,8 @@ public class IncomingSecurityFilter extends SignalkProcessor implements
 
 			// save config only from allowed ips
 			String configSave = exchange.getIn().getHeader(
-					JsonConstants.CONFIG_ACTION, String.class);
-			if (JsonConstants.CONFIG_ACTION_SAVE.equals(configSave)) {
+					CONFIG_ACTION, String.class);
+			if (CONFIG_ACTION_SAVE.equals(configSave)) {
 				// must be in the configAcceptlist!
 				if (configAcceptList.contains(srcIp)) {
 					if (logger.isDebugEnabled())
@@ -120,7 +129,7 @@ public class IncomingSecurityFilter extends SignalkProcessor implements
 				}
 			}
 			// we trust INTERNAL_IP
-			if (JsonConstants.INTERNAL_IP.equals(type)) {
+			if (INTERNAL_IP.equals(type)) {
 				if (logger.isDebugEnabled())
 					logger.debug("Message allowed for src ip (internal):"
 							+ srcIp);
@@ -138,16 +147,16 @@ public class IncomingSecurityFilter extends SignalkProcessor implements
 			// now we look for anomalies
 
 			// new incoming, so flag for acceptance
-			// exchange.getIn().setHeader(JsonConstants.MSG_APPROVAL,
-			// JsonConstants.REQUIRED);
+			// exchange.getIn().setHeader(MSG_APPROVAL,
+			// REQUIRED);
 			// filter for evil
 			Json node = exchange.getIn().getBody(Json.class);
 
-			if (node.at(JsonConstants.UPDATES) != null
-					|| node.at(JsonConstants.PUT) != null) {
+			if (node.at(UPDATES) != null
+					|| node.at(PUT) != null) {
 				// cant be an update or put for this vessel since its external
-				if (node.at(JsonConstants.CONTEXT).asString()
-						.contains(SignalKConstants.self)) {
+				if (node.at(CONTEXT).asString()
+						.contains(self)) {
 					if (logger.isDebugEnabled())
 						logger.debug("Message DENIED for src ip (spoofing self):"
 								+ srcIp);

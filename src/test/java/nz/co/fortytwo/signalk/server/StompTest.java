@@ -24,9 +24,8 @@
  */
 package nz.co.fortytwo.signalk.server;
 
-import static nz.co.fortytwo.signalk.util.JsonConstants.FORMAT_DELTA;
-import static nz.co.fortytwo.signalk.util.JsonConstants.POLICY_FIXED;
-import static nz.co.fortytwo.signalk.util.JsonConstants.SELF;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.FORMAT_DELTA;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.POLICY_FIXED;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.dot;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.env;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.env_wind;
@@ -43,8 +42,7 @@ import mjson.Json;
 import nz.co.fortytwo.signalk.client.StompConnection;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
-import nz.co.fortytwo.signalk.util.JsonConstants;
-import nz.co.fortytwo.signalk.util.Util;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
 import nz.co.fortytwo.signalk.util.TestHelper;
 
 import org.apache.activemq.transport.stomp.Stomp;
@@ -84,10 +82,10 @@ public class StompTest extends SignalKCamelTestSupport {
 				+ ".vessels.motu.navigation", Subscribe.AckModeValues.AUTO);
 
 		// subscribe
-		Json subMsg = getSubscribe("vessels." + SELF, "navigation", 1000, 0,
+		Json subMsg = getSubscribe("vessels." + SignalKConstants.self, "navigation", 1000, 0,
 				FORMAT_DELTA, POLICY_FIXED);
-		subMsg.set(nz.co.fortytwo.signalk.util.Constants.OUTPUT_TYPE,
-				nz.co.fortytwo.signalk.util.Constants.OUTPUT_STOMP);
+		subMsg.set(nz.co.fortytwo.signalk.util.ConfigConstants.OUTPUT_TYPE,
+				nz.co.fortytwo.signalk.util.ConfigConstants.OUTPUT_STOMP);
 		subMsg.set(WebsocketConstants.CONNECTION_KEY, uuid);
 		HashMap<String, String> headers = new HashMap<String, String>();
 
@@ -104,10 +102,10 @@ public class StompTest extends SignalKCamelTestSupport {
 		assertNotNull(message);
 		Json reply = Json.read(message.getBody());
 
-		assertNotNull(reply.at(JsonConstants.CONTEXT));
-		assertNotNull(reply.at(JsonConstants.UPDATES));
+		assertNotNull(reply.at(SignalKConstants.CONTEXT));
+		assertNotNull(reply.at(SignalKConstants.UPDATES));
 		// unsubscribe
-		subMsg = getSubscribe("vessels." + SELF, "navigation", 1000, 0,
+		subMsg = getSubscribe("vessels." + SignalKConstants.self, "navigation", 1000, 0,
 				FORMAT_DELTA, POLICY_FIXED);
 		connection.send("/queue/signalk.subscribe", subMsg.toString(), null,
 				headers);
@@ -176,7 +174,7 @@ public class StompTest extends SignalKCamelTestSupport {
 				+ ".vessels.motu.navigation", Subscribe.AckModeValues.AUTO);
 		latch.await(2, TimeUnit.SECONDS);
 		// send list
-		Json subMsg = getList("vessels." + SELF, "navigation.position.*");
+		Json subMsg = getList("vessels." + SignalKConstants.self, "navigation.position.*");
 		HashMap<String, String> headers = new HashMap<String, String>();
 		logger.debug("sending" + subMsg);
 		// queue>signalk.3202a939-1681-4a74-ad4b-3a90212e4f33.vessels.motu.navigation
@@ -192,8 +190,8 @@ public class StompTest extends SignalKCamelTestSupport {
 		assertNotNull(message);
 		Json reply = Json.read(message.getBody());
 
-		assertNotNull(reply.at(JsonConstants.CONTEXT));
-		assertNotNull(reply.at(JsonConstants.PATHLIST));
+		assertNotNull(reply.at(SignalKConstants.CONTEXT));
+		assertNotNull(reply.at(SignalKConstants.PATHLIST));
 		// unsubscribe
 		connection.unsubscribe("/queue/signalk." + uuid
 				+ ".vessels.motu.navigation");
@@ -226,8 +224,8 @@ public class StompTest extends SignalKCamelTestSupport {
 						Subscribe.AckModeValues.AUTO);
 		latch.await(2, TimeUnit.SECONDS);
 		// send list
-		Json subMsg = getGet("vessels." + SELF, env_wind + ".*",
-				JsonConstants.FORMAT_FULL);
+		Json subMsg = getGet("vessels." + SignalKConstants.self, env_wind + ".*",
+				SignalKConstants.FORMAT_FULL);
 		HashMap<String, String> headers = new HashMap<String, String>();
 		logger.debug("sending" + subMsg);
 		// queue>signalk.3202a939-1681-4a74-ad4b-3a90212e4f33.vessels.motu.navigation
@@ -243,8 +241,8 @@ public class StompTest extends SignalKCamelTestSupport {
 		assertNotNull(message);
 		Json reply = Json.read(message.getBody());
 
-		assertNotNull(reply.at(JsonConstants.VESSELS));
-		assertNotNull(reply.at(JsonConstants.VESSELS).at(SELF).at(env)
+		assertNotNull(reply.at(SignalKConstants.vessels));
+		assertNotNull(reply.at(SignalKConstants.vessels).at(SignalKConstants.self).at(env)
 				.at("wind"));
 		// unsubscribe
 		connection.unsubscribe("/queue/signalk." + uuid + "."
@@ -278,8 +276,8 @@ public class StompTest extends SignalKCamelTestSupport {
 						Subscribe.AckModeValues.AUTO);
 		latch.await(2, TimeUnit.SECONDS);
 		// send list
-		Json subMsg = getGet("vessels." + SELF, env_wind + ".*",
-				JsonConstants.FORMAT_DELTA);
+		Json subMsg = getGet("vessels." + SignalKConstants.self, env_wind + ".*",
+				SignalKConstants.FORMAT_DELTA);
 		HashMap<String, String> headers = new HashMap<String, String>();
 		logger.debug("sending" + subMsg);
 		// queue>signalk.3202a939-1681-4a74-ad4b-3a90212e4f33.vessels.motu.navigation
@@ -295,8 +293,8 @@ public class StompTest extends SignalKCamelTestSupport {
 		assertNotNull(message);
 		Json reply = Json.read(message.getBody());
 
-		assertNotNull(reply.at(JsonConstants.CONTEXT));
-		assertNotNull(reply.at(JsonConstants.UPDATES));
+		assertNotNull(reply.at(SignalKConstants.CONTEXT));
+		assertNotNull(reply.at(SignalKConstants.UPDATES));
 		// unsubscribe
 		connection.unsubscribe("/queue/signalk." + uuid + "."
 				+ vessels_dot_self_dot + env_wind);

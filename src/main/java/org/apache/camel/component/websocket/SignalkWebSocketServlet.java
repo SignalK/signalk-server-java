@@ -36,7 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
-import nz.co.fortytwo.signalk.util.Constants;
+import nz.co.fortytwo.signalk.util.ConfigConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.commons.lang3.StringUtils;
@@ -189,7 +189,7 @@ public class SignalkWebSocketServlet extends WebsocketComponentServlet {
 					if(logger.isDebugEnabled())logger.debug("Upgraded session " + sessionId + " to ws " + wsSession+ " from remote ip:"+request.getRemoteAddr());
 					try {
 						sessionMap.put(connection, wsSession);
-						SubscriptionManagerFactory.getInstance().add(sessionId, wsSession, Constants.OUTPUT_WS, request.getLocalAddr(),request.getRemoteAddr());
+						SubscriptionManagerFactory.getInstance().add(sessionId, wsSession, ConfigConstants.OUTPUT_WS, request.getLocalAddr(),request.getRemoteAddr());
 					} catch (Exception e1) {
 						logger.error(e1.getMessage(),e1);
 						throw new IOException(e1);
