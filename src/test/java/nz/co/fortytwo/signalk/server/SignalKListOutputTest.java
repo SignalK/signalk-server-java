@@ -32,8 +32,11 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import mjson.Json;
+import nz.co.fortytwo.signalk.model.SignalKModel;
+import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
 import nz.co.fortytwo.signalk.processor.WindProcessor;
+import nz.co.fortytwo.signalk.util.JsonSerializer;
 import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Exchange;
@@ -56,17 +59,26 @@ public class SignalKListOutputTest extends SignalKCamelTestSupport {
 	//@Produce(uri = RouteManager.SEDA_INPUT)
     protected ProducerTemplate template;
 	
-    String jsonString = "{\"vessels\":{\""
-			+ SELF
-			+ "\":{\"navigation\":{\"courseOverGroundTrue\": {\"value\":11.9600000381},\"courseOverGroundMagnetic\": {\"value\":93.0000000000},\"headingMagnetic\": {\"value\":0.0000000000},\"magneticVariation\": {\"value\":0.0000000000},\"headingTrue\": {\"value\":0.0000000000},\"pitch\": {\"value\":0.0000000000},\"rateOfTurn\": {\"value\":0.0000000000},\"roll\": {\"value\":0.0000000000},\"speedOverGround\": {\"value\":0.0399999980},\"speedThroughWater\": {\"value\":0.0000000000},\"state\": {\"value\":\"Not defined (example)\"},\"anchor\":{\"alarmRadius\": {\"value\":0.0000000000},\"maxRadius\": {\"value\":0.0000000000},\"position\":{\"latitude\": -41.2936935424,\"longitude\": 173.247085571,\"altitude\": 0.0000000000}},\"position\":{\"latitude\":-41.2936935424,\"longitude\": 173.2470855712,\"altitude\": 0.000000000}},\"alarm\":{\"anchorAlarmMethod\": {\"value\":\"sound\"},\"anchorAlarmState\": {\"value\":\"disabled\"},\"autopilotAlarmMethod\": {\"value\":\"sound\"},\"autopilotAlarmState\": {\"value\":\"disabled\"},\"engineAlarmMethod\": {\"value\":\"sound\"},\"engineAlarmState\": {\"value\":\"disabled\"},\"fireAlarmMethod\": {\"value\":\"sound\"},\"fireAlarmState\": {\"value\":\"disabled\"},\"gasAlarmMethod\": {\"value\":\"sound\"},\"gasAlarmState\": {\"value\":\"disabled\"},\"gpsAlarmMethod\": {\"value\":\"sound\"},\"gpsAlarmState\": {\"value\":\"disabled\"},\"maydayAlarmMethod\": {\"value\":\"sound\"},\"maydayAlarmState\": {\"value\":\"disabled\"},\"panpanAlarmMethod\": {\"value\":\"sound\"},\"panpanAlarmState\": {\"value\":\"disabled\"},\"powerAlarmMethod\": {\"value\":\"sound\"},\"powerAlarmState\": {\"value\":\"disabled\"},\"silentInterval\": {\"value\":300},\"windAlarmMethod\": {\"value\":\"sound\"},\"windAlarmState\": {\"value\":\"disabled\"},\"genericAlarmMethod\": {\"value\":\"sound\"},\"genericAlarmState\": {\"value\":\"disabled\"},\"radarAlarmMethod\": {\"value\":\"sound\"},\"radarAlarmState\": {\"value\":\"disabled\"},\"mobAlarmMethod\": {\"value\":\"sound\"},\"mobAlarmState\": {\"value\":\"disabled\"}},\"steering\":{\"rudderAngle\": {\"value\":0.0000000000},\"rudderAngleTarget\": {\"value\":0.0000000000},\"autopilot\":{\"state\": {\"value\":\"off\"},\"mode\": {\"value\":\"powersave\"},\"targetHeadingNorth\": {\"value\":0.0000000000},\"targetHeadingMagnetic\": {\"value\":0.0000000000},\"alarmHeadingXte\": {\"value\":0.0000000000},\"headingSource\": {\"value\":\"compass\"},\"deadZone\": {\"value\":0.0000000000},\"backlash\": {\"value\":0.0000000000},\"gain\": {\"value\":0},\"maxDriveAmps\": {\"value\":0.0000000000},\"maxDriveRate\": {\"value\":0.0000000000},\"portLock\": {\"value\":0.0000000000},\"starboardLock\": {\"value\":0.0000000000}}},\"environment\":{\"airPressureChangeRateAlarm\": {\"value\":0.0000000000},\"airPressure\": {\"value\":1024.0000000000},\"waterTemp\": {\"value\":0.0000000000},\"wind\":{\"speedAlarm\": {\"value\":0.0000000000},\"directionChangeAlarm\": {\"value\":0.0000000000},\"angleApparent\": {\"value\":0.0000000000},\"directionTrue\": {\"value\":0.0000000000},\"speedApparent\": {\"value\":0.0000000000},\"speedTrue\": {\"value\":7.68}}}}}}";
+    String jsonString = null;
     @BeforeClass
 	public static void setClass() throws Exception {
 		Util.getConfig();
 		Util.setSelf("motu");
+		
 	}
     @Before
 	public void before() throws Exception {
-
+    	//generate json
+    			SignalKModel temp = SignalKModelFactory.getCleanInstance();
+    			//add data
+    			temp.putValue(vessels_dot_self_dot+nav_courseOverGroundTrue, 11.96d);
+    			temp.putValue(vessels_dot_self_dot+nav_courseOverGroundMagnetic, 93.00d);
+    			temp.putValue(vessels_dot_self_dot+nav_position_latitude, -41.2936935424d);
+    			temp.putValue(vessels_dot_self_dot+nav_position_longitude, 11.96d);
+    			temp.putValue(vessels_dot_self_dot+nav_position_altitude, 0.0d);
+    			temp.putValue(vessels_dot_self_dot+nav_position+dot+source, "test");
+    			
+    			jsonString = ser.write(temp);
 		
 	}
 	
@@ -99,7 +111,7 @@ public class SignalKListOutputTest extends SignalKCamelTestSupport {
 		 Json reply = exch.getIn().getBody(Json.class);
 		 logger.debug("Reply = "+reply);
 		 assertNotNull(reply);
-		 assertTrue(reply.at("pathlist").asList().size()==4);
+		 assertTrue(reply.at("pathlist").asList().size()==3);
 		 
     }
 	

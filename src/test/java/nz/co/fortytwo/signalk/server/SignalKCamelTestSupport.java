@@ -35,6 +35,7 @@ import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.util.Constants;
+import nz.co.fortytwo.signalk.util.JsonSerializer;
 import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.activemq.broker.BrokerService;
@@ -53,6 +54,7 @@ public abstract class SignalKCamelTestSupport extends CamelTestSupport {
     protected BrokerService broker = null;
     protected int restPort = 0;
     protected int wsPort = 0;
+    protected JsonSerializer ser = new JsonSerializer();
     
     @BeforeClass
 	public static void setClass() throws Exception {

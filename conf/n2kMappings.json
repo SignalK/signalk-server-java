@@ -73,15 +73,15 @@
     "127257": [
         {
             "source": "Yaw",
-            "node": "navigation.yaw.value"
+            "node": "navigation.attitude.yaw.value"
         },
         {
             "source": "Pitch",
-            "node": "navigation.pitch.value"
+            "node": "navigation.attitude.pitch.value"
         },
         {
             "source": "Roll",
-            "node": "navigation.roll.value"
+            "node": "navigation.attitude.roll.value"
         }
     ],
     "130306": [
@@ -107,12 +107,12 @@
         },
         {
             "source": "Wind Angle",
-            "node": "environment.wind.angleTrue.value",
+            "node": "environment.wind.angleTrueWater.value",
             "filter": "$.fields[?(@.Reference=='True (boat referenced)')]"
         },
         {
             "source": "Wind Angle",
-            "node": "environment.wind.directionTrue.value",
+            "node": "environment.wind.angleTrueGround.value",
             "filter": "$.fields[?(@.Reference=='True (ground referenced to North)')]"
         }
     ],
@@ -208,7 +208,7 @@
         },
          {
             "source": "Length",
-             "node": "design.loa.value"
+             "node": "design.length.overall.value"
          },
          {
             "source": "Beam",
@@ -247,24 +247,24 @@
         },
         {
             "source": "Set",
-            "node": "navigation.current.setTrue",
+            "node": "environment.current.setTrue",
             "filter": "$.fields[?(@.COG Reference=='True' && @.Set)]"
         },
         {
             "source": "Drift",
-            "node": "navigation.current.drift"
+            "node": "environment.current.drift"
        
         }
     ],
     "129291": [
         {
             "source": "Set",
-            "node": "navigation.current.setTrue",
+            "node": "environment.current.setTrue",
             "filter": "$.fields[?(@.Set Reference=='True')]"
         },
         {
             "source": "Drift",
-            "node": "navigation.current.drift"
+            "node": "environment.current.drift"
             
         }
     ]

@@ -45,6 +45,7 @@ import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.util.JsonConstants;
 import nz.co.fortytwo.signalk.util.Util;
+import nz.co.fortytwo.signalk.util.TestHelper;
 
 import org.apache.activemq.transport.stomp.Stomp;
 import org.apache.activemq.transport.stomp.Stomp.Headers.Subscribe;
@@ -63,9 +64,8 @@ public class StompTest extends SignalKCamelTestSupport {
 	public void testSubscribe() throws Exception {
 		// fill the model with data
 		SignalKModel model = SignalKModelFactory.getMotuTestInstance();
-
-		model = Util.populateModel(model, new File(
-				"src/test/resources/samples/basicModel.txt"));
+		model.putAll(TestHelper.getBasicModel().getFullData());
+		
 
 		// create STOMP connection
 		StompConnection connection = new StompConnection();
@@ -157,9 +157,7 @@ public class StompTest extends SignalKCamelTestSupport {
 	public void testSendingList() throws Exception {
 		// fill the model with data
 		SignalKModel model = SignalKModelFactory.getMotuTestInstance();
-
-		model = Util.populateModel(model, new File(
-				"src/test/resources/samples/basicModel.txt"));
+		model.putAll(TestHelper.getBasicModel().getFullData());
 
 		// create STOMP connection
 		StompConnection connection = new StompConnection();
@@ -207,9 +205,7 @@ public class StompTest extends SignalKCamelTestSupport {
 	public void testSendingGetFull() throws Exception {
 		// fill the model with data
 		SignalKModel model = SignalKModelFactory.getMotuTestInstance();
-
-		model = Util.populateModel(model, new File(
-				"src/test/resources/samples/basicModel.txt"));
+		model.putAll(TestHelper.getBasicModel().getFullData());
 
 		// create STOMP connection
 		StompConnection connection = new StompConnection();
@@ -261,9 +257,7 @@ public class StompTest extends SignalKCamelTestSupport {
 	public void testSendingGetDelta() throws Exception {
 		// fill the model with data
 		SignalKModel model = SignalKModelFactory.getMotuTestInstance();
-
-		model = Util.populateModel(model, new File(
-				"src/test/resources/samples/basicModel.txt"));
+		model.putAll(TestHelper.getBasicModel().getFullData());
 
 		// create STOMP connection
 		StompConnection connection = new StompConnection();

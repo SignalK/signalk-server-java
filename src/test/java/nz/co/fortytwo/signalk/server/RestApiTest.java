@@ -65,6 +65,7 @@ public class RestApiTest extends SignalKCamelTestSupport {
 		}
 	}
 
+	//TODO - test for empty context + path, eg /resources/...
 	@Test
     public void shouldGetJsonResponse() throws Exception {
 		

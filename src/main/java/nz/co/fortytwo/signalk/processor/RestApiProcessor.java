@@ -229,7 +229,7 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 		String context = Util.getContext(path);
 		if (logger.isDebugEnabled())
 			logger.debug("Processing the context:" + context);
-		if (path.length() > context.length()) {
+		if (path.length() > context.length() && context.length()>0) {
 			path = path.substring(context.length() + 1);
 		} else {
 			path = "*";

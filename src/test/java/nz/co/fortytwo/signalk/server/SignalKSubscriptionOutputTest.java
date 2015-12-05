@@ -38,6 +38,7 @@ import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
 import nz.co.fortytwo.signalk.processor.WindProcessor;
 import nz.co.fortytwo.signalk.util.JsonSerializer;
 import nz.co.fortytwo.signalk.util.Util;
+import nz.co.fortytwo.signalk.util.TestHelper;
 
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
@@ -72,7 +73,9 @@ public class SignalKSubscriptionOutputTest extends SignalKCamelTestSupport {
 		SignalKModel model = SignalKModelFactory.getCleanInstance();
 		SignalKModelFactory.loadConfig(signalkModel);
 		logger.debug("SignalKModel at init:"+signalkModel);
-		model = Util.populateModel(model, new File("src/test/resources/samples/basicModel.txt"));
+		
+		model.putAll(TestHelper.getBasicModel().getFullData());
+		
 		JsonSerializer ser = new JsonSerializer();
 		jsonString=ser.write(model);
 	}

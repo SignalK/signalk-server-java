@@ -90,7 +90,7 @@ public class RouteManager extends RouteBuilder {
 	private JmmDNS jmdns = null;
 	private int wsPort = 3000;
 	private int restPort = 8080;
-	private String streamUrl;
+	//private String streamUrl;
 	
 	private SerialPortManager serialPortManager;
     
@@ -106,11 +106,7 @@ public class RouteManager extends RouteBuilder {
 		wsPort=Util.getConfigPropertyInt(Constants.WEBSOCKET_PORT);
 		logger.info("  Signalk REST API port:"+Util.getConfigPropertyInt(Constants.REST_PORT));
 		restPort=Util.getConfigPropertyInt(Constants.REST_PORT);
-		//are we running demo?
-		if (Boolean.valueOf(Util.getConfigPropertyBoolean(Constants.DEMO))) {
-			logger.info("  Demo streaming url:"+Util.getConfigProperty(Constants.STREAM_URL));
-			setStreamUrl(Util.getConfigProperty(Constants.STREAM_URL));
-		}
+		
 	}
 
 	@Override
@@ -294,6 +290,8 @@ public class RouteManager extends RouteBuilder {
 		
 		//Demo mode
 		if (Util.getConfigPropertyBoolean(Constants.DEMO)) {
+			String streamUrl = Util.getConfigProperty(Constants.STREAM_URL);
+			logger.info("  Demo streaming url:"+Util.getConfigProperty(Constants.STREAM_URL));
 			from("file://./src/test/resources/samples/?move=done&fileName=" + streamUrl).id("demo feed")
 				.onException(Exception.class).handled(true).maximumRedeliveries(0)
 				.to("log:nz.co.fortytwo.signalk.model.receive?level=ERROR&showException=true&showStackTrace=true")
@@ -321,17 +319,6 @@ public class RouteManager extends RouteBuilder {
 		txtSet.put("vessel_mmsi",Util.getConfigProperty(Constants.SELF));
 		txtSet.put("vessel_uuid",Util.getConfigProperty(Constants.SELF));
 		return txtSet;
-	}
-
-	/**
-	 * @return
-	 */
-	public String getStreamUrl() {
-		return streamUrl;
-	}
-
-	public void setStreamUrl(String serialUrl) {
-		this.streamUrl = serialUrl;
 	}
 
 	public void stopNettyServers(){

@@ -36,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
+import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelImpl;
 import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
 import nz.co.fortytwo.signalk.processor.WindProcessor;
@@ -43,6 +44,7 @@ import nz.co.fortytwo.signalk.util.JsonConstants;
 import nz.co.fortytwo.signalk.util.JsonSerializer;
 import nz.co.fortytwo.signalk.util.SignalKConstants;
 import nz.co.fortytwo.signalk.util.Util;
+import nz.co.fortytwo.signalk.util.TestHelper;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.ProducerTemplate;
@@ -77,8 +79,9 @@ public class SignalKGetOutputTest extends SignalKCamelTestSupport {
 		template.setDefaultEndpointUri(DIRECT_INPUT);
 		template.start();
 		//get model
-		SignalKModel model = new SignalKModelImpl();
-		model = Util.populateModel(model, new File("src/test/resources/samples/basicModel.txt"));
+		SignalKModel model = SignalKModelFactory.getMotuTestInstance();
+		model.putAll(TestHelper.getBasicModel().getFullData());
+		
 		JsonSerializer ser = new JsonSerializer();
 		jsonString=ser.write(model);
 	}
