@@ -22,6 +22,8 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
+import com.google.common.collect.ImmutableList;
+import nz.co.fortytwo.signalk.util.Position;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.dot;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.key;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.name;
@@ -36,13 +38,14 @@ import static nz.co.fortytwo.signalk.util.SignalKConstants.value;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels_dot_self_dot;
 
 import java.io.IOException;
+import java.util.List;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.handler.JsonStorageHandler;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.util.ConfigConstants;
-import nz.co.fortytwo.signalk.util.SGImplify;
 import nz.co.fortytwo.signalk.util.SignalKConstants;
+import nz.co.fortytwo.signalk.util.TrackSimplifier;
 import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Exchange;
@@ -61,21 +64,24 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 	private static final String COORDINATES = "coordinates";
 	private static final String GEOMETRY = "geometry";
 	private static final String FEATURES = "features";
+	private static final String GEOJSON = "{\"features\":[{\"geometry\":{\"coordinates\":[],\"type\":\"LineString\"},\"properties\":null,\"id\":\"laqz\",\"type\":\"Feature\"}],\"type\":\"FeatureCollection\"}";
+
+	// simplify to about 2m out of true (at equator)
+	private static final double TRACK_TOLERANCE = 0.00002;
+
+	private static final int MAX_COUNT = 5000;
+	private static final int SAVE_COUNT = 60;
+
 	private static Logger logger = Logger.getLogger(TrackProcessor.class);
 	private static String latKey = vessels_dot_self_dot + nav_position_latitude;
 	private static String lonKey = vessels_dot_self_dot + nav_position_longitude;
-	private JsonStorageHandler storageHandler = null;
 	private Json msg = Json.object();
 	private Json currentTrack;
 	private Json coords;
 	private Json geometry;
-	private static String geojson = "{\"features\":[{\"geometry\":{\"coordinates\":[],\"type\":\"LineString\"},\"properties\":null,\"id\":\"laqz\",\"type\":\"Feature\"}],\"type\":\"FeatureCollection\"}";
-	private static int maxCount = 5000;
-	private static int saveCount = 60;
 	private static int count = 0;
 
 	public TrackProcessor() throws Exception {
-		storageHandler = new JsonStorageHandler();
 		Json val = Json.object();
 		val.set(SignalKConstants.PATH, resources_routes + dot + SignalKConstants.currentTrack);
 		currentTrack = Json.object();
@@ -102,6 +108,7 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 		// do we have an existing one? we dont want to stomp on it
 		currentTrack.set("uri", "vessels/self/resources/routes/currentTrack.geojson");
 		try {
+			JsonStorageHandler storageHandler = new JsonStorageHandler();
 			storageHandler.handle(msg);
 			// should now have any existing track, so archive it, and start
 			// fresh
@@ -110,7 +117,7 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 			// no file, or unreadable
 			currentTrack.delAt("uri");
 		}
-		Json geoJson = Json.read(geojson);
+		Json geoJson = Json.read(GEOJSON);
 		geometry = geoJson.at(FEATURES).at(0).at(GEOMETRY);
 		coords = geometry.at(COORDINATES);
 		currentTrack.set(ConfigConstants.PAYLOAD, geoJson);
@@ -142,28 +149,47 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 			coords.add(Json.array(node.get(lonKey), node.get(latKey)));
 			count++;
 			// append to file
-			if (count % saveCount == 0) {
+			if (count % SAVE_COUNT == 0) {
 				// save it
 				// if(logger.isDebugEnabled())logger.debug("Track:"+msg);
 				inProducer.sendBody(msg.toString());
 			}
-			if (count % (saveCount * 4) == 0) {
-				// simplify to about 2m out of true (at equator)
+			if (count % (SAVE_COUNT * 4) == 0) {
 				if (logger.isDebugEnabled())
 					logger.debug("Simplify Track, size:" + coords.asList().size());// +":"+coords);
-				coords = SGImplify.simplifyLine2D(0.00002, coords);
+				List<Position> positions = positionsFor(coords);
+				List<Position> simplified = TrackSimplifier.simplify(positions, TRACK_TOLERANCE);
+				coords = jsonFor(simplified);
 				geometry.set(COORDINATES, coords);
 				if (logger.isDebugEnabled())
 					logger.debug("  done, size:" + coords.asList().size());
 				count = coords.asList().size();
 			}
 			// reset?
-			if (count > maxCount) {
+			if (count > MAX_COUNT) {
 				archiveTrack(msg);
 				count = 0;
 				coords.asJsonList().clear();
 			}
 		}
+	}
+
+	private static List<Position> positionsFor(Json coords) {
+		ImmutableList.Builder<Position> positions = ImmutableList.builder();
+		for (Json json : coords.asJsonList()) {
+			double longitude = json.at(0).asDouble();
+			double latitude = json.at(1).asDouble();
+			positions.add(new Position(latitude, longitude));
+		}
+		return positions.build();
+	}
+
+	private static Json jsonFor(List<Position> positions) {
+		Json coords = Json.array();
+		for (Position position : positions) {
+			coords.add(Json.array(position.longitude(), position.latitude()));
+		}
+		return coords;
 	}
 
 	private void archiveTrack(Json message) {
