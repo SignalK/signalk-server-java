@@ -58,7 +58,7 @@ public class SerialPortManager implements Runnable, Processor {
 	public void run() {
 		// not running, start now.
 		ProducerTemplate producer = CamelContextFactory.getInstance().createProducerTemplate();
-		producer.setDefaultEndpointUri("seda:input");
+		producer.setDefaultEndpointUri(RouteManager.SEDA_INPUT);
 		
 		while (running) {
 			// remove any stopped readers
@@ -71,10 +71,13 @@ public class SerialPortManager implements Runnable, Processor {
 				if(logger.isDebugEnabled())logger.debug("Comm port " + reader.getPortName() + " currently running");
 			}
 			serialPortList.removeAll(tmpPortList);
-			
-			String portStr ="/dev/ttyUSB0,/dev/ttyUSB1,/dev/ttyUSB2";
+			//json array
+			String portStr ="[\"/dev/ttyUSB0\",\"/dev/ttyUSB1\",\"/dev/ttyUSB2\"]";
 			portStr = Util.getConfigProperty(ConfigConstants.SERIAL_PORTS);
-			
+			portStr=portStr.replace("[", "");
+			portStr=portStr.replace("]", "");
+			portStr=portStr.replace("\"", "");
+			//now we have just comma delim text.
 			String[] ports = portStr.split(",");
 			for (String port:ports) {
 				boolean portOk = false;
@@ -104,16 +107,16 @@ public class SerialPortManager implements Runnable, Processor {
 					SerialPortReader serial = new SerialPortReader();
 					serial.setProducer(producer);
 					//default 38400, then freeboard.cfg default, then freeboard.cfg per port
-					String baudStr = Util.getConfigProperty(ConfigConstants.SERIAL_PORT_BAUD);
-					if(logger.isDebugEnabled())logger.debug("Comm port default found and connecting at "+baudStr+"...");
+					int baudRate = Util.getConfigPropertyInt(ConfigConstants.SERIAL_PORT_BAUD);
 					//get port name
 					String portName = port;
 					if(port.indexOf("/")>0){
 						portName=port.substring(port.lastIndexOf("/")+1);
 					}
-					baudStr = Util.getConfigProperty(ConfigConstants.SERIAL_PORT_BAUD+"."+portName);
+					if(Util.getConfigPropertyInt(ConfigConstants.SERIAL_PORT_BAUD+"."+portName)!=null){
+						baudRate = Util.getConfigPropertyInt(ConfigConstants.SERIAL_PORT_BAUD+"."+portName);
+					}
 					if(logger.isDebugEnabled())logger.debug("Comm port "+ConfigConstants.SERIAL_PORT_BAUD+"."+portName+" override="+Util.getConfigProperty(ConfigConstants.SERIAL_PORT_BAUD+"."+portName));
-					int baudRate = Integer.valueOf(baudStr);
 					if(logger.isDebugEnabled())logger.debug("Comm port " + port + " found and connecting at "+baudRate+"...");
 					serial.connect(port, baudRate);
 					if(logger.isDebugEnabled())logger.info("Comm port " + port + " found and connected");

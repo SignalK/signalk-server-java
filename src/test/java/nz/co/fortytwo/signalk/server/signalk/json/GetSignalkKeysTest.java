@@ -57,12 +57,18 @@ public class GetSignalkKeysTest {
 	public void printKeys() throws IOException{
 
 		getAlarmKeys();
+		getSchemaKeys("design");
 		getCommunicationKeys();
+		getSchemaKeys("electrical_ac");
+		getSchemaKeys("electrical_dc");
 		getEnvironmentKeys();
 		getNavigationKeys();
+		getSchemaKeys("performance");
 		getPropulsionKeys();
 		getResourcesKeys();
+		getSchemaKeys("sails");
 		getSensorsKeys();
+		//getSchemaKeys("sources");
 		getSteeringKeys();
 		getTanksKeys();
 		for(String str: strings){
@@ -74,6 +80,14 @@ public class GetSignalkKeysTest {
 			constantName=constantName.replaceAll("navigation_", "nav_");
 			System.out.println(constantName.toUpperCase()+" = \""+keyName+"\"");
 		}
+	}
+	
+	public void getSchemaKeys(String group) throws IOException {
+		String env = FileUtils.readFileToString(new File(("/home/robert/gitrep/specification/schemas/groups/"+group+".json")));
+		//env = env.replaceAll("$","");
+		Json schema = Json.read(env);
+		System.out.println("public static final String environment = \""+group+"\";");
+		extractKeys(schema, group);
 	}
 	
 	public void getEnvironmentKeys() throws IOException {

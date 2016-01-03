@@ -31,7 +31,7 @@
             "source": "system"
          },
          "demo": {
-            "file": "./src/test/resources/motu.log&scanStream=true&scanStreamDelay=500",
+            "file": "PacCupStartNMEA.txt",
             "start": false
          },
          "files": {
@@ -65,6 +65,7 @@
          },
          "serial": {
             "baud": 38400.0,
+            "enable": true,
             "ports": ["/dev/ttyUSB0","/dev/ttyUSB1","/dev/ttyUSB2","/dev/ttyACM0","/dev/ttyACM1","/dev/ttyACM2"]
          },
          "server": {
@@ -100,7 +101,7 @@
          },
          "version": "0.1",
          "vessel": {
-            "uuid": "motu"
+            "uuid": "self"
          }
       }
    }

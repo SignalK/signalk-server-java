@@ -145,7 +145,7 @@ public class SerialPortReader implements Processor {
 		private Pattern uid;
 		List<String> lines = new ArrayList<String>();
 		StringBuffer line = new StringBuffer(60);
-		private boolean sendMessage=true;
+		private boolean enableSerial=true;
 		private boolean complete;
 		private InputStream in;
 		byte[] buff = new byte[256]; 
@@ -160,7 +160,7 @@ public class SerialPortReader implements Processor {
 			headers.put(SignalKConstants.MSG_SERIAL_PORT, portName);
 			uid = Pattern.compile(ConfigConstants.UID + ":");
 			if(logger.isDebugEnabled())logger.info("Setup serialReader on :"+portName);
-			sendMessage = new Boolean(Util.getConfigProperty(ConfigConstants.SEND_MESSAGE));
+			enableSerial = Util.getConfigPropertyBoolean(ConfigConstants.ENABLE_SERIAL);
 		}
 
 		
@@ -199,20 +199,20 @@ public class SerialPortReader implements Processor {
 								//its not empty!
 								if(lineStr.length()>0){
 									//map it if we havent already
-									/*if (!mapped && uid.matcher(lineStr).matches()) {
+									if (!mapped && uid.matcher(lineStr).matches()) {
 										// add to map
 										logger.debug(portName + ":Serial Received:" + lineStr);
-										String type = StringUtils.substringBetween(lineStr, Constants.UID + ":", ",");
+										String type = StringUtils.substringBetween(lineStr, ConfigConstants.UID + ":", ",");
 										if (type != null) {
 											logger.debug(portName + ":  device name:" + type);
 											deviceType = type.trim();
 											mapped = true;
 										}
-									}*/
-									if(sendMessage){
+									}
+									if(enableSerial){
 										producer.sendBodyAndHeaders(lineStr,headers);
 									}else{
-										if(logger.isDebugEnabled())logger.debug("sendMessage false:"+lineStr);
+										if(logger.isDebugEnabled())logger.debug("enableSerial false:"+lineStr);
 									}
 								}
 								complete=false;

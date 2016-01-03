@@ -73,6 +73,11 @@ public class JsonSubscribeProcessor extends SignalkProcessor implements Processo
 			if(json.has(CONTEXT) && (json.has(SUBSCRIBE) || json.has(UNSUBSCRIBE))){
 				json = handle(json, exchange.getIn().getHeaders());
 				exchange.getIn().setBody(json);
+			}else{
+				if(logger.isDebugEnabled()){
+					logger.debug("Subscribe msg class: "+exchange.getIn().getBody().getClass());
+					logger.debug("Subscribe msg: "+exchange.getIn().getBody());
+				}
 			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);

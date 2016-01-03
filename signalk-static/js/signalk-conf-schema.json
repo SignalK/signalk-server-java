@@ -512,6 +512,15 @@
 										57600,
 										115200
 									]
+								},
+								"enable": 
+								{
+									"id": "http://jsonschema.net/signalk/config/server/serial/enable",
+									"type": "boolean",
+									"title": "Enable Serial",
+									"description": "Enable incoming data via serial",
+									"name": "enable",
+									"default": true
 								}
 							}
 						},
