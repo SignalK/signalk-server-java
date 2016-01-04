@@ -94,7 +94,7 @@ public class SignalKSubscriptionOutputTest extends SignalKCamelTestSupport {
          template.sendBody(DIRECT_INPUT,jsonString);
          latch.await(2,TimeUnit.SECONDS);
 		 logger.debug("SignalKModel:"+signalkModel);
-		 assertEquals(11.96d,(double)signalkModel.getValue(vessels_dot_self_dot + nav_courseOverGroundTrue),0.00001);
+		 assertEquals(Math.toRadians(11.96d),(double)signalkModel.getValue(vessels_dot_self_dot + nav_courseOverGroundTrue),0.00001);
 		 logger.debug("Lat :"+(double)signalkModel.get(vessels_dot_self_dot + nav_position_latitude));
 		 
 		 //add a sub
@@ -115,7 +115,7 @@ public class SignalKSubscriptionOutputTest extends SignalKCamelTestSupport {
          template.sendBody(DIRECT_INPUT,jsonString);
          latch.await(2,TimeUnit.SECONDS);
 		 logger.debug("SignalKModel:"+signalkModel);
-		 assertEquals(11.96d,(double)signalkModel.getValue(vessels_dot_self_dot + nav_courseOverGroundTrue),0.001);
+		 assertEquals(Math.toRadians(11.96d),(double)signalkModel.getValue(vessels_dot_self_dot + nav_courseOverGroundTrue),0.001);
 		 logger.debug("Lat :"+(double)signalkModel.get(vessels_dot_self_dot + nav_position_latitude));
 		 
 		 //add a sub
@@ -138,7 +138,7 @@ public class SignalKSubscriptionOutputTest extends SignalKCamelTestSupport {
          template.sendBody(DIRECT_INPUT,jsonString);
          latch.await(2,TimeUnit.SECONDS);
 		 logger.debug("SignalKModel:"+signalkModel);
-		 assertEquals(11.96d,(double)signalkModel.getValue(vessels_dot_self_dot + nav_courseOverGroundTrue),0.00001);
+		 assertEquals(Math.toRadians(11.96d),(double)signalkModel.getValue(vessels_dot_self_dot + nav_courseOverGroundTrue),0.00001);
 		 logger.debug("Lat :"+(double)signalkModel.get(vessels_dot_self_dot + nav_position_latitude));
 		 
 		 //add a sub

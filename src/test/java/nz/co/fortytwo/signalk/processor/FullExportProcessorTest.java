@@ -171,10 +171,10 @@ public class FullExportProcessorTest {
 				
 				resultEndpoint.assertIsSatisfied();
 				//assertEquals(pos+":rcvdCounter != actual received counter",rcvdCounter, resultEndpoint.getReceivedCounter());
-				
+				int sizeAfter = processor.queue.size();
 				resultEndpoint.reset();
 				
-				assertEquals(pos+":MapSizeAfter != queue size", mapSizeAfter, processor.queue.size());
+				assertEquals(pos+":MapSizeAfter != queue size", mapSizeAfter, sizeAfter);
 				for(Exchange e: resultEndpoint.getExchanges()){
 					logger.debug(e.getIn().getBody());
 				}

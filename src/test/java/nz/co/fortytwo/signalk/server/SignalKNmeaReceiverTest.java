@@ -157,7 +157,7 @@ public class SignalKNmeaReceiverTest extends SignalKCamelTestSupport {
 		// assertEquals(20.0d,signalkModel.getValue(vessels_dot_self_dot +env_wind_speedApparent ),0.00001);
 		 declinationProcessor.handle(signalkModel);
 		 logger.debug("SignalKModel:"+signalkModel);
-		 assertEquals(0.8d,(double)signalkModel.getValue(vessels_dot_self_dot +nav_magneticVariation ),0.00001);
+		 assertEquals(0.014248d,(double)signalkModel.getValue(vessels_dot_self_dot +nav_magneticVariation ),0.00001);
 		 nmea.assertIsSatisfied();
     }
 
