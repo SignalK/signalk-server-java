@@ -120,7 +120,7 @@ public class RouteManager extends RouteBuilder {
 		CamelContextFactory.getInstance().getShutdownStrategy().setTimeout(10);
 		
 		//DNS-SD
-		NetworkTopologyDiscovery netTop = NetworkTopologyDiscovery.Factory.getInstance();
+		//NetworkTopologyDiscovery netTop = NetworkTopologyDiscovery.Factory.getInstance();
 		
 		jmdns = JmmDNS.Factory.getInstance();
 		

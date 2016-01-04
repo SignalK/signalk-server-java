@@ -354,8 +354,8 @@
 			<groupId>javax.jmdns</groupId>
 			<artifactId>jmdns</artifactId>
 			<version>3.4.2-SNAPSHOT</version>
- 			<scope>system</scope>
-          	<systemPath>${project.basedir}/src/main/release/jmdns-3.4.2-SNAPSHOT.jar</systemPath>
+<!--  			<scope>system</scope> -->
+<!--           	<systemPath>${project.basedir}/src/main/release/jmdns-3.4.2-SNAPSHOT.jar</systemPath> -->
 		</dependency>
 
 	</dependencies>
