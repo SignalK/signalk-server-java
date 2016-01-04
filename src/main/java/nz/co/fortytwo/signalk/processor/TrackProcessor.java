@@ -64,22 +64,25 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 	private static final String COORDINATES = "coordinates";
 	private static final String GEOMETRY = "geometry";
 	private static final String FEATURES = "features";
+	private static final String GEOJSON = "{\"features\":[{\"geometry\":{\"coordinates\":[],\"type\":\"LineString\"},\"properties\":null,\"id\":\"laqz\",\"type\":\"Feature\"}],\"type\":\"FeatureCollection\"}";
+
+	// simplify to about 2m out of true (at equator)
+	private static final double TRACK_TOLERANCE = 0.00002;
+
+	private static final int MAX_COUNT = 5000;
+	private static final int SAVE_COUNT = 60;
+
 	private static Logger logger = Logger.getLogger(TrackProcessor.class);
 	private static String latKey = vessels_dot_self_dot + nav_position_latitude;
 	private static String lonKey = vessels_dot_self_dot + nav_position_longitude;
-	private JsonStorageHandler storageHandler = null;
 	private Json msg = Json.object();
 	private Json currentTrack;
 	private List<Position> track = new ArrayList<Position>();
 	private Json coords;
 	private Json geometry;
-	private static String geojson = "{\"features\":[{\"geometry\":{\"coordinates\":[],\"type\":\"LineString\"},\"properties\":null,\"id\":\"laqz\",\"type\":\"Feature\"}],\"type\":\"FeatureCollection\"}";
-	private static int maxCount = 5000;
-	private static int saveCount = 60;
 	private static int count = 0;
 
 	public TrackProcessor() throws Exception {
-		storageHandler = new JsonStorageHandler();
 		Json val = Json.object();
 		val.set(SignalKConstants.PATH, resources_routes + dot + SignalKConstants.currentTrack);
 		currentTrack = Json.object();
@@ -106,6 +109,7 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 		// do we have an existing one? we dont want to stomp on it
 		currentTrack.set("uri", "vessels/self/resources/routes/currentTrack.geojson");
 		try {
+			JsonStorageHandler storageHandler = new JsonStorageHandler();
 			storageHandler.handle(msg);
 			// should now have any existing track, so archive it, and start
 			// fresh
@@ -114,7 +118,7 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 			// no file, or unreadable
 			currentTrack.delAt("uri");
 		}
-		Json geoJson = Json.read(geojson);
+		Json geoJson = Json.read(GEOJSON);
 		geometry = geoJson.at(FEATURES).at(0).at(GEOMETRY);
 		coords = geometry.at(COORDINATES);
 		currentTrack.set(ConfigConstants.PAYLOAD, geoJson);
@@ -146,22 +150,22 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 			track.add(new Position((double)node.get(latKey), (double)node.get(lonKey)));
 			count++;
 			// append to file
-			if (count % saveCount == 0) {
+			if (count % SAVE_COUNT == 0) {
 				// save it
 				// if(logger.isDebugEnabled())logger.debug("Track:"+msg);
 				inProducer.sendBody(msg.toString());
 			}
-			if (count % (saveCount * 4) == 0) {
-				// simplify to about 2m out of true (at equator)
+			if (count % (SAVE_COUNT * 4) == 0) {
 				if (logger.isDebugEnabled())
 					logger.debug("Simplify Track, size:" + coords.asList().size());// +":"+coords);
-				track = TrackSimplifier.simplify(track, 0.00002);
+				track = TrackSimplifier.simplify(track, TRACK_TOLERANCE);
+
 				if (logger.isDebugEnabled())
 					logger.debug("  done, size:" + coords.asList().size());
 				count = track.size();
 			}
 			// reset?
-			if (count > maxCount) {
+			if (count > MAX_COUNT) {
 				for(Position p: track){
 					coords.add(Json.array(p.longitude(), p.latitude()));
 				}
@@ -173,6 +177,8 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 			}
 		}
 	}
+
+
 
 	private void archiveTrack(Json message) {
 		Json lastTrack = message.dup();

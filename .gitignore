@@ -1,3 +1,10 @@
 /target
 /logs
 /storage
+
+# exclude IDE stuff
+.settings
+.project
+.classpath
+.idea
+*.iml
