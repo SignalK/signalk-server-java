@@ -36,13 +36,16 @@ import static nz.co.fortytwo.signalk.util.SignalKConstants.value;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels_dot_self_dot;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.handler.JsonStorageHandler;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.util.ConfigConstants;
-import nz.co.fortytwo.signalk.util.SGImplify;
+import nz.co.fortytwo.signalk.util.Position;
 import nz.co.fortytwo.signalk.util.SignalKConstants;
+import nz.co.fortytwo.signalk.util.TrackSimplifier;
 import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Exchange;
@@ -67,6 +70,7 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 	private JsonStorageHandler storageHandler = null;
 	private Json msg = Json.object();
 	private Json currentTrack;
+	private List<Position> track = new ArrayList<Position>();
 	private Json coords;
 	private Json geometry;
 	private static String geojson = "{\"features\":[{\"geometry\":{\"coordinates\":[],\"type\":\"LineString\"},\"properties\":null,\"id\":\"laqz\",\"type\":\"Feature\"}],\"type\":\"FeatureCollection\"}";
@@ -139,7 +143,7 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 			if (logger.isTraceEnabled())
 				logger.trace("TrackProcessor  updating " + node);
 			// we have a track change.
-			coords.add(Json.array(node.get(lonKey), node.get(latKey)));
+			track.add(new Position((double)node.get(latKey), (double)node.get(lonKey)));
 			count++;
 			// append to file
 			if (count % saveCount == 0) {
@@ -151,17 +155,21 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 				// simplify to about 2m out of true (at equator)
 				if (logger.isDebugEnabled())
 					logger.debug("Simplify Track, size:" + coords.asList().size());// +":"+coords);
-				coords = SGImplify.simplifyLine2D(0.00002, coords);
-				geometry.set(COORDINATES, coords);
+				track = TrackSimplifier.simplify(track, 0.00002);
 				if (logger.isDebugEnabled())
 					logger.debug("  done, size:" + coords.asList().size());
-				count = coords.asList().size();
+				count = track.size();
 			}
 			// reset?
 			if (count > maxCount) {
+				for(Position p: track){
+					coords.add(Json.array(p.longitude(), p.latitude()));
+				}
+				geometry.set(COORDINATES, coords);
 				archiveTrack(msg);
 				count = 0;
 				coords.asJsonList().clear();
+				track.clear();
 			}
 		}
 	}
