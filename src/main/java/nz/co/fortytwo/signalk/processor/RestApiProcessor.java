@@ -152,10 +152,6 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 	}
 
 	private void processPut(Exchange exchange, String path) {
-		if (path.startsWith(SignalKConstants.SIGNALK_ENDPOINTS)) {
-			// cant PUT here
-			return;
-		}
 		path = standardizePath(path);
 
 		String context = Util.getContext(path);
@@ -195,8 +191,6 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 			return true;
 		if (path.startsWith(SignalKConstants.SIGNALK_API))
 			return true;
-		if (path.startsWith(SignalKConstants.SIGNALK_ENDPOINTS))
-			return true;
 		return false;
 	}
 
@@ -224,26 +218,6 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 			return;
 		}
 
-		// TODO: remove old check addresses request
-		if (path.startsWith(SignalKConstants.SIGNALK_ENDPOINTS)) {
-			exchange.getIn().setHeader(Exchange.CONTENT_TYPE,
-					"application/json");
-			// SEND RESPONSE
-			exchange.getIn().setHeader(Exchange.HTTP_RESPONSE_CODE,
-					HttpServletResponse.SC_OK);
-			path = path.substring(SignalKConstants.SIGNALK_ENDPOINTS.length());
-			String host = (String) exchange.getIn()
-					.getHeader(Exchange.HTTP_URL);
-			// could be http://localhost:8080
-			int pos1 = host.indexOf("//") + 2;
-			int pos2 = host.indexOf(":", pos1);
-			if (pos2 < 0)
-				pos2 = host.indexOf("/", pos1);
-			host = host.substring(pos1, pos2);
-			Json json = Util.getEndpoints(host);
-			exchange.getIn().setBody(json.toString());
-			return;
-		}
 		path = standardizePath(path);
 
 		String context = Util.getContext(path);
@@ -292,6 +266,7 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 
 	}
 
+	// TODO: This should come from the configuration used to start the endpoints.
 	static Json discovery(String hostname) {
 		Json endpoints = Json.object();
 		endpoints.set(SignalKConstants.websocketUrl, "ws://" + hostname + ":"

@@ -24,7 +24,7 @@
 package nz.co.fortytwo.signalk.server;
 
 import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_AUTH;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_ENDPOINTS;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_DISCOVERY;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_WS;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.websocketUrl;
 
@@ -81,9 +81,9 @@ public class SubcribeWsTest extends SignalKCamelTestSupport{
         //get a sessionid
         Response r1 = c.prepareGet("http://localhost:"+restPort+SIGNALK_AUTH+"/demo/pass").execute().get();
         assertEquals(200, r1.getStatusCode());
-        Response r2 = c.prepareGet("http://localhost:"+restPort+SIGNALK_ENDPOINTS).setCookies(r1.getCookies()).execute().get();
+        Response r2 = c.prepareGet("http://localhost:"+restPort+SIGNALK_DISCOVERY).setCookies(r1.getCookies()).execute().get();
         Json json = Json.read(r2.getResponseBody());
-        assertEquals("ws://localhost:"+wsPort+SIGNALK_WS, json.at(websocketUrl).asString());
+        assertEquals("ws://localhost:"+wsPort+SIGNALK_WS, json.at("endpoints").at(websocketUrl).asString());
         c.close();
 	}
 	
@@ -98,11 +98,11 @@ public class SubcribeWsTest extends SignalKCamelTestSupport{
         template.sendBody(RouteManager.SEDA_INPUT,jsonDiff);
         //get a sessionid
         Response r1 = c.prepareGet("http://localhost:"+restPort+SIGNALK_AUTH+"/demo/pass").execute().get();
-        Response r2 = c.prepareGet("http://localhost:"+restPort+SIGNALK_ENDPOINTS).setCookies(r1.getCookies()).execute().get();
+        Response r2 = c.prepareGet("http://localhost:"+restPort+SIGNALK_DISCOVERY).setCookies(r1.getCookies()).execute().get();
         Json json = Json.read(r2.getResponseBody());
         latch2.await(3, TimeUnit.SECONDS);
       //await messages
-        WebSocket websocket = c.prepareGet(json.at(websocketUrl).asString()).setCookies(r1.getCookies()).execute(
+        WebSocket websocket = c.prepareGet(json.at("endpoints").at(websocketUrl).asString()).setCookies(r1.getCookies()).execute(
                 new WebSocketUpgradeHandler.Builder()
                     .addWebSocketListener(new WebSocketTextListener() {
                         @Override
