@@ -25,6 +25,8 @@ package nz.co.fortytwo.signalk.processor;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,10 +34,12 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import mjson.Json;
+import nz.co.fortytwo.signalk.util.ConfigConstants;
 import nz.co.fortytwo.signalk.util.SignalKConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Exchange;
+import org.apache.camel.Message;
 import org.apache.camel.Processor;
 import org.apache.camel.StreamCache;
 import org.apache.camel.component.http.HttpMessage;
@@ -187,6 +191,8 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 	private boolean isValidPath(String path) {
 		if (StringUtils.isBlank(path))
 			return false;
+		if (path.equals(SignalKConstants.SIGNALK_DISCOVERY))
+			return true;
 		if (path.startsWith(SignalKConstants.SIGNALK_API))
 			return true;
 		if (path.startsWith(SignalKConstants.SIGNALK_ENDPOINTS))
@@ -194,9 +200,31 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 		return false;
 	}
 
-	private void processGet(Exchange exchange, String path)
-			throws UnknownHostException {
-		// check addresses request
+	private void processGet(Exchange exchange, String path) throws UnknownHostException {
+
+		// discovery request
+		if (path.equals(SignalKConstants.SIGNALK_DISCOVERY)) {
+			Message in = exchange.getIn();
+
+			String hostname = Util.getConfigProperty(ConfigConstants.HOSTNAME);
+			if (StringUtils.isBlank(hostname)) {
+				try {
+					String header = (String) in.getHeader(Exchange.HTTP_URL);
+					hostname = new URI(header).getHost();
+				} catch (URISyntaxException e) {
+					// Should not happen as we expect Camel to return a valid URI.
+					logger.warn("Invalid URI returned from Exchange: " + in.getHeader(Exchange.HTTP_URL));
+					hostname = "localhost";
+				}
+			}
+
+			in.setHeader(Exchange.CONTENT_TYPE, "application/json");
+			in.setHeader(Exchange.HTTP_RESPONSE_CODE, HttpServletResponse.SC_OK);
+			in.setBody(discovery(hostname).toString());
+			return;
+		}
+
+		// TODO: remove old check addresses request
 		if (path.startsWith(SignalKConstants.SIGNALK_ENDPOINTS)) {
 			exchange.getIn().setHeader(Exchange.CONTENT_TYPE,
 					"application/json");
@@ -262,6 +290,31 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 			logger.debug("Processing the GET request:"
 					+ exchange.getIn().getBody());
 
+	}
+
+	static Json discovery(String hostname) {
+		Json endpoints = Json.object();
+		endpoints.set(SignalKConstants.websocketUrl, "ws://" + hostname + ":"
+				+ Util.getConfigPropertyInt(ConfigConstants.WEBSOCKET_PORT)
+				+ SignalKConstants.SIGNALK_WS);
+		endpoints.set(SignalKConstants.restUrl, "http://" + hostname + ":"
+				+ Util.getConfigPropertyInt(ConfigConstants.REST_PORT)
+				+ SignalKConstants.SIGNALK_API + "/");
+		endpoints.set(SignalKConstants.signalkTcpPort, "tcp://" + hostname + ":"
+				+ Util.getConfigPropertyInt(ConfigConstants.TCP_PORT));
+		endpoints.set(SignalKConstants.signalkUdpPort, "udp://" + hostname + ":"
+				+ Util.getConfigPropertyInt(ConfigConstants.UDP_PORT));
+		endpoints.set(SignalKConstants.nmeaTcpPort, "tcp://" + hostname + ":"
+				+ Util.getConfigPropertyInt(ConfigConstants.TCP_NMEA_PORT));
+		endpoints.set(SignalKConstants.nmeaUdpPort, "udp://" + hostname + ":"
+				+ Util.getConfigPropertyInt(ConfigConstants.UDP_NMEA_PORT));
+		if (Util.getConfigPropertyBoolean(ConfigConstants.START_STOMP))
+			endpoints.set(SignalKConstants.stompPort, "stomp+nio://" + hostname + ":"
+					+ Util.getConfigPropertyInt(ConfigConstants.STOMP_PORT));
+		if (Util.getConfigPropertyBoolean(ConfigConstants.START_MQTT))
+			endpoints.set(SignalKConstants.mqttPort, "mqtt://" + hostname + ":"
+					+ Util.getConfigPropertyInt(ConfigConstants.MQTT_PORT));
+		return Json.object().set("endpoints", endpoints);
 	}
 
 	private String standardizePath(String path) {

@@ -210,6 +210,7 @@ public class RouteManager extends RouteBuilder {
 		SignalkRouteFactory.configureHeartbeatRoute(this,"timer://heartbeat?fixedRate=true&period=1000");
 		
 		SignalkRouteFactory.configureAuthRoute(this, "jetty:http://0.0.0.0:" + restPort + SignalKConstants.SIGNALK_AUTH+"?sessionSupport=true&matchOnUriPrefix=true&handlers=#staticHandler&enableJMX=true&enableCORS=true");
+		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + SignalKConstants.SIGNALK_DISCOVERY+"?sessionSupport=true&matchOnUriPrefix=false&enableJMX=true&enableCORS=true","REST Discovery");
 		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + SignalKConstants.SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true&enableCORS=true","REST Api");
 		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + SignalKConstants.SIGNALK_ENDPOINTS+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true&enableCORS=true","REST Endpoints");
 		
