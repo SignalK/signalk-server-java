@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.jmdns.JmmDNS;
-import javax.jmdns.NetworkTopologyDiscovery;
 import javax.jmdns.ServiceInfo;
 
 import mjson.Json;
@@ -210,9 +209,9 @@ public class RouteManager extends RouteBuilder {
 		SignalkRouteFactory.configureHeartbeatRoute(this,"timer://heartbeat?fixedRate=true&period=1000");
 		
 		SignalkRouteFactory.configureAuthRoute(this, "jetty:http://0.0.0.0:" + restPort + SignalKConstants.SIGNALK_AUTH+"?sessionSupport=true&matchOnUriPrefix=true&handlers=#staticHandler&enableJMX=true&enableCORS=true");
+		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + SignalKConstants.SIGNALK_DISCOVERY+"?sessionSupport=true&matchOnUriPrefix=false&enableJMX=true&enableCORS=true","REST Discovery");
 		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + SignalKConstants.SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true&enableCORS=true","REST Api");
-		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + SignalKConstants.SIGNALK_ENDPOINTS+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true&enableCORS=true","REST Endpoints");
-		
+
 		
 		if(Util.getConfigPropertyBoolean(ConfigConstants.ALLOW_INSTALL)){
 			SignalkRouteFactory.configureInstallRoute(this, "jetty:http://0.0.0.0:" + restPort + SignalKConstants.SIGNALK_INSTALL+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true", "REST Install");
@@ -307,7 +306,7 @@ public class RouteManager extends RouteBuilder {
 
 	private Map<String,String> getMdnsTxt() {
 		Map<String,String> txtSet = new HashMap<String, String>();
-		txtSet.put("path", SignalKConstants.SIGNALK_ENDPOINTS);
+		txtSet.put("path", SignalKConstants.SIGNALK_DISCOVERY);
 		txtSet.put("server","signalk-server");
 		txtSet.put("version",Util.getConfigProperty(ConfigConstants.VERSION));
 		txtSet.put("vessel_name",Util.getConfigProperty(ConfigConstants.UUID));
