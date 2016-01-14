@@ -31,10 +31,14 @@
             "source": "system"
          },
          "demo": {
-            "file": "./src/test/resources/motu.log&scanStream=true&scanStreamDelay=500",
+            "file": "PacCupStartNMEA.txt",
             "start": false
          },
          "files": {
+            "cfg": {
+               "dir": "./conf/",
+               "file": "signalk.cfg"
+            },
             "maps": {
                "dir": "./mapcache"
             },
@@ -50,13 +54,13 @@
          },
          "security": {
             "config": {
-               "ip": []
+               "ip": ["10.1.1.64","127.0.0.1"]
             },
             "deny": {
                "ip": []
             },
             "white": {
-               "ip": []
+               "ip": ["10.1.1.64"]
             }
          },
          "serial": {
@@ -97,7 +101,7 @@
          },
          "version": "0.1",
          "vessel": {
-            "uuid": "urn:mrn:signalk:uuid:28f9a6ae-ee66-4464-9ce4-a6dca3e33c7c"
+            "uuid": "motu"
          }
       }
    }

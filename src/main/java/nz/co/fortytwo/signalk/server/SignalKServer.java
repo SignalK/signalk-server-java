@@ -133,9 +133,9 @@ public class SignalKServer {
 	private void ensureInstall() {
 
 		File rootDir = new File(".");
-		if (Util.cfg != null) {
-			rootDir = Util.cfg.getParentFile().getParentFile();
-		}
+		//if (Util.cfg != null) {
+		//	rootDir = Util.cfg.getParentFile().getParentFile();
+		//}
 		// do we have a log dir?
 		File logDir = new File(rootDir, "logs");
 		if (!logDir.exists()) {

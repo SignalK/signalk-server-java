@@ -1,0 +1,13 @@
+pi@raspberrypi:~ $ history
+   sudo nano /etc/wpa_supplicant/wpa_supplicant.conf 
+   sudo ifdown wlan0
+   sudo ifup wlan0
+   cd /home/pi/
+   sudo raspi-config
+   sudo apt-get update
+   sudo apt-get upgrade
+   sudo apt-get install oracle-java8-jdk git
+   java -version
+   git clone https://github.com/SignalK/signalk-server-java.git
+   cd signalk-server-java/
+   ./startpc.sh
