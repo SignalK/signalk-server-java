@@ -24,6 +24,7 @@
 package nz.co.fortytwo.signalk.server;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Properties;
 
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
@@ -32,6 +33,7 @@ import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.activemq.broker.BrokerService;
 import org.apache.camel.main.Main;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Server;
@@ -130,7 +132,7 @@ public class SignalKServer {
 		return server;
 	}
 
-	private void ensureInstall() {
+	private void ensureInstall() throws IOException {
 
 		File rootDir = new File(".");
 		//if (Util.cfg != null) {
@@ -141,12 +143,20 @@ public class SignalKServer {
 		if (!logDir.exists()) {
 			logDir.mkdirs();
 		}
+		// do we have a log4j.properties?
+		File log4j = new File(rootDir, "conf/log4j.properties");
+		if (!log4j.exists()) {
+			File log4jSample = new File(rootDir, "conf/log4j.properties.sample");
+			FileUtils.copyFile(log4jSample, log4j);
+		}
 		// do we have a storage dir?
 		File storageDir = new File(
 				Util.getConfigProperty(ConfigConstants.STORAGE_ROOT));
 		if (!storageDir.exists()) {
 			storageDir.mkdirs();
 		}
+		
+		
 
 	}
 
