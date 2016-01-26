@@ -120,17 +120,28 @@ public class RouteManager extends RouteBuilder {
 		
 		//DNS-SD
 		//NetworkTopologyDiscovery netTop = NetworkTopologyDiscovery.Factory.getInstance();
-		
-		jmdns = JmmDNS.Factory.getInstance();
-		
-		jmdns.registerServiceType(_SIGNALK_WS_TCP_LOCAL);
-		jmdns.registerServiceType(_SIGNALK_HTTP_TCP_LOCAL);
-		ServiceInfo wsInfo = ServiceInfo.create(_SIGNALK_WS_TCP_LOCAL,"signalk-ws",wsPort, 0,0, getMdnsTxt());
-		jmdns.registerService(wsInfo);
-		
-		ServiceInfo httpInfo = ServiceInfo
-				.create(_SIGNALK_HTTP_TCP_LOCAL, "signalk-http",restPort,0,0, getMdnsTxt());
-		jmdns.registerService(httpInfo);
+		Runnable r = new Runnable() {
+			
+			@Override
+			public void run() {
+				jmdns = JmmDNS.Factory.getInstance();
+				
+				jmdns.registerServiceType(_SIGNALK_WS_TCP_LOCAL);
+				jmdns.registerServiceType(_SIGNALK_HTTP_TCP_LOCAL);
+				ServiceInfo wsInfo = ServiceInfo.create(_SIGNALK_WS_TCP_LOCAL,"signalk-ws",wsPort, 0,0, getMdnsTxt());
+				try {
+					jmdns.registerService(wsInfo);
+					ServiceInfo httpInfo = ServiceInfo
+						.create(_SIGNALK_HTTP_TCP_LOCAL, "signalk-http",restPort,0,0, getMdnsTxt());
+					jmdns.registerService(httpInfo);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		};
+		Thread t = new Thread(r);
+		t.start();
 		
 		//Netty tcp server
 		skServer = new NettyServer(null, ConfigConstants.OUTPUT_TCP);

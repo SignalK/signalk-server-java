@@ -77,11 +77,11 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 		
 		basic.put(vessels_dot_self_dot+nav_courseOverGroundTrue+dot+source,"unknown");
 		basic.put(vessels_dot_self_dot+nav_courseOverGroundTrue+dot+timestamp,"2015-03-16T03:31:22.332Z");
-		basic.put(vessels_dot_self_dot+nav_courseOverGroundTrue+dot+value,172.9d);
+		basic.put(vessels_dot_self_dot+nav_courseOverGroundTrue+dot+value,3.0176d);
 		
 		p.handle(basic);
 		double cog = (double) signalkModel.getValue(vessels_dot_self_dot+nav_courseOverGroundTrue);
-		assertEquals(172.9,cog, 0.001);
+		assertEquals(3.0176,cog, 0.001);
 	}
 	@Test
 	public void shouldNotMergeOtherJson() throws IOException {
@@ -91,7 +91,7 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 		SignalkModelProcessor p = new SignalkModelProcessor();
 		assertEquals(null,signalkModel.get(vessels));
 		JsonSerializer ser = new JsonSerializer();
-		NavigableMap<String, Object> tmp = ser.read("{\"invalid\":{\""+SignalKConstants.self+"\":{\"navigation\":{\"courseOverGroundTrue\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":172.9},\"speedOverGround\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":3.85}}}}}");
+		NavigableMap<String, Object> tmp = ser.read("{\"invalid\":{\""+SignalKConstants.self+"\":{\"navigation\":{\"courseOverGroundTrue\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":3.0176},\"speedOverGround\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\",\"value\":3.85}}}}}");
 		
 		p.handle(SignalKModelFactory.getWrappedInstance(tmp));
 		

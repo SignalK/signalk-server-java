@@ -59,6 +59,7 @@ public class NMEA0183ExportProcessor extends SignalkProcessor implements Process
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 			logger.debug(e.getMessage(),e);
+			logger.debug("SignalkModel:"+signalkModel);
 		}
 	}
 

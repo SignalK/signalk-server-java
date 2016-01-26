@@ -84,16 +84,16 @@ public class RestApiTest extends SignalKCamelTestSupport {
         assertEquals(200, reponse.getStatusCode());
         
         Json resp = Json.read(reponse.getResponseBody());
-        assertEquals(172.9 , resp.at(vessels).at(SignalKConstants.self).at(nav).at("courseOverGroundTrue").at("value").asFloat(),0.001);
+        assertEquals(3.0176 , resp.at(vessels).at(SignalKConstants.self).at(nav).at("courseOverGroundTrue").at("value").asFloat(),0.001);
      
         reponse = c.prepareGet("http://localhost:"+restPort+SIGNALK_API+"/vessels/"+SignalKConstants.self+"/navigation").setCookies(r1.getCookies()).execute().get();
         //latch.await(3, TimeUnit.SECONDS);
         logger.debug(reponse.getResponseBody());
         assertEquals(200, reponse.getStatusCode());
-        			//{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"navigation.courseOverGroundTrue\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}],\"context\":\"vessels.self\"}
+        			//{\"updates\":[{\"values\":[{\"value\":3.0176,\"path\":\"navigation.courseOverGroundTrue\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}],\"context\":\"vessels.self\"}
         
         resp = Json.read(reponse.getResponseBody());
-        assertEquals(172.9 , resp.at(vessels).at(SignalKConstants.self).at(nav).at("courseOverGroundTrue").at("value").asFloat(),0.001);
+        assertEquals(3.0176 , resp.at(vessels).at(SignalKConstants.self).at(nav).at("courseOverGroundTrue").at("value").asFloat(),0.001);
         c.close();
     }
 
@@ -124,7 +124,7 @@ public class RestApiTest extends SignalKCamelTestSupport {
         //latch.await(3, TimeUnit.SECONDS);
         logger.debug(reponse.getResponseBody());
         assertEquals(200, reponse.getStatusCode());
-        			//{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"navigation.courseOverGroundTrue\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}],\"context\":\"vessels.self\"}
+        			//{\"updates\":[{\"values\":[{\"value\":3.0176,\"path\":\"navigation.courseOverGroundTrue\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}],\"context\":\"vessels.self\"}
         
         resp = Json.read(reponse.getResponseBody());
         list = resp.at(SignalKConstants.PATHLIST);

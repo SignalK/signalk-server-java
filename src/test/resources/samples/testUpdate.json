@@ -1,1 +1,1 @@
-{"updates":[{"values":[{"value":172.9,"path":"courseOverGroundTrue"},{"value":3.85,"path":"speedOverGround"}],"timestamp":"2014-08-15T16:00:00.081+00:00","source":{"device":"/dev/actisense","pgn":"128267","src":"115"}}],"context":"vessels.motu.navigation"}
+{"updates":[{"values":[{"value":3.0176,"path":"courseOverGroundTrue"},{"value":3.85,"path":"speedOverGround"}],"timestamp":"2014-08-15T16:00:00.081+00:00","source":{"device":"/dev/actisense","pgn":"128267","src":"115"}}],"context":"vessels.motu.navigation"}

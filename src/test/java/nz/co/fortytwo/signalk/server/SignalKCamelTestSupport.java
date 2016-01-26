@@ -178,7 +178,7 @@ public abstract class SignalKCamelTestSupport extends CamelTestSupport {
 	    	} catch (Exception e) {
 				logger.error(e);
 			} 
-			signalkModel=SignalKModelFactory.getInstance();
+			signalkModel=SignalKModelFactory.getMotuTestInstance();
 
 			return routeManager;
 		} catch (Exception e) {

@@ -53,8 +53,8 @@ public class WebsocketTest1 extends SignalKCamelTestSupport {
  
     private static Logger logger = Logger.getLogger(WebsocketTest1.class);
 	
-	String jsonDiff = "{\"updates\":[{\"values\":[{\"value\":172.9,\"path\":\"courseOverGroundTrue\"},{\"value\":3.85,\"path\":\"speedOverGround\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081+00:00\",\"device\":\"/dev/actisense\",\"pgn\":\"128267\",\"src\":\"115\"}}],\"context\":\"vessels."+SignalKConstants.self+".navigation\"}";
-	String jsonPosDiff = "{\"updates\":[{\"values\":[{\"path\": \"log\",\"value\": 17404540},{\"value\":172.9,\"path\":\"courseOverGroundTrue\"},{\"value\":3.85,\"path\":\"speedOverGround\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081+00:00\",\"device\":\"/dev/actisense\",\"pgn\":\"128267\",\"src\":\"115\"}}],\"context\":\"vessels."+SignalKConstants.self+".navigation\"}";
+	String jsonDiff = "{\"updates\":[{\"values\":[{\"value\":3.0176,\"path\":\"courseOverGroundTrue\"},{\"value\":3.85,\"path\":\"speedOverGround\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081+00:00\",\"device\":\"/dev/actisense\",\"pgn\":\"128267\",\"src\":\"115\"}}],\"context\":\"vessels."+SignalKConstants.self+".navigation\"}";
+	String jsonPosDiff = "{\"updates\":[{\"values\":[{\"path\": \"log\",\"value\": 17404540},{\"value\":3.0176,\"path\":\"courseOverGroundTrue\"},{\"value\":3.85,\"path\":\"speedOverGround\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081+00:00\",\"device\":\"/dev/actisense\",\"pgn\":\"128267\",\"src\":\"115\"}}],\"context\":\"vessels."+SignalKConstants.self+".navigation\"}";
 	
 	@Produce(uri = "direct:input")
     protected ProducerTemplate template;
@@ -125,7 +125,7 @@ public class WebsocketTest1 extends SignalKCamelTestSupport {
         assertTrue(latch.await(5, TimeUnit.SECONDS));
 
         assertTrue(2<=received.size());
-       json = Json.read("{\"context\":\"vessels.motu\",\"updates\":[{\"values\":[{\"path\":\"navigation.courseOverGroundTrue\",\"value\":172.9},{\"path\":\"navigation.speedOverGround\",\"value\":3.85}]},{\"values\":[{\"path\":\"navigation.courseOverGroundTrue\",\"value\":172.9},{\"path\":\"navigation.speedOverGround\",\"value\":3.85}]}]}");
+       json = Json.read("{\"context\":\"vessels.motu\",\"updates\":[{\"values\":[{\"path\":\"navigation.courseOverGroundTrue\",\"value\":3.0176},{\"path\":\"navigation.speedOverGround\",\"value\":3.85}]},{\"values\":[{\"path\":\"navigation.courseOverGroundTrue\",\"value\":3.0176},{\"path\":\"navigation.speedOverGround\",\"value\":3.85}]}]}");
        
        logger.debug("Msg1:" +received.get(0));
         assertEquals(json, Json.read(received.get(0)));
