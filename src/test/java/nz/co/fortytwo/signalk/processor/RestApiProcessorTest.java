@@ -15,16 +15,20 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
+import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import mjson.Json;
+import nz.co.fortytwo.signalk.util.ConfigConstants;
 import nz.co.fortytwo.signalk.util.Util;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 public class RestApiProcessorTest {
 
+	private static Logger logger = Logger.getLogger(RestApiProcessorTest.class);
+	
     @BeforeClass
     public static void initModel() throws Exception {
         Util.getConfig();
@@ -33,14 +37,18 @@ public class RestApiProcessorTest {
     @Test
     public void shouldListAllEndpoints() {
         Json discovery = RestApiProcessor.discovery("localhost");
+        logger.debug(discovery);
         Json endpoints = discovery.at("endpoints");
-        assertThat(endpoints.at("signalk-http").asString(), equalTo("http://localhost:8080/signalk/v1/api/"));
-        assertThat(endpoints.at("signalk-ws").asString(), equalTo("ws://localhost:3000/signalk/v1/stream"));
-        assertThat(endpoints.at("signalk-udp").asString(), equalTo("udp://localhost:55554"));
-        assertThat(endpoints.at("signalk-tcp").asString(), equalTo("tcp://localhost:55555"));
-        assertThat(endpoints.at("nmea-udp").asString(), equalTo("udp://localhost:55556"));
-        assertThat(endpoints.at("nmea-tcp").asString(), equalTo("tcp://localhost:55557"));
-        assertThat(endpoints.at("stomp").asString(), equalTo("stomp+nio://localhost:61613"));
-        assertThat(endpoints.at("mqtt").asString(), equalTo("mqtt://localhost:1883"));
+        String ver = Util.getConfigProperty(ConfigConstants.VERSION);
+        Json version = endpoints.at(ver.substring(0, 2));
+        assertThat(version.at("version").asString(), equalTo(ver.substring(1)));
+        assertThat(version.at("signalk-http").asString(), equalTo("http://localhost:8080/signalk/v1/api/"));
+        assertThat(version.at("signalk-ws").asString(), equalTo("ws://localhost:3000/signalk/v1/stream"));
+        assertThat(version.at("signalk-udp").asString(), equalTo("udp://localhost:55554"));
+        assertThat(version.at("signalk-tcp").asString(), equalTo("tcp://localhost:55555"));
+        assertThat(version.at("nmea-udp").asString(), equalTo("udp://localhost:55556"));
+        assertThat(version.at("nmea-tcp").asString(), equalTo("tcp://localhost:55557"));
+        assertThat(version.at("stomp").asString(), equalTo("stomp+nio://localhost:61613"));
+        assertThat(version.at("mqtt").asString(), equalTo("mqtt://localhost:1883"));
     }
 }

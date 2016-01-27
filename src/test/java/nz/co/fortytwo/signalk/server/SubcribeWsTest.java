@@ -83,7 +83,7 @@ public class SubcribeWsTest extends SignalKCamelTestSupport{
         assertEquals(200, r1.getStatusCode());
         Response r2 = c.prepareGet("http://localhost:"+restPort+SIGNALK_DISCOVERY).setCookies(r1.getCookies()).execute().get();
         Json json = Json.read(r2.getResponseBody());
-        assertEquals("ws://localhost:"+wsPort+SIGNALK_WS, json.at("endpoints").at(websocketUrl).asString());
+        assertEquals("ws://localhost:"+wsPort+SIGNALK_WS, json.at("endpoints").at("v1").at(websocketUrl).asString());
         c.close();
 	}
 	
@@ -102,7 +102,7 @@ public class SubcribeWsTest extends SignalKCamelTestSupport{
         Json json = Json.read(r2.getResponseBody());
         latch2.await(3, TimeUnit.SECONDS);
       //await messages
-        WebSocket websocket = c.prepareGet(json.at("endpoints").at(websocketUrl).asString()).setCookies(r1.getCookies()).execute(
+        WebSocket websocket = c.prepareGet(json.at("endpoints").at("v1").at(websocketUrl).asString()).setCookies(r1.getCookies()).execute(
                 new WebSocketUpgradeHandler.Builder()
                     .addWebSocketListener(new WebSocketTextListener() {
                         @Override

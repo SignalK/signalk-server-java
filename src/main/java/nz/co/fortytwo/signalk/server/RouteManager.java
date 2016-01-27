@@ -135,12 +135,12 @@ public class RouteManager extends RouteBuilder {
 						.create(_SIGNALK_HTTP_TCP_LOCAL, "signalk-http",restPort,0,0, getMdnsTxt());
 					jmdns.registerService(httpInfo);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
 		};
 		Thread t = new Thread(r);
+		t.setDaemon(true);
 		t.start();
 		
 		//Netty tcp server

@@ -268,27 +268,32 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 
 	// TODO: This should come from the configuration used to start the endpoints.
 	static Json discovery(String hostname) {
-		Json endpoints = Json.object();
-		endpoints.set(SignalKConstants.websocketUrl, "ws://" + hostname + ":"
+		
+		Json version = Json.object();
+		String ver = Util.getConfigProperty(ConfigConstants.VERSION);
+		version.set("version", ver.substring(1));
+		version.set(SignalKConstants.websocketUrl, "ws://" + hostname + ":"
 				+ Util.getConfigPropertyInt(ConfigConstants.WEBSOCKET_PORT)
 				+ SignalKConstants.SIGNALK_WS);
-		endpoints.set(SignalKConstants.restUrl, "http://" + hostname + ":"
+		version.set(SignalKConstants.restUrl, "http://" + hostname + ":"
 				+ Util.getConfigPropertyInt(ConfigConstants.REST_PORT)
 				+ SignalKConstants.SIGNALK_API + "/");
-		endpoints.set(SignalKConstants.signalkTcpPort, "tcp://" + hostname + ":"
+		version.set(SignalKConstants.signalkTcpPort, "tcp://" + hostname + ":"
 				+ Util.getConfigPropertyInt(ConfigConstants.TCP_PORT));
-		endpoints.set(SignalKConstants.signalkUdpPort, "udp://" + hostname + ":"
+		version.set(SignalKConstants.signalkUdpPort, "udp://" + hostname + ":"
 				+ Util.getConfigPropertyInt(ConfigConstants.UDP_PORT));
-		endpoints.set(SignalKConstants.nmeaTcpPort, "tcp://" + hostname + ":"
+		version.set(SignalKConstants.nmeaTcpPort, "tcp://" + hostname + ":"
 				+ Util.getConfigPropertyInt(ConfigConstants.TCP_NMEA_PORT));
-		endpoints.set(SignalKConstants.nmeaUdpPort, "udp://" + hostname + ":"
+		version.set(SignalKConstants.nmeaUdpPort, "udp://" + hostname + ":"
 				+ Util.getConfigPropertyInt(ConfigConstants.UDP_NMEA_PORT));
 		if (Util.getConfigPropertyBoolean(ConfigConstants.START_STOMP))
-			endpoints.set(SignalKConstants.stompPort, "stomp+nio://" + hostname + ":"
+			version.set(SignalKConstants.stompPort, "stomp+nio://" + hostname + ":"
 					+ Util.getConfigPropertyInt(ConfigConstants.STOMP_PORT));
 		if (Util.getConfigPropertyBoolean(ConfigConstants.START_MQTT))
-			endpoints.set(SignalKConstants.mqttPort, "mqtt://" + hostname + ":"
+			version.set(SignalKConstants.mqttPort, "mqtt://" + hostname + ":"
 					+ Util.getConfigPropertyInt(ConfigConstants.MQTT_PORT));
+		Json endpoints = Json.object();
+		endpoints.set(ver.substring(0, 2), version );
 		return Json.object().set("endpoints", endpoints);
 	}
 
