@@ -32,6 +32,7 @@ import nz.co.fortytwo.signalk.processor.AISProcessor;
 import nz.co.fortytwo.signalk.processor.AlarmProcessor;
 import nz.co.fortytwo.signalk.processor.AnchorWatchProcessor;
 import nz.co.fortytwo.signalk.processor.ClientAppProcessor;
+import nz.co.fortytwo.signalk.processor.ConfigFilterProcessor;
 import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
 import nz.co.fortytwo.signalk.processor.DeltaImportProcessor;
 import nz.co.fortytwo.signalk.processor.FullExportProcessor;
@@ -188,7 +189,8 @@ public class SignalkRouteFactory {
 	public static void configureRestRoute(RouteBuilder routeBuilder ,String input, String name)throws IOException{
 		routeBuilder.from(input).id(getName(name)) //.setExchangePattern(ExchangePattern.InOut);
 			.setExchangePattern(ExchangePattern.InOut)
-			.process(new RestApiProcessor()).to(ExchangePattern.InOut,"seda:inputData?purgeWhenStopping=true&size=100");
+			.process(new RestApiProcessor()).to(ExchangePattern.InOut,"seda:inputData?purgeWhenStopping=true&size=100")
+			.process(new ConfigFilterProcessor(false)).id(getName(ConfigFilterProcessor.class.getSimpleName()));
 			//.process(new OutputFilterProcessor()).id(getName(OutputFilterProcessor.class.getSimpleName()));
 		
 				
@@ -197,6 +199,12 @@ public class SignalkRouteFactory {
 //					.to("log:nz.co.fortytwo.signalk.client.rest?level=INFO&showException=true&showStackTrace=true")
 //					.to("direct:restTest");
 
+		}
+	public static void configureRestConfigRoute(RouteBuilder routeBuilder ,String input, String name)throws IOException{
+		routeBuilder.from(input).id(getName(name)) //.setExchangePattern(ExchangePattern.InOut);
+			.setExchangePattern(ExchangePattern.InOut)
+			.process(new RestApiProcessor()).to(ExchangePattern.InOut,"seda:inputData?purgeWhenStopping=true&size=100")
+			.process(new ConfigFilterProcessor(true)).id(getName(ConfigFilterProcessor.class.getSimpleName()));
 		}
 	
 	public static void configureAuthRoute(RouteBuilder routeBuilder ,String input){

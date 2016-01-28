@@ -39,7 +39,7 @@
 		<repository>
 			<id>jcenter</id>
 			<name>jcenter</name>
-			<url>https://jcenter.bintray.com/</url>
+			<url>http://jcenter.bintray.com/</url>
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
@@ -358,7 +358,7 @@
 			<groupId>org.openhab.jmdns</groupId>
 			<artifactId>jmdns</artifactId>
 			<version>3.4.2</version>
-		</dependency>
+		</dependency> 
 
 	</dependencies>
 	<build>

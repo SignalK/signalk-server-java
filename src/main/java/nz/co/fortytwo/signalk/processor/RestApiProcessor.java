@@ -191,6 +191,8 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 			return true;
 		if (path.startsWith(SignalKConstants.SIGNALK_API))
 			return true;
+		if (path.startsWith(SignalKConstants.SIGNALK_CONFIG))
+			return true;
 		return false;
 	}
 
