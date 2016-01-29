@@ -24,6 +24,7 @@ package nz.co.fortytwo.signalk.processor;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NavigableMap;
 
 import com.google.common.eventbus.DeadEvent;
 import com.google.common.eventbus.Subscribe;
@@ -88,7 +89,6 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
             exchange.getIn().setHeader(WebsocketConstants.CONNECTION_KEY, sub.getWsSession());
 
         }
-
     }
 
     private boolean isDelta(String routeId) {
@@ -105,12 +105,13 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
         for (Subscription sub : manager.getSubscriptions(wsSession)) {
             if (sub != null && sub.isActive() && routeId.equals(sub.getRouteId())) {
                 for (String p : sub.getSubscribed(null)) {
-                    populateTree(temp, p);
+                    NavigableMap<String, Object> node = signalkModel.getSubMap(p);
+                    if(logger.isDebugEnabled())logger.debug("Found node:" + p + " = " + node);
+                    temp.putAll(node);
                 }
             }
         }
         return temp;
-
     }
 
     /**

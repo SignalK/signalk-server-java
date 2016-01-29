@@ -24,7 +24,6 @@
 
 package nz.co.fortytwo.signalk.processor;
 
-import java.util.NavigableMap;
 import java.util.regex.Pattern;
 
 import nz.co.fortytwo.signalk.model.SignalKModel;
@@ -82,7 +81,7 @@ public class SignalkProcessor {
 	/**
 	 * If a processor generates an NMEA string, then this method is a convenient way to send it to the NMEA stream
 	 * 
-	 * @param output
+	 * @param ex
 	 */
 	public void sendNmea(Exchange ex){
 		Exchange exchange = ex.copy();
@@ -119,21 +118,4 @@ public class SignalkProcessor {
 		newPath = newPath.replace(SignalkProcessor.VESSELS_DOT_SELF + SignalKConstants.dot, SignalKConstants.vessels_dot_self_dot);
 		return newPath;
 	}
-	
-	public ProducerTemplate getExportProducer() {
-		return outProducer;
-	}
-
-	public void setExportProducer(ProducerTemplate outProducer) {
-		this.outProducer = outProducer;
-	}
-
-
-	public void populateTree(SignalKModel temp, String p) {
-		NavigableMap<String, Object> node = signalkModel.getSubMap(p);
-		if(logger.isDebugEnabled())logger.debug("Found node:" + p + " = " + node);
-		temp.putAll(node);
-		
-	}
-
 }
