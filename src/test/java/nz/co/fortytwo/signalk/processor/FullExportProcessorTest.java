@@ -22,22 +22,17 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import static nz.co.fortytwo.signalk.util.SignalKConstants.dot;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.env_wind_angleApparent;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_courseOverGroundTrue;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels;
-//import static nz.co.fortytwo.signalk.util.SignalKConstants.*;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels_dot_self_dot;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
 import java.util.NavigableSet;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import com.google.common.eventbus.EventBus;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.event.PathEvent;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
@@ -47,21 +42,22 @@ import nz.co.fortytwo.signalk.server.Subscription;
 import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
 import nz.co.fortytwo.signalk.util.ConfigConstants;
 import nz.co.fortytwo.signalk.util.SignalKConstants;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.FORMAT_DELTA;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.dot;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.env_wind_angleApparent;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_courseOverGroundTrue;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels_dot_self_dot;
 import nz.co.fortytwo.signalk.util.TestHelper;
 import nz.co.fortytwo.signalk.util.Util;
-
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.impl.DefaultProducerTemplate;
 import org.apache.log4j.Logger;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import com.google.common.eventbus.EventBus;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class FullExportProcessorTest {
 	private static Logger logger = Logger.getLogger(FullExportProcessorTest.class);
@@ -73,7 +69,7 @@ public class FullExportProcessorTest {
 	}
 	@Before
 	public void setUp() throws Exception {
-		
+        RouteManagerFactory.getMotuTestInstance().getContext();
 	}
 
 	@After
@@ -82,7 +78,6 @@ public class FullExportProcessorTest {
 
 	@Test
 	public void shouldPopulateTree() throws Exception {
-		CamelContext ctx = RouteManagerFactory.getMotuTestInstance().getContext();
 		SignalKModel model = SignalKModelFactory.getMotuTestInstance();
 		model.putAll(TestHelper.getBasicModel().getFullData());
 		model.putAll(TestHelper.getOtherModel().getFullData());
@@ -99,32 +94,28 @@ public class FullExportProcessorTest {
 	
 	@Test
 	public void shouldCreateInstantDelta() throws Exception {
-		CamelContext ctx = RouteManagerFactory.getMotuTestInstance().getContext();
 
 		SignalKModel model = SignalKModelFactory.getMotuTestInstance();
 		model.putAll(TestHelper.getBasicModel().getFullData());
 		model.putAll(TestHelper.getOtherModel().getFullData());
 		
-		testScenario(1,UUID.randomUUID().toString(), "vessels.self.navigation", SignalKConstants.FORMAT_DELTA, SignalKConstants.POLICY_IDEAL, 1, 0, 0, getJsonForEvent( SignalKConstants.self, nav_courseOverGroundTrue));
-		testScenario(2,UUID.randomUUID().toString(), "vessels.self.navigation", SignalKConstants.FORMAT_DELTA, SignalKConstants.POLICY_INSTANT, 1, 0, 0, getJsonForEvent( SignalKConstants.self, nav_courseOverGroundTrue));
+		testScenario("vessels.self.navigation", SignalKConstants.POLICY_IDEAL, 3, getJsonForEvent( SignalKConstants.self, nav_courseOverGroundTrue));
+		testScenario("vessels.self.navigation", SignalKConstants.POLICY_INSTANT, 3, getJsonForEvent( SignalKConstants.self, nav_courseOverGroundTrue));
 		
-		testScenario(3,UUID.randomUUID().toString(), "vessels.self.navigation", SignalKConstants.FORMAT_DELTA, SignalKConstants.POLICY_FIXED, 0, 0, 0, getJsonForEvent( SignalKConstants.self, nav_courseOverGroundTrue));
+		testScenario("vessels.self.navigation", SignalKConstants.POLICY_FIXED, 0, getJsonForEvent( SignalKConstants.self, nav_courseOverGroundTrue));
 		
-		testScenario(4,UUID.randomUUID().toString(), "vessels.self.invalid", SignalKConstants.FORMAT_DELTA, SignalKConstants.POLICY_IDEAL, 0, 0, 0, getJsonForEvent( SignalKConstants.self, nav_courseOverGroundTrue));
-		testScenario(5,UUID.randomUUID().toString(), "vessels.self.environment", SignalKConstants.FORMAT_DELTA, SignalKConstants.POLICY_IDEAL, 1, 0, 0, getJsonForEvent( SignalKConstants.self, env_wind_angleApparent));
+		testScenario("vessels.self.invalid", SignalKConstants.POLICY_IDEAL, 0, getJsonForEvent( SignalKConstants.self, nav_courseOverGroundTrue));
+		testScenario("vessels.self.environment", SignalKConstants.POLICY_IDEAL, 3, getJsonForEvent( SignalKConstants.self, env_wind_angleApparent));
 		
-		testScenario(6,UUID.randomUUID().toString(), "vessels.*.environment", SignalKConstants.FORMAT_DELTA, SignalKConstants.POLICY_IDEAL, 1, 0, 0, getJsonForEvent( SignalKConstants.self, env_wind_angleApparent));
-		testScenario(7,UUID.randomUUID().toString(), "vessels.*.environment", SignalKConstants.FORMAT_DELTA, SignalKConstants.POLICY_IDEAL, 1, 0, 0, getJsonForEvent( "other", env_wind_angleApparent));
+		testScenario("vessels.*.environment", SignalKConstants.POLICY_IDEAL, 3, getJsonForEvent( SignalKConstants.self, env_wind_angleApparent));
+		testScenario("vessels.*.environment", SignalKConstants.POLICY_IDEAL, 3, getJsonForEvent( "other", env_wind_angleApparent));
 		
-		testScenario(8,UUID.randomUUID().toString(), "vessels.other.environment", SignalKConstants.FORMAT_DELTA, SignalKConstants.POLICY_IDEAL, 1, 0, 0, getJsonForEvent( "other", env_wind_angleApparent));
-		testScenario(9,UUID.randomUUID().toString(), "vessels.other.environment", SignalKConstants.FORMAT_DELTA, SignalKConstants.POLICY_IDEAL, 0, 0, 0, getJsonForEvent( SignalKConstants.self, env_wind_angleApparent));
-		ConcurrentSkipListSet<String> event = new ConcurrentSkipListSet<String>(getJsonForEvent(SignalKConstants.self, nav_courseOverGroundTrue));
+		testScenario("vessels.other.environment", SignalKConstants.POLICY_IDEAL, 3, getJsonForEvent( "other", env_wind_angleApparent));
+		testScenario("vessels.other.environment", SignalKConstants.POLICY_IDEAL, 0, getJsonForEvent( SignalKConstants.self, env_wind_angleApparent));
+		ConcurrentSkipListSet<String> event = new ConcurrentSkipListSet<>(getJsonForEvent(SignalKConstants.self, nav_courseOverGroundTrue));
 		event.addAll(getJsonForEvent("other", env_wind_angleApparent));
-		testScenario(10,UUID.randomUUID().toString(), "vessels.*.environment", SignalKConstants.FORMAT_DELTA, SignalKConstants.POLICY_IDEAL, 1, 0, 0, event);
-		testScenario(11,UUID.randomUUID().toString(), "vessels.*", SignalKConstants.FORMAT_DELTA, SignalKConstants.POLICY_IDEAL, 1, 0, 0, event);
-		
-		final CountDownLatch latch = new CountDownLatch(1);
-		latch.await(10, TimeUnit.SECONDS);
+		testScenario("vessels.*.environment", SignalKConstants.POLICY_IDEAL, 3, event);
+		testScenario("vessels.*", SignalKConstants.POLICY_IDEAL, 6, event);
 	}
 	
 
@@ -135,9 +126,11 @@ public class FullExportProcessorTest {
 	}
 	
 
-	private void testScenario(int pos,String session, String subKey, String format, String policy, int rcvdCounter, int mapSizeBefore, int mapSizeAfter, NavigableSet<String> eventSet) throws Exception {
-			
-		CamelContext ctx = CamelContextFactory.getInstance();//RouteManagerFactory.getMotuTestInstance().getContext();
+	private void testScenario(String subKey, String policy, int expectedCount, NavigableSet<String> eventSet) throws Exception {
+		String session = UUID.randomUUID().toString();
+        String format = FORMAT_DELTA;
+
+		CamelContext ctx = CamelContextFactory.getInstance();
 			try{
 				Subscription sub = new Subscription(session, subKey, 10, 1000, format, policy);
 				SubscriptionManagerFactory.getInstance().add("ses"+session, session, ConfigConstants.OUTPUT_WS, "127.0.0.1","127.0.0.1");
@@ -148,7 +141,7 @@ public class FullExportProcessorTest {
 				//drain queue
 				resultEndpoint.await(2, TimeUnit.SECONDS);
 				resultEndpoint.reset();
-				resultEndpoint.expectedMessageCount(rcvdCounter);
+				resultEndpoint.expectedMessageCount(expectedCount);
 				
 				FullExportProcessor processor = new FullExportProcessor(session);
 				ProducerTemplate exportProducer= new DefaultProducerTemplate(ctx);
@@ -160,7 +153,6 @@ public class FullExportProcessorTest {
 				}
 				processor.setExportProducer(exportProducer);
 	
-				assertEquals(mapSizeBefore, processor.queue.size());
 				EventBus bus = new EventBus();
 				bus.register(processor);
 	
@@ -170,19 +162,14 @@ public class FullExportProcessorTest {
 				}
 				
 				resultEndpoint.assertIsSatisfied();
-				//assertEquals(pos+":rcvdCounter != actual received counter",rcvdCounter, resultEndpoint.getReceivedCounter());
-				int sizeAfter = processor.queue.size();
 				resultEndpoint.reset();
 				
-				assertEquals(pos+":MapSizeAfter != queue size", mapSizeAfter, sizeAfter);
 				for(Exchange e: resultEndpoint.getExchanges()){
 					logger.debug(e.getIn().getBody());
 				}
 				SubscriptionManagerFactory.getInstance().removeSubscription(sub);
 			}finally{
 				SubscriptionManagerFactory.getInstance().removeWsSession(session);
-				//final CountDownLatch latch = new CountDownLatch(1);
-				//latch.await(2, TimeUnit.SECONDS);
 			}
 			
 		}
