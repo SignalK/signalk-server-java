@@ -22,9 +22,18 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicLong;
 
 import com.google.common.eventbus.DeadEvent;
 import com.google.common.eventbus.Subscribe;
@@ -35,6 +44,8 @@ import nz.co.fortytwo.signalk.server.Subscription;
 import nz.co.fortytwo.signalk.util.ConfigConstants;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.FORMAT_DELTA;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.POLICY_FIXED;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.POLICY_IDEAL;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.POLICY_INSTANT;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_FORMAT;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -48,21 +59,29 @@ import org.apache.log4j.Logger;
  */
 public class FullExportProcessor extends SignalkProcessor implements Processor {
 
-    static Logger logger = Logger.getLogger(FullExportProcessor.class);
-    protected String wsSession = null;
+    private static final Logger logger = Logger.getLogger(FullExportProcessor.class);
+    private static final Timer timer = new Timer("Export Timer", true);
+
+    private final String wsSession;
+    private final AtomicLong lastSend;
+    private final ConcurrentLinkedQueue<String> pendingPaths = new ConcurrentLinkedQueue<>();
 
     public FullExportProcessor(String wsSession) {
         super();
         this.wsSession = wsSession;
+        lastSend = new AtomicLong(System.currentTimeMillis());
         signalkModel.getEventBus().register(this);
-
     }
 
     public void process(Exchange exchange) throws Exception {
-
         try {
             if (logger.isDebugEnabled())
                 logger.info("process  subs for " + exchange.getFromRouteId() + " as delta? " + isDelta(exchange.getFromRouteId()));
+
+            // Clear the pending paths as we are about to send all.
+            pendingPaths.clear();
+            lastSend.set(System.currentTimeMillis());
+
             // get the accumulated delta nodes.
             exchange.getIn().setBody(createTree(exchange.getFromRouteId()));
             setHeaders(exchange);
@@ -121,15 +140,44 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
     public void recordEvent(PathEvent pathEvent) {
         if (pathEvent == null)
             return;
-        if (pathEvent.getPath() == null)
+
+        String path = pathEvent.getPath();
+        if (path == null)
             return;
 
-        // Send update to any non-FIXED subscribers.
+        // Send update if necessary.
         for (Subscription s : manager.getSubscriptions(wsSession)) {
-            if (s.isActive() && !POLICY_FIXED.equals(s.getPolicy()) && s.isSubscribed(pathEvent.getPath())) {
-                // TODO(jboynes): Batch updates together and rate limit transmissions.
-                send(pathEvent.getPath());
-                break;
+            if (s.isActive() && s.isSubscribed(path)) {
+                switch (s.getPolicy()) {
+                    case POLICY_INSTANT:
+                        // Always send now.
+                        send(Collections.singletonList(path));
+                        return;
+                    case POLICY_IDEAL:
+                        // Schedule a timer is the queue is currently empty.
+                        boolean schedule = pendingPaths.isEmpty();
+                        pendingPaths.add(path);
+
+                        if (schedule) {
+                            TimerTask task = new TimerTask() {
+                                @Override
+                                public void run() {
+                                    List<String> paths = new ArrayList<>();
+                                    for (String path = pendingPaths.poll(); path != null; path = pendingPaths.poll()) {
+                                        paths.add(path);
+                                    }
+                                    send(paths);
+                                }
+                            };
+                            // Schedule to send minPeriod after the last send; if that's in the past the task will run immediately.
+                            timer.schedule(task, new Date(lastSend.get() + s.getMinPeriod()));
+                        }
+                        return;
+                    case POLICY_FIXED:
+                    default:
+                        // Updates will be sent at the next period.
+                        break;
+                }
             }
         }
     }
@@ -140,22 +188,36 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
     }
 
 
-    private void send(String path) {
-        Object node = signalkModel.get(path);
-        if (node == null) {
+    private void send(Collection<String> paths) {
+        if (paths.isEmpty()) {
             return;
         }
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("Sending : " + path);
+        SignalKModel temp = SignalKModelFactory.getCleanInstance();
+        boolean send = false;
+        for (String path : paths) {
+            Object node = signalkModel.get(path);
+            if (node != null) {
+                temp.put(path, node);
+                send = true;
+            }
         }
 
-        SignalKModel temp = SignalKModelFactory.getCleanInstance();
-        temp.put(path, node);
+        if (send) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Sending : " + temp.getKeys());
+            }
 
-        Map<String, Object> headers = new HashMap<>();
-        headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
-        headers.put(ConfigConstants.OUTPUT_TYPE, manager.getOutputType(wsSession));
-        outProducer.sendBodyAndHeaders(temp, headers);
+            Map<String, Object> headers = new HashMap<>();
+            headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
+            headers.put(ConfigConstants.OUTPUT_TYPE, manager.getOutputType(wsSession));
+            outProducer.sendBodyAndHeaders(temp, headers);
+            lastSend.set(System.currentTimeMillis());
+        } else {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Nothing to send");
+            }
+        }
+
     }
 }

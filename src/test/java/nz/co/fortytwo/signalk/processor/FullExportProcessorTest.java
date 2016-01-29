@@ -42,6 +42,7 @@ import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
 import nz.co.fortytwo.signalk.util.ConfigConstants;
 import nz.co.fortytwo.signalk.util.SignalKConstants;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.FORMAT_DELTA;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.POLICY_IDEAL;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.dot;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.env_wind_angleApparent;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_courseOverGroundTrue;
@@ -99,7 +100,7 @@ public class FullExportProcessorTest {
 
     @Test
     public void shouldEmitIfMatchesWithIdealPolicy() throws Exception {
-        testScenario("vessels.self.navigation", SignalKConstants.POLICY_IDEAL, 3, self_nav);
+        testScenario("vessels.self.navigation", SignalKConstants.POLICY_IDEAL, 1, self_nav);
     }
 
     @Test
@@ -119,18 +120,18 @@ public class FullExportProcessorTest {
 
     @Test
     public void shouldEmitIfPatternMatchesWithIdealPolicy() throws Exception {
-        testScenario("vessels.*.environment", SignalKConstants.POLICY_IDEAL, 3, self_env);
-        testScenario("vessels.*.environment", SignalKConstants.POLICY_IDEAL, 3, other_env);
+        testScenario("vessels.*.environment", SignalKConstants.POLICY_IDEAL, 1, self_env);
+        testScenario("vessels.*.environment", SignalKConstants.POLICY_IDEAL, 1, other_env);
     }
 
     @Test
     public void shouldEmitIfPatternPartiallyMatches() throws Exception {
-        testScenario("vessels.*.environment", SignalKConstants.POLICY_IDEAL, 3, multiple_keys);
+        testScenario("vessels.*.environment", SignalKConstants.POLICY_IDEAL, 1, multiple_keys);
     }
 
     @Test
     public void shouldEmitIfPatternFullyMatches() throws Exception {
-        testScenario("vessels.*", SignalKConstants.POLICY_IDEAL, 6, multiple_keys);
+        testScenario("vessels.*", SignalKConstants.POLICY_IDEAL, 1, multiple_keys);
     }
 
     private void testScenario(String subKey, String policy, int expectedCount, NavigableSet<String> keys) throws Exception {
@@ -154,6 +155,11 @@ public class FullExportProcessorTest {
             for (String key : keys) {
                 processor.recordEvent(new PathEvent(key, 0, nz.co.fortytwo.signalk.model.event.PathEvent.EventType.ADD));
                 logger.debug("Posted path event:" + key);
+            }
+
+            // Sleep to allow for minPeriod.
+            if (POLICY_IDEAL.equals(policy)) {
+                Thread.sleep(100L);
             }
 
             resultEndpoint.assertIsSatisfied();
