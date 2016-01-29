@@ -45,6 +45,8 @@ import nz.co.fortytwo.signalk.util.SignalKConstants;
 import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.camel.model.RouteDefinition;
 import org.apache.log4j.Logger;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -244,10 +246,15 @@ public class JsonSubscribeProcessorTest {
 	public void shouldUnSubscribeOne() throws Exception {
 		
 		SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
+		RouteManager routeManager = RouteManagerFactory.getMotuTestInstance();
+		int routes = routeManager.getRouteCollection().getRoutes().size();
+
 		String wsSession = UUID.randomUUID().toString();
 		manager.removeSessionId(wsSession);
 		// now add webSocket
 		manager.add(wsSession, wsSession,ConfigConstants.OUTPUT_WS,"127.0.0.1","127.0.0.1");
+		assertTrue("No current subscriptions", manager.getSubscriptions(wsSession).isEmpty());
+
 		JsonSubscribeProcessor subscribe = new JsonSubscribeProcessor();
 		HashMap<String, Object> headers = new HashMap<String, Object>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
@@ -255,19 +262,15 @@ public class JsonSubscribeProcessorTest {
 		subscribe.handle(getJson("vessels." + SignalKConstants.self,"environment", 1500, 0,FORMAT_DELTA, POLICY_FIXED),headers);
 		List<Subscription> subs = manager.getSubscriptions(wsSession);
 		assertEquals(2, subs.size());
-		// see if its created a route
-		RouteManager routeManager = RouteManagerFactory.getMotuTestInstance();
-		assertEquals(2, routeManager.getRouteCollection().getRoutes().size());
+		assertEquals("Added 2 routes", routes + 2, routeManager.getRouteCollection().getRoutes().size());
 		Subscription s = subs.get(0);
 
 		for (RouteDefinition route : routeManager.getRouteCollection().getRoutes()) {
 			logger.debug("Checking route " + route.getId());
-			// assertEquals("subscribe:wsSession5:vessels/motu/navigation", route.getId());
 		}
 		manager.removeSubscription(s);
 		subs = manager.getSubscriptions(wsSession);
 		assertEquals(1, subs.size());
-		// assertEquals(1,routeManager.getRouteCollection().getRoutes().size());
 	}
 
 	@Test
