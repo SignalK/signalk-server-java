@@ -40,6 +40,7 @@ import nz.co.fortytwo.signalk.util.ConfigConstants;
 import nz.co.fortytwo.signalk.util.SignalKConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
+import org.apache.camel.CamelExecutionException;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.ProducerTemplate;
@@ -212,9 +213,11 @@ public class SerialPortReader implements Processor {
 									if(enableSerial){
 										try{
 											producer.sendBodyAndHeaders(lineStr,headers);
-										}catch(IllegalStateException ise){
-											if("Queue full".equals(ise.getMessage())){
-												logger.error("Unable to send serial data - Queue full - skipping..");
+										}catch(CamelExecutionException ce){
+											if(ce.getCause() instanceof IllegalStateException){
+												if("Queue full".equals(ce.getCause().getMessage())){
+													logger.error("Unable to send serial data - Queue full - skipping..");
+												}
 											}
 										}
 									}else{
@@ -228,6 +231,7 @@ public class SerialPortReader implements Processor {
 				}
 			}catch (Exception e) {
 				running=false;
+				serialPort.close();
 				logger.error(portName, e);
 			}
 		
