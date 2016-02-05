@@ -35,7 +35,17 @@
 			<email>robert@42.co.nz</email>
 		</developer>
 	</developers>
+
 	<repositories>
+		<repository>
+			<id>signalk-snapshots</id>
+			<name>SignalK Repository</name>
+			<url>http://ec2-52-91-140-52.compute-1.amazonaws.com/artifactory/libs-snapshot</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+
 		<repository>
 			<id>jcenter</id>
 			<name>jcenter</name>
@@ -72,6 +82,7 @@
 		    </snapshots>
 		  </repository>
 	</repositories>
+
 	<pluginRepositories>
 		<pluginRepository>
 			<id>autoincrement-versions-maven-plugin</id>
@@ -81,10 +92,17 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</pluginRepository>
-
 	</pluginRepositories>
 
-	<dependencies>
+  <distributionManagement>
+    <snapshotRepository>
+      <id>signalk-snapshots</id>
+      <name>SignalK Repository</name>
+      <url>http://ec2-52-91-140-52.compute-1.amazonaws.com/artifactory/libs-snapshot-local</url>
+    </snapshotRepository>
+  </distributionManagement>
+
+  <dependencies>
 
 		<dependency>
 			<groupId>nz.co.fortytwo.signalk.core</groupId>
