@@ -11,3 +11,6 @@ pi@raspberrypi:~ $ history
    git clone https://github.com/SignalK/signalk-server-java.git
    cd signalk-server-java/
    ./startpc.sh
+
+   #had to add 'ifconfig wlan0 192.168.0.1' to near the bottom of /etc/rc.local to get correct address
+   #had to add jna library

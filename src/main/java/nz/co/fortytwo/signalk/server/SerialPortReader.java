@@ -210,7 +210,13 @@ public class SerialPortReader implements Processor {
 										}
 									}
 									if(enableSerial){
-										producer.sendBodyAndHeaders(lineStr,headers);
+										try{
+											producer.sendBodyAndHeaders(lineStr,headers);
+										}catch(IllegalStateException ise){
+											if("Queue full".equals(ise.getMessage())){
+												logger.error("Unable to send serial data - Queue full - skipping..");
+											}
+										}
 									}else{
 										if(logger.isDebugEnabled())logger.debug("enableSerial false:"+lineStr);
 									}
