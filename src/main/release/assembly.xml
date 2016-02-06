@@ -1,24 +1,22 @@
 <assembly
-	xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
+	xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+	xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.3 http://maven.apache.org/xsd/assembly-1.1.3.xsd">
 	<id>all</id>
+	<baseDirectory>signalk</baseDirectory>
 	<formats>
 		<format>zip</format>
+		<format>tar.gz</format>
 	</formats>
+
 	<fileSets>
 		<fileSet>
 			<directory>${basedir}</directory>
-			<outputDirectory>signalk</outputDirectory>
 			<includes>
-				<include>conf/log4j.properties</include>
+				<include>conf/*</include>
 				<include>docs/**</include>
 				<include>logs/placeholder.txt</include>
-				<!--<include>freeboard/**</include>-->
-				<!--<include>jna/**</include>-->
-				<!--<include>mapcache/WORLD*/**</include>-->
-<!-- 				<include>target/signalk-server-${project.version}-jar-with-dependencies.jar</include> -->
-				<include>*.txt</include>
+				<include>signalk-static/**</include>
 				<include>*.txt</include>
 				<include>*.bat</include>
 				<include>*.sh</include>
@@ -29,8 +27,7 @@
 	<files>
 		<file>
 			<source>target/signalk-server-${project.version}-jar-with-dependencies.jar</source>
-			<outputDirectory>signalk/target/</outputDirectory>
-			<destName>signalk-server.jar</destName>
+			<outputDirectory>target/</outputDirectory>
 		</file>
 	</files>
 </assembly>
