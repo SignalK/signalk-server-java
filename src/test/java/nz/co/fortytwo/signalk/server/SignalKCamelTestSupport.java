@@ -75,9 +75,24 @@ public abstract class SignalKCamelTestSupport extends CamelTestSupport {
 	
 	@After
 	public void shutdownBroker() throws Exception{
-		routeManager.stopNettyServers();
-		broker.stop();
-		routeManager.getContext().stop();
+		try{
+			routeManager.stopNettyServers();
+		}catch(Exception e){
+			log.error("Error shutting down netty:"+e.getMessage());
+			log.debug("Error shutting down netty:"+e.getMessage(), e);
+		}
+		try{
+			broker.stop();
+		}catch(Exception e){
+			log.error("Error shutting down broker:"+e.getMessage());
+			log.debug("Error shutting down broker:"+e.getMessage(), e);
+		}
+		try{
+			routeManager.getContext().stop();
+		}catch(Exception e){
+			log.error("Error shutting down routes:"+e.getMessage());
+			log.debug("Error shutting down routes:"+e.getMessage(), e);
+		}
 	}
 
 	/**

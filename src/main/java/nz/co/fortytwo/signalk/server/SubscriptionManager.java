@@ -172,6 +172,19 @@ public class SubscriptionManager {
 		}
 	}
 
+	public void removeAllSessions() throws Exception{
+		wsSessionMap.clear();
+		
+		outPutMap.clear();
+		ipMap.clear();
+		//remove all subscriptions
+		RouteManager routeManager = RouteManagerFactory.getInstance();
+		List<Subscription> subs = subscriptions;
+		SignalkRouteFactory.removeSubscribeTimers(routeManager,subscriptions );
+		subscriptions.clear();
+		heartbeats.clear();
+		
+	}
 
 	public void removeSessionId(String sessionId) throws Exception{
 		String wsSession = wsSessionMap.get(sessionId);

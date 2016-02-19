@@ -14,3 +14,8 @@ pi@raspberrypi:~ $ history
 
    #had to add 'ifconfig wlan0 192.168.0.1' to near the bottom of /etc/rc.local to get correct address
    #had to add jna library
+   # used sudo systemctl set-default multi-user.target to stop graphical start up
+   # had to add sudo su -c "service hostapd restart" to make wifi run on startup
+   # had to add sudo ifconfig wlan0 192.168.0.1 to get the right ip
+   # turn off avahi-daemon so mDns works
+   #
