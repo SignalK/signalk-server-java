@@ -55,7 +55,7 @@ public class HeartbeatProcessor extends SignalkProcessor implements Processor{
 	private static Logger logger = Logger.getLogger(HeartbeatProcessor.class);
 	private SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
 	ProducerTemplate producer;
-	Json msg = null;
+	//Json msg = null;
 	
 	public HeartbeatProcessor(){
 		producer= new DefaultProducerTemplate(CamelContextFactory.getInstance());
@@ -65,7 +65,7 @@ public class HeartbeatProcessor extends SignalkProcessor implements Processor{
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
 		}
-		msg=getHeartBeatDelta();
+		
 	}
 	
 	public void process(Exchange exchange) throws Exception {
@@ -73,6 +73,7 @@ public class HeartbeatProcessor extends SignalkProcessor implements Processor{
 		try {
 			List<String> heartbeats = ImmutableList.copyOf(manager.getHeartbeats());
 			if(logger.isDebugEnabled())logger.debug("process heartbeats: "+heartbeats.size());
+			Json msg=getHeartBeatDelta();
 			for(String session : heartbeats){
 				HashMap<String, Object> headers = new HashMap<String, Object>();
 				headers.put(WebsocketConstants.CONNECTION_KEY, session);
@@ -101,7 +102,7 @@ public class HeartbeatProcessor extends SignalkProcessor implements Processor{
 		Json delta = Json.object();
 		delta.set(SignalKConstants.version, Util.getConfigProperty(SignalKConstants.version));
 		delta.set(SignalKConstants.timestamp, Util.getIsoTimeString());
-		delta.set(SignalKConstants.self_str, SignalKConstants.self);		
+		delta.set(SignalKConstants.self_str, Util.getConfigProperty(SignalKConstants.self));		
 		return delta;
 	}
 	
