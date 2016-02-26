@@ -25,7 +25,7 @@ package nz.co.fortytwo.signalk.processor;
 
 import static nz.co.fortytwo.signalk.util.SignalKConstants.dot;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_courseOverGroundTrue;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.source;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.sourceRef;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.timestamp;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.value;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels;
@@ -68,16 +68,14 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 	@Test
 	public void shouldMerge() throws IOException {
 		SignalKModel signalkModel=SignalKModelFactory.getInstance();
-		signalkModel.put(vessels+dot+SignalKConstants.self, null);
-		signalkModel.put(vessels+dot+"366951720", null);
+		signalkModel.put(vessels+dot+SignalKConstants.self, null,null,null);
+		signalkModel.put(vessels+dot+"366951720", null,null,null);
 		SignalkModelProcessor p = new SignalkModelProcessor();
 		assertEquals(null,signalkModel.get(vessels));
 		
 		SignalKModel basic=SignalKModelFactory.getCleanInstance();
 		
-		basic.put(vessels_dot_self_dot+nav_courseOverGroundTrue+dot+source,"unknown");
-		basic.put(vessels_dot_self_dot+nav_courseOverGroundTrue+dot+timestamp,"2015-03-16T03:31:22.332Z");
-		basic.put(vessels_dot_self_dot+nav_courseOverGroundTrue+dot+value,3.0176d);
+		basic.put(vessels_dot_self_dot+nav_courseOverGroundTrue,3.0176d,"unknown","2015-03-16T03:31:22.332Z");
 		
 		p.handle(basic);
 		double cog = (double) signalkModel.getValue(vessels_dot_self_dot+nav_courseOverGroundTrue);
@@ -86,8 +84,8 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 	@Test
 	public void shouldNotMergeOtherJson() throws IOException {
 		SignalKModel signalkModel=SignalKModelFactory.getInstance();
-		signalkModel.put(vessels+dot+SignalKConstants.self, null);
-		signalkModel.put(vessels+dot+"366951720", null);
+		signalkModel.put(vessels+dot+SignalKConstants.self, null,null,null);
+		signalkModel.put(vessels+dot+"366951720", null,null,null);
 		SignalkModelProcessor p = new SignalkModelProcessor();
 		assertEquals(null,signalkModel.get(vessels));
 		JsonSerializer ser = new JsonSerializer();
@@ -103,8 +101,8 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 	@Test
 	public void shouldNotMergeNmea() throws Exception {
 		SignalKModel signalkModel=SignalKModelFactory.getInstance();
-		signalkModel.put(vessels+dot+SignalKConstants.self, null);
-		signalkModel.put(vessels+dot+"366951720", null);
+		signalkModel.put(vessels+dot+SignalKConstants.self, null,null,null);
+		signalkModel.put(vessels+dot+"366951720", null,null,null);
 		SignalkModelProcessor p = new SignalkModelProcessor();
 		assertEquals(null,signalkModel.get(vessels));
 		//make an exchange here
@@ -118,8 +116,8 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 	@Test
 	public void shouldNotMergeAis() throws Exception {
 		SignalKModel signalkModel=SignalKModelFactory.getInstance();
-		signalkModel.put(vessels+dot+SignalKConstants.self, null);
-		signalkModel.put(vessels+dot+"366951720", null);
+		signalkModel.put(vessels+dot+SignalKConstants.self, null,null,null);
+		signalkModel.put(vessels+dot+"366951720", null,null,null);
 		SignalkModelProcessor p = new SignalkModelProcessor();
 		assertEquals(null,signalkModel.get(vessels));
 		//make an exchange here
@@ -133,8 +131,8 @@ public class SignalkModelProcessorTest extends CamelTestSupport {
 	@Test
 	public void shouldHandleNull() throws Exception{
 		SignalKModel signalkModel=SignalKModelFactory.getInstance();
-		signalkModel.put(vessels+dot+SignalKConstants.self, null);
-		signalkModel.put(vessels+dot+"366951720", null);
+		signalkModel.put(vessels+dot+SignalKConstants.self, null,null,null);
+		signalkModel.put(vessels+dot+"366951720", null,null,null);
 		SignalkModelProcessor p = new SignalkModelProcessor();
 		assertEquals(null,signalkModel.get(vessels));
 		//make an exchange here

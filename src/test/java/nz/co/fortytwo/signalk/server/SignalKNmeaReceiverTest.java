@@ -29,6 +29,7 @@ import static nz.co.fortytwo.signalk.util.SignalKConstants.env_wind_speedTrue;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_magneticVariation;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position_latitude;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position_longitude;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.self;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels_dot_self_dot;
 
@@ -128,7 +129,7 @@ public class SignalKNmeaReceiverTest extends SignalKCamelTestSupport {
         assertNotNull(template);
         nmea.reset();
         nmea.expectedMessageCount(1);
-        String jStr = "{\"vessels\":{\""+SignalKConstants.self+"\":{\"environment\":{\"wind\":{\"angleApparent\":{\"value\":90.0000000000},\"directionTrue\":{\"value\":0.0000000000},\"speedApparent\":{\"value\":20.0000000000},\"speedTrue\":{\"value\":0.0000000000}}}}}}";
+        String jStr = "{\"vessels\":{\""+SignalKConstants.self+"\":{\"environment\":{\"wind\":{\"angleApparent\":{\"value\":90.0000000000},\"directionTrue\":{\"value\":0.0000000000, \"source\":\""+self+"\"},\"speedApparent\":{\"value\":20.0000000000, \"source\":\""+self+"\"},\"speedTrue\":{\"value\":0.0000000000, \"source\":\""+self+"\"}}}}}}";
         template.sendBody(DIRECT_INPUT,"$GPRMC,144629.20,A,5156.91111,N,00434.80385,E,0.295,,011113,,,A*78");
         template.sendBody(DIRECT_INPUT,jStr);
         latch.await(2,TimeUnit.SECONDS);
@@ -137,6 +138,8 @@ public class SignalKNmeaReceiverTest extends SignalKCamelTestSupport {
 		 assertEquals(51.9485185d,(double)signalkModel.get(vessels_dot_self_dot + nav_position_latitude),0.00001);
 		 assertEquals(20.0d,(double)signalkModel.getValue(vessels_dot_self_dot +env_wind_speedApparent ),0.00001);
 		 windProcessor.handle(signalkModel);
+		 logger.debug("SignalKModel after:"+signalkModel);
+		 
 		 assertEquals(20.0d,(double)signalkModel.getValue(vessels_dot_self_dot +env_wind_speedTrue ),0.00001);
 		 nmea.assertIsSatisfied();
     }

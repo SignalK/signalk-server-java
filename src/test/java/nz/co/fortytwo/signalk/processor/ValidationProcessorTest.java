@@ -26,12 +26,12 @@ package nz.co.fortytwo.signalk.processor;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.dot;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.env_wind_directionChangeAlarm;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.env_wind_speedAlarm;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.source;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.sourceRef;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.timestamp;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.value;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels_dot_self_dot;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 
@@ -63,9 +63,9 @@ public class ValidationProcessorTest {
 		ValidationProcessor validationProcessor = new ValidationProcessor();
 		//{\"vessels\":{\""+SignalKConstants.self+"\":{\"environment\":{\"wind\":
 		SignalKModel wind = SignalKModelFactory.getCleanInstance();
-		wind.put(vessels_dot_self_dot+env_wind_speedAlarm+dot+source,"unknown");
-		//wind.put(vessels_dot_self_dot+env_wind_speedAlarm+dot+timestamp,"2015-03-16T03:31:22.327Z");
-		wind.put(vessels_dot_self_dot+env_wind_speedAlarm+dot+value,0d);
+		
+		wind.put(vessels_dot_self_dot+env_wind_speedAlarm,0d,"unknown","2015-03-16T03:31:22.327Z");
+		wind.getFullData().remove(vessels_dot_self_dot+env_wind_speedAlarm+dot+timestamp);
 		
 		assertNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+timestamp));
 		validationProcessor.validate(wind);
@@ -77,12 +77,12 @@ public class ValidationProcessorTest {
 	public void shouldNotAddTimestamp() throws IOException{
 		ValidationProcessor validationProcessor = new ValidationProcessor();
 		SignalKModel wind = SignalKModelFactory.getCleanInstance();
-		wind.put(vessels_dot_self_dot+env_wind_speedAlarm+dot+source,"unknown");
-		wind.put(vessels_dot_self_dot+env_wind_speedAlarm+dot+timestamp,"2015-03-16T03:31:22.327Z");
-		wind.put(vessels_dot_self_dot+env_wind_speedAlarm+dot+value,0d);
-		wind.put(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+source,"unknown");
-		//wind.put(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+timestamp,"2015-03-16T03:31:22.326Z");
-		wind.put(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+value,0d);
+		
+		wind.put(vessels_dot_self_dot+env_wind_speedAlarm,0d,"unknown","2015-03-16T03:31:22.327Z");
+		
+		
+		wind.put(vessels_dot_self_dot+env_wind_directionChangeAlarm,0d,"unknown","2015-03-16T03:31:22.327Z");
+		wind.getFullData().remove(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+timestamp);
 		
 		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+timestamp));
 		assertNull(wind.get(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+timestamp));
@@ -98,32 +98,33 @@ public class ValidationProcessorTest {
 		ValidationProcessor validationProcessor = new ValidationProcessor();
 		
 		SignalKModel wind = SignalKModelFactory.getCleanInstance();
-		//wind.put(vessels_dot_self_dot+env_wind_speedAlarm+dot+source,"unknown");
-		wind.put(vessels_dot_self_dot+env_wind_speedAlarm+dot+timestamp,"2015-03-16T03:31:22.327Z");
-		wind.put(vessels_dot_self_dot+env_wind_speedAlarm+dot+value,0d);
 		
-		assertNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+source));
+		wind.put(vessels_dot_self_dot+env_wind_speedAlarm,0d,null,"2015-03-16T03:31:22.327Z");
+		wind.getFullData().remove(vessels_dot_self_dot+env_wind_speedAlarm+dot+sourceRef);
+		
+		assertNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+sourceRef));
 		validationProcessor.validate(wind);
 		logger.debug(wind);
-		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+source));
+		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+sourceRef));
 		logger.debug(wind);
 	}
 	@Test
 	public void shouldNotAddSource() throws IOException{
 		ValidationProcessor validationProcessor = new ValidationProcessor();
 		SignalKModel wind = SignalKModelFactory.getCleanInstance();
-		wind.put(vessels_dot_self_dot+env_wind_speedAlarm+dot+source,"unknown");
-		wind.put(vessels_dot_self_dot+env_wind_speedAlarm+dot+timestamp,"2015-03-16T03:31:22.327Z");
-		wind.put(vessels_dot_self_dot+env_wind_speedAlarm+dot+value,0d);
-		//wind.put(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+source,"unknown");
-		wind.put(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+timestamp,"2015-03-16T03:31:22.326Z");
-		wind.put(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+value,0d);
 		
-		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+source));
-		assertNull(wind.get(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+source));
+		wind.put(vessels_dot_self_dot+env_wind_speedAlarm,0d,"unknown","2015-03-16T03:31:22.327Z");
+		//wind.put(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+source,"unknown");
+		
+		wind.put(vessels_dot_self_dot+env_wind_directionChangeAlarm,0d,null,"2015-03-16T03:31:22.327Z");
+		wind.getFullData().remove(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+sourceRef);
+		
+		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+sourceRef));
+		assertNull(wind.get(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+sourceRef));
+		
 		validationProcessor.validate(wind);
-		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+source));
-		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+source));
+		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+sourceRef));
+		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+sourceRef));
 		logger.debug(wind);
 	}
 	

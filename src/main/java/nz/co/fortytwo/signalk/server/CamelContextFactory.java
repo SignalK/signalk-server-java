@@ -33,7 +33,7 @@ import org.apache.camel.builder.RouteBuilder;
  * @author robert
  *
  */
-public class CamelContextFactory {
+public class CamelContextFactory { 
 
 	private static RouteBuilder wc;
 

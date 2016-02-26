@@ -30,7 +30,7 @@ import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position_altitude;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position_latitude;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position_longitude;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.source;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.sourceRef;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels_dot_self_dot;
 
 import java.util.UUID;
@@ -76,11 +76,8 @@ public class SignalKListOutputTest extends SignalKCamelTestSupport {
     			//add data
     			temp.putValue(vessels_dot_self_dot+nav_courseOverGroundTrue, 11.96d);
     			temp.putValue(vessels_dot_self_dot+nav_courseOverGroundMagnetic, 93.00d);
-    			temp.putValue(vessels_dot_self_dot+nav_position_latitude, -41.2936935424d);
-    			temp.putValue(vessels_dot_self_dot+nav_position_longitude, 11.96d);
-    			temp.putValue(vessels_dot_self_dot+nav_position_altitude, 0.0d);
-    			temp.putValue(vessels_dot_self_dot+nav_position+dot+source, "test");
-    			
+    			temp.putPosition(vessels_dot_self_dot+nav_position, -41.2936935424d,11.96d,0.0,"test",Util.getIsoTimeString());
+    			    			
     			jsonString = ser.write(temp);
 		
 	}

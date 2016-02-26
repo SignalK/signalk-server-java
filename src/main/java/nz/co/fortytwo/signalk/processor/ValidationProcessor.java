@@ -23,12 +23,14 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
+import static nz.co.fortytwo.signalk.util.SignalKConstants.UNKNOWN;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.dot;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.source;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.sourceRef;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.timestamp;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.value;
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
+import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -78,8 +80,12 @@ public class ValidationProcessor extends SignalkProcessor implements Processor{
 				if(logger.isDebugEnabled())	logger.debug("Processing key="+key);
 				String tmpKey = key.substring(0,key.length()-value.length());
 				//it should have timestamp and source
-				if(model.getSubMap(tmpKey+timestamp).size()==0)model.put(tmpKey+timestamp,new DateTime(DateTimeZone.UTC).toDateTimeISO().toString());
-				if(model.getSubMap(tmpKey+source).size()==0)model.put(tmpKey+source,"unknown");
+				if(model.getSubMap(tmpKey+timestamp).size()==0){
+					model.getFullData().put(tmpKey+timestamp,Util.getIsoTimeString());
+				}
+				if(model.getSubMap(tmpKey+sourceRef).size()==0){
+					model.getFullData().put(tmpKey+sourceRef,UNKNOWN);
+				}
 			}
 		
 		}

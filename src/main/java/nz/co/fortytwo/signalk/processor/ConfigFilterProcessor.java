@@ -72,9 +72,9 @@ public class ConfigFilterProcessor extends SignalkProcessor implements Processor
 			//remove _arduino
 			try{
 				if(allow){
-					model.put(SignalKConstants.vessels,null);
+					model.getFullData().remove(SignalKConstants.vessels);
 				}else{
-					model.put(SignalKConstants.CONFIG,null);
+					model.getFullData().remove(SignalKConstants.CONFIG);
 				}
 			}catch(NullPointerException npe){}
 			

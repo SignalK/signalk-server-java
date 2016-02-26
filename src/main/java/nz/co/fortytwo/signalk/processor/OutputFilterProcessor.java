@@ -66,11 +66,11 @@ public class OutputFilterProcessor extends SignalkProcessor implements Processor
 			SignalKModel model = (SignalKModel)exchange.getIn().getBody();
 			//remove _arduino
 			try{
-				model.put(SignalKConstants.vessels_dot_self_dot+"_arduino",null);
+				model.getFullData().remove(SignalKConstants.vessels_dot_self_dot+"_arduino");
 			}catch(NullPointerException npe){}
 			//remove _config
 			try{
-				model.put(SignalKConstants.vessels_dot_self_dot+"_config",null);
+				model.getFullData().remove(SignalKConstants.vessels_dot_self_dot+"_config");
 			}catch(NullPointerException npe){}
 			
 			exchange.getIn().setBody(ser.write(model));

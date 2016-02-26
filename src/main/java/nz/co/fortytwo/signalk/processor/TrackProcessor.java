@@ -29,7 +29,7 @@ import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position_latitude
 import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position_longitude;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.resources_routes;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.routes;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.source;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.sourceRef;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.timestamp;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.type;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.value;
@@ -98,7 +98,7 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 
 		Json update = Json.object();
 		update.set(timestamp, DateTime.now().toDateTimeISO().toString());
-		update.set(source, VESSELS_DOT_SELF);
+		update.set(sourceRef, VESSELS_DOT_SELF);
 		update.set(SignalKConstants.values, values);
 
 		Json updates = Json.array();

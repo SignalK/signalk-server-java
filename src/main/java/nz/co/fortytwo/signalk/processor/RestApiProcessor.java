@@ -168,7 +168,7 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 		json.set(SignalKConstants.PUT, array);
 		Json entry = Json.object();
 		// add the source
-		entry.set(SignalKConstants.source, Json.object());
+		entry.set(SignalKConstants.sourceRef, Json.object());
 		// add the value
 		Json values = Json.array();
 		entry.set(SignalKConstants.values, values);

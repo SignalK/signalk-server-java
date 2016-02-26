@@ -537,11 +537,11 @@
 							{
 								"source": 
 								{
-									"id": "http://jsonschema.net/signalk/config/server/clock/source",
+									"id": "http://jsonschema.net/signalk/config/server/clock/src",
 									"type": "string",
 									"title": "Source",
 									"description": "",
-									"name": "source",
+									"name": "src",
 									"default": "system",
 									"enum": 
 									[
