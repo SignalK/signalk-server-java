@@ -129,7 +129,7 @@ public class SignalKNmeaReceiverTest extends SignalKCamelTestSupport {
         assertNotNull(template);
         nmea.reset();
         nmea.expectedMessageCount(1);
-        String jStr = "{\"vessels\":{\""+SignalKConstants.self+"\":{\"environment\":{\"wind\":{\"angleApparent\":{\"value\":90.0000000000},\"directionTrue\":{\"value\":0.0000000000, \"source\":\""+self+"\"},\"speedApparent\":{\"value\":20.0000000000, \"source\":\""+self+"\"},\"speedTrue\":{\"value\":0.0000000000, \"source\":\""+self+"\"}}}}}}";
+        String jStr = "{\"vessels\":{\""+self+"\":{\"environment\":{\"wind\":{\"angleApparent\":{\"value\":90.0000000000},\"directionTrue\":{\"value\":0.0000000000, \"$source\":\""+self+"\"},\"speedApparent\":{\"value\":20.0000000000, \"$source\":\""+self+"\"},\"speedTrue\":{\"value\":0.0000000000, \"$source\":\""+self+"\"}}}}}}";
         template.sendBody(DIRECT_INPUT,"$GPRMC,144629.20,A,5156.91111,N,00434.80385,E,0.295,,011113,,,A*78");
         template.sendBody(DIRECT_INPUT,jStr);
         latch.await(2,TimeUnit.SECONDS);

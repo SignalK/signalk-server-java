@@ -24,6 +24,14 @@
 
 package nz.co.fortytwo.signalk.processor;
 
+import static nz.co.fortytwo.signalk.util.SignalKConstants.dot;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.source;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.sourceRef;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.sources;
+
+import java.util.Map.Entry;
+import java.util.NavigableMap;
+
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.util.JsonSerializer;
 
@@ -32,14 +40,14 @@ import org.apache.camel.Processor;
 import org.apache.log4j.Logger;
 
 /**
- * Converts the hashmap of key/values back to a json string
+ * Replaces $source with the actual source object
  * 
  * @author robert
  *
  */
-public class MapToJsonProcessor extends SignalkProcessor implements Processor {
+public class SourceRefToSourceProcessor extends SignalkProcessor implements Processor {
 
-	private static Logger logger = Logger.getLogger(MapToJsonProcessor.class);
+	private static Logger logger = Logger.getLogger(SourceRefToSourceProcessor.class);
 	JsonSerializer ser = new JsonSerializer();
 	
 	public void process(Exchange exchange) throws Exception {
@@ -49,9 +57,28 @@ public class MapToJsonProcessor extends SignalkProcessor implements Processor {
 		if(logger.isDebugEnabled())logger.debug("Processing:"+exchange.getIn().getBody().getClass());
 		
 		if (exchange.getIn().getBody() instanceof SignalKModel){
-			SignalKModel model = (SignalKModel)exchange.getIn().getBody();
-		
-			exchange.getIn().setBody(ser.writeJson(model));
+			SignalKModel model = exchange.getIn().getBody(SignalKModel.class);
+			if(logger.isDebugEnabled())logger.debug("Processing:"+model);
+			for(String key : model.getKeys()){
+				if(key.endsWith(dot+sourceRef)){
+					String val = (String) model.get(key);
+					if(logger.isDebugEnabled())logger.debug("key:"+key+", value:"+val);
+					//val is the path
+					model.getFullData().remove(key);
+					//fix key
+					key = key.replace(dot+sourceRef, dot+source);
+					NavigableMap<String, Object> node = signalkModel.getSubMap(sources+dot+val);
+					int pos = (sources+dot+val).length();
+					//node is the source object 
+					if(node!=null){
+						for(Entry<String, Object> entry:node.entrySet()){
+							String nodeKey = entry.getKey();
+							model.getFullData().put(key+nodeKey.substring(pos), entry.getValue());
+						}
+					}
+				}
+			}
+			exchange.getIn().setBody(model);
 		}
 		if(logger.isDebugEnabled())logger.debug("Outputting:"+exchange.getIn());
 	}

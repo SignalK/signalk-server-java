@@ -54,6 +54,8 @@ import nz.co.fortytwo.signalk.processor.RestApiProcessor;
 import nz.co.fortytwo.signalk.processor.RestAuthProcessor;
 import nz.co.fortytwo.signalk.processor.SaveProcessor;
 import nz.co.fortytwo.signalk.processor.SignalkModelProcessor;
+import nz.co.fortytwo.signalk.processor.SourceRefToSourceProcessor;
+import nz.co.fortytwo.signalk.processor.SourceToSourceRefProcessor;
 import nz.co.fortytwo.signalk.processor.StompProcessor;
 import nz.co.fortytwo.signalk.processor.StorageProcessor;
 import nz.co.fortytwo.signalk.processor.TrackProcessor;
@@ -119,6 +121,8 @@ public class SignalkRouteFactory {
 		.process(new ValidationProcessor()).id(getName(ValidationProcessor.class.getSimpleName()))
 		//record track
 		.process(new TrackProcessor()).id(getName(TrackProcessor.class.getSimpleName()))
+		//push source to sources and add $source
+		.process(new SourceToSourceRefProcessor()).id(getName(SourceToSourceRefProcessor.class.getSimpleName()))
 		//and update signalk model
 		.process(new SignalkModelProcessor()).id(getName(SignalkModelProcessor.class.getSimpleName()))
 		//we have processed all incoming data now - if there is more left its LIST, GET.
@@ -255,6 +259,7 @@ public class SignalkRouteFactory {
 			.onException(Exception.class).handled(true).maximumRedeliveries(0)
 			.to("log:nz.co.fortytwo.signalk.model.output?level=ERROR")
 			.end()
+		.process(new SourceRefToSourceProcessor()).id(getName(SourceRefToSourceProcessor.class.getSimpleName()))
 		.process(new MapToJsonProcessor()).id(getName(MapToJsonProcessor.class.getSimpleName()))
 		.process(new FullToDeltaProcessor()).id(getName(FullToDeltaProcessor.class.getSimpleName()))
 		.split().body()

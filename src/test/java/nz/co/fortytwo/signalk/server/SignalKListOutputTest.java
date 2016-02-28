@@ -106,6 +106,7 @@ public class SignalKListOutputTest extends SignalKCamelTestSupport {
 		 //request list
 		 Json sub = getList("vessels." + SignalKConstants.self,"navigation.position.*");
 		 template.sendBodyAndHeader(DIRECT_INPUT, sub.toString(),WebsocketConstants.CONNECTION_KEY, wsSession);
+		 latch.await(2,TimeUnit.SECONDS);
 		 output.assertIsSatisfied();
 		 Exchange exch = output.getReceivedExchanges().get(0);
 		 Json reply = exch.getIn().getBody(Json.class);

@@ -25,6 +25,9 @@ package nz.co.fortytwo.signalk.processor;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.FORMAT_DELTA;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.POLICY_FIXED;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_FORMAT;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.dot;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.source;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.sourceRef;
 
 import java.util.HashMap;
 import java.util.Queue;
@@ -68,7 +71,7 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 	public void process(Exchange exchange) throws Exception {
 
 		try {
-			if(logger.isDebugEnabled())logger.info("process  subs for " + exchange.getFromRouteId()+" as delta? "+isDelta(exchange.getFromRouteId()));
+			if(logger.isInfoEnabled())logger.info("process  subs for " + exchange.getFromRouteId()+" as delta? "+isDelta(exchange.getFromRouteId()));
 			// get the accumulated delta nodes.
 			exchange.getIn().setBody(createTree(exchange.getFromRouteId()));
 			setHeaders(exchange);
@@ -169,7 +172,7 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 		if (pathEvent.getPath() == null)
 			return;
 		//if (logger.isTraceEnabled())logger.trace(this.wsSession + " received event " + pathEvent.getPath());
-		logger.debug(this.wsSession + " received event " + pathEvent.getPath());
+		if(logger.isDebugEnabled())logger.debug(this.wsSession + " received event " + pathEvent.getPath());
 		// do we care?
 		for (Subscription s : manager.getSubscriptions(wsSession)) {
 			if (s.isActive() && !POLICY_FIXED.equals(s.getPolicy()) && s.isSubscribed(pathEvent.getPath())) {
@@ -216,6 +219,11 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 						Object node = signalkModel.get(p);
 						if(logger.isDebugEnabled())logger.debug("Found node:" + p + " = " + node);
 						if (node != null) {
+							//swap $source for real source
+							if(p.endsWith(dot+sourceRef)){
+								node = signalkModel.get(p.toString());
+								p = p.replace(dot+sourceRef, dot+source);
+							}
 							temp.getFullData().put(p, node);
 							send = true;
 						}
