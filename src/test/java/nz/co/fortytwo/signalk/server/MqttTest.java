@@ -152,7 +152,7 @@ public class MqttTest extends SignalKCamelTestSupport {
 
 		latch.await(2, TimeUnit.SECONDS);
 		log.debug("model:" + model);
-		assertEquals(338.0,
+		assertEquals(2.0,
 				model.getValue(vessels_dot_self_dot + env_wind_angleApparent));
 		assertEquals(6.8986404,
 				model.getValue(vessels_dot_self_dot + env_wind_speedApparent));

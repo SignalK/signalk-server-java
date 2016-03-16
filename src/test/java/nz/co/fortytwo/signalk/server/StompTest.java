@@ -143,7 +143,7 @@ public class StompTest extends SignalKCamelTestSupport {
 								.readFileToString(new File(
 										"src/test/resources/samples/windAngleUpdate.json.txt")));
 		latch.await(2, TimeUnit.SECONDS);
-		assertEquals(338.0,
+		assertEquals(2.0,
 				model.getValue(vessels_dot_self_dot + env_wind_angleApparent));
 		assertEquals(6.8986404,
 				model.getValue(vessels_dot_self_dot + env_wind_speedApparent));

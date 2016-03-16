@@ -219,11 +219,6 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 						Object node = signalkModel.get(p);
 						if(logger.isDebugEnabled())logger.debug("Found node:" + p + " = " + node);
 						if (node != null) {
-							//swap $source for real source
-							if(p.endsWith(dot+sourceRef)){
-								node = signalkModel.get(p.toString());
-								p = p.replace(dot+sourceRef, dot+source);
-							}
 							temp.getFullData().put(p, node);
 							send = true;
 						}
