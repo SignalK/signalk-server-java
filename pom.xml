@@ -2,9 +2,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>nz.co.fortytwo.signalk.server</groupId>
-	<artifactId>signalk-server</artifactId>
+	<artifactId>signalk-server-java</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>signalk-server</name>
+	<name>signalk-server-java</name>
 	<properties>
 		<!-- <bundle.name>nsb-${project.version}</bundle.name> -->
 		<signalk.core.version>0.0.1-SNAPSHOT</signalk.core.version>
@@ -88,7 +88,7 @@
 
 		<dependency>
 			<groupId>nz.co.fortytwo.signalk.core</groupId>
-			<artifactId>signalk-core</artifactId>
+			<artifactId>signalk-core-java</artifactId>
 			<version>${signalk.core.version}</version>
 		</dependency>
 
