@@ -85,12 +85,16 @@
 	</pluginRepositories>
 
 	<dependencies>
-
 		<dependency>
-			<groupId>nz.co.fortytwo.signalk.core</groupId>
+			<groupId>com.github.SignalK</groupId>
 			<artifactId>signalk-core-java</artifactId>
-			<version>${signalk.core.version}</version>
+			<version>JIT-Deploy-01</version>
 		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>nz.co.fortytwo.signalk.core</groupId> -->
+<!-- 			<artifactId>signalk-core-java</artifactId> -->
+<!-- 			<version>${signalk.core.version}</version> -->
+<!-- 		</dependency> -->
 
 	<!-- ActiveMq -->
 		<dependency>
