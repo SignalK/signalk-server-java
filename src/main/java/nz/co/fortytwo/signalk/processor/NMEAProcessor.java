@@ -26,6 +26,9 @@ package nz.co.fortytwo.signalk.processor;
 import nz.co.fortytwo.signalk.handler.NMEAHandler;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 
+import static nz.co.fortytwo.signalk.util.SignalKConstants.MSG_SERIAL_PORT;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.MSG_SRC_BUS;
+
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.log4j.Logger;
@@ -54,7 +57,8 @@ public class NMEAProcessor extends SignalkProcessor implements Processor {
 		}
 		
 		String body = exchange.getIn().getBody(String.class);
-		SignalKModel model = nmea.handle(body);
+		String src = exchange.getIn().getHeader(MSG_SRC_BUS, String.class);
+		SignalKModel model = nmea.handle(body, src);
 		if(model!=null){
 			exchange.getIn().setBody(model);
 		}

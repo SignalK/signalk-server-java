@@ -60,6 +60,8 @@ public class WsSessionProcessor extends SignalkProcessor implements Processor {
 		String localAddress = manager.getLocalIpAddress(wsSession);
 
 		exchange.getIn().setHeader(SignalKConstants.MSG_SRC_IP, remoteAddress);
+		exchange.getIn().setHeader(SignalKConstants.MSG_SRC_BUS, "ws."+remoteAddress.replace('.', '_'));
+		
 		if (Util.sameNetwork(localAddress, remoteAddress)) {
 			exchange.getIn().setHeader(SignalKConstants.MSG_TYPE,
 					SignalKConstants.INTERNAL_IP);

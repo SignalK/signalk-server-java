@@ -118,6 +118,7 @@ public class CamelUdpNettyHandler extends SimpleChannelInboundHandler<DatagramPa
 		Map<String, Object> headers = new HashMap<>();
 		headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
 		headers.put(SignalKConstants.MSG_SRC_IP, sessionList.get(wsSession).getHostString());
+		headers.put(SignalKConstants.MSG_SRC_BUS, "udp."+sessionList.get(wsSession).getHostString().replace('.', '_'));
 		headers.put(ConfigConstants.OUTPUT_TYPE, outputType);
 		return headers;
 	}

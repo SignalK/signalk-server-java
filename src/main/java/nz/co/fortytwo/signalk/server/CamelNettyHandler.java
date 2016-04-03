@@ -101,6 +101,7 @@ public class CamelNettyHandler extends SimpleChannelInboundHandler<String> {
 		headers.put(WebsocketConstants.CONNECTION_KEY, contextList.inverse().get(ctx));
 		String remoteAddress = ctx.channel().remoteAddress().toString();
 		headers.put(SignalKConstants.MSG_SRC_IP, remoteAddress);
+		headers.put(SignalKConstants.MSG_SRC_BUS, "tcp."+remoteAddress.replace('.', '_'));
 		headers.put(ConfigConstants.OUTPUT_TYPE, outputType);
 		String localAddress = ctx.channel().localAddress().toString();
 		

@@ -159,6 +159,7 @@ public class SerialPortReader implements Processor {
 			this.in = new BufferedInputStream(serialPort.getInputStream());
 			headers.put(SignalKConstants.MSG_TYPE, SignalKConstants.SERIAL);
 			headers.put(SignalKConstants.MSG_SERIAL_PORT, portName);
+			headers.put(SignalKConstants.MSG_SRC_BUS, portName);
 			uid = Pattern.compile(ConfigConstants.UID + ":");
 			if(logger.isDebugEnabled())logger.info("Setup serialReader on :"+portName);
 			enableSerial = Util.getConfigPropertyBoolean(ConfigConstants.ENABLE_SERIAL);

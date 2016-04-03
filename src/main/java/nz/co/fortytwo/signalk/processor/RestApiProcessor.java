@@ -92,7 +92,7 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 			}
 			exchange.getIn().setHeader(SignalKConstants.MSG_SRC_IP, remoteAddress);
 			exchange.getIn().setHeader(SignalKConstants.MSG_SRC_IP_PORT, request.getRemotePort());
-			
+			exchange.getIn().setHeader(SignalKConstants.MSG_SRC_BUS, "rest."+remoteAddress.replace('.', '_'));
 			exchange.getIn().setHeader(WebsocketConstants.CONNECTION_KEY,
 					session.getId());
 			
