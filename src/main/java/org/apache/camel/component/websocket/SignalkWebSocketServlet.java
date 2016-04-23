@@ -24,6 +24,12 @@
  */
 package org.apache.camel.component.websocket;
 
+import static nz.co.fortytwo.signalk.util.SignalKConstants.EXTERNAL_IP;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.INTERNAL_IP;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.MSG_SRC_IP;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.MSG_SRC_IP_PORT;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.MSG_TYPE;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -35,10 +41,16 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import nz.co.fortytwo.signalk.server.CamelContextFactory;
+import nz.co.fortytwo.signalk.server.RouteManager;
+import nz.co.fortytwo.signalk.server.RouteManagerFactory;
 import nz.co.fortytwo.signalk.server.SubscriptionManagerFactory;
 import nz.co.fortytwo.signalk.util.ConfigConstants;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
+import org.apache.camel.Producer;
+import org.apache.camel.ProducerTemplate;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.http.HttpException;
@@ -62,10 +74,12 @@ public class SignalkWebSocketServlet extends WebsocketComponentServlet {
 	private static final long serialVersionUID = 1L;
 	private static Logger logger = Logger.getLogger(SignalkWebSocketServlet.class);
 	private WebSocketFactory _webSocketFactory;
+	private ProducerTemplate producer = null; 
 
 	public SignalkWebSocketServlet(NodeSynchronization sync) {
 		super(sync);
-	}
+		producer = CamelContextFactory.getInstance().createProducerTemplate();
+		}
 
 	public void init() throws ServletException {
 		try {
@@ -190,6 +204,20 @@ public class SignalkWebSocketServlet extends WebsocketComponentServlet {
 					try {
 						sessionMap.put(connection, wsSession);
 						SubscriptionManagerFactory.getInstance().add(sessionId, wsSession, ConfigConstants.OUTPUT_WS, request.getLocalAddr(),request.getRemoteAddr());
+						//add default sub, or specific sub here
+						String subscribe = request.getParameter("subscribe");
+						if(StringUtils.isBlank(subscribe)|| "self".equals(subscribe)){
+							//subscribe to self
+							String sub = "{\"context\":\"vessels.self\",\"subscribe\":[{\"path\":\"*\"}]}";
+							sendSub(request, sub, wsSession);
+						}else if("all".equals(subscribe)){
+							//subscribe to all
+							String sub = "{\"context\":\"vessels.*\",\"subscribe\":[{\"path\":\"*\"}]}";
+							sendSub(request, sub, wsSession);
+						}else if("none".equals(subscribe)){
+							//subscribe to none - do nothing
+						}
+						
 					} catch (Exception e1) {
 						logger.error(e1.getMessage(),e1);
 						throw new IOException(e1);
@@ -197,6 +225,22 @@ public class SignalkWebSocketServlet extends WebsocketComponentServlet {
 					// LOG.debug("Websocket upgrade {} {} {} {}", new Object[] { request.getRequestURI(), Integer.valueOf(draft), protocol, connection });
 					request.setAttribute("org.eclipse.jetty.io.Connection", connection);
 					connection.getConnection().sendMessage(Util.getWelcomeMsg().toString());
+				}
+
+				private void sendSub(HttpServletRequest request, String sub, String wsSession) throws Exception {
+					Map<String, Object> headers = new HashMap<>();
+					headers.put(MSG_SRC_IP, request.getRemoteAddr());
+					headers.put(MSG_SRC_IP_PORT, request.getRemotePort());
+					
+					if(Util.sameNetwork(request.getLocalAddr(), request.getRemoteAddr())){
+						headers.put(MSG_TYPE, INTERNAL_IP);
+					}else{
+						headers.put(MSG_TYPE, EXTERNAL_IP);
+					}
+					headers.put(WebsocketConstants.CONNECTION_KEY,wsSession);
+					if(logger.isDebugEnabled())logger.debug("Sending connection sub:"+sub);
+					producer.sendBodyAndHeaders(RouteManager.SEDA_INPUT,sub, headers);
+					
 				}
 
 				@Override
