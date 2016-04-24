@@ -73,8 +73,7 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 	private static final int SAVE_COUNT = 60;
 
 	private static Logger logger = Logger.getLogger(TrackProcessor.class);
-	private static String latKey = vessels_dot_self_dot + nav_position_latitude;
-	private static String lonKey = vessels_dot_self_dot + nav_position_longitude;
+	
 	private Json msg = Json.object();
 	private Json currentTrack;
 	private List<Position> track = new ArrayList<Position>();
@@ -143,11 +142,11 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 		if (node.getData().size() == 0)
 			return;
 
-		if (node.getData().containsKey(latKey) && node.getData().containsKey(lonKey)) {
+		if (node.getData().containsKey(vessels_dot_self_dot + nav_position_latitude) && node.getData().containsKey(vessels_dot_self_dot + nav_position_longitude)) {
 			if (logger.isTraceEnabled())
 				logger.trace("TrackProcessor  updating " + node);
 			// we have a track change.
-			track.add(new Position((double)node.get(latKey), (double)node.get(lonKey)));
+			track.add(new Position((double)node.get(vessels_dot_self_dot + nav_position_latitude), (double)node.get(vessels_dot_self_dot + nav_position_longitude)));
 			count++;
 			// append to file
 			if (count % SAVE_COUNT == 0) {
