@@ -45,7 +45,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.websocket.WebsocketConstants;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 import com.google.common.eventbus.DeadEvent;
 import com.google.common.eventbus.Subscribe;
@@ -63,7 +63,7 @@ import nz.co.fortytwo.signalk.util.ConfigConstants;
  */
 public class FullExportProcessor extends SignalkProcessor implements Processor {
 
-	private static final Logger logger = Logger.getLogger(FullExportProcessor.class);
+	private static final Logger logger = LogManager.getLogger(FullExportProcessor.class);
     private static final Timer timer = new Timer("Export Timer", true);
 
     private final String wsSession;

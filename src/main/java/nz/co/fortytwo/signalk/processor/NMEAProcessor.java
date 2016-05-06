@@ -31,7 +31,7 @@ import static nz.co.fortytwo.signalk.util.SignalKConstants.MSG_SRC_BUS;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 
 
@@ -44,7 +44,7 @@ import org.apache.log4j.Logger;
  */
 public class NMEAProcessor extends SignalkProcessor implements Processor {
 
-	private static Logger logger = Logger.getLogger(NMEAProcessor.class);
+	private static Logger logger = LogManager.getLogger(NMEAProcessor.class);
 	
 
 	private NMEAHandler nmea = new NMEAHandler();

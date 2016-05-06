@@ -40,7 +40,7 @@ import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
 import com.ning.http.client.AsyncHttpClient;
@@ -48,7 +48,7 @@ import com.ning.http.client.Response;
 
 public class RestApiTest extends SignalKCamelTestSupport {
  
-    private static Logger logger = Logger.getLogger(RestApiTest.class);
+    private static Logger logger = LogManager.getLogger(RestApiTest.class);
 	String jsonDiff = null;
 	
 	@Produce(uri = "direct:input")

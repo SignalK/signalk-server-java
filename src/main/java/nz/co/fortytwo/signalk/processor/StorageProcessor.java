@@ -32,7 +32,7 @@ import nz.co.fortytwo.signalk.handler.JsonStorageHandler;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 /**
  * Intercept and store/retrieve payloads in the storage system.
@@ -42,7 +42,7 @@ import org.apache.log4j.Logger;
  */
 public class StorageProcessor extends SignalkProcessor implements Processor {
 
-	private static Logger logger = Logger.getLogger(StorageProcessor.class);
+	private static Logger logger = LogManager.getLogger(StorageProcessor.class);
 
 	private JsonStorageHandler storageHandler = null;
 	public StorageProcessor() throws IOException{

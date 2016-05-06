@@ -32,7 +32,7 @@ import nz.co.fortytwo.signalk.handler.FullToDeltaConverter;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 /**
  * Convert the full format to delta format
@@ -42,7 +42,7 @@ import org.apache.log4j.Logger;
  */
 public class FullToDeltaProcessor extends SignalkProcessor implements Processor {
 
-	private static Logger logger = Logger.getLogger(FullToDeltaProcessor.class);
+	private static Logger logger = LogManager.getLogger(FullToDeltaProcessor.class);
 
 	private FullToDeltaConverter fullToDelta = new FullToDeltaConverter();
 	

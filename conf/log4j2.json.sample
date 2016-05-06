@@ -1,0 +1,82 @@
+{
+	"configuration": {
+
+		"status": "error",
+		"monitorInterval":"30",
+		"properties": {
+			"property": [{
+					"name": "Directory",
+					"value": "./logs"
+				},
+
+				{
+					"name": "FileName",
+					"value": "signalk.log"
+				}
+			]
+		},
+		"appenders": {
+			"Console": {
+				"name": "STDOUT",
+				"patternlayout": {
+					"pattern": "%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"
+				}
+			},
+			"RollingFile": {
+				"name": "File",
+				"fileName": "${Directory}/${FileName}",
+				"filePattern": "${Directory}/${date:yyyy-MM}/test-%d{MM-dd-yyyy}-%i.log.gz",
+				"PatternLayout": {
+					"pattern": "%d %p %logger{36} [%t] %m%n"
+				},
+				"Policies": {
+					"SizeBasedTriggeringPolicy": {
+						"size": "1 MB"
+					}
+				},
+				"DefaultRolloverStrategy": {
+					"max": "10"
+				}
+			}
+		},
+		"loggers": {
+
+			"root": {
+				"level": "error",
+				"appender-ref": [{
+					"ref": "STDOUT"
+				}, {
+					"ref": "File"
+				}]
+			},
+			"logger": [{
+				"name": "nz.co.fortytwo.signalk",
+				"level": "info"
+			},
+			{
+				"name": "nz.co.fortytwo.signalk.model",
+				"level": "error"
+			},
+			{
+				"name": "nz.co.fortytwo.signalk.handler",
+				"level": "error"
+			},
+			{
+				"name": "nz.co.fortytwo.signalk.processor",
+				"level": "error"
+			},
+			{
+				"name": "nz.co.fortytwo.signalk.util",
+				"level": "error"
+			},
+			{
+				"name": "org.apache.camel",
+				"level": "error"
+			},
+			{
+				"name": "mjson",
+				"level": "error"
+			}]
+		}
+	}
+}

@@ -38,7 +38,7 @@ import nz.co.fortytwo.signalk.util.JsonSerializer;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.websocket.WebsocketConstants;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 /**
  * Handles  json messages with 'get' requests
@@ -48,7 +48,7 @@ import org.apache.log4j.Logger;
  */
 public class JsonGetProcessor extends SignalkProcessor implements Processor{
 
-	private static Logger logger = Logger.getLogger(JsonGetProcessor.class);
+	private static Logger logger = LogManager.getLogger(JsonGetProcessor.class);
 	//private static DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
 	private JsonGetHandler handler = new JsonGetHandler();
 	JsonSerializer ser = new JsonSerializer();

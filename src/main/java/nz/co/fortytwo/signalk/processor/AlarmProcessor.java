@@ -27,7 +27,7 @@ import nz.co.fortytwo.signalk.handler.AlarmHandler;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 /**
  * Processes the signalk model for alarm condidtions and sets *.alarm.* keys
@@ -37,7 +37,7 @@ import org.apache.log4j.Logger;
  */
 public class AlarmProcessor extends SignalkProcessor implements Processor {
 
-	private static Logger logger = Logger.getLogger(AlarmProcessor.class);
+	private static Logger logger = LogManager.getLogger(AlarmProcessor.class);
 	
 	private AlarmHandler alarmsHandler = new AlarmHandler();
 	

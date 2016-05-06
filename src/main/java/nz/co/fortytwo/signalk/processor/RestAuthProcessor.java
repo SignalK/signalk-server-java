@@ -31,7 +31,7 @@ import nz.co.fortytwo.signalk.util.SignalKConstants;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.http.HttpMessage;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.http.MimeTypes;
 
 
@@ -43,7 +43,7 @@ import org.eclipse.jetty.http.MimeTypes;
  */
 public class RestAuthProcessor extends SignalkProcessor implements Processor{
 
-	private static Logger logger = Logger.getLogger(RestAuthProcessor.class);
+	private static Logger logger = LogManager.getLogger(RestAuthProcessor.class);
 	
 	@Override
 	public void process(Exchange exchange) throws Exception {

@@ -29,7 +29,7 @@ import nz.co.fortytwo.signalk.model.SignalKModel;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 /**
  * Updates the convert n2k json to signalk tree
@@ -40,7 +40,7 @@ import org.apache.log4j.Logger;
 public class N2KProcessor extends SignalkProcessor implements Processor {
 
 	
-	private static Logger logger = Logger.getLogger(N2KProcessor.class);
+	private static Logger logger = LogManager.getLogger(N2KProcessor.class);
 	
 	private N2KHandler n2k = new N2KHandler(); 
 

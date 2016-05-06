@@ -44,14 +44,14 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.camel.impl.DefaultProducerTemplate;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 
 public class SignalKGetOutputTest extends SignalKCamelTestSupport {
 
 	static final String DIRECT_INPUT = "seda:input";
-	static Logger logger = Logger.getLogger(SignalKGetOutputTest.class);
+	static Logger logger = LogManager.getLogger(SignalKGetOutputTest.class);
 
 	MockEndpoint output = null;
 	// @Produce(uri = RouteManager.SEDA_INPUT)

@@ -33,7 +33,7 @@ import org.apache.camel.Consumer;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.Producer;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 import org.fusesource.hawtbuf.AsciiBuffer;
 import org.fusesource.hawtbuf.Buffer;
 import org.fusesource.hawtdispatch.Task;
@@ -46,7 +46,7 @@ import org.fusesource.stomp.codec.StompFrame.HeaderEntry;
 
 public class SkStompEndpoint extends StompEndpoint {
 
-	private static Logger logger = Logger.getLogger(SkStompEndpoint.class);
+	private static Logger logger = LogManager.getLogger(SkStompEndpoint.class);
 	
     private CallbackConnection connection;
     //private StompConfiguration configuration;

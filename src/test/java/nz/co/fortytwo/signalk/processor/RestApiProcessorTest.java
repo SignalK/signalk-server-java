@@ -15,7 +15,7 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -27,7 +27,7 @@ import static org.junit.Assert.assertThat;
 
 public class RestApiProcessorTest {
 
-	private static Logger logger = Logger.getLogger(RestApiProcessorTest.class);
+	private static Logger logger = LogManager.getLogger(RestApiProcessorTest.class);
 	
     @BeforeClass
     public static void initModel() throws Exception {

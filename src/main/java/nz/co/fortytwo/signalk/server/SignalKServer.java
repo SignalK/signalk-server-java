@@ -26,25 +26,29 @@ package nz.co.fortytwo.signalk.server;
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
-
-import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
-import nz.co.fortytwo.signalk.util.ConfigConstants;
-import nz.co.fortytwo.signalk.util.Util;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.apache.activemq.broker.BrokerService;
 import org.apache.camel.main.Main;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.webapp.WebAppContext;
+
+import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
+import nz.co.fortytwo.signalk.util.ConfigConstants;
+import nz.co.fortytwo.signalk.util.Util;
 
 public class SignalKServer {
 
 	private static Server server;
 
-	private static Logger logger = Logger.getLogger(SignalKServer.class);
+	private static Logger logger = LogManager.getLogger(SignalKServer.class);
 
 	protected SignalKServer(String configDir) throws Exception {
 		// init config
@@ -56,7 +60,7 @@ public class SignalKServer {
 		Util.getConfig();
 		// make sure we have all the correct dirs and files now
 		ensureInstall();
-
+		
 		logger.info("SignalKServer starting....");
 
 		// do we have a USB drive connected?
@@ -70,6 +74,7 @@ public class SignalKServer {
 		main.enableHangupSupport();
 
 		if (Util.getConfigPropertyBoolean(ConfigConstants.HAWTIO_START)) {
+			logger.info("SignalKServer starting hawtio manager....");
 			server = startHawtio();
 		}
 
@@ -82,7 +87,7 @@ public class SignalKServer {
 
 		// add our routes to Camel
 		main.addRouteBuilder(routeManager);
-
+		
 		
 		// and run, which keeps blocking until we terminate the JVM (or stop
 		// CamelContext)
@@ -144,11 +149,12 @@ public class SignalKServer {
 			logDir.mkdirs();
 		}
 		// do we have a log4j.properties?
-		File log4j = new File(rootDir, "conf/log4j.properties");
+		File log4j = new File(rootDir, "conf/log4j2.json");
 		if (!log4j.exists()) {
-			File log4jSample = new File(rootDir, "conf/log4j.properties.sample");
+			File log4jSample = new File(rootDir, "conf/log4j2.json.sample");
 			FileUtils.copyFile(log4jSample, log4j);
 		}
+		Configurator.initialize("signalk",log4j.toString());
 		// do we have a storage dir?
 		File storageDir = new File(
 				Util.getConfigProperty(ConfigConstants.STORAGE_ROOT));
@@ -171,6 +177,7 @@ public class SignalKServer {
 				conf = conf + "/";
 			}
 		}
+		//Configurator.initialize("test","./conf/log4j.json");
 		SignalKServerFactory.getInstance(conf);
 
 	}

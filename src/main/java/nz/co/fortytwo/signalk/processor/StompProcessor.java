@@ -26,7 +26,7 @@ import mjson.Json;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 import org.fusesource.stomp.client.Constants;
 
 /**
@@ -37,7 +37,7 @@ import org.fusesource.stomp.client.Constants;
  */
 public class StompProcessor extends SignalkProcessor implements Processor {
 
-	private static Logger logger = Logger.getLogger(StompProcessor.class);
+	private static Logger logger = LogManager.getLogger(StompProcessor.class);
 	
 	public void process(Exchange exchange) throws Exception {
 

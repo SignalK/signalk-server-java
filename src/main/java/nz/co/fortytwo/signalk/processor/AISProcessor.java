@@ -28,7 +28,7 @@ import nz.co.fortytwo.signalk.model.SignalKModel;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 /**
  * Churns through incoming nav data and looking for AIVDM messages
@@ -41,7 +41,7 @@ import org.apache.log4j.Logger;
 public class AISProcessor extends SignalkProcessor implements Processor {
 
 
-	private static Logger logger = Logger.getLogger(AISProcessor.class);
+	private static Logger logger = LogManager.getLogger(AISProcessor.class);
 
     /** Reader to parse lines and deliver complete AIS packets.
      * Updates them into model, and removes the key from the map. */

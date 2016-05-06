@@ -41,12 +41,12 @@ import org.apache.activemq.broker.BrokerService;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.websocket.SignalkWebsocketComponent;
 import org.apache.camel.test.junit4.CamelTestSupport;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 import org.junit.After;
 import org.junit.BeforeClass;
 
 public abstract class SignalKCamelTestSupport extends CamelTestSupport {
-	static Logger logger = Logger.getLogger(SignalKCamelTestSupport.class);
+	static Logger logger = LogManager.getLogger(SignalKCamelTestSupport.class);
 	protected SignalKModel signalkModel = null;
 	protected RouteManager routeManager = null;
 	protected final CountDownLatch latch = new CountDownLatch(1);

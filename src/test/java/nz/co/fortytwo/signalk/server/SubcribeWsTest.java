@@ -42,7 +42,7 @@ import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
 import com.ning.http.client.AsyncHttpClient;
@@ -53,7 +53,7 @@ import com.ning.http.client.websocket.WebSocketUpgradeHandler;
 
 public class SubcribeWsTest extends SignalKCamelTestSupport{
  
-    private static Logger logger = Logger.getLogger(SubcribeWsTest.class);
+    private static Logger logger = LogManager.getLogger(SubcribeWsTest.class);
 	String jsonDiff = null;
 	
 	

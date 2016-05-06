@@ -38,12 +38,12 @@ import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
 public class MapToJsonProcessorTest extends SignalKCamelTestSupport{
 
-	private static Logger logger = Logger.getLogger(MapToJsonProcessorTest.class);
+	private static Logger logger = LogManager.getLogger(MapToJsonProcessorTest.class);
 	
 	@Test
 	public void test() throws Exception {

@@ -29,7 +29,7 @@ import nz.co.fortytwo.signalk.model.SignalKModel;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 /**
  * Updates the signalkModel with the current json
@@ -39,7 +39,7 @@ import org.apache.log4j.Logger;
  */
 public class DeltaImportProcessor extends SignalkProcessor implements Processor{
 
-	private static Logger logger = Logger.getLogger(DeltaImportProcessor.class);
+	private static Logger logger = LogManager.getLogger(DeltaImportProcessor.class);
 	
 	private DeltaToMapConverter deltaToMap = new DeltaToMapConverter();
 	

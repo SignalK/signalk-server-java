@@ -53,11 +53,11 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.impl.DefaultProducerTemplate;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 public class FullExportProcessorTest {
 
-    private static Logger logger = Logger.getLogger(FullExportProcessorTest.class);
+    private static Logger logger = LogManager.getLogger(FullExportProcessorTest.class);
 
     private static SubscriptionManager subscriptionManager;
     private static SignalKModel model;

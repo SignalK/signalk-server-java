@@ -32,11 +32,11 @@ import org.apache.activemq.broker.region.Subscription;
 import org.apache.activemq.command.ConsumerInfo;
 import org.apache.activemq.command.RemoveSubscriptionInfo;
 import org.apache.activemq.util.IntrospectionSupport;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 public class ActiveMqSubscriptionFilter extends BrokerFilter{
 
-	private static Logger logger = Logger.getLogger(ActiveMqSubscriptionFilter.class);
+	private static Logger logger = LogManager.getLogger(ActiveMqSubscriptionFilter.class);
 	
 	public ActiveMqSubscriptionFilter(Broker next) {
 		super(next);

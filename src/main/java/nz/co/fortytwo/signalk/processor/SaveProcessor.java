@@ -30,7 +30,7 @@ import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 import com.google.common.eventbus.DeadEvent;
 import com.google.common.eventbus.Subscribe;
@@ -43,7 +43,7 @@ import com.google.common.eventbus.Subscribe;
  */
 public class SaveProcessor extends SignalkProcessor implements Processor {
 
-	private static Logger logger = Logger.getLogger(SaveProcessor.class);
+	private static Logger logger = LogManager.getLogger(SaveProcessor.class);
 	private SaveThread saver = new SaveThread();
 	
 	public SaveProcessor(){

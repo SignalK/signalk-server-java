@@ -27,7 +27,7 @@ import nz.co.fortytwo.signalk.handler.DeclinationHandler;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 /**
  * Processes messages, if it finds a Magnetic bearing, and has seen a LAT and LON, it calculates declination,
@@ -39,7 +39,7 @@ import org.apache.log4j.Logger;
  */
 public class DeclinationProcessor extends SignalkProcessor implements Processor {
 
-	private static Logger logger = Logger.getLogger(DeclinationProcessor.class);
+	private static Logger logger = LogManager.getLogger(DeclinationProcessor.class);
 	
 	private DeclinationHandler decl = new DeclinationHandler();
 	

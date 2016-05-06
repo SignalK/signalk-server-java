@@ -39,7 +39,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.camel.impl.DefaultProducerTemplate;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 
 /**
@@ -49,7 +49,7 @@ import org.apache.log4j.Logger;
  */
 public class SignalkProcessor {
 	
-	private static Logger logger = Logger.getLogger(SignalkProcessor.class);
+	private static Logger logger = LogManager.getLogger(SignalkProcessor.class);
 	protected static final SignalKModel signalkModel = SignalKModelFactory.getInstance();
 	protected  SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
 	//@Produce(uri = RouteManager.SEDA_NMEA )

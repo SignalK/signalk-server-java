@@ -45,7 +45,7 @@ import org.apache.camel.StreamCache;
 import org.apache.camel.component.http.HttpMessage;
 import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 /*
  * Processes REST requests for Signal K data
@@ -61,7 +61,7 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 	//private static final String SLASH = "/";
 	private static final String LIST = "list";
 	public static final String REST_WILDCARD = "REST_WILDCARD";
-	private static Logger logger = Logger.getLogger(RestApiProcessor.class);
+	private static Logger logger = LogManager.getLogger(RestApiProcessor.class);
 
 	public RestApiProcessor() throws IOException {
 

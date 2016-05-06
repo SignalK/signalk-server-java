@@ -34,7 +34,7 @@ import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
@@ -47,7 +47,7 @@ import org.joda.time.DateTimeZone;
  */
 public class ValidationProcessor extends SignalkProcessor implements Processor{
 
-	private static Logger logger = Logger.getLogger(ValidationProcessor.class);
+	private static Logger logger = LogManager.getLogger(ValidationProcessor.class);
 	
 	public void process(Exchange exchange) throws Exception {
 		

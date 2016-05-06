@@ -36,7 +36,7 @@ import nz.co.fortytwo.signalk.handler.JsonListHandler;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.websocket.WebsocketConstants;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 /**
  * Handles json messages with 'list' requests. These provide a list of available signalk keys the server understands
@@ -46,7 +46,7 @@ import org.apache.log4j.Logger;
  */
 public class JsonListProcessor extends SignalkProcessor implements Processor{
 
-	private static Logger logger = Logger.getLogger(JsonListProcessor.class);
+	private static Logger logger = LogManager.getLogger(JsonListProcessor.class);
 	//private static DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
 	private JsonListHandler listHandler = new JsonListHandler();
 	

@@ -37,7 +37,7 @@ import nz.co.fortytwo.signalk.util.JsonSerializer;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 /**
  * Replaces $source with the actual source object
@@ -47,7 +47,7 @@ import org.apache.log4j.Logger;
  */
 public class SourceRefToSourceProcessor extends SignalkProcessor implements Processor {
 
-	private static Logger logger = Logger.getLogger(SourceRefToSourceProcessor.class);
+	private static Logger logger = LogManager.getLogger(SourceRefToSourceProcessor.class);
 	JsonSerializer ser = new JsonSerializer();
 	
 	public void process(Exchange exchange) throws Exception {

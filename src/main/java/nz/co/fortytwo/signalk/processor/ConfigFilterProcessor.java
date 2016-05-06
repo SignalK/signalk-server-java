@@ -31,7 +31,7 @@ import nz.co.fortytwo.signalk.util.SignalKConstants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 /**
  * Converts the hashmap of key/values back to a string
@@ -40,7 +40,7 @@ import org.apache.log4j.Logger;
  */
 public class ConfigFilterProcessor extends SignalkProcessor implements Processor {
 
-	private static Logger logger = Logger.getLogger(ConfigFilterProcessor.class);
+	private static Logger logger = LogManager.getLogger(ConfigFilterProcessor.class);
 	JsonSerializer ser = new JsonSerializer();
 	private boolean allow;
 	

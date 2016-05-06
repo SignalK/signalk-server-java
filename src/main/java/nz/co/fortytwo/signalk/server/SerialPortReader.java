@@ -46,7 +46,7 @@ import org.apache.camel.Processor;
 import org.apache.camel.ProducerTemplate;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 import purejavacomm.CommPortIdentifier;
 import purejavacomm.SerialPort;
@@ -62,7 +62,7 @@ import purejavacomm.SerialPortEventListener;
  */
 public class SerialPortReader implements Processor {
 
-	private static Logger logger = Logger.getLogger(SerialPortReader.class);
+	private static Logger logger = LogManager.getLogger(SerialPortReader.class);
 	private String portName;
 	private File portFile;
 	private ProducerTemplate producer;

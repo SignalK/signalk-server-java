@@ -28,7 +28,7 @@ import nz.co.fortytwo.signalk.handler.NMEA0183Producer;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.websocket.WebsocketConstants;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 /**
  * Processes the signalk model for alarm condidtions and sets *.alarm.* keys
@@ -38,7 +38,7 @@ import org.apache.log4j.Logger;
  */
 public class NMEA0183ExportProcessor extends SignalkProcessor implements Processor {
 
-	private static Logger logger = Logger.getLogger(NMEA0183ExportProcessor.class);
+	private static Logger logger = LogManager.getLogger(NMEA0183ExportProcessor.class);
 	
 	private NMEA0183Producer handler = new NMEA0183Producer();
 	

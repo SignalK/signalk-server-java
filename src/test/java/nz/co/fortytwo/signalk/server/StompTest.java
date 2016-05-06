@@ -51,12 +51,12 @@ import org.apache.activemq.transport.stomp.StompFrame;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
 public class StompTest extends SignalKCamelTestSupport {
 
-	static Logger logger = Logger.getLogger(StompTest.class);
+	static Logger logger = LogManager.getLogger(StompTest.class);
 
 	@Test
 	public void testSubscribe() throws Exception {

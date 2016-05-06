@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -45,7 +45,7 @@ import com.google.common.collect.HashBiMap;
  */
 public class SubscriptionManager {
 	
-	private static Logger logger = Logger.getLogger(SubscriptionManager.class);
+	private static Logger logger = LogManager.getLogger(SubscriptionManager.class);
 	
 	//hold sessionid <> wsSessionId
 	BiMap<String, String> wsSessionMap = HashBiMap.create();

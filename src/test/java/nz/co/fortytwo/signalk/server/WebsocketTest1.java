@@ -38,7 +38,7 @@ import nz.co.fortytwo.signalk.util.SignalKConstants;
 import org.apache.camel.Produce;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 import org.junit.After;
 import org.junit.Test;
 
@@ -51,7 +51,7 @@ import com.ning.http.client.websocket.WebSocketUpgradeHandler;
 
 public class WebsocketTest1 extends SignalKCamelTestSupport {
  
-    private static Logger logger = Logger.getLogger(WebsocketTest1.class);
+    private static Logger logger = LogManager.getLogger(WebsocketTest1.class);
 	
 	String jsonDiff = "{\"updates\":[{\"values\":[{\"value\":3.0176,\"path\":\"courseOverGroundTrue\"},{\"value\":3.85,\"path\":\"speedOverGround\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081+00:00\",\"device\":\"/dev/actisense\",\"pgn\":\"128267\",\"src\":\"115\"}}],\"context\":\"vessels."+SignalKConstants.self+".navigation\"}";
 	String jsonPosDiff = "{\"updates\":[{\"values\":[{\"path\": \"log\",\"value\": 17404540},{\"value\":3.0176,\"path\":\"courseOverGroundTrue\"},{\"value\":3.85,\"path\":\"speedOverGround\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081+00:00\",\"device\":\"/dev/actisense\",\"pgn\":\"128267\",\"src\":\"115\"}}],\"context\":\"vessels."+SignalKConstants.self+".navigation\"}";

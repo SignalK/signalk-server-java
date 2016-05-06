@@ -32,11 +32,11 @@ import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.util.Util;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 public class RouteManagerFactory {
 
-	private static Logger logger = Logger.getLogger(RouteManagerFactory.class);
+	private static Logger logger = LogManager.getLogger(RouteManagerFactory.class);
 	static RouteManager manager = null;
 	
 	public static RouteManager getInstance() throws FileNotFoundException, IOException{

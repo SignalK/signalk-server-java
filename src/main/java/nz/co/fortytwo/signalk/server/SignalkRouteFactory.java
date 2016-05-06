@@ -44,6 +44,7 @@ import nz.co.fortytwo.signalk.processor.InputFilterProcessor;
 import nz.co.fortytwo.signalk.processor.JsonGetProcessor;
 import nz.co.fortytwo.signalk.processor.JsonListProcessor;
 import nz.co.fortytwo.signalk.processor.JsonSubscribeProcessor;
+import nz.co.fortytwo.signalk.processor.LoggerProcessor;
 import nz.co.fortytwo.signalk.processor.MapToJsonProcessor;
 import nz.co.fortytwo.signalk.processor.MqttProcessor;
 import nz.co.fortytwo.signalk.processor.N2KProcessor;
@@ -75,13 +76,13 @@ import org.apache.camel.component.websocket.WebsocketEndpoint;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.model.RouteDefinition;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 
 
 public class SignalkRouteFactory {
 
-	private static Logger logger = Logger.getLogger(SignalkRouteFactory.class);
+	private static Logger logger = LogManager.getLogger(SignalkRouteFactory.class);
 	private static Set<String> nameSet = new HashSet<String>();
 	/**
 	 * Configures a route for all input traffic, which will parse the traffic and update the signalk model
@@ -203,6 +204,11 @@ public class SignalkRouteFactory {
 //					.to("log:nz.co.fortytwo.signalk.client.rest?level=INFO&showException=true&showStackTrace=true")
 //					.to("direct:restTest");
 
+		}
+	public static void configureRestLoggerRoute(RouteBuilder routeBuilder ,String input, String name)throws IOException{
+		routeBuilder.from(input).id(getName(name)) //.setExchangePattern(ExchangePattern.InOut);
+			.setExchangePattern(ExchangePattern.InOut)
+			.process(new LoggerProcessor());
 		}
 	public static void configureRestConfigRoute(RouteBuilder routeBuilder ,String input, String name)throws IOException{
 		routeBuilder.from(input).id(getName(name)) //.setExchangePattern(ExchangePattern.InOut);

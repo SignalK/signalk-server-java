@@ -15,3 +15,17 @@ TCP done, look into UDP (NMEA)
 	
 make java n2k code a standalone jar
 do unit tests
+
+
+sources is in root of tree
+make sk GenerateSignalkData more useable and use for tests.
+
+use atmosphere for websockets
+
+Use rule engine for security
+
+dynamic logs settings and log file access
+Use log4j2 - update all, and use json config via config.html and jsoneditor.
+
+
+permanent storage of timeseries data.

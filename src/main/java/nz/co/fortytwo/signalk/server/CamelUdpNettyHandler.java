@@ -45,7 +45,7 @@ import nz.co.fortytwo.signalk.util.Util;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.camel.impl.DefaultProducerTemplate;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -54,7 +54,7 @@ import com.google.common.collect.HashBiMap;
 @Sharable
 public class CamelUdpNettyHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
-	private Logger logger = Logger.getLogger(CamelUdpNettyHandler.class);
+	private Logger logger = LogManager.getLogger(CamelUdpNettyHandler.class);
 	private BiMap<String,InetSocketAddress> sessionList = HashBiMap.create();
 	
 	ProducerTemplate producer;

@@ -40,7 +40,7 @@ import org.apache.camel.Processor;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.camel.impl.DefaultProducerTemplate;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 import com.google.common.collect.ImmutableList;
 
@@ -52,7 +52,7 @@ import com.google.common.collect.ImmutableList;
  */
 public class HeartbeatProcessor extends SignalkProcessor implements Processor{
 
-	private static Logger logger = Logger.getLogger(HeartbeatProcessor.class);
+	private static Logger logger = LogManager.getLogger(HeartbeatProcessor.class);
 	private SubscriptionManager manager = SubscriptionManagerFactory.getInstance();
 	ProducerTemplate producer;
 	//Json msg = null;

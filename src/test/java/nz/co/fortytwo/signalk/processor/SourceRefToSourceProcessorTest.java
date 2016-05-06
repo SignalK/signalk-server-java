@@ -30,7 +30,7 @@ import static org.junit.Assert.assertEquals;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.impl.DefaultExchange;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
 import nz.co.fortytwo.signalk.model.SignalKModel;
@@ -39,7 +39,7 @@ import nz.co.fortytwo.signalk.server.RouteManagerFactory;
 
 public class SourceRefToSourceProcessorTest {
 	
-	private static Logger logger = Logger.getLogger(SourceRefToSourceProcessorTest.class);
+	private static Logger logger = LogManager.getLogger(SourceRefToSourceProcessorTest.class);
 
 	@Test
 	public void shouldRemoveSourceRef() throws Exception {

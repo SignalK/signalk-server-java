@@ -49,11 +49,11 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.impl.DefaultExchange;
 import org.apache.camel.util.ExchangeHelper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
 public class SourceToSourceRefProcessorTest{
-	private static Logger logger = Logger.getLogger(SourceToSourceRefProcessorTest.class);
+	private static Logger logger = LogManager.getLogger(SourceToSourceRefProcessorTest.class);
 	@Test
 	public void shouldMoveSource() throws Exception {
 		CamelContext ctx = RouteManagerFactory.getMotuTestInstance().getContext();

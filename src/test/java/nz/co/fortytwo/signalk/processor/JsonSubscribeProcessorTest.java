@@ -45,7 +45,7 @@ import nz.co.fortytwo.signalk.util.SignalKConstants;
 
 import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.camel.model.RouteDefinition;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -53,7 +53,7 @@ import org.junit.Test;
 
 public class JsonSubscribeProcessorTest {
 
-	private static Logger logger = Logger.getLogger(JsonSubscribeProcessorTest.class);
+	private static Logger logger = LogManager.getLogger(JsonSubscribeProcessorTest.class);
 
 	@Before
 	public void setUp() throws Exception {

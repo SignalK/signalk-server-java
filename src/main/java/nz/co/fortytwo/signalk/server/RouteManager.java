@@ -43,7 +43,7 @@ import org.apache.camel.component.stomp.SkStompComponent;
 import org.apache.camel.component.websocket.SignalkWebsocketComponent;
 import org.apache.camel.impl.JndiRegistry;
 import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 
 
@@ -62,12 +62,12 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
  * @author robert
  * 
  */
-public class RouteManager extends RouteBuilder {
+public class RouteManager extends RouteBuilder  {
 	public static final String _SIGNALK_HTTP_TCP_LOCAL = "_signalk-http._tcp.local.";
 
 	public static final String _SIGNALK_WS_TCP_LOCAL = "_signalk-ws._tcp.local.";
 
-	private static Logger logger = Logger.getLogger(RouteManager.class);
+	private static Logger logger = LogManager.getLogger(RouteManager.class);
 	
 	public static final String SEDA_INPUT = "seda:inputData?purgeWhenStopping=true&size=100";
 	public static final String SEDA_WEBSOCKETS = "seda:websockets?purgeWhenStopping=true&size=100";
@@ -223,6 +223,8 @@ public class RouteManager extends RouteBuilder {
 		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + SignalKConstants.SIGNALK_DISCOVERY+"?sessionSupport=true&matchOnUriPrefix=false&enableJMX=true&enableCORS=true","REST Discovery");
 		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + SignalKConstants.SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true&enableCORS=true","REST Api");
 		SignalkRouteFactory.configureRestConfigRoute(this, "jetty:http://0.0.0.0:" + restPort + SignalKConstants.SIGNALK_CONFIG+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true&enableCORS=false","Config Api");
+		
+		SignalkRouteFactory.configureRestLoggerRoute(this, "jetty:http://0.0.0.0:" + restPort + SignalKConstants.SIGNALK_LOGGER+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true&enableCORS=false","Logger");
 
 		
 		if(Util.getConfigPropertyBoolean(ConfigConstants.ALLOW_INSTALL)){

@@ -51,7 +51,7 @@ import org.apache.activemq.transport.stomp.StompFrame;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 import org.fusesource.mqtt.client.BlockingConnection;
 import org.fusesource.mqtt.client.MQTT;
 import org.fusesource.mqtt.client.Message;
@@ -62,7 +62,7 @@ import org.junit.Test;
 
 public class MqttTest extends SignalKCamelTestSupport {
 
-	static Logger logger = Logger.getLogger(MqttTest.class);
+	static Logger logger = LogManager.getLogger(MqttTest.class);
 
 	@Test
 	public void testSubscribe() throws Exception {

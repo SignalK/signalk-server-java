@@ -32,7 +32,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 /**
  * Churns through incoming nav data and filters out misc debug and unnecessary messages from the other devices
@@ -42,7 +42,7 @@ import org.apache.log4j.Logger;
  * 
  */
 public class InputFilterProcessor extends SignalkProcessor implements Processor {
-	private static Logger logger = Logger.getLogger(InputFilterProcessor.class);
+	private static Logger logger = LogManager.getLogger(InputFilterProcessor.class);
 
 	public InputFilterProcessor() {
 

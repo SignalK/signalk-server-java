@@ -37,7 +37,7 @@ import org.apache.camel.Processor;
 import org.apache.camel.ProducerTemplate;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 /**
  * A manager to monitor the USB tty ports. It dynamically adds/removes
@@ -48,7 +48,7 @@ import org.apache.log4j.Logger;
  */
 public class SerialPortManager implements Runnable, Processor {
 
-	private static Logger logger = Logger.getLogger(SerialPortManager.class);
+	private static Logger logger = LogManager.getLogger(SerialPortManager.class);
 
 	private List<SerialPortReader> serialPortList = new CopyOnWriteArrayList<SerialPortReader>();
 

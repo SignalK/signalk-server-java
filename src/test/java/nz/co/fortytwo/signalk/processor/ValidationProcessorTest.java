@@ -40,14 +40,14 @@ import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.server.RouteManagerFactory;
 import nz.co.fortytwo.signalk.util.JsonSerializer;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 public class ValidationProcessorTest {
 
-	private static Logger logger = Logger.getLogger(ValidationProcessorTest.class);
+	private static Logger logger = LogManager.getLogger(ValidationProcessorTest.class);
 	private JsonSerializer ser = new JsonSerializer();
 	@Before
 	public void setUp() throws Exception {

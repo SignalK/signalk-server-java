@@ -38,7 +38,7 @@ import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 /**
  * Processes the signalk model and updates the currentRadius of the anchor
@@ -48,7 +48,7 @@ import org.apache.log4j.Logger;
  */
 public class AnchorWatchProcessor extends SignalkProcessor implements Processor {
 
-	private static Logger logger = Logger.getLogger(AnchorWatchProcessor.class);
+	private static Logger logger = LogManager.getLogger(AnchorWatchProcessor.class);
 	private static String zonesKey = vessels_dot_self_dot+nav_anchor_currentRadius+dot+meta+dot+zones;
 	private static String radiusKey = vessels_dot_self_dot+nav_anchor_currentRadius;
 	private static String latKey = vessels_dot_self_dot+nav_position_latitude;
