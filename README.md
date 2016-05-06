@@ -52,6 +52,7 @@ Using
 The project is not in any public maven repository yet but is available from jitpack.io. 
 
 For dev you will have to build the project locally on your dev system, and do a maven install to install into your local m2 repository. 
+Use the dev profile `mvn -P dev ...` to build from your local versions, the default will use the last tagged version in jitpack.io 
 
 You will need to clone the signalk-core-java project and build it with maven , then the signalk-server-java project.
 The signalk-core-java project is usable separately and contains the core model, and useful helpers.
