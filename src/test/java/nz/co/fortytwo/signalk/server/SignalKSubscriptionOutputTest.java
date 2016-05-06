@@ -102,7 +102,8 @@ public class SignalKSubscriptionOutputTest extends SignalKCamelTestSupport {
 		 template.sendBodyAndHeader(DIRECT_INPUT, sub.toString(),WebsocketConstants.CONNECTION_KEY, wsSession);
 		 
 		 output.assertIsSatisfied();
-      
+		 SignalKModel out = (SignalKModel)output.getReceivedExchanges().get(0).getIn().getBody(SignalKModel.class);
+		 logger.debug("Received msg: "+out);
     }
 	
 	@Test

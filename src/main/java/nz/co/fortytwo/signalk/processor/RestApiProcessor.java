@@ -125,7 +125,8 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 							StreamCache.class);
 					ByteArrayOutputStream writer = new ByteArrayOutputStream();
 					cache.writeTo(writer);
-					logger.debug("Reading the POST request:"+writer.toString());
+					if (logger.isDebugEnabled())
+						logger.debug("Reading the POST request:"+writer.toString());
 					exchange.getIn().setBody(writer.toString());
 
 					// POST here

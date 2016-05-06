@@ -47,6 +47,7 @@ import org.junit.Test;
 
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.Response;
+import com.ning.http.client.websocket.DefaultWebSocketListener;
 import com.ning.http.client.websocket.WebSocket;
 import com.ning.http.client.websocket.WebSocketTextListener;
 import com.ning.http.client.websocket.WebSocketUpgradeHandler;
@@ -91,7 +92,7 @@ public class SubcribeWsTest extends SignalKCamelTestSupport{
     public void shouldGetSubscribeWsResponse() throws Exception {
 		final List<String> received = new ArrayList<String>();
 	    final CountDownLatch latch2 = new CountDownLatch(1);
-	    final CountDownLatch latch3 = new CountDownLatch(2);
+	    final CountDownLatch latch3 = new CountDownLatch(5);
 	    final CountDownLatch latch4 = new CountDownLatch(1);
         final AsyncHttpClient c = new AsyncHttpClient();
         
@@ -100,41 +101,41 @@ public class SubcribeWsTest extends SignalKCamelTestSupport{
         Response r1 = c.prepareGet("http://localhost:"+restPort+SIGNALK_AUTH+"/demo/pass").execute().get();
         Response r2 = c.prepareGet("http://localhost:"+restPort+SIGNALK_DISCOVERY).setCookies(r1.getCookies()).execute().get();
         Json json = Json.read(r2.getResponseBody());
+        logger.debug(json);
         latch2.await(3, TimeUnit.SECONDS);
       //await messages
-        WebSocket websocket = c.prepareGet(json.at("endpoints").at("v1").at(websocketUrl).asString()).setCookies(r1.getCookies()).execute(
+        String restUrl = json.at("endpoints").at("v1").at(websocketUrl).asString();
+        logger.debug("Open websocket at :"+restUrl);
+        WebSocket websocket = c.prepareGet(restUrl).setCookies(r1.getCookies()).execute(
                 new WebSocketUpgradeHandler.Builder()
-                    .addWebSocketListener(new WebSocketTextListener() {
+                    .addWebSocketListener(new DefaultWebSocketListener() {
+                    	
                         @Override
                         public void onMessage(String message) {
-                            received.add(message);
-                            log.info("received --> " + message);
+                            
+                            logger.info("received --> " + message);
                             //{"context":"vessels.self","updates":[]}
-                            if(message.startsWith("{\"context\":\"vessels.self\",\"updates\":[]}"))return; //heartbeats
+                            if(message.startsWith("{\"context\":\"vessels.self\",\"updates\":[]}"))return;//heartbeats
+                            if(message.startsWith("{\"self\":\"motu\",\"version\""))return;//heartbeats
+                            received.add(message);
                             latch3.countDown();
                         }
-
                         @Override
                         public void onFragment(String fragment, boolean last) {
-                        }
-
-                        @Override
-                        public void onOpen(WebSocket websocket) {
-                        }
-
-                        @Override
-                        public void onClose(WebSocket websocket) {
-                        }
-
-                        @Override
-                        public void onError(Throwable t) {
-                            t.printStackTrace();
+                        	logger.info("fragment --> " + fragment);
+                        	if(fragment.startsWith("{\"context\":\"vessels.self\",\"updates\":[]}"))return;//heartbeats
+                            if(fragment.startsWith("{\"self\":\"motu\",\"version\""))return;//heartbeats
+                            
+                        	received.add(fragment);
+                        	latch3.countDown();
                         }
                     }).build()).get();
 
       //subscribe
         String subscribeMsg="{\"context\":\"vessels.motu\",\"subscribe\":[{\"path\":\"navigation\"}]}";
 		websocket.sendTextMessage(subscribeMsg);
+		
+		logger.debug("Sent subscribe = "+subscribeMsg);
         latch4.await(2, TimeUnit.SECONDS);
       
         websocket.sendTextMessage(jsonDiff);
@@ -145,7 +146,7 @@ public class SubcribeWsTest extends SignalKCamelTestSupport{
         String fullMsg = null;
         for(String msg : received){
         	logger.debug("Received msg = "+msg);
-        	if(msg.contains("\"updates\":[{\"")){
+        	if(msg.contains("\"updates\":[{\"")&&msg.contains("\"path\":\"navigation")){
         		fullMsg=msg;
         	}
         }

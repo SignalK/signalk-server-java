@@ -66,12 +66,45 @@
 				"level": "info"
 			},
 			{
+				"name": "nz.co.fortytwo.signalk.processor.InputFilterProcessor",
+				"level": "info"
+			},
+			{
+				"name": "nz.co.fortytwo.signalk.processor.FullToDeltaProcessor",
+				"level": "info"
+			},
+			{
+				"name": "nz.co.fortytwo.signalk.server.SubscriptionManager",
+				"level": "info"
+			},
+			{
+				"name": "nz.co.fortytwo.signalk.handler.FullToDeltaConverter",
+				"level": "info"
+			},
+			{
+				"name": "nz.co.fortytwo.signalk.processor.RestApiProcessor",
+				"level": "info"
+			},
+			{
+				"name": "nz.co.fortytwo.signalk.processor.WsSessionProcessor",
+				"level": "info"
+			},
+			{
+				"name": "nz.co.fortytwo.signalk.server.SubcribeWsTest",
+				"level": "info"
+			},
+			
+			{
 				"name": "nz.co.fortytwo.signalk.util",
 				"level": "info"
 			},
 			{
 				"name": "org.apache.camel",
 				"level": "info"
+			},
+			{
+				"name": "nz.co.fortytwo.signalk.server.SerialPortManager",
+				"level": "fatal"
 			},
 			{
 				"name": "mjson",
