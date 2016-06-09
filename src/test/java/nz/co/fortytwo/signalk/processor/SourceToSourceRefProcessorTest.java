@@ -26,7 +26,7 @@
 package nz.co.fortytwo.signalk.processor;
 
 import static nz.co.fortytwo.signalk.util.SignalKConstants.dot;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.env_airPressure;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.env_outside_pressure;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_courseOverGroundMagnetic;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_courseOverGroundTrue;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.source;
@@ -68,9 +68,9 @@ public class SourceToSourceRefProcessorTest{
 		logger.debug("Processed to:"+ex.getIn().getBody());
 		String srcRef = "unknown";
 		String label ="testAirP";
-		assertEquals(srcRef+dot+label,  model.getFullData().get(vessels_dot_self_dot+env_airPressure+dot+sourceRef));
+		assertEquals(srcRef+dot+label,  model.getFullData().get(vessels_dot_self_dot+env_outside_pressure+dot+sourceRef));
 		assertEquals("testAirP",  model.getFullData().get(sources+dot+srcRef+dot+label+".label"));
-		assertNull(model.getFullData().get(vessels_dot_self_dot+env_airPressure+dot+source+".label"));
+		assertNull(model.getFullData().get(vessels_dot_self_dot+env_outside_pressure+dot+source+".label"));
 		
 		label ="testCogM";
 		assertEquals(srcRef+dot+label,  model.getFullData().get(vessels_dot_self_dot+nav_courseOverGroundMagnetic+dot+sourceRef));

@@ -25,7 +25,7 @@ package nz.co.fortytwo.signalk.processor;
 
 import static nz.co.fortytwo.signalk.util.SignalKConstants.dot;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.env_wind_directionChangeAlarm;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.env_wind_speedAlarm;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.env_wind_speedTrue;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.sourceRef;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.timestamp;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.value;
@@ -64,13 +64,13 @@ public class ValidationProcessorTest {
 		//{\"vessels\":{\""+SignalKConstants.self+"\":{\"environment\":{\"wind\":
 		SignalKModel wind = SignalKModelFactory.getCleanInstance();
 		
-		wind.put(vessels_dot_self_dot+env_wind_speedAlarm,0d,"unknown","2015-03-16T03:31:22.327Z");
-		wind.getFullData().remove(vessels_dot_self_dot+env_wind_speedAlarm+dot+timestamp);
+		wind.put(vessels_dot_self_dot+env_wind_speedTrue,0d,"unknown","2015-03-16T03:31:22.327Z");
+		wind.getFullData().remove(vessels_dot_self_dot+env_wind_speedTrue+dot+timestamp);
 		
-		assertNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+timestamp));
+		assertNull(wind.get(vessels_dot_self_dot+env_wind_speedTrue+dot+timestamp));
 		validationProcessor.validate(wind);
 		
-		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+timestamp));
+		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedTrue+dot+timestamp));
 		logger.debug(wind);
 	}
 	@Test
@@ -78,17 +78,17 @@ public class ValidationProcessorTest {
 		ValidationProcessor validationProcessor = new ValidationProcessor();
 		SignalKModel wind = SignalKModelFactory.getCleanInstance();
 		
-		wind.put(vessels_dot_self_dot+env_wind_speedAlarm,0d,"unknown","2015-03-16T03:31:22.327Z");
+		wind.put(vessels_dot_self_dot+env_wind_speedTrue,0d,"unknown","2015-03-16T03:31:22.327Z");
 		
 		
 		wind.put(vessels_dot_self_dot+env_wind_directionChangeAlarm,0d,"unknown","2015-03-16T03:31:22.327Z");
 		wind.getFullData().remove(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+timestamp);
 		
-		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+timestamp));
+		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedTrue+dot+timestamp));
 		assertNull(wind.get(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+timestamp));
 		validationProcessor.validate(wind);
 		logger.debug(wind);
-		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+timestamp));
+		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedTrue+dot+timestamp));
 		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+timestamp));
 		logger.debug(wind);
 	}
@@ -99,13 +99,13 @@ public class ValidationProcessorTest {
 		
 		SignalKModel wind = SignalKModelFactory.getCleanInstance();
 		
-		wind.put(vessels_dot_self_dot+env_wind_speedAlarm,0d,null,"2015-03-16T03:31:22.327Z");
-		wind.getFullData().remove(vessels_dot_self_dot+env_wind_speedAlarm+dot+sourceRef);
+		wind.put(vessels_dot_self_dot+env_wind_speedTrue,0d,null,"2015-03-16T03:31:22.327Z");
+		wind.getFullData().remove(vessels_dot_self_dot+env_wind_speedTrue+dot+sourceRef);
 		
-		assertNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+sourceRef));
+		assertNull(wind.get(vessels_dot_self_dot+env_wind_speedTrue+dot+sourceRef));
 		validationProcessor.validate(wind);
 		logger.debug(wind);
-		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+sourceRef));
+		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedTrue+dot+sourceRef));
 		logger.debug(wind);
 	}
 	@Test
@@ -113,17 +113,17 @@ public class ValidationProcessorTest {
 		ValidationProcessor validationProcessor = new ValidationProcessor();
 		SignalKModel wind = SignalKModelFactory.getCleanInstance();
 		
-		wind.put(vessels_dot_self_dot+env_wind_speedAlarm,0d,"unknown","2015-03-16T03:31:22.327Z");
+		wind.put(vessels_dot_self_dot+env_wind_speedTrue,0d,"unknown","2015-03-16T03:31:22.327Z");
 		//wind.put(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+source,"unknown");
 		
 		wind.put(vessels_dot_self_dot+env_wind_directionChangeAlarm,0d,null,"2015-03-16T03:31:22.327Z");
 		wind.getFullData().remove(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+sourceRef);
 		
-		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+sourceRef));
+		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedTrue+dot+sourceRef));
 		assertNull(wind.get(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+sourceRef));
 		
 		validationProcessor.validate(wind);
-		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedAlarm+dot+sourceRef));
+		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_speedTrue+dot+sourceRef));
 		assertNotNull(wind.get(vessels_dot_self_dot+env_wind_directionChangeAlarm+dot+sourceRef));
 		logger.debug(wind);
 	}

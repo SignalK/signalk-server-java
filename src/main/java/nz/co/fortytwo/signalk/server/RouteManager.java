@@ -118,30 +118,8 @@ public class RouteManager extends RouteBuilder  {
 		CamelContextFactory.getInstance().getShutdownStrategy().setShutdownNowOnTimeout(true);
 		CamelContextFactory.getInstance().getShutdownStrategy().setTimeout(10);
 		
-		//DNS-SD
-		//NetworkTopologyDiscovery netTop = NetworkTopologyDiscovery.Factory.getInstance();
-		Runnable r = new Runnable() {
-			
-			@Override
-			public void run() {
-				jmdns = JmmDNS.Factory.getInstance();
-				
-				jmdns.registerServiceType(_SIGNALK_WS_TCP_LOCAL);
-				jmdns.registerServiceType(_SIGNALK_HTTP_TCP_LOCAL);
-				ServiceInfo wsInfo = ServiceInfo.create(_SIGNALK_WS_TCP_LOCAL,"signalk-ws",wsPort, 0,0, getMdnsTxt());
-				try {
-					jmdns.registerService(wsInfo);
-					ServiceInfo httpInfo = ServiceInfo
-						.create(_SIGNALK_HTTP_TCP_LOCAL, "signalk-http",restPort,0,0, getMdnsTxt());
-					jmdns.registerService(httpInfo);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		};
-		Thread t = new Thread(r);
-		t.setDaemon(true);
-		t.start();
+		//DNS-SD, zeroconf mDNS
+		startMdns();
 		
 		//Netty tcp server
 		skServer = new NettyServer(null, ConfigConstants.OUTPUT_TCP);
@@ -164,18 +142,6 @@ public class RouteManager extends RouteBuilder  {
 		
 		File htmlRoot = new File(Util.getConfigProperty(ConfigConstants.STATIC_DIR));
 		log.info("Serving static files from "+htmlRoot.getAbsolutePath());
-		
-		//cors
-		/*FilterHolder holder = new FilterHolder(CrossOriginFilter.class);
-		holder.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, "*");
-		holder.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, "*");
-		holder.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM, "GET,POST,HEAD");
-		holder.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, "X-Requested-With,Content-Type,Accept,Origin");
-		holder.setName("cross-origin");
-		FilterMapping fm = new FilterMapping();
-		fm.setFilterName("cross-origin");
-		fm.setPathSpec("*");
-		handler.addFilter(holder, fm );*/
 
 		//restlet
 		
@@ -188,11 +154,6 @@ public class RouteManager extends RouteBuilder  {
 		//static files
 		((JndiRegistry)registry.getRegistry()).bind("staticHandler",staticHandler );
 		restConfiguration().component("jetty")
-			//.corsHeaderProperty(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, "*")
-			//.corsHeaderProperty(CrossOriginFilter.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, "*")
-			//.corsHeaderProperty(CrossOriginFilter.ALLOWED_METHODS_PARAM, "GET,POST,HEAD")
-			//.corsHeaderProperty(CrossOriginFilter.ALLOWED_HEADERS_PARAM, "X-Requested-With,Content-Type,Accept,Origin")
-			//.enableCORS(true)
 			.consumerProperty("matchOnUriPrefix", "true")
 			.componentProperty("matchOnUriPrefix", "true")
 			.host("0.0.0.0").port(8080);
@@ -258,6 +219,17 @@ public class RouteManager extends RouteBuilder  {
 				.to(SEDA_INPUT).id(SignalkRouteFactory.getName("SEDA_INPUT"));
 		}
 		//start any clients if they exist
+		//WS
+		Json wsClients = Util.getConfigJsonArray(ConfigConstants.CLIENT_WS);
+		if(wsClients!=null){
+			for(Object client: wsClients.asList()){
+				from("ahc:ws://"+client).id("Websocket Client:"+client)
+					.onException(Exception.class).handled(true).maximumRedeliveries(0)
+						.to("log:nz.co.fortytwo.signalk.client.ws?level=ERROR&showException=true&showStackTrace=true")
+						.end().transform(body().convertToString())
+					.to(SEDA_INPUT);
+			}
+		}
 		//TCP
 		Json tcpClients = Util.getConfigJsonArray(ConfigConstants.CLIENT_TCP);
 		if(tcpClients!=null){
@@ -318,17 +290,7 @@ public class RouteManager extends RouteBuilder  {
 		}
 	}
 
-	private Map<String,String> getMdnsTxt() {
-		Map<String,String> txtSet = new HashMap<String, String>();
-		txtSet.put("path", SignalKConstants.SIGNALK_DISCOVERY);
-		txtSet.put("server","signalk-server");
-		txtSet.put("version",Util.getConfigProperty(ConfigConstants.VERSION));
-		txtSet.put("vessel_name",Util.getConfigProperty(ConfigConstants.UUID));
-		txtSet.put("vessel_mmsi",Util.getConfigProperty(ConfigConstants.UUID));
-		txtSet.put("vessel_uuid",Util.getConfigProperty(ConfigConstants.UUID));
-		return txtSet;
-	}
-
+	
 	public void stopNettyServers(){
 		if(skServer!=null){
 			skServer.shutdownServer();
@@ -359,5 +321,44 @@ public class RouteManager extends RouteBuilder  {
 		}
 	}
 	
+	private void startMdns() {
+		//DNS-SD
+		//NetworkTopologyDiscovery netTop = NetworkTopologyDiscovery.Factory.getInstance();
+		Runnable r = new Runnable() {
+			
+			@Override
+			public void run() {
+				jmdns = JmmDNS.Factory.getInstance();
+				
+				jmdns.registerServiceType(_SIGNALK_WS_TCP_LOCAL);
+				jmdns.registerServiceType(_SIGNALK_HTTP_TCP_LOCAL);
+				ServiceInfo wsInfo = ServiceInfo.create(_SIGNALK_WS_TCP_LOCAL,"signalk-ws",wsPort, 0,0, getMdnsTxt());
+				try {
+					jmdns.registerService(wsInfo);
+					ServiceInfo httpInfo = ServiceInfo
+						.create(_SIGNALK_HTTP_TCP_LOCAL, "signalk-http",restPort,0,0, getMdnsTxt());
+					jmdns.registerService(httpInfo);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		};
+		Thread t = new Thread(r);
+		t.setDaemon(true);
+		t.start();
+		
+	}
+
+	private Map<String,String> getMdnsTxt() {
+		Map<String,String> txtSet = new HashMap<String, String>();
+		txtSet.put("path", SignalKConstants.SIGNALK_DISCOVERY);
+		txtSet.put("server","signalk-server");
+		txtSet.put("version",Util.getConfigProperty(ConfigConstants.VERSION));
+		txtSet.put("vessel_name",Util.getConfigProperty(ConfigConstants.UUID));
+		txtSet.put("vessel_mmsi",Util.getConfigProperty(ConfigConstants.UUID));
+		txtSet.put("vessel_uuid",Util.getConfigProperty(ConfigConstants.UUID));
+		return txtSet;
+	}
+
 
 }
