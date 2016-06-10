@@ -108,7 +108,7 @@
 				<dependency>
 					<groupId>com.github.SignalK</groupId>
 					<artifactId>signalk-core-java</artifactId>
-					<version>JIT-Deploy-04</version>
+					<version>JIT-Deploy-05</version>
 				</dependency>
 			</dependencies>
 		</profile>
