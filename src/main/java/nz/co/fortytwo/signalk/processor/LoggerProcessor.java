@@ -38,7 +38,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import mjson.Json;
 import nz.co.fortytwo.signalk.util.SignalKConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
@@ -47,10 +46,10 @@ public class LoggerProcessor implements Processor {
 
 	@Override
 	public void process(Exchange exchange) throws Exception {
-		// if (exchange.getIn().getBody()==null)
-		// return;
 		
+		logger.debug("LoggerProcessor starts");
 		HttpServletRequest request = exchange.getIn(HttpMessage.class).getRequest();
+		logger.debug("Session = "+request.getSession().getId());
 		HttpSession session = request.getSession();
 		if (logger.isDebugEnabled()) {
 
@@ -81,13 +80,13 @@ public class LoggerProcessor implements Processor {
 	private void processPost(Exchange exchange) throws IOException {
 		String conf = exchange.getIn().getBody(String.class);
 		logger.debug("POST Log4j2 = " + conf);
-		FileUtils.writeStringToFile(new File("./conf/log4j2.json"), conf);
+		FileUtils.writeStringToFile(new File(Util.getRootPath()+"./conf/log4j2.json"), conf);
 
 	}
 
 	private void processGet(Exchange exchange) throws IOException {
 		// get and return the current log4j2.json
-		String conf = FileUtils.readFileToString(new File("./conf/log4j2.json"));
+		String conf = FileUtils.readFileToString(new File(Util.getRootPath()+"./conf/log4j2.json"));
 		logger.debug("GET Log4j2 = " + conf);
 		exchange.getIn().setBody(conf);
 	}

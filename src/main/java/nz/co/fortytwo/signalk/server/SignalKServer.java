@@ -106,8 +106,10 @@ public class SignalKServer {
 
 	private Server startHawtio() throws Exception {
 		// hawtio, auth disabled
-		System.setProperty(ConfigConstants.HAWTIO_AUTHENTICATE,
-				Util.getConfigPropertyBoolean(ConfigConstants.HAWTIO_AUTHENTICATE).toString());
+		Properties props = System.getProperties();
+		props.setProperty("hawtio.authenticationEnabled", "false");
+		System.setProperties(props);
+		//System.setProperty("hawtio.authenticationEnabled",Util.getConfigPropertyBoolean(ConfigConstants.HAWTIO_AUTHENTICATE).toString());
 		int hawtPort = Util.getConfigPropertyInt(ConfigConstants.HAWTIO_PORT);
 		Server server = new Server(hawtPort);
 		HandlerCollection handlers = new HandlerCollection();

@@ -142,10 +142,11 @@ public class FullExportProcessorTest {
 
         String session = UUID.randomUUID().toString();
         Subscription sub = new Subscription(session, subKey, 10, 1000, FORMAT_DELTA, policy);
+        sub.setRouteId("test");
         subscriptionManager.add("ses" + session, session, ConfigConstants.OUTPUT_WS, "127.0.0.1", "127.0.0.1");
         subscriptionManager.addSubscription(sub);
         try {
-            FullExportProcessor processor = new FullExportProcessor(session);
+            FullExportProcessor processor = new FullExportProcessor(session,"test");
             ProducerTemplate exportProducer = new DefaultProducerTemplate(ctx);
             exportProducer.setDefaultEndpointUri("mock:resultEnd");
             exportProducer.start();

@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import nz.co.fortytwo.signalk.processor.AISProcessor;
 import nz.co.fortytwo.signalk.processor.AlarmProcessor;
@@ -194,8 +195,10 @@ public class SignalkRouteFactory {
 	public static void configureRestRoute(RouteBuilder routeBuilder ,String input, String name)throws IOException{
 		routeBuilder.from(input).id(getName(name)) //.setExchangePattern(ExchangePattern.InOut);
 			.setExchangePattern(ExchangePattern.InOut)
-			.process(new RestApiProcessor()).to(ExchangePattern.InOut,"seda:inputData?purgeWhenStopping=true&size=100")
-			.process(new ConfigFilterProcessor(false)).id(getName(ConfigFilterProcessor.class.getSimpleName()));
+			.process(new RestApiProcessor())
+			.to(ExchangePattern.InOut,"seda:inputData?purgeWhenStopping=true&size=100")
+			.process(new ConfigFilterProcessor(false))
+			.id(getName(ConfigFilterProcessor.class.getSimpleName()));
 			//.process(new OutputFilterProcessor()).id(getName(OutputFilterProcessor.class.getSimpleName()));
 		
 				
@@ -206,14 +209,15 @@ public class SignalkRouteFactory {
 
 		}
 	public static void configureRestLoggerRoute(RouteBuilder routeBuilder ,String input, String name)throws IOException{
-		routeBuilder.from(input).id(getName(name)) //.setExchangePattern(ExchangePattern.InOut);
+		routeBuilder.from(input).id(getName(name)) 
 			.setExchangePattern(ExchangePattern.InOut)
 			.process(new LoggerProcessor());
 		}
 	public static void configureRestConfigRoute(RouteBuilder routeBuilder ,String input, String name)throws IOException{
-		routeBuilder.from(input).id(getName(name)) //.setExchangePattern(ExchangePattern.InOut);
+		routeBuilder.from(input).id(getName(name)) 
 			.setExchangePattern(ExchangePattern.InOut)
-			.process(new RestApiProcessor()).to(ExchangePattern.InOut,"seda:inputData?purgeWhenStopping=true&size=100")
+			.process(new RestApiProcessor())
+			.to(ExchangePattern.InOut,"seda:inputData?purgeWhenStopping=true&size=100")
 			.process(new ConfigFilterProcessor(true)).id(getName(ConfigFilterProcessor.class.getSimpleName()));
 		}
 	
@@ -292,11 +296,12 @@ public class SignalkRouteFactory {
 	
 	public static void configureSubscribeTimer(RouteBuilder routeBuilder ,Subscription sub) throws Exception{
 		String routeId = getRouteId(sub);
-		String input = "timer://"+routeId+"?fixedRate=true&period="+sub.getPeriod();
-		if(logger.isDebugEnabled())logger.debug("Configuring route "+input);
+		String input = "quartz2://"+routeId+"?trigger.repeatCount=-1&trigger.repeatInterval="+sub.getPeriod();
+		logger.info("Configuring route "+input);
+		//if(logger.isDebugEnabled())logger.debug("Configuring route "+input);
 		String wsSession = sub.getWsSession();
 		RouteDefinition route = routeBuilder.from(input);
-			route.process(new FullExportProcessor(wsSession)).id(getName(FullExportProcessor.class.getSimpleName()))
+			route.process(new FullExportProcessor(wsSession,routeId)).id(FullExportProcessor.class.getSimpleName()+"-"+routeId)
 				.onException(Exception.class).handled(true).maximumRedeliveries(0)
 				.to("log:nz.co.fortytwo.signalk.model.output.subscribe?level=ERROR&maxChars=1000")
 				.end()
@@ -319,7 +324,7 @@ public class SignalkRouteFactory {
 	}
 
 
-	public static void removeSubscribeTimers(RouteManager routeManager, List<Subscription> subs) throws Exception {
+	public static void removeSubscribeTimers(RouteManager routeManager, ConcurrentLinkedQueue<Subscription> subs) throws Exception {
 		for(Subscription sub : subs){
 			SignalkRouteFactory.removeSubscribeTimer(routeManager, sub);
 		}

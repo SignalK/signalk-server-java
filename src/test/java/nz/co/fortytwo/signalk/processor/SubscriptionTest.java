@@ -53,6 +53,14 @@ public class SubscriptionTest {
 	}
 
 	@Test
+	public void shouldNotBeEqual() {
+		Subscription sub = new Subscription("wsSession", "vessels.self.navigation", 1000l, 0l, SignalKConstants.FORMAT_DELTA, SignalKConstants.POLICY_FIXED);
+		Subscription sub1 = new Subscription("wsSession", "vessels.self.navigation", 10000l, 0l, SignalKConstants.FORMAT_DELTA, SignalKConstants.POLICY_FIXED);
+		assertFalse(sub.equals(sub1));
+		assertFalse(sub1.equals(sub));
+	}
+	
+	@Test
 	public void shouldBeSubscribed() {
 		Subscription sub = new Subscription("wsSession", "vessels.self.navigation", 10, 1000, SignalKConstants.FORMAT_FULL, SignalKConstants.POLICY_FIXED);
 		assertTrue(sub.isSubscribed("vessels.motu.navigation.courseOverGroundTrue"));

@@ -29,6 +29,7 @@ import static nz.co.fortytwo.signalk.util.SignalKConstants.POLICY_IDEAL;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.POLICY_INSTANT;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_FORMAT;
 
+import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,13 +40,18 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
+
+import javax.management.ObjectName;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.websocket.WebsocketConstants;
-import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.google.common.eventbus.DeadEvent;
 import com.google.common.eventbus.Subscribe;
@@ -57,42 +63,60 @@ import nz.co.fortytwo.signalk.server.Subscription;
 import nz.co.fortytwo.signalk.util.ConfigConstants;
 
 /**
- * Exports the signalkModel as a json object
+ * Exports the signalkModel as a json object.
+ * Avoids meta, sources, and values branches
  *
  * @author robert
  */
-public class FullExportProcessor extends SignalkProcessor implements Processor {
+public class FullExportProcessor extends SignalkProcessor implements Processor, FullExportProcessorMBean {
 
 	private static final Logger logger = LogManager.getLogger(FullExportProcessor.class);
     private static final Timer timer = new Timer("Export Timer", true);
 
     private final String wsSession;
+    private final String routeId;
     private final AtomicLong lastSend;
+    //private ThreadLocal<ConcurrentLinkedQueue<String>> pendingThreadLocal = new ThreadLocal<>();
     private final ConcurrentLinkedQueue<String> pendingPaths = new ConcurrentLinkedQueue<>();
 
-    public FullExportProcessor(String wsSession) {
+    public FullExportProcessor(String wsSession, String routeId) {
         super();
         this.wsSession = wsSession;
+        this.routeId=routeId;
         lastSend = new AtomicLong(System.currentTimeMillis());
         signalkModel.getEventBus().register(this);
+        
+       
+        //setup jmx
+        //register the MBean
+		try {
+			ObjectName name = new ObjectName(getClass().getName(),"id",UUID.randomUUID().toString());
+			ManagementFactory.getPlatformMBeanServer().registerMBean(this, name);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			logger.error(e.getMessage(),e);
+		} 
+        
     }
     
 	
 	 public void process(Exchange exchange) throws Exception {
 	        try {
 	            if (logger.isDebugEnabled())
-	                logger.info("process  subs for " + exchange.getFromRouteId() + " as delta? " + isDelta(exchange.getFromRouteId()));
+	                logger.info("process  subs for " + routeId + " as delta? " + isDelta(routeId));
 
 	            // Clear the pending paths as we are about to send all.
+	            
 	            pendingPaths.clear();
 	            lastSend.set(System.currentTimeMillis());
 
 	            // get the accumulated delta nodes.
-	            exchange.getIn().setBody(createTree(exchange.getFromRouteId()));
+	            exchange.getIn().setBody(createTree(routeId));
 	            setHeaders(exchange);
 	            if (logger.isDebugEnabled()) {
 	                logger.debug("Headers set to :" + exchange.getIn().getHeaders());
-	                logger.debug("Body set to :" + exchange.getIn().getBody());
+	               // logger.debug("Body set to :" + StringUtils.abbreviate(exchange.getIn().getBody().toString(),500));
+	                logger.debug("Body set to :" + exchange.getIn().getBody().toString());
 	            }
 	        } catch (Exception e) {
 	            logger.error(e.getMessage(), e);
@@ -118,7 +142,7 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 
 	 private void setHeaders(Exchange exchange) {
 	        for (Subscription sub : manager.getSubscriptions(wsSession)) {
-	            if (sub == null || !sub.isActive() || !exchange.getFromRouteId().equals(sub.getRouteId()))
+	            if (sub == null || !sub.isActive() || !routeId.equals(sub.getRouteId()))
 	                continue;
 	            exchange.getIn().setHeader(SIGNALK_FORMAT, sub.getFormat());
 	            if (sub.getDestination() != null) {
@@ -144,12 +168,24 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 
 	   private SignalKModel createTree(String routeId) {
 	        SignalKModel temp = SignalKModelFactory.getCleanInstance();
+	        if(logger.isDebugEnabled())logger.debug("subs for ws:" + wsSession + " = " + manager.getSubscriptions(wsSession));
 	        for (Subscription sub : manager.getSubscriptions(wsSession)) {
 	            if (sub != null && sub.isActive() && routeId.equals(sub.getRouteId())) {
+	            	if(logger.isDebugEnabled())logger.debug("Found active sub:" + sub);
 	                for (String p : sub.getSubscribed(null)) {
 	                    NavigableMap<String, Object> node = signalkModel.getSubMap(p);
 	                    if(logger.isDebugEnabled())logger.debug("Found node:" + p + " = " + node);
-	                    temp.putAll(node);
+	                    for (String key:node.keySet()){
+	                    	if(key.contains(".meta."))continue;
+	                    	if(key.contains(".values."))continue;
+	                    	//if(key.contains(".source"))continue;
+	                    	//if(key.contains(".$source"))continue;
+	                    	Object val = node.get(key);
+	                    	if(val!=null){
+	                    		temp.getData().put(key,val);
+	                    	}
+	                    }
+	                    
 	                }
 	            }
 	        }
@@ -189,14 +225,15 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
 
         // Send update if necessary.
         for (Subscription s : manager.getSubscriptions(wsSession)) {
-            if (s.isActive() && s.isSubscribed(path)) {
+            if (s.isActive() && s.isSubscribed(path) && routeId.equals(s.getRouteId())) {
                 switch (s.getPolicy()) {
                     case POLICY_INSTANT:
                         // Always send now.
                         send(Collections.singletonList(path));
                         return;
                     case POLICY_IDEAL:
-                        // Schedule a timer is the queue is currently empty.
+                        // Schedule a timer if the queue is currently empty.
+                    	
                         boolean schedule = pendingPaths.isEmpty();
                         pendingPaths.add(path);
 
@@ -284,6 +321,18 @@ public class FullExportProcessor extends SignalkProcessor implements Processor {
         }
 
     }
+
+
+	@Override
+	public String getSubscriptionDetails() {
+		ArrayList<String> subDetails = new ArrayList<>();
+		for (Subscription s : manager.getSubscriptions(wsSession)) {
+			if(routeId.equals(s.getRouteId())){
+				subDetails.add(s.toString());
+			}
+		}
+		return subDetails.toString();
+	}
 	
 /*	class MsgSender implements Runnable {
 		long lastSend = 0;

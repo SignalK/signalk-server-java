@@ -38,6 +38,7 @@ import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 /**
@@ -68,7 +69,7 @@ public class AnchorWatchProcessor extends SignalkProcessor implements Processor 
 				//workout distance
 				double distance = Util.haversineMeters(lat,lon,anchorLat, anchorLon);
 				logger.debug("Updating anchor distance:"+distance);
-				signalkModel.put(radiusKey,distance,vessels_dot_self);
+				signalkModel.put(radiusKey,distance,null, Util.getIsoTimeString(System.currentTimeMillis()));
 			}
 			
 		} catch (Exception e) {

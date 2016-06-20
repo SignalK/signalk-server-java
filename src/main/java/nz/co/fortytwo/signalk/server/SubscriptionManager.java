@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
@@ -52,8 +53,8 @@ public class SubscriptionManager {
 	Map<String, String> outPutMap = new HashMap<String, String>();
 	Map<String, String> ipMap = new HashMap<String, String>();
 	//wsSessionId>Subscription
-	List<Subscription> subscriptions = new ArrayList<Subscription>();
-	List<String> heartbeats = new ArrayList<String>();
+	ConcurrentLinkedQueue<Subscription> subscriptions = new ConcurrentLinkedQueue<Subscription>();
+	ConcurrentLinkedQueue<String> heartbeats = new ConcurrentLinkedQueue<String>();
 	
 	/**
 	 * Add a new subscription.
@@ -68,6 +69,7 @@ public class SubscriptionManager {
 			if(sub.isActive() && !hasExistingRoute(sub)){
 				RouteManager routeManager = RouteManagerFactory.getInstance();
 				SignalkRouteFactory.configureSubscribeTimer(routeManager, sub);
+				if(logger.isDebugEnabled())logger.debug("Started route for sub"+sub);
 				heartbeats.remove(sub.getWsSession());
 			}
 			if(logger.isDebugEnabled())logger.debug("Subs size ="+subscriptions.size());
@@ -109,8 +111,8 @@ public class SubscriptionManager {
 			}
 	}
 	
-	public List<Subscription> getSubscriptions(String wsSession){
-		List<Subscription> subs = new ArrayList<Subscription>();
+	public ConcurrentLinkedQueue<Subscription> getSubscriptions(String wsSession){
+		ConcurrentLinkedQueue<Subscription> subs = new ConcurrentLinkedQueue<Subscription>();
 		for (Subscription s: subscriptions){
 			if(s.getWsSession().equals(wsSession)){
 				subs.add(s);
@@ -151,7 +153,7 @@ public class SubscriptionManager {
 		ipMap.put(wsSession, localIpAddress+"#"+remoteIpAddress);
 		logger.debug("Adding "+sessionId+"/"+wsSession+", outputType="+outputType+", localAddress:"+localIpAddress+", remoteAddress:"+remoteIpAddress);
 		//now update any subscriptions for sessionId
-		List<Subscription> subs = getSubscriptions(sessionId);
+		ConcurrentLinkedQueue<Subscription> subs = getSubscriptions(sessionId);
 
 		for (Subscription s: subs){
 			if(s.getWsSession().equals(sessionId)){
@@ -179,7 +181,7 @@ public class SubscriptionManager {
 		ipMap.clear();
 		//remove all subscriptions
 		RouteManager routeManager = RouteManagerFactory.getInstance();
-		List<Subscription> subs = subscriptions;
+		
 		SignalkRouteFactory.removeSubscribeTimers(routeManager,subscriptions );
 		subscriptions.clear();
 		heartbeats.clear();
@@ -193,7 +195,7 @@ public class SubscriptionManager {
 		ipMap.remove(wsSession);
 		//remove all subscriptions
 		RouteManager routeManager = RouteManagerFactory.getInstance();
-		List<Subscription> subs = getSubscriptions(wsSession);
+		ConcurrentLinkedQueue<Subscription> subs = getSubscriptions(wsSession);
 		SignalkRouteFactory.removeSubscribeTimers(routeManager,subs );
 		subscriptions.removeAll(subs);
 		subscriptions.removeAll(getSubscriptions(sessionId));
@@ -206,7 +208,7 @@ public class SubscriptionManager {
 		ipMap.remove(wsSession);
 		//remove all subscriptions
 		RouteManager routeManager = RouteManagerFactory.getInstance();
-		List<Subscription> subs = getSubscriptions(wsSession);
+		ConcurrentLinkedQueue<Subscription> subs = getSubscriptions(wsSession);
 		SignalkRouteFactory.removeSubscribeTimers(routeManager, subs);
 		subscriptions.removeAll(subs);
 		heartbeats.remove(wsSession);
@@ -226,7 +228,7 @@ public class SubscriptionManager {
 	}
 	
 	/**
-	 * Return the ipAddress of the cleint on this websocket session
+	 * Return the ipAddress of the client on this websocket session
 	 * @param wsSession
 	 * @return
 	 */
@@ -254,7 +256,7 @@ public class SubscriptionManager {
 		return false;
 	}
 
-	public List<String> getHeartbeats() {
+	public ConcurrentLinkedQueue<String> getHeartbeats() {
 		return heartbeats;
 	}
 	
