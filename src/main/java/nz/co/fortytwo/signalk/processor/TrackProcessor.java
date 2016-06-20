@@ -151,8 +151,13 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 			// append to file
 			if (count % SAVE_COUNT == 0) {
 				// save it
+				for(Position p: track){
+					coords.add(Json.array(p.longitude(), p.latitude()));
+				}
+				geometry.set(COORDINATES, coords);
 				// if(logger.isDebugEnabled())logger.debug("Track:"+msg);
 				inProducer.sendBody(msg.toString());
+				coords.asJsonList().clear();
 			}
 			if (count % (SAVE_COUNT * 4) == 0) {
 				if (logger.isDebugEnabled())
