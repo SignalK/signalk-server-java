@@ -211,7 +211,7 @@ public class SignalkRouteFactory {
 	public static void configureRestLoggerRoute(RouteBuilder routeBuilder ,String input, String name)throws IOException{
 		routeBuilder.from(input).id(getName(name)) 
 			.setExchangePattern(ExchangePattern.InOut)
-			.process(new LoggerProcessor());
+			.process(new LoggerProcessor()).id(getName(LoggerProcessor.class.getSimpleName()));
 		}
 	public static void configureRestConfigRoute(RouteBuilder routeBuilder ,String input, String name)throws IOException{
 		routeBuilder.from(input).id(getName(name)) 

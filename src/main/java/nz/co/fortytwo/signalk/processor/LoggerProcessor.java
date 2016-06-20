@@ -27,6 +27,7 @@ package nz.co.fortytwo.signalk.processor;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.NavigableMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -38,10 +39,16 @@ import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import mjson.Json;
+import nz.co.fortytwo.signalk.util.JsonPrinter;
+import nz.co.fortytwo.signalk.util.JsonSerializer;
 import nz.co.fortytwo.signalk.util.SignalKConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
-public class LoggerProcessor implements Processor {
+public class LoggerProcessor extends SignalkProcessor implements Processor {
 	private static Logger logger = LogManager.getLogger(LoggerProcessor.class);
 
 	@Override
@@ -79,6 +86,7 @@ public class LoggerProcessor implements Processor {
 
 	private void processPost(Exchange exchange) throws IOException {
 		String conf = exchange.getIn().getBody(String.class);
+		//Json confJson = Json.read(conf);
 		logger.debug("POST Log4j2 = " + conf);
 		FileUtils.writeStringToFile(new File(Util.getRootPath()+"./conf/log4j2.json"), conf);
 
