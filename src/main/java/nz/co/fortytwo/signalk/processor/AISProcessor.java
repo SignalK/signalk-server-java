@@ -26,6 +26,8 @@ package nz.co.fortytwo.signalk.processor;
 import nz.co.fortytwo.signalk.handler.AISHandler;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 
+import static nz.co.fortytwo.signalk.util.SignalKConstants.MSG_SRC_BUS;
+
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
@@ -57,7 +59,8 @@ public class AISProcessor extends SignalkProcessor implements Processor {
 				
 			String bodyStr = exchange.getIn().getBody(String.class);
 			try{
-				SignalKModel model = aisHandler.handle(bodyStr);
+				String src = exchange.getIn().getHeader(MSG_SRC_BUS, String.class);
+				SignalKModel model = aisHandler.handle(bodyStr, src);
 				if(model!=null){
 					exchange.getIn().setBody(model);
 				}

@@ -209,6 +209,7 @@ public class RouteManager extends RouteBuilder  {
 		if(Util.getConfigPropertyBoolean(ConfigConstants.START_STOMP)){
 			from("skStomp:queue:signalk.put").id("STOMP In")
 				.setHeader(ConfigConstants.OUTPUT_TYPE, constant(ConfigConstants.OUTPUT_STOMP))
+				.setHeader(SignalKConstants.MSG_SRC_BUS, constant("stomp.queue:signalk.put"))
 				.to(SEDA_INPUT).id(SignalkRouteFactory.getName("SEDA_INPUT"));
 		}
 		//MQTT
@@ -216,6 +217,7 @@ public class RouteManager extends RouteBuilder  {
 			from(MQTT+"&subscribeTopicName=signalk.put").id("MQTT In")
 				.transform(body().convertToString())
 				.setHeader(ConfigConstants.OUTPUT_TYPE, constant(ConfigConstants.OUTPUT_MQTT))
+				.setHeader(SignalKConstants.MSG_SRC_BUS, constant("mqtt.queue:signalk.put"))
 				.to(SEDA_INPUT).id(SignalkRouteFactory.getName("SEDA_INPUT"));
 		}
 		//start any clients if they exist
@@ -226,7 +228,10 @@ public class RouteManager extends RouteBuilder  {
 				from("ahc:ws://"+client).id("Websocket Client:"+client)
 					.onException(Exception.class).handled(true).maximumRedeliveries(0)
 						.to("log:nz.co.fortytwo.signalk.client.ws?level=ERROR&showException=true&showStackTrace=true")
-						.end().transform(body().convertToString())
+						.end()
+					.transform(body()
+					.convertToString())
+					.setHeader(SignalKConstants.MSG_SRC_BUS, constant("ws."+client.toString().replace('.', '_')))
 					.to(SEDA_INPUT);
 			}
 		}
@@ -237,7 +242,10 @@ public class RouteManager extends RouteBuilder  {
 				from("netty4:tcp://"+client+"?clientMode=true&textline=true").id("TCP Client:"+client)
 					.onException(Exception.class).handled(true).maximumRedeliveries(0)
 						.to("log:nz.co.fortytwo.signalk.client.tcp?level=ERROR&showException=true&showStackTrace=true")
-						.end().transform(body().convertToString())
+						.end()
+					.transform(body()
+					.convertToString())
+					.setHeader(SignalKConstants.MSG_SRC_BUS, constant("stomp."+client.toString().replace('.', '_')))
 					.to(SEDA_INPUT);
 			}
 		}
@@ -248,7 +256,10 @@ public class RouteManager extends RouteBuilder  {
 					from("mqtt://"+client).id("MQTT Client:"+client)
 						.onException(Exception.class).handled(true).maximumRedeliveries(0)
 							.to("log:nz.co.fortytwo.signalk.client.mqtt?level=ERROR&showException=true&showStackTrace=true")
-							.end().transform(body().convertToString())
+							.end()
+						.transform(body()
+						.convertToString())
+						.setHeader(SignalKConstants.MSG_SRC_BUS, constant("mqtt."+client.toString().replace('.', '_')))
 						.to(SEDA_INPUT);
 				}
 			}
@@ -261,7 +272,10 @@ public class RouteManager extends RouteBuilder  {
 				from("stomp://"+client).id("STOMP Client:"+client)
 					.onException(Exception.class).handled(true).maximumRedeliveries(0)
 						.to("log:nz.co.fortytwo.signalk.client.stomp?level=ERROR&showException=true&showStackTrace=true")
-						.end().transform(body().convertToString())
+						.end()
+					.transform(body()
+					.convertToString())
+					.setHeader(SignalKConstants.MSG_SRC_BUS, constant("stomp."+client.toString().replace('.', '_')))
 					.to(SEDA_INPUT);
 			}
 		}
@@ -279,6 +293,7 @@ public class RouteManager extends RouteBuilder  {
 			.split(body().tokenize("\n")).streaming()
 			.transform(body().convertToString())
 			.throttle(2).timePeriodMillis(1000)
+			.setHeader(SignalKConstants.MSG_SRC_BUS, constant("demo"))
 			.to(SEDA_INPUT).id(SignalkRouteFactory.getName("SEDA_INPUT"))
 			.end();
 			
