@@ -131,7 +131,8 @@ public class SignalkRouteFactory {
 		//handle list
 		.process(new JsonListProcessor()).id(getName(JsonListProcessor.class.getSimpleName()))
 		//handle get
-		.process(new JsonGetProcessor()).id(getName(JsonGetProcessor.class.getSimpleName()));
+		.process(new JsonGetProcessor()).id(getName(JsonGetProcessor.class.getSimpleName()))
+		.process(new StorageProcessor()).id(getName(StorageProcessor.class.getSimpleName()));
 		
 	}
 	

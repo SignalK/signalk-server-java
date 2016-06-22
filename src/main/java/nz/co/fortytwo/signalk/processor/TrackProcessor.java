@@ -29,6 +29,7 @@ import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position_latitude
 import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position_longitude;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.resources_routes;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.routes;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.self;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.sourceRef;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.timestamp;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.type;
@@ -88,7 +89,9 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 		val.set(value, currentTrack);
 		currentTrack.set(name, "Current Track");
 		currentTrack.set(type, routes);
-		currentTrack.set(key, SignalKConstants.currentTrack);
+		String time = Util.getIsoTimeString();
+		time = time.substring(0, time.indexOf("."));
+		currentTrack.set(key, SignalKConstants.currentTrack+time);
 		currentTrack.set("description", "Auto saved current track");
 		currentTrack.set(ConfigConstants.MIME_TYPE, ConfigConstants.MIME_TYPE_JSON);
 
@@ -96,7 +99,7 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 		values.add(val);
 
 		Json update = Json.object();
-		update.set(timestamp, DateTime.now().toDateTimeISO().toString());
+		update.set(timestamp, time);
 		update.set(sourceRef, VESSELS_DOT_SELF);
 		update.set(SignalKConstants.values, values);
 
@@ -106,13 +109,13 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 		msg.set(SignalKConstants.CONTEXT, VESSELS_DOT_SELF);
 		msg.set(SignalKConstants.PUT, updates);
 		// do we have an existing one? we dont want to stomp on it
-		currentTrack.set("uri", "vessels/self/resources/routes/currentTrack.geojson");
+		currentTrack.set("uri", "vessels."+self+"/resources/routes/currentTrack.geojson");
 		try {
 			JsonStorageHandler storageHandler = new JsonStorageHandler();
 			storageHandler.handle(msg);
 			// should now have any existing track, so archive it, and start
 			// fresh
-			archiveTrack(msg);
+			archiveTrack(msg, time);
 		} catch (IOException io) {
 			// no file, or unreadable
 			currentTrack.delAt("uri");
@@ -174,7 +177,9 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 					coords.add(Json.array(p.longitude(), p.latitude()));
 				}
 				geometry.set(COORDINATES, coords);
-				archiveTrack(msg);
+				String time = Util.getIsoTimeString();
+				time = time.substring(0, time.indexOf("."));
+				archiveTrack(msg, time);
 				count = 0;
 				coords.asJsonList().clear();
 				track.clear();
@@ -184,14 +189,13 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 
 
 
-	private void archiveTrack(Json message) {
+	private void archiveTrack(Json message, String time) {
 		Json lastTrack = message.dup();
-		String time = Util.getIsoTimeString();
+		
 		if (logger.isDebugEnabled())
 			logger.debug("Archive Track to File:" + SignalKConstants.currentTrack + time);
 		Json val = lastTrack.at(SignalKConstants.PUT).at(0).at(SignalKConstants.values).at(0);
 
-		time = time.substring(0, time.indexOf("."));
 		val.set(SignalKConstants.PATH, resources_routes + dot + SignalKConstants.currentTrack + time);
 		val.at(value).set(name, "Track at " + time);
 		currentTrack.set(key, SignalKConstants.currentTrack + time);
