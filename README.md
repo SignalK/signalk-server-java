@@ -50,31 +50,34 @@ Current capabilities:
 Using
 =====
 The project is not in any public maven repository yet but is available from jitpack.io. 
-
-For dev you will have to build the project locally on your dev system, and do a maven install to install into your local m2 repository. 
-Use the dev profile `mvn -P dev ...` to build from your local versions, the default will use the last tagged version in jitpack.io 
-
-You will need to clone the signalk-core-java project and build it with maven , then the signalk-server-java project.
-The signalk-core-java project is usable separately and contains the core model, and useful helpers.
-
-Then add the following to the pom of your project.
-
+To use that version add the following to your pom.xml:
 ```
-<!--<properties>-->
-<signalk.server.version>0.0.1-SNAPSHOT</signalk.server.version>
-
-<!-- <dependencies>-->
-    <dependency>
-			<groupId>nz.co.fortytwo.signalk.server</groupId>
-			<artifactId>signalk-server-java</artifactId>
-			<version>${signalk.server.version}</version>
-		</dependency>
-
+	<repositories>
+		<repository>
+		    <id>jitpack.io</id>
+		    <url>https://jitpack.io</url>
+		</repository>
+	</repositories>
+	<dependency>
+		<groupId>com.github.SignalK</groupId>
+		<artifactId>signalk-server-java</artifactId>
+		<!--choose appropriate version-->
+		<version>JIT-Deploy-07</version>
+	</dependency>
 ```
-Alternatively you can take the jar file from target/ and include manually in your project.
 
 Development
 ===========
 
-The project is a typical maven/eclipse java project. Clone the repository, import into eclipse and go.
+The project is developed and built using maven and eclipse. 
+
+You will need to clone the signalk-core-java project and build it with maven , then the signalk-server-java project. 
+
+The default signalk-server-java build will use the most recent jitpack.io signalk-core build, so for dev you need to set the system property in maven as follows. This will cause the builds to use the dev dependencies, from your local repository.
+
+```
+mvn -Dsignalk.build=dev install
+```
+
+The signalk-core-java project is usable separately and contains the core model, and useful helpers.
 
