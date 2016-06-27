@@ -22,6 +22,7 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
+import static nz.co.fortytwo.signalk.util.SignalKConstants.PUT;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.dot;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.key;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.name;
@@ -30,6 +31,7 @@ import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position_longitud
 import static nz.co.fortytwo.signalk.util.SignalKConstants.resources_routes;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.routes;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.self;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.source;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.sourceRef;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.timestamp;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.type;
@@ -39,6 +41,8 @@ import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels_dot_self_dot;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NavigableSet;
+import java.util.UUID;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.handler.JsonStorageHandler;
@@ -64,8 +68,8 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 
 	private static final String COORDINATES = "coordinates";
 	private static final String GEOMETRY = "geometry";
-	private static final String FEATURES = "features";
-	private static final String GEOJSON = "{\"features\":[{\"geometry\":{\"coordinates\":[],\"type\":\"LineString\"},\"properties\":null,\"id\":\"laqz\",\"type\":\"Feature\"}],\"type\":\"FeatureCollection\"}";
+	private static final String FEATURE = "feature";
+	private static final String GEOJSON = "[{\"geometry\":{\"coordinates\":[],\"type\":\"LineString\"},\"properties\":null,\"id\":\"na\",\"type\":\"Feature\"}]";
 
 	// simplify to about 2m out of true (at equator)
 	private static final double TRACK_TOLERANCE = 0.00002;
@@ -75,65 +79,31 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 
 	private static Logger logger = LogManager.getLogger(TrackProcessor.class);
 	
-	private Json msg = Json.object();
-	private Json currentTrack;
+	private Json msg ;
+	//TODO: thread safety??
 	private List<Position> track = new ArrayList<Position>();
 	private Json coords;
 	private Json geometry;
 	private static int count = 0;
 
 	public TrackProcessor() throws Exception {
-		Json val = Json.object();
-		val.set(SignalKConstants.PATH, resources_routes + dot + SignalKConstants.currentTrack);
-		currentTrack = Json.object();
-		val.set(value, currentTrack);
-		currentTrack.set(name, "Current Track");
-		currentTrack.set(type, routes);
-		String time = Util.getIsoTimeString();
-		time = time.substring(0, time.indexOf("."));
-		currentTrack.set(key, SignalKConstants.currentTrack+time);
-		currentTrack.set("description", "Auto saved current track");
-		currentTrack.set(ConfigConstants.MIME_TYPE, ConfigConstants.MIME_TYPE_JSON);
-
-		Json values = Json.array();
-		values.add(val);
-
-		Json update = Json.object();
-		update.set(timestamp, time);
-		update.set(sourceRef, VESSELS_DOT_SELF);
-		update.set(SignalKConstants.values, values);
-
-		Json updates = Json.array();
-		updates.add(update);
-
-		msg.set(SignalKConstants.CONTEXT, VESSELS_DOT_SELF);
-		msg.set(SignalKConstants.PUT, updates);
-		// do we have an existing one? we dont want to stomp on it
-		currentTrack.set("uri", "vessels."+self+"/resources/routes/currentTrack.geojson");
-		try {
-			JsonStorageHandler storageHandler = new JsonStorageHandler();
-			storageHandler.handle(msg);
-			// should now have any existing track, so archive it, and start
-			// fresh
-			archiveTrack(msg, time);
-		} catch (IOException io) {
-			// no file, or unreadable
-			currentTrack.delAt("uri");
-		}
-		Json geoJson = Json.read(GEOJSON);
-		geometry = geoJson.at(FEATURES).at(0).at(GEOMETRY);
-		coords = geometry.at(COORDINATES);
-		currentTrack.set(ConfigConstants.PAYLOAD, geoJson);
-
+		msg = createTrackMsg();
+		//save new message
+		inProducer.sendBody(msg.toString());
 	}
+	
 
 	public void process(Exchange exchange) throws Exception {
 		try {
+			if(logger.isDebugEnabled()&& exchange.getIn().getBody()!=null){
+				logger.debug("Processing:"+exchange.getIn().getBody().getClass());
+				logger.trace("Processing:"+exchange.getIn().getBody());
+			}
 			if (exchange.getIn().getBody() instanceof SignalKModel) {
 
 				handle(exchange.getIn().getBody(SignalKModel.class));
 			}else{
-				if(logger.isDebugEnabled())logger.debug("Ignored, not a track:"+exchange.getIn().getBody(Json.class));
+				if(logger.isTraceEnabled())logger.trace("Ignored, not a track:"+exchange.getIn().getBody(Json.class));
 			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
@@ -158,48 +128,76 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 					coords.add(Json.array(p.longitude(), p.latitude()));
 				}
 				geometry.set(COORDINATES, coords);
-				// if(logger.isDebugEnabled())logger.debug("Track:"+msg);
+				if(logger.isDebugEnabled())logger.debug("Saving track:"+count);
+				updateSourceAndTime(msg);
 				inProducer.sendBody(msg.toString());
 				coords.asJsonList().clear();
 			}
 			if (count % (SAVE_COUNT * 4) == 0) {
 				if (logger.isDebugEnabled())
-					logger.debug("Simplify Track, size:" + coords.asList().size());// +":"+coords);
+					logger.debug("Simplify track, size:" + coords.asList().size());// +":"+coords);
 				track = TrackSimplifier.simplify(track, TRACK_TOLERANCE);
 
 				if (logger.isDebugEnabled())
-					logger.debug("  done, size:" + coords.asList().size());
+					logger.debug("Simplify track, done, size:" + coords.asList().size());
 				count = track.size();
 			}
 			// reset?
 			if (count > MAX_COUNT) {
+				if(logger.isDebugEnabled())logger.debug("Rolling to new track:"+count);
 				for(Position p: track){
 					coords.add(Json.array(p.longitude(), p.latitude()));
 				}
 				geometry.set(COORDINATES, coords);
-				String time = Util.getIsoTimeString();
-				time = time.substring(0, time.indexOf("."));
-				archiveTrack(msg, time);
+				updateSourceAndTime(msg);
+				inProducer.sendBody(msg.toString());
+				msg = createTrackMsg();
+				//save new message
+				inProducer.sendBody(msg.toString());
 				count = 0;
-				coords.asJsonList().clear();
 				track.clear();
 			}
 		}
 	}
 
 
-
-	private void archiveTrack(Json message, String time) {
-		Json lastTrack = message.dup();
+	private Json createTrackMsg(){
+		Json val = Json.object();
+		val.set(SignalKConstants.PATH, resources_routes + dot + "urn:mrn:signalk:uuid:"+UUID.randomUUID().toString());
+		Json currentTrack = Json.object();
+		val.set(value, currentTrack);
+		String time = Util.getIsoTimeString();
+		time = time.substring(0, time.indexOf("."));
+		currentTrack.set(name, "Vessel Track from "+time);
+		currentTrack.set("description", "Auto saved vessel track from "+time);
 		
-		if (logger.isDebugEnabled())
-			logger.debug("Archive Track to File:" + SignalKConstants.currentTrack + time);
-		Json val = lastTrack.at(SignalKConstants.PUT).at(0).at(SignalKConstants.values).at(0);
+		Json values = Json.array();
+		values.add(val);
 
-		val.set(SignalKConstants.PATH, resources_routes + dot + SignalKConstants.currentTrack + time);
-		val.at(value).set(name, "Track at " + time);
-		currentTrack.set(key, SignalKConstants.currentTrack + time);
-		inProducer.sendBody(lastTrack.toString());
+		Json update = Json.object();
+		
+		update.set(SignalKConstants.values, values);
 
+		Json updates = Json.array();
+		updates.add(update);
+		Json msg = Json.object();
+		msg.set(SignalKConstants.CONTEXT, VESSELS_DOT_SELF);
+		msg.set(SignalKConstants.PUT, updates);
+		updateSourceAndTime(msg);
+		Json geoJson = Json.read(GEOJSON);
+		geometry = geoJson.at(0).at(GEOMETRY);
+		coords = geometry.at(COORDINATES);
+		currentTrack.set(FEATURE, geoJson);
+		if(logger.isDebugEnabled())logger.debug("Created new track msg:"+msg);
+		return msg;
+	}
+
+
+	private void updateSourceAndTime(Json msg) {
+		Json update = msg.at(PUT).at(0);
+		update.set(timestamp, Util.getIsoTimeString());
+		update.set(source, Json.read("{\"internal\": {"+
+	          "\"value\": \"TrackProcessor\","+
+	          "\"timestamp\": \""+Util.getIsoTimeString()+"\"}}"));
 	}
 }

@@ -186,6 +186,8 @@ public class RouteManager extends RouteBuilder  {
 		SignalkRouteFactory.configureRestConfigRoute(this, "jetty:http://0.0.0.0:" + restPort + SignalKConstants.SIGNALK_CONFIG+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true&enableCORS=false","Config Api");
 		
 		SignalkRouteFactory.configureRestLoggerRoute(this, "jetty:http://0.0.0.0:" + restPort + SignalKConstants.SIGNALK_LOGGER+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true&enableCORS=false","Logger");
+		
+		SignalkRouteFactory.configureRestUploadRoute(this, "jetty:http://0.0.0.0:" + restPort + SignalKConstants.SIGNALK_UPLOAD+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true&enableCORS=false","Upload");
 
 		
 		if(Util.getConfigPropertyBoolean(ConfigConstants.ALLOW_INSTALL)){

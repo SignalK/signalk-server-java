@@ -27,6 +27,12 @@ package nz.co.fortytwo.signalk.processor;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.NavigableMap;
 
 import javax.servlet.http.HttpServletRequest;
@@ -35,9 +41,15 @@ import javax.servlet.http.HttpSession;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.http.HttpMessage;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.restlet.data.MediaType;
+import org.restlet.ext.fileupload.RestletFileUpload;
+import org.restlet.representation.InputRepresentation;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,8 +60,8 @@ import nz.co.fortytwo.signalk.util.JsonSerializer;
 import nz.co.fortytwo.signalk.util.SignalKConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
-public class LoggerProcessor extends SignalkProcessor implements Processor {
-	private static Logger logger = LogManager.getLogger(LoggerProcessor.class);
+public class UploadProcessor extends SignalkProcessor implements Processor {
+	private static Logger logger = LogManager.getLogger(UploadProcessor.class);
 
 	@Override
 	public void process(Exchange exchange) throws Exception {
@@ -73,24 +85,39 @@ public class LoggerProcessor extends SignalkProcessor implements Processor {
 			}else{
 				exchange.getIn().setHeader(SignalKConstants.MSG_TYPE, SignalKConstants.EXTERNAL_IP);
 			}
-
-			if (exchange.getIn().getHeader(Exchange.HTTP_METHOD).equals("GET")) {
-				processGet(exchange);
-			}
-			if (exchange.getIn().getHeader(Exchange.HTTP_METHOD).equals("POST")) {
-				processPost(exchange);
-			}
+			//if (exchange.getIn().getHeader(Exchange.HTTP_METHOD).equals("POST")) {
+				processUpload(exchange);
+			//}
 		} else {
 			exchange.getIn().setHeader("Location", SignalKConstants.SIGNALK_AUTH);
 			exchange.getIn().setBody("Authentication Required");
 		}
 	}
 
-	private void processPost(Exchange exchange) throws IOException {
-		String conf = exchange.getIn().getBody(String.class);
-		//Json confJson = Json.read(conf);
-		logger.debug("POST Log4j2 = " + conf);
-		FileUtils.writeStringToFile(new File(Util.getRootPath()+"./conf/log4j2.json"), conf);
+	private void processUpload(Exchange exchange) throws IOException {
+		MediaType mediaType = 
+	            exchange.getIn().getHeader(Exchange.CONTENT_TYPE, MediaType.class);
+	        InputRepresentation representation =
+	            new InputRepresentation(
+	                exchange.getIn().getBody(InputStream.class), mediaType);
+
+	        try {
+	            List<FileItem> items = 
+	                new RestletFileUpload(
+	                    new DiskFileItemFactory()).parseRepresentation(representation);
+
+	            for (FileItem item : items) {
+	                if (!item.isFormField()) {
+	                    InputStream inputStream = item.getInputStream();
+	                    Path destination = Paths.get("MyFile.jpg");
+	                    Files.copy(inputStream, destination,
+	                                StandardCopyOption.REPLACE_EXISTING);
+	                }
+	            }
+	        } catch (FileUploadException | IOException e) {
+	            e.printStackTrace();
+	        }
+
 
 	}
 

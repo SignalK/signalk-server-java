@@ -61,6 +61,7 @@ import nz.co.fortytwo.signalk.processor.SourceToSourceRefProcessor;
 import nz.co.fortytwo.signalk.processor.StompProcessor;
 import nz.co.fortytwo.signalk.processor.StorageProcessor;
 import nz.co.fortytwo.signalk.processor.TrackProcessor;
+import nz.co.fortytwo.signalk.processor.UploadProcessor;
 import nz.co.fortytwo.signalk.processor.ValidationProcessor;
 import nz.co.fortytwo.signalk.processor.WindProcessor;
 import nz.co.fortytwo.signalk.processor.WsSessionProcessor;
@@ -106,7 +107,7 @@ public class SignalkRouteFactory {
 		//now filter security
 		//.process(new IncomingSecurityFilter()).id(getName(IncomingSecurityFilter.class.getSimpleName()))
 		//swap payloads to storage
-		.process(new StorageProcessor()).id(getName(StorageProcessor.class.getSimpleName()))
+		//.process(new StorageProcessor()).id(getName(StorageProcessor.class.getSimpleName()))
 		//convert NMEA to signalk
 		.process(new NMEAProcessor()).id(getName(NMEAProcessor.class.getSimpleName()))
 		//convert AIS to signalk
@@ -131,8 +132,8 @@ public class SignalkRouteFactory {
 		//handle list
 		.process(new JsonListProcessor()).id(getName(JsonListProcessor.class.getSimpleName()))
 		//handle get
-		.process(new JsonGetProcessor()).id(getName(JsonGetProcessor.class.getSimpleName()))
-		.process(new StorageProcessor()).id(getName(StorageProcessor.class.getSimpleName()));
+		.process(new JsonGetProcessor()).id(getName(JsonGetProcessor.class.getSimpleName()));
+		//.process(new StorageProcessor()).id(getName(StorageProcessor.class.getSimpleName()));
 		
 	}
 	
@@ -214,6 +215,13 @@ public class SignalkRouteFactory {
 			.setExchangePattern(ExchangePattern.InOut)
 			.process(new LoggerProcessor()).id(getName(LoggerProcessor.class.getSimpleName()));
 		}
+	
+	public static void configureRestUploadRoute(RouteBuilder routeBuilder ,String input, String name)throws IOException{
+		routeBuilder.from(input).id(getName(name)) 
+			.setExchangePattern(ExchangePattern.InOut)
+			.process(new UploadProcessor()).id(getName(UploadProcessor.class.getSimpleName()));
+		}
+	
 	public static void configureRestConfigRoute(RouteBuilder routeBuilder ,String input, String name)throws IOException{
 		routeBuilder.from(input).id(getName(name)) 
 			.setExchangePattern(ExchangePattern.InOut)
@@ -275,7 +283,7 @@ public class SignalkRouteFactory {
 		.process(new FullToDeltaProcessor()).id(getName(FullToDeltaProcessor.class.getSimpleName()))
 		.split().body()
 		//swap payloads from storage
-		.process(new StorageProcessor()).id(getName(InputFilterProcessor.class.getSimpleName()))
+		//.process(new StorageProcessor()).id(getName(InputFilterProcessor.class.getSimpleName()))
 		.process(new OutputFilterProcessor()).id(getName(OutputFilterProcessor.class.getSimpleName()))
 		.multicast().parallelProcessing()
 			.to(RouteManager.DIRECT_TCP,

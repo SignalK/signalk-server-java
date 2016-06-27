@@ -31,21 +31,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.NavigableMap;
-
-import mjson.Json;
-import nz.co.fortytwo.signalk.handler.JsonStorageHandler;
-import nz.co.fortytwo.signalk.util.JsonSerializer;
-import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jboss.netty.handler.codec.http.multipart.FileUpload;
 
-import com.google.common.collect.Multiset.Entry;
+import mjson.Json;
+import nz.co.fortytwo.signalk.handler.JsonStorageHandler;
+import nz.co.fortytwo.signalk.util.Util;
 
 /**
  * Intercept and store/retrieve payloads in the storage system.
