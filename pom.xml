@@ -108,13 +108,13 @@
 		<profile>
 			<id>release</id>
 			<activation>
-	            <activeByDefault>false</activeByDefault>
+	            <activeByDefault>true</activeByDefault>
 	        </activation>
 			<dependencies>
 				<dependency>
 					<groupId>com.github.SignalK</groupId>
 					<artifactId>signalk-core-java</artifactId>
-					<version>JIT-Deploy-06</version>
+					<version>JIT-Deploy-07</version>
 				</dependency>
 			</dependencies>
 		</profile>
