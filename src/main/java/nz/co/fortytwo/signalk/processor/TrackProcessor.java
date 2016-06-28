@@ -85,11 +85,10 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 	private Json coords;
 	private Json geometry;
 	private static int count = 0;
+	private boolean initialized = false;
 
 	public TrackProcessor() throws Exception {
 		msg = createTrackMsg();
-		//save new message
-		inProducer.sendBody(msg.toString());
 	}
 	
 
@@ -98,6 +97,11 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 			if(logger.isDebugEnabled()&& exchange.getIn().getBody()!=null){
 				logger.debug("Processing:"+exchange.getIn().getBody().getClass());
 				logger.trace("Processing:"+exchange.getIn().getBody());
+			}
+			if(!initialized){
+				//save new message
+				inProducer.sendBody(msg.toString());
+				initialized=true;
 			}
 			if (exchange.getIn().getBody() instanceof SignalKModel) {
 

@@ -128,11 +128,20 @@ public class SerialPortReader implements Processor {
 					}
 				}
 			} catch (IOException e) {
-				running = false;
+				
 				logger.error(portName+":"+ e.getMessage());
 				logger.debug(e.getMessage(),e);
 			} catch (InterruptedException e) {
 				// do nothing
+			}finally {
+				//clean up
+				running = false;
+				try {
+					out.close();
+				} catch (Exception e1) {
+					logger.error(portName+":"+ e1.getMessage());
+					//logger.debug(e1.getMessage(),e1);
+				}
 			}
 		}
 
@@ -148,7 +157,7 @@ public class SerialPortReader implements Processor {
 		StringBuffer line = new StringBuffer(60);
 		private boolean enableSerial=true;
 		private boolean complete;
-		private InputStream in;
+		protected InputStream in;
 		byte[] buff = new byte[256]; 
 		int x=0;
 		Map<String, Object> headers = new HashMap<String, Object>();
@@ -232,10 +241,21 @@ public class SerialPortReader implements Processor {
 				}
 			}catch (Exception e) {
 				running=false;
-				serialPort.close();
+				stopReader();
 				logger.error(portName, e);
 			}
 		
+		}
+
+
+		protected void stopReader() {
+			serialPort.removeEventListener();
+			try {
+				in.close();
+			} catch (IOException e1) {
+				logger.error(portName, e1);
+			}
+			
 		}
 
 	}
@@ -263,7 +283,7 @@ public class SerialPortReader implements Processor {
 
 			try {
 				serialPort.close();
-				serialPort.removeEventListener();
+				serialReader.stopReader();
 			} catch (Exception e) {
 				logger.error("Problem disconnecting port " + portName +", "+ e.getMessage());
 				logger.debug(e.getMessage(),e);
@@ -281,6 +301,11 @@ public class SerialPortReader implements Processor {
 	 */
 	public void setRunning(boolean running) {
 		this.running = running;
+		if(!running){
+			serialReader.stopReader();
+			serialPort.close();
+		}
+		
 	}
 
 	public String getPortName() {

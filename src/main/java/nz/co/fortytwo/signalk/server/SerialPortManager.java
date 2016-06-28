@@ -135,6 +135,8 @@ public class SerialPortManager implements Runnable, Processor {
 			} catch (InterruptedException ie) {
 			}
 		}
+		//finished, so clean up
+		serialPortList.clear();
 	}
 
 	/**

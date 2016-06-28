@@ -31,20 +31,21 @@ import java.util.Map;
 import javax.jmdns.JmmDNS;
 import javax.jmdns.ServiceInfo;
 
+import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.stomp.SkStompComponent;
+import org.apache.camel.component.websocket.SignalkWebsocketComponent;
+import org.apache.camel.impl.JndiRegistry;
+import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.eclipse.jetty.server.handler.ResourceHandler;
+
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.util.ConfigConstants;
 import nz.co.fortytwo.signalk.util.SignalKConstants;
 import nz.co.fortytwo.signalk.util.Util;
-
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.stomp.SkStompComponent;
-import org.apache.camel.component.websocket.SignalkWebsocketComponent;
-import org.apache.camel.impl.JndiRegistry;
-import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry;
-import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
-import org.eclipse.jetty.server.handler.ResourceHandler;
 
 
 
@@ -133,7 +134,9 @@ public class RouteManager extends RouteBuilder  {
 		nmeaServer.run();
 		
 		// start a serial port manager
-		serialPortManager = new SerialPortManager();
+		if(serialPortManager==null){
+			serialPortManager = new SerialPortManager();
+		}
 		new Thread(serialPortManager).start();
 		
 		// main input to destination route
@@ -145,14 +148,15 @@ public class RouteManager extends RouteBuilder  {
 
 		//restlet
 		
-		ResourceHandler staticHandler = new ResourceHandler();
-		staticHandler.setResourceBase(Util.getConfigProperty(ConfigConstants.STATIC_DIR));
-		
 		//bind in registry
 		PropertyPlaceholderDelegateRegistry registry = (PropertyPlaceholderDelegateRegistry) CamelContextFactory.getInstance().getRegistry();
 		JndiRegistry reg = (JndiRegistry)registry.getRegistry();
-		//static files
-		((JndiRegistry)registry.getRegistry()).bind("staticHandler",staticHandler );
+		if(reg.lookup("staticHandler")==null){		
+			ResourceHandler staticHandler = new ResourceHandler();
+			staticHandler.setResourceBase(Util.getConfigProperty(ConfigConstants.STATIC_DIR));	
+			//static files
+			reg.bind("staticHandler",staticHandler );
+		}
 		restConfiguration().component("jetty")
 			.consumerProperty("matchOnUriPrefix", "true")
 			.componentProperty("matchOnUriPrefix", "true")
@@ -283,7 +287,6 @@ public class RouteManager extends RouteBuilder  {
 		}
 		
 		
-		
 		//Demo mode
 		if (Util.getConfigPropertyBoolean(ConfigConstants.DEMO)) {
 			String streamUrl = Util.getConfigProperty(ConfigConstants.STREAM_URL);
@@ -325,6 +328,7 @@ public class RouteManager extends RouteBuilder  {
 	 */
 	public void stopSerial() {
 		serialPortManager.stopSerial();
+		serialPortManager=null;
 	}
 	/**
 	 * Stop the DNS-SD server.
