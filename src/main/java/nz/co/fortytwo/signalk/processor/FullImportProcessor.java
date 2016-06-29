@@ -24,6 +24,7 @@
 package nz.co.fortytwo.signalk.processor;
 
 import static nz.co.fortytwo.signalk.util.SignalKConstants.CONFIG;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.resources;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels;
 import mjson.Json;
 import nz.co.fortytwo.signalk.handler.FullToMapConverter;
@@ -51,7 +52,7 @@ public class FullImportProcessor extends SignalkProcessor implements Processor{
 			if(exchange.getIn().getBody()==null ||!(exchange.getIn().getBody() instanceof Json)) return;
 			//we only process full format
 			Json node = exchange.getIn().getBody(Json.class);
-			if(node.has(vessels) || node.has(CONFIG)){
+			if(node.has(vessels) || node.has(CONFIG) || node.has(resources)){
 				SignalKModel model = fullToMap.handle(node);
 				if(logger.isDebugEnabled())logger.debug("Converted to:"+model);
 				if(model!=null){

@@ -28,6 +28,7 @@ import static nz.co.fortytwo.signalk.util.SignalKConstants.key;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.name;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position_latitude;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_position_longitude;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.resources;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.resources_routes;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.routes;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.self;
@@ -167,7 +168,7 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 
 	private Json createTrackMsg(){
 		Json val = Json.object();
-		val.set(SignalKConstants.PATH, resources_routes + dot + "urn:mrn:signalk:uuid:"+UUID.randomUUID().toString());
+		val.set(SignalKConstants.PATH, routes + dot + "urn:mrn:signalk:uuid:"+UUID.randomUUID().toString());
 		Json currentTrack = Json.object();
 		val.set(value, currentTrack);
 		String time = Util.getIsoTimeString();
@@ -185,7 +186,7 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 		Json updates = Json.array();
 		updates.add(update);
 		Json msg = Json.object();
-		msg.set(SignalKConstants.CONTEXT, VESSELS_DOT_SELF);
+		msg.set(SignalKConstants.CONTEXT, resources);
 		msg.set(SignalKConstants.PUT, updates);
 		updateSourceAndTime(msg);
 		Json geoJson = Json.read(GEOJSON);

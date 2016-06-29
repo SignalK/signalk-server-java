@@ -80,7 +80,7 @@ public class InputFilterProcessor extends SignalkProcessor implements Processor 
 					if (json.has(SignalKConstants.CONTEXT)) {
 						exchange.getIn().setHeader(SignalKConstants.SIGNALK_FORMAT, SignalKConstants.FORMAT_DELTA);
 					}
-					if (json.has(SignalKConstants.vessels)) {
+					if (json.has(SignalKConstants.vessels)||json.has(SignalKConstants.resources)) {
 						exchange.getIn().setHeader(SignalKConstants.SIGNALK_FORMAT, SignalKConstants.FORMAT_FULL);
 					}
 				}
