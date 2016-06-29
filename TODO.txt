@@ -13,19 +13,11 @@ Do security outProcessor
 make java n2k code a standalone jar
 do unit tests
 
-Make sure streaming behaves:
-    ws://hostname/signalk/v1/stream?subscribe=self ws://hostname/signalk/v1/stream?subscribe=all ws://hostname/signalk/v1/stream?subscribe=none 
-	With no query parameter the default is self, which will stream the data related to the self object. all will stream all the updates the server sees and none will stream only the heartbeat, until the client issues subscribe messages in the WebSocket stream.
-	If a server does not support some streaming options listed in here it must respond with http status code 501 Not Implemented.
-
-sources is in root of tree
 make sk GenerateSignalkData more useable and use for tests.
 
 Use rule engine for security
 
 log file access
-
-
 
 permanent storage of timeseries data.
 
@@ -37,3 +29,165 @@ Upload charts and select.
 Save tracks
 
 Enable features
+
+Bad format:
+{
+  "context": "vessels.urn:mrn:signalk:uuid:6b0e776f-811a-4b35-980e-b93405371bc5",
+  "updates": [
+    {
+      "values": [
+        {
+          "path": "environment.depth.belowTransducer",
+          "value": 26.8
+        }
+      ],
+      "source": {
+        "value": "$IIDBT,088.2,f,026.8,M,014.7,F*1D",
+        "$source": "unknown",
+        "timestamp": "2016-06-29T05:07:42.430Z"
+      },
+      "timestamp": "2016-06-29T05:07:42.430Z"
+    },
+    {
+      "values": [
+        {
+          "path": "navigation.anchor.maxRadius",
+          "value": 49
+        },
+        {
+          "path": "navigation.anchor.currentRadius",
+          "value": 0.00012419
+        },
+        {
+          "path": "navigation.anchor.position",
+          "value": {
+            "altitude": 0,
+            "latitude": 37.80979791,
+            "longitude": -122.44746995
+          }
+        }
+      ],
+      "source": "unknown",
+      "timestamp": "2016-06-27T06:08:28.012Z"
+    },
+    {
+      "values": [
+        {
+          "path": "navigation.speedOverGround",
+          "value": 3.13866503
+        },
+        {
+          "path": "navigation.courseOverGroundMagnetic",
+          "value": 2.28638132
+        }
+      ],
+      "source": {
+        "value": "$IIVHW,,T,131,M,06.60,N,12.03,K*66",
+        "$source": "unknown",
+        "timestamp": "2016-06-29T05:07:50.430Z"
+      },
+      "timestamp": "2016-06-29T05:07:50.430Z"
+    },
+    {
+      "values": [
+        {
+          "path": "navigation.position",
+          "value": {
+            "altitude": 0,
+            "latitude": 37.81743389,
+            "longitude": -122.45135335
+          }
+        },
+        {
+          "path": "navigation.magneticVariation",
+          "value": 0.239216
+        }
+      ],
+      "source": {
+        "value": "$ECRMC,194610,A,3749.042,N,12227.078,W,6.1,150.0,140708,015.0,E,A*1A",
+        "timestamp": "2016-06-29T05:07:31.430Z"
+      },
+      "timestamp": "2016-06-29T05:07:31.430Z"
+    },
+    {
+      "values": [
+        {
+          "path": "uuid",
+          "value": "urn:mrn:signalk:uuid:6b0e776f-811a-4b35-980e-b93405371bc5"
+        },
+        {
+          "path": "notifications.navigation.anchor.currentRadius.alarmState",
+          "value": "normal"
+        },
+        {
+          "path": "notifications.navigation.anchor.currentRadius.message",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "values": [
+        {
+          "path": "uuid",
+          "value": "urn:mrn:signalk:uuid:6b0e776f-811a-4b35-980e-b93405371bc5"
+        },
+        {
+          "path": "notifications.navigation.anchor.currentRadius.alarmState",
+          "value": "normal"
+        },
+        {
+          "path": "notifications.navigation.anchor.currentRadius.message",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "values": [
+        {
+          "path": "uuid",
+          "value": "urn:mrn:signalk:uuid:6b0e776f-811a-4b35-980e-b93405371bc5"
+        },
+        {
+          "path": "notifications.navigation.anchor.currentRadius.alarmState",
+          "value": "normal"
+        },
+        {
+          "path": "notifications.navigation.anchor.currentRadius.message",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "values": [
+        {
+          "path": "uuid",
+          "value": "urn:mrn:signalk:uuid:6b0e776f-811a-4b35-980e-b93405371bc5"
+        },
+        {
+          "path": "notifications.navigation.anchor.currentRadius.alarmState",
+          "value": "normal"
+        },
+        {
+          "path": "notifications.navigation.anchor.currentRadius.message",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "values": [
+        {
+          "path": "uuid",
+          "value": "urn:mrn:signalk:uuid:6b0e776f-811a-4b35-980e-b93405371bc5"
+        },
+        {
+          "path": "notifications.navigation.anchor.currentRadius.alarmState",
+          "value": "normal"
+        },
+        {
+          "path": "notifications.navigation.anchor.currentRadius.message",
+          "value": ""
+        }
+      ]
+    }
+  ]
+}

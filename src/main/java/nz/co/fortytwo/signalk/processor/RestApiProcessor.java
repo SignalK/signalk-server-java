@@ -201,23 +201,7 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 
 		// discovery request
 		if (path.equals(SignalKConstants.SIGNALK_DISCOVERY)) {
-			Message in = exchange.getIn();
-
-			String hostname = Util.getConfigProperty(ConfigConstants.HOSTNAME);
-			if (StringUtils.isBlank(hostname)) {
-				try {
-					String header = (String) in.getHeader(Exchange.HTTP_URL);
-					hostname = new URI(header).getHost();
-				} catch (URISyntaxException e) {
-					// Should not happen as we expect Camel to return a valid URI.
-					logger.warn("Invalid URI returned from Exchange: " + in.getHeader(Exchange.HTTP_URL));
-					hostname = "localhost";
-				}
-			}
-
-			in.setHeader(Exchange.CONTENT_TYPE, "application/json");
-			in.setHeader(Exchange.HTTP_RESPONSE_CODE, HttpServletResponse.SC_OK);
-			in.setBody(discovery(hostname).toString());
+			doDiscovery(exchange, path);
 			return;
 		}
 
@@ -234,18 +218,7 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 		// list
 		if (context.startsWith(LIST)) {
 			// make LIST obj
-			// "{\"context\":\"vessels.*\",\"list\":[{\"path\":\"navigation.*\"}]}";
-			exchange.getIn().setHeader(Exchange.CONTENT_TYPE,
-					"application/json");
-			Json json = Json.object().set(SignalKConstants.CONTEXT,
-					context.substring(LIST.length() + 1));
-			Json array = Json.array().add(
-					Json.object().set(SignalKConstants.PATH, path));
-			json.set(SignalKConstants.LIST, array);
-			exchange.getIn().setBody(json.toString());
-			if (logger.isDebugEnabled())
-				logger.debug("Processing the LIST request:"
-						+ exchange.getIn().getBody());
+			doList(exchange, context, path);
 			return;
 		}
 		// make GET obj
@@ -254,6 +227,7 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 		Json json = Json.object().set(SignalKConstants.CONTEXT, context);
 		Json array = Json.array().add(
 				Json.object().set(SignalKConstants.PATH, path));
+		
 		json.set(SignalKConstants.GET, array);
 		exchange.getIn().setBody(json.toString());
 		// If a GET is an absolute object return only the requested object
@@ -267,6 +241,43 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 			logger.debug("Processing the GET request:"
 					+ exchange.getIn().getBody());
 
+	}
+
+	private void doList(Exchange exchange, String context, String path) {
+		// "{\"context\":\"vessels.*\",\"list\":[{\"path\":\"navigation.*\"}]}";
+		exchange.getIn().setHeader(Exchange.CONTENT_TYPE,
+				"application/json");
+		Json json = Json.object().set(SignalKConstants.CONTEXT,
+				context.substring(LIST.length() + 1));
+		Json array = Json.array().add(
+				Json.object().set(SignalKConstants.PATH, path));
+		json.set(SignalKConstants.LIST, array);
+		exchange.getIn().setBody(json.toString());
+		if (logger.isDebugEnabled())
+			logger.debug("Processing the LIST request:"
+					+ exchange.getIn().getBody());
+		
+	}
+
+	private void doDiscovery(Exchange exchange, String path) {
+		Message in = exchange.getIn();
+
+		String hostname = Util.getConfigProperty(ConfigConstants.HOSTNAME);
+		if (StringUtils.isBlank(hostname)) {
+			try {
+				String header = (String) in.getHeader(Exchange.HTTP_URL);
+				hostname = new URI(header).getHost();
+			} catch (URISyntaxException e) {
+				// Should not happen as we expect Camel to return a valid URI.
+				logger.warn("Invalid URI returned from Exchange: " + in.getHeader(Exchange.HTTP_URL));
+				hostname = "localhost";
+			}
+		}
+
+		in.setHeader(Exchange.CONTENT_TYPE, "application/json");
+		in.setHeader(Exchange.HTTP_RESPONSE_CODE, HttpServletResponse.SC_OK);
+		in.setBody(discovery(hostname).toString());
+		
 	}
 
 	// TODO: This should come from the configuration used to start the endpoints.
