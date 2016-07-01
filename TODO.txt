@@ -8,8 +8,6 @@ $GPWCV - Waypoint Closure Velocity $GPWCV,,N,,D*5F
 $GPXTE - Cross-Track Error, Measured  $GPXTE,A,A,,R,N,D*06
 
 
-Default subscription is instant
-
 Do security outProcessor
 Use rule engine for security
 

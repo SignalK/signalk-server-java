@@ -23,11 +23,14 @@
  */
 package nz.co.fortytwo.signalk.server;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+
+import javax.servlet.http.HttpServletResponse;
 
 import nz.co.fortytwo.signalk.processor.AISProcessor;
 import nz.co.fortytwo.signalk.processor.AlarmProcessor;
@@ -69,6 +72,7 @@ import nz.co.fortytwo.signalk.processor.WsSessionProcessor;
 import nz.co.fortytwo.signalk.util.ConfigConstants;
 import nz.co.fortytwo.signalk.util.SignalKConstants;
 
+import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.Predicate;
 import org.apache.camel.Processor;
@@ -78,8 +82,11 @@ import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.camel.component.websocket.WebsocketEndpoint;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.model.RouteDefinition;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
+
+import mjson.Json;
 
 
 
@@ -370,6 +377,44 @@ public class SignalkRouteFactory {
 		}
 		nameSet.add(tmpName);
 		return tmpName;
+	}
+
+	public static void startLogRoutes(RouteBuilder routeBuilder, String  host, int restPort) {
+		//list logs dir
+		routeBuilder.from(host + restPort + "/signalk/v1/listLogs?sessionSupport=true&matchOnUriPrefix=true")
+					.setExchangePattern(ExchangePattern.InOut)
+					.process(new Processor() {
+						
+						@Override
+						public void process(Exchange exchange) throws Exception {
+							File dir = new File("signalk-static/logs");
+							exchange.getIn().setBody(Json.array(dir.list()));
+						}
+					});
+				
+		routeBuilder.from(host + restPort + "/signalk/v1/getLogs?sessionSupport=true&matchOnUriPrefix=true")
+				.setExchangePattern(ExchangePattern.InOut)
+				.process(new Processor() {
+					
+					@Override
+					public void process(Exchange exchange) throws Exception {
+						
+						String logFile = exchange.getIn().getHeader("logFile", String.class);
+						if(logFile.contains("/")){
+							logFile=logFile.substring(logFile.lastIndexOf("/")+1, logFile.length());
+						}
+						exchange.getIn().setHeader(Exchange.CONTENT_TYPE, "text/plain");
+						if(StringUtils.isBlank(logFile)){
+							
+							exchange.getIn().setHeader(Exchange.HTTP_RESPONSE_CODE,
+									HttpServletResponse.SC_BAD_REQUEST);
+							exchange.getIn().setBody("Bad request");
+						}
+						File dir = new File("signalk-static/logs/"+logFile);
+						exchange.getIn().setBody(FileUtils.readFileToString(dir));
+					}
+				});
+		
 	}
 		
 	

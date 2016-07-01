@@ -23,6 +23,16 @@
  */
 package nz.co.fortytwo.signalk.server;
 
+import static nz.co.fortytwo.signalk.util.SignalKConstants.MSG_SRC_BUS;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_API;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_AUTH;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_CONFIG;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_DISCOVERY;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_INSTALL;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_LOGGER;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_UPGRADE;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_UPLOAD;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -38,13 +48,13 @@ import org.apache.camel.impl.JndiRegistry;
 import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.util.ConfigConstants;
-import nz.co.fortytwo.signalk.util.SignalKConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
 
@@ -64,6 +74,8 @@ import nz.co.fortytwo.signalk.util.Util;
  * 
  */
 public class RouteManager extends RouteBuilder  {
+	protected static final String JETTY_HTTP_0_0_0_0 = "jetty:http://0.0.0.0:";
+
 	public static final String _SIGNALK_HTTP_TCP_LOCAL = "_signalk-http._tcp.local.";
 
 	public static final String _SIGNALK_WS_TCP_LOCAL = "_signalk-ws._tcp.local.";
@@ -154,8 +166,14 @@ public class RouteManager extends RouteBuilder  {
 		if(reg.lookup("staticHandler")==null){		
 			ResourceHandler staticHandler = new ResourceHandler();
 			staticHandler.setResourceBase(Util.getConfigProperty(ConfigConstants.STATIC_DIR));	
+			staticHandler.setDirectoriesListed(false);
+			MimeTypes mimeTypes = staticHandler.getMimeTypes();
+			mimeTypes.addMimeMapping("log", MimeTypes.TEXT_HTML_UTF_8);
+			staticHandler.setMimeTypes(mimeTypes);
+			
 			//static files
 			reg.bind("staticHandler",staticHandler );
+			
 		}
 		restConfiguration().component("jetty")
 			.consumerProperty("matchOnUriPrefix", "true")
@@ -184,22 +202,22 @@ public class RouteManager extends RouteBuilder  {
 		
 		SignalkRouteFactory.configureHeartbeatRoute(this,"timer://heartbeat?fixedRate=true&period=1000");
 		
-		SignalkRouteFactory.configureAuthRoute(this, "jetty:http://0.0.0.0:" + restPort + SignalKConstants.SIGNALK_AUTH+"?sessionSupport=true&matchOnUriPrefix=true&handlers=#staticHandler&enableJMX=true&enableCORS=true");
-		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + SignalKConstants.SIGNALK_DISCOVERY+"?sessionSupport=true&matchOnUriPrefix=false&enableJMX=true&enableCORS=true","REST Discovery");
-		SignalkRouteFactory.configureRestRoute(this, "jetty:http://0.0.0.0:" + restPort + SignalKConstants.SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true&enableCORS=true","REST Api");
-		SignalkRouteFactory.configureRestConfigRoute(this, "jetty:http://0.0.0.0:" + restPort + SignalKConstants.SIGNALK_CONFIG+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true&enableCORS=false","Config Api");
+		SignalkRouteFactory.configureAuthRoute(this, JETTY_HTTP_0_0_0_0 + restPort + SIGNALK_AUTH+"?sessionSupport=true&matchOnUriPrefix=true&handlers=#staticHandler&enableJMX=true&enableCORS=true");
+		SignalkRouteFactory.configureRestRoute(this, JETTY_HTTP_0_0_0_0 + restPort + SIGNALK_DISCOVERY+"?sessionSupport=true&matchOnUriPrefix=false&enableJMX=true&enableCORS=true","REST Discovery");
+		SignalkRouteFactory.configureRestRoute(this, JETTY_HTTP_0_0_0_0 + restPort + SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true&enableCORS=true","REST Api");
+		SignalkRouteFactory.configureRestConfigRoute(this, JETTY_HTTP_0_0_0_0 + restPort + SIGNALK_CONFIG+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true&enableCORS=false","Config Api");
 		
-		SignalkRouteFactory.configureRestLoggerRoute(this, "jetty:http://0.0.0.0:" + restPort + SignalKConstants.SIGNALK_LOGGER+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true&enableCORS=false","Logger");
+		SignalkRouteFactory.configureRestLoggerRoute(this, JETTY_HTTP_0_0_0_0 + restPort + SIGNALK_LOGGER+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true&enableCORS=false","Logger");
 		
-		SignalkRouteFactory.configureRestUploadRoute(this, "jetty:http://0.0.0.0:" + restPort + SignalKConstants.SIGNALK_UPLOAD+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true&enableCORS=false","Upload");
+		SignalkRouteFactory.configureRestUploadRoute(this, JETTY_HTTP_0_0_0_0 + restPort + SIGNALK_UPLOAD+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true&enableCORS=false","Upload");
 
 		
 		if(Util.getConfigPropertyBoolean(ConfigConstants.ALLOW_INSTALL)){
-			SignalkRouteFactory.configureInstallRoute(this, "jetty:http://0.0.0.0:" + restPort + SignalKConstants.SIGNALK_INSTALL+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true", "REST Install");
+			SignalkRouteFactory.configureInstallRoute(this, JETTY_HTTP_0_0_0_0 + restPort + SIGNALK_INSTALL+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true", "REST Install");
 		}
 		
 		if(Util.getConfigPropertyBoolean(ConfigConstants.ALLOW_UPGRADE)){
-			SignalkRouteFactory.configureInstallRoute(this, "jetty:http://0.0.0.0:" + restPort + SignalKConstants.SIGNALK_UPGRADE+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true", "REST Upgrade");
+			SignalkRouteFactory.configureInstallRoute(this, JETTY_HTTP_0_0_0_0 + restPort + SIGNALK_UPGRADE+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true", "REST Upgrade");
 		}
 		
 		// timed actions
@@ -215,7 +233,7 @@ public class RouteManager extends RouteBuilder  {
 		if(Util.getConfigPropertyBoolean(ConfigConstants.START_STOMP)){
 			from("skStomp:queue:signalk.put").id("STOMP In")
 				.setHeader(ConfigConstants.OUTPUT_TYPE, constant(ConfigConstants.OUTPUT_STOMP))
-				.setHeader(SignalKConstants.MSG_SRC_BUS, constant("stomp.queue:signalk.put"))
+				.setHeader(MSG_SRC_BUS, constant("stomp.queue:signalk.put"))
 				.to(SEDA_INPUT).id(SignalkRouteFactory.getName("SEDA_INPUT"));
 		}
 		//MQTT
@@ -223,7 +241,7 @@ public class RouteManager extends RouteBuilder  {
 			from(MQTT+"&subscribeTopicName=signalk.put").id("MQTT In")
 				.transform(body().convertToString())
 				.setHeader(ConfigConstants.OUTPUT_TYPE, constant(ConfigConstants.OUTPUT_MQTT))
-				.setHeader(SignalKConstants.MSG_SRC_BUS, constant("mqtt.queue:signalk.put"))
+				.setHeader(MSG_SRC_BUS, constant("mqtt.queue:signalk.put"))
 				.to(SEDA_INPUT).id(SignalkRouteFactory.getName("SEDA_INPUT"));
 		}
 		//start any clients if they exist
@@ -237,7 +255,7 @@ public class RouteManager extends RouteBuilder  {
 						.end()
 					.transform(body()
 					.convertToString())
-					.setHeader(SignalKConstants.MSG_SRC_BUS, constant("ws."+client.toString().replace('.', '_')))
+					.setHeader(MSG_SRC_BUS, constant("ws."+client.toString().replace('.', '_')))
 					.to(SEDA_INPUT);
 			}
 		}
@@ -251,7 +269,7 @@ public class RouteManager extends RouteBuilder  {
 						.end()
 					.transform(body()
 					.convertToString())
-					.setHeader(SignalKConstants.MSG_SRC_BUS, constant("stomp."+client.toString().replace('.', '_')))
+					.setHeader(MSG_SRC_BUS, constant("stomp."+client.toString().replace('.', '_')))
 					.to(SEDA_INPUT);
 			}
 		}
@@ -265,7 +283,7 @@ public class RouteManager extends RouteBuilder  {
 							.end()
 						.transform(body()
 						.convertToString())
-						.setHeader(SignalKConstants.MSG_SRC_BUS, constant("mqtt."+client.toString().replace('.', '_')))
+						.setHeader(MSG_SRC_BUS, constant("mqtt."+client.toString().replace('.', '_')))
 						.to(SEDA_INPUT);
 				}
 			}
@@ -281,7 +299,7 @@ public class RouteManager extends RouteBuilder  {
 						.end()
 					.transform(body()
 					.convertToString())
-					.setHeader(SignalKConstants.MSG_SRC_BUS, constant("stomp."+client.toString().replace('.', '_')))
+					.setHeader(MSG_SRC_BUS, constant("stomp."+client.toString().replace('.', '_')))
 					.to(SEDA_INPUT);
 			}
 		}
@@ -298,7 +316,7 @@ public class RouteManager extends RouteBuilder  {
 			.split(body().tokenize("\n")).streaming()
 			.transform(body().convertToString())
 			.throttle(2).timePeriodMillis(1000)
-			.setHeader(SignalKConstants.MSG_SRC_BUS, constant("demo"))
+			.setHeader(MSG_SRC_BUS, constant("demo"))
 			.to(SEDA_INPUT).id(SignalkRouteFactory.getName("SEDA_INPUT"))
 			.end();
 			
@@ -308,6 +326,8 @@ public class RouteManager extends RouteBuilder  {
 				.end()
 			.to("file://./src/test/resources/samples/?fileName=" + streamUrl);
 		}
+		
+		SignalkRouteFactory.startLogRoutes(this, JETTY_HTTP_0_0_0_0, restPort);
 	}
 
 	
@@ -372,7 +392,7 @@ public class RouteManager extends RouteBuilder  {
 
 	private Map<String,String> getMdnsTxt() {
 		Map<String,String> txtSet = new HashMap<String, String>();
-		txtSet.put("path", SignalKConstants.SIGNALK_DISCOVERY);
+		txtSet.put("path", SIGNALK_DISCOVERY);
 		txtSet.put("server","signalk-server");
 		txtSet.put("version",Util.getConfigProperty(ConfigConstants.VERSION));
 		txtSet.put("vessel_name",Util.getConfigProperty(ConfigConstants.UUID));
