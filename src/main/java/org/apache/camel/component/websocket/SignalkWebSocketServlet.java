@@ -204,15 +204,15 @@ public class SignalkWebSocketServlet extends WebsocketComponentServlet {
 					try {
 						sessionMap.put(connection, wsSession);
 						SubscriptionManagerFactory.getInstance().add(sessionId, wsSession, ConfigConstants.OUTPUT_WS, request.getLocalAddr(),request.getRemoteAddr());
-						//add default sub, or specific sub here
+						//add default sub, or specific sub here, all instant policy
 						String subscribe = request.getParameter("subscribe");
 						if(StringUtils.isBlank(subscribe)|| "self".equals(subscribe)){
 							//subscribe to self
-							String sub = "{\"context\":\"vessels.self\",\"subscribe\":[{\"path\":\"*\"}]}";
+							String sub = "{\"context\":\"vessels.self\",\"subscribe\":[{\"path\":\"*\", \"policy\":\"instant\"}]}";
 							sendSub(request, sub, wsSession);
 						}else if("all".equals(subscribe)){
 							//subscribe to all
-							String sub = "{\"context\":\"vessels.*\",\"subscribe\":[{\"path\":\"*\"}]}";
+							String sub = "{\"context\":\"vessels.*\",\"subscribe\":[{\"path\":\"*\", \"policy\":\"instant\"}]}";
 							sendSub(request, sub, wsSession);
 						}else if("none".equals(subscribe)){
 							//subscribe to none - do nothing

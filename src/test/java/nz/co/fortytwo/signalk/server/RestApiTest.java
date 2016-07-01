@@ -50,6 +50,7 @@ public class RestApiTest extends SignalKCamelTestSupport {
  
     private static Logger logger = LogManager.getLogger(RestApiTest.class);
 	String jsonDiff = null;
+	String jsonDiff2 = null;
 	
 	@Produce(uri = "direct:input")
     protected ProducerTemplate template;
@@ -58,6 +59,8 @@ public class RestApiTest extends SignalKCamelTestSupport {
 		try {
 			jsonDiff = FileUtils.readFileToString(new File("src/test/resources/samples/testUpdate.json"));
 			jsonDiff=jsonDiff.replaceAll("self", SignalKConstants.self);
+			jsonDiff2 = FileUtils.readFileToString(new File("src/test/resources/samples/testUpdate2.json"));
+			jsonDiff2=jsonDiff2.replaceAll("self", SignalKConstants.self);
 		} catch (IOException e) {
 			logger.error(e);
 			fail();
@@ -84,7 +87,7 @@ public class RestApiTest extends SignalKCamelTestSupport {
         assertEquals(200, reponse.getStatusCode());
         
         Json resp = Json.read(reponse.getResponseBody());
-        assertEquals(3.0176 , resp.at(vessels).at(SignalKConstants.self).at(nav).at("courseOverGroundTrue").at("value").asFloat(),0.001);
+        assertEquals(3.0176 , resp.at(nav).at("courseOverGroundTrue").at("value").asFloat(),0.001);
      
         reponse = c.prepareGet("http://localhost:"+restPort+SIGNALK_API+"/vessels/"+SignalKConstants.self+"/navigation").setCookies(r1.getCookies()).execute().get();
         //latch.await(3, TimeUnit.SECONDS);
@@ -93,9 +96,81 @@ public class RestApiTest extends SignalKCamelTestSupport {
         			//{\"updates\":[{\"values\":[{\"value\":3.0176,\"path\":\"navigation.courseOverGroundTrue\"}],\"source\":{\"timestamp\":\"2014-08-15T16:00:00.081Z\",\"source\":\"/dev/actisense-N2K-115-128267\"}}],\"context\":\"vessels.self\"}
         
         resp = Json.read(reponse.getResponseBody());
-        assertEquals(3.0176 , resp.at(vessels).at(SignalKConstants.self).at(nav).at("courseOverGroundTrue").at("value").asFloat(),0.001);
+        assertEquals(3.0176 , resp.at("courseOverGroundTrue").at("value").asFloat(),0.001);
         c.close();
     }
+	
+	@Test
+    public void shouldGetBadRequest() throws Exception {
+		
+	    final CountDownLatch latch = new CountDownLatch(1);
+	    
+        final AsyncHttpClient c = new AsyncHttpClient();
+        
+        template.sendBody(RouteManager.SEDA_INPUT,jsonDiff);
+        latch.await(2,TimeUnit.SECONDS);
+        //get a sessionid
+        Response r1 = c.prepareGet("http://localhost:"+restPort+SIGNALK_AUTH+"/demo/pass").execute().get();
+        //latch2.await(3, TimeUnit.SECONDS);
+        assertEquals(200, r1.getStatusCode());
+        Response reponse = c.prepareGet("http://localhost:"+restPort+SIGNALK_API+"/vessels/*/navigation").setCookies(r1.getCookies()).execute().get();
+        //latch.await(3, TimeUnit.SECONDS);
+        logger.debug(reponse.getResponseBody());
+        assertEquals(400, reponse.getStatusCode());
+        
+        assertEquals("Bad Request" , reponse.getResponseBody());
+     
+        c.close();
+    }
+	
+	@Test
+    public void shouldGetEmptyResponse() throws Exception {
+		
+	    final CountDownLatch latch = new CountDownLatch(1);
+	    
+        final AsyncHttpClient c = new AsyncHttpClient();
+        
+        template.sendBody(RouteManager.SEDA_INPUT,jsonDiff);
+        latch.await(2,TimeUnit.SECONDS);
+        //get a sessionid
+        Response r1 = c.prepareGet("http://localhost:"+restPort+SIGNALK_AUTH+"/demo/pass").execute().get();
+        //latch2.await(3, TimeUnit.SECONDS);
+        assertEquals(200, r1.getStatusCode());
+        Response reponse = c.prepareGet("http://localhost:"+restPort+SIGNALK_API+"/vessels/self/navigation/nothing").setCookies(r1.getCookies()).execute().get();
+        //latch.await(3, TimeUnit.SECONDS);
+        logger.debug(reponse.getResponseBody());
+        assertEquals(200, reponse.getStatusCode());
+        
+        assertEquals("{}" , reponse.getResponseBody());
+     
+        c.close();
+    }
+	
+	@Test
+    public void shouldGetValidResponse() throws Exception {
+		
+	    final CountDownLatch latch = new CountDownLatch(1);
+	    
+        final AsyncHttpClient c = new AsyncHttpClient();
+        
+        template.sendBody(RouteManager.SEDA_INPUT,jsonDiff2);
+        latch.await(2,TimeUnit.SECONDS);
+        //get a sessionid
+        Response r1 = c.prepareGet("http://localhost:"+restPort+SIGNALK_AUTH+"/demo/pass").execute().get();
+        //latch2.await(3, TimeUnit.SECONDS);
+        assertEquals(200, r1.getStatusCode());
+        Response reponse = c.prepareGet("http://localhost:"+restPort+SIGNALK_API+"/vessels/self/navigation/course*").setCookies(r1.getCookies()).execute().get();
+        //latch.await(3, TimeUnit.SECONDS);
+        logger.debug(reponse.getResponseBody());
+        assertEquals(200, reponse.getStatusCode());
+        
+        Json resp = Json.read(reponse.getResponseBody());
+        assertEquals(3.0176 , resp.at("courseOverGroundTrue").at("value").asFloat(),0.001);
+        assertEquals(1.6231 , resp.at("courseOverGroundMagnetic").at("value").asFloat(),0.001);
+        c.close();
+        
+    }
+
 
 	@Test
     public void shouldGetListResponse() throws Exception {

@@ -33,11 +33,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import mjson.Json;
-import nz.co.fortytwo.signalk.util.ConfigConstants;
-import nz.co.fortytwo.signalk.util.SignalKConstants;
-import nz.co.fortytwo.signalk.util.Util;
-
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.Processor;
@@ -45,7 +40,13 @@ import org.apache.camel.StreamCache;
 import org.apache.camel.component.http.HttpMessage;
 import org.apache.camel.component.websocket.WebsocketConstants;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import mjson.Json;
+import nz.co.fortytwo.signalk.util.ConfigConstants;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
+import nz.co.fortytwo.signalk.util.Util;
 
 /*
  * Processes REST requests for Signal K data
@@ -207,6 +208,7 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 
 		path = standardizePath(path);
 
+		
 		String context = Util.getContext(path);
 		if (logger.isDebugEnabled())
 			logger.debug("Processing the context:" + context);

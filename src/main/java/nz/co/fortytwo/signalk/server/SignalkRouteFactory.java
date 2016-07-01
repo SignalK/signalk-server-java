@@ -54,6 +54,7 @@ import nz.co.fortytwo.signalk.processor.NMEAProcessor;
 import nz.co.fortytwo.signalk.processor.OutputFilterProcessor;
 import nz.co.fortytwo.signalk.processor.RestApiProcessor;
 import nz.co.fortytwo.signalk.processor.RestAuthProcessor;
+import nz.co.fortytwo.signalk.processor.RestPathFilterProcessor;
 import nz.co.fortytwo.signalk.processor.SaveProcessor;
 import nz.co.fortytwo.signalk.processor.SignalkModelProcessor;
 import nz.co.fortytwo.signalk.processor.SourceRefToSourceProcessor;
@@ -199,9 +200,8 @@ public class SignalkRouteFactory {
 			.setExchangePattern(ExchangePattern.InOut)
 			.process(new RestApiProcessor())
 			.to(ExchangePattern.InOut,"seda:inputData?purgeWhenStopping=true&size=100")
-			.process(new ConfigFilterProcessor(false))
-			.id(getName(ConfigFilterProcessor.class.getSimpleName()));
-			//.process(new OutputFilterProcessor()).id(getName(OutputFilterProcessor.class.getSimpleName()));
+			.process(new ConfigFilterProcessor(false)).id(getName(ConfigFilterProcessor.class.getSimpleName()))
+			.process(new RestPathFilterProcessor()).id(getName(RestPathFilterProcessor.class.getSimpleName()));
 		
 				
 //		routeBuilder.rest(SignalKConstants.SIGNALK_API).id("REST POST Client")

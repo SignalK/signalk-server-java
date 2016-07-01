@@ -26,6 +26,7 @@ import nz.co.fortytwo.signalk.util.ConfigConstants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 
@@ -51,7 +52,9 @@ public class MqttProcessor extends SignalkProcessor implements Processor {
 			String msg = exchange.getIn().getBody(String.class);
 			exchange.getIn().setBody(msg.getBytes());
 			String dest = exchange.getIn().getHeader(ConfigConstants.DESTINATION, String.class);
-			exchange.getIn().setHeader(ConfigConstants.CamelMQTTPublishTopic, dest.replace('.', '/'));
+			if(StringUtils.isNotBlank(dest)){
+				exchange.getIn().setHeader(ConfigConstants.CamelMQTTPublishTopic, dest.replace('.', '/'));
+			}
 			if(logger.isDebugEnabled()){
 				logger.debug("Message: "+msg);
 				logger.debug("Message destination :" + exchange.getIn().getHeader(ConfigConstants.CamelMQTTPublishTopic));
