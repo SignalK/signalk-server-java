@@ -224,7 +224,9 @@ public class SignalkRouteFactory {
 		}
 	
 	public static void configureRestUploadRoute(RouteBuilder routeBuilder ,String input, String name)throws IOException{
-		routeBuilder.from(input).id(getName(name)) 
+		routeBuilder.rest(input).id(getName(name))
+			.post()
+			.route().id(getName(name+"Route"))
 			.setExchangePattern(ExchangePattern.InOut)
 			.process(new UploadProcessor()).id(getName(UploadProcessor.class.getSimpleName()));
 		}

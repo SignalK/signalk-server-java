@@ -25,6 +25,9 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
+import static nz.co.fortytwo.signalk.util.ConfigConstants.MAP_DIR;
+import static nz.co.fortytwo.signalk.util.ConfigConstants.STATIC_DIR;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,7 +36,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.NavigableMap;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -44,31 +48,26 @@ import org.apache.camel.component.http.HttpMessage;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.restlet.data.MediaType;
 import org.restlet.ext.fileupload.RestletFileUpload;
 import org.restlet.representation.InputRepresentation;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import mjson.Json;
-import nz.co.fortytwo.signalk.util.JsonPrinter;
-import nz.co.fortytwo.signalk.util.JsonSerializer;
 import nz.co.fortytwo.signalk.util.SignalKConstants;
 import nz.co.fortytwo.signalk.util.Util;
+import nz.co.fortytwo.signalk.util.ZipUtils;
 
 public class UploadProcessor extends SignalkProcessor implements Processor {
 	private static Logger logger = LogManager.getLogger(UploadProcessor.class);
 
 	@Override
 	public void process(Exchange exchange) throws Exception {
-		
-		logger.debug("LoggerProcessor starts");
+
+		logger.debug("UploadProcessor starts");
 		HttpServletRequest request = exchange.getIn(HttpMessage.class).getRequest();
-		logger.debug("Session = "+request.getSession().getId());
+		logger.debug("Session = " + request.getSession().getId());
 		HttpSession session = request.getSession();
 		if (logger.isDebugEnabled()) {
 
@@ -80,14 +79,14 @@ public class UploadProcessor extends SignalkProcessor implements Processor {
 
 			String remoteAddress = request.getRemoteAddr();
 			String localAddress = request.getLocalAddr();
-			if(Util.sameNetwork(localAddress, remoteAddress)){
+			if (Util.sameNetwork(localAddress, remoteAddress)) {
 				exchange.getIn().setHeader(SignalKConstants.MSG_TYPE, SignalKConstants.INTERNAL_IP);
-			}else{
+			} else {
 				exchange.getIn().setHeader(SignalKConstants.MSG_TYPE, SignalKConstants.EXTERNAL_IP);
 			}
-			//if (exchange.getIn().getHeader(Exchange.HTTP_METHOD).equals("POST")) {
-				processUpload(exchange);
-			//}
+			if (exchange.getIn().getHeader(Exchange.HTTP_METHOD).equals("POST")) {
+				 processUpload(exchange);
+			}
 		} else {
 			exchange.getIn().setHeader("Location", SignalKConstants.SIGNALK_AUTH);
 			exchange.getIn().setBody("Authentication Required");
@@ -95,37 +94,56 @@ public class UploadProcessor extends SignalkProcessor implements Processor {
 	}
 
 	private void processUpload(Exchange exchange) throws IOException {
-		MediaType mediaType = 
-	            exchange.getIn().getHeader(Exchange.CONTENT_TYPE, MediaType.class);
-	        InputRepresentation representation =
-	            new InputRepresentation(
-	                exchange.getIn().getBody(InputStream.class), mediaType);
-
-	        try {
-	            List<FileItem> items = 
-	                new RestletFileUpload(
-	                    new DiskFileItemFactory()).parseRepresentation(representation);
-
-	            for (FileItem item : items) {
-	                if (!item.isFormField()) {
-	                    InputStream inputStream = item.getInputStream();
-	                    Path destination = Paths.get("MyFile.jpg");
-	                    Files.copy(inputStream, destination,
-	                                StandardCopyOption.REPLACE_EXISTING);
-	                }
-	            }
-	        } catch (FileUploadException | IOException e) {
-	            e.printStackTrace();
-	        }
-
-
+		logger.debug("Begin import:"+ exchange.getIn().getHeaders());
+		if(exchange.getIn().getBody()!=null){
+			logger.debug("Body class:"+ exchange.getIn().getBody().getClass());
+		}else{
+			logger.debug("Body class is null");
+		}
+		//logger.debug("Begin import:"+ exchange.getIn().getBody());
+		MediaType mediaType = exchange.getIn().getHeader(Exchange.CONTENT_TYPE, MediaType.class);
+		InputRepresentation representation = new InputRepresentation((InputStream) exchange.getIn().getBody(), mediaType);
+		logger.debug("Found MIME:"+ mediaType+", length:"+exchange.getIn().getHeader(Exchange.CONTENT_LENGTH, Integer.class));
+		//make a reply
+		Json reply = Json.read("{\"files\": []}");
+		Json files = reply.at("files");
+		
+		try {
+			List<FileItem> items = new RestletFileUpload(new DiskFileItemFactory()).parseRepresentation(representation);
+			logger.debug("Begin import files:"+items);
+			for (FileItem item : items) {
+				if (!item.isFormField()) {
+					InputStream inputStream = item.getInputStream();
+					
+					Path destination = Paths.get(Util.getConfigProperty(STATIC_DIR)+"/"+Util.getConfigProperty(MAP_DIR)+item.getName());
+					logger.debug("Save import file:"+destination);
+					long len = Files.copy(inputStream, destination, StandardCopyOption.REPLACE_EXISTING);
+					Json f = Json.object();
+					f.set("name",item.getName());
+					f.set("size",len);
+					files.add(f);
+					install(destination);
+				}
+			}
+		} catch (FileUploadException | IOException e) {
+			logger.error(e.getMessage(),e);
+		}
+		exchange.getIn().setBody(reply);
 	}
 
-	private void processGet(Exchange exchange) throws IOException {
-		// get and return the current log4j2.json
-		String conf = FileUtils.readFileToString(new File(Util.getRootPath()+"./conf/log4j2.json"));
-		logger.debug("GET Log4j2 = " + conf);
-		exchange.getIn().setBody(conf);
+	private void install(Path destination) throws ZipException, IOException {
+		if(!destination.toString().endsWith(".zip"))return;
+		//unzip here
+		logger.debug("Unzipping file:"+destination);
+		File zipFile = destination.toFile();
+		String f = destination.toFile().getName();
+		f= f.substring(0,f.indexOf("."));
+		File destDir = new File(Util.getConfigProperty(STATIC_DIR)+"/"+Util.getConfigProperty(MAP_DIR)+f);
+		if(!destDir.exists()){
+			destDir.mkdirs();
+		}
+		ZipUtils.unzip(destDir, zipFile);
+		logger.debug("Unzipped file:"+destDir);
 	}
 
 }

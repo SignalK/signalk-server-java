@@ -209,7 +209,7 @@ public class RouteManager extends RouteBuilder  {
 		
 		SignalkRouteFactory.configureRestLoggerRoute(this, JETTY_HTTP_0_0_0_0 + restPort + SIGNALK_LOGGER+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true&enableCORS=false","Logger");
 		
-		SignalkRouteFactory.configureRestUploadRoute(this, JETTY_HTTP_0_0_0_0 + restPort + SIGNALK_UPLOAD+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true&enableCORS=false","Upload");
+		SignalkRouteFactory.configureRestUploadRoute(this, SIGNALK_UPLOAD,"Upload");
 
 		
 		if(Util.getConfigPropertyBoolean(ConfigConstants.ALLOW_INSTALL)){

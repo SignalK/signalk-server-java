@@ -16,16 +16,11 @@ do unit tests
 
 make sk GenerateSignalkData more useable and use for tests.
 
-log file access
-
 permanent storage of timeseries data.
-
-Anchor alarm notification sound
-Drag anchor circle
 
 Upload charts and select.
 
-Save tracks
+Drag anchor circle
 
 Enable features
 
