@@ -124,7 +124,14 @@ public class RouteManager extends RouteBuilder  {
 		//restConfiguration().component("jetty").port(8080);
 		//sessionSupport=true&matchOnUriPrefix=true&handlers=#staticHandler&enableJMX=true
 		//.componentProperty("handlers", "#staticHandler");
+		errorHandler(deadLetterChannel("direct:fail")
+		        .useOriginalMessage()
+		        .maximumRedeliveries(1)
+		        .redeliveryDelay(1000));
 		
+		from ("direct:fail")
+        .to("log:log:nz.co.fortytwo.signalk.error?level=ERROR&showAll=true");
+		 
 		SignalKModelFactory.load(signalkModel);
 		
 		//set shutdown quickly, 5 min is too long
@@ -175,6 +182,8 @@ public class RouteManager extends RouteBuilder  {
 			reg.bind("staticHandler",staticHandler );
 			
 		}
+		
+		
 		restConfiguration().component("jetty")
 			.consumerProperty("matchOnUriPrefix", "true")
 			.componentProperty("matchOnUriPrefix", "true")
@@ -191,6 +200,8 @@ public class RouteManager extends RouteBuilder  {
 			CamelContextFactory.getInstance().addComponent("skStomp", new SkStompComponent());
 		}
 		
+		
+        
 		//setup routes
 		SignalkRouteFactory.configureWebsocketTxRoute(this, SEDA_WEBSOCKETS, wsPort);
 		SignalkRouteFactory.configureWebsocketRxRoute(this, SEDA_INPUT, wsPort);

@@ -28,6 +28,13 @@ package nz.co.fortytwo.signalk.processor;
 import static nz.co.fortytwo.signalk.util.ConfigConstants.MAP_DIR;
 import static nz.co.fortytwo.signalk.util.ConfigConstants.STATIC_DIR;
 
+import static nz.co.fortytwo.signalk.util.SignalKConstants.dot;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.name;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.resources;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.resources_charts;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.routes;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.value;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,6 +43,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.UUID;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
@@ -48,8 +56,13 @@ import org.apache.camel.component.http.HttpMessage;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
 import org.restlet.data.MediaType;
 import org.restlet.ext.fileupload.RestletFileUpload;
 import org.restlet.representation.InputRepresentation;
@@ -93,7 +106,7 @@ public class UploadProcessor extends SignalkProcessor implements Processor {
 		}
 	}
 
-	private void processUpload(Exchange exchange) throws IOException {
+	private void processUpload(Exchange exchange) throws Exception {
 		logger.debug("Begin import:"+ exchange.getIn().getHeaders());
 		if(exchange.getIn().getBody()!=null){
 			logger.debug("Body class:"+ exchange.getIn().getBody().getClass());
@@ -115,7 +128,7 @@ public class UploadProcessor extends SignalkProcessor implements Processor {
 				if (!item.isFormField()) {
 					InputStream inputStream = item.getInputStream();
 					
-					Path destination = Paths.get(Util.getConfigProperty(STATIC_DIR)+"/"+Util.getConfigProperty(MAP_DIR)+item.getName());
+					Path destination = Paths.get(Util.getConfigProperty(STATIC_DIR)+Util.getConfigProperty(MAP_DIR)+item.getName());
 					logger.debug("Save import file:"+destination);
 					long len = Files.copy(inputStream, destination, StandardCopyOption.REPLACE_EXISTING);
 					Json f = Json.object();
@@ -131,19 +144,77 @@ public class UploadProcessor extends SignalkProcessor implements Processor {
 		exchange.getIn().setBody(reply);
 	}
 
-	private void install(Path destination) throws ZipException, IOException {
+	private void install(Path destination) throws Exception {
 		if(!destination.toString().endsWith(".zip"))return;
 		//unzip here
 		logger.debug("Unzipping file:"+destination);
-		File zipFile = destination.toFile();
-		String f = destination.toFile().getName();
-		f= f.substring(0,f.indexOf("."));
-		File destDir = new File(Util.getConfigProperty(STATIC_DIR)+"/"+Util.getConfigProperty(MAP_DIR)+f);
-		if(!destDir.exists()){
-			destDir.mkdirs();
+		try{
+			File zipFile = destination.toFile();
+			String f = destination.toFile().getName();
+			f= f.substring(0,f.indexOf("."));
+			File destDir = new File(Util.getConfigProperty(STATIC_DIR)+Util.getConfigProperty(MAP_DIR)+f);
+			if(!destDir.exists()){
+				destDir.mkdirs();
+			}
+			ZipUtils.unzip(destDir, zipFile);
+			logger.debug("Unzipped file:"+destDir);
+			//now add a reference in resources
+			
+			 SAXReader reader = new SAXReader();
+		     Document document = reader.read(new File(destDir, "tilemapresource.xml"));
+		     
+		     String title = document.getRootElement().element("Title").getText();
+		     double maxRes = 0.0;
+		     double minRes = Double.MAX_VALUE;
+		     int maxZoom = 0;
+		     int minZoom = 99;
+		     Element tileSets = document.getRootElement().element("TileSets");
+		     for(Object o: tileSets.elements("TileSet")){
+		    	 Element e = (Element)o;
+		    	 int href = Integer.parseInt(e.attribute("href").getValue());
+		    	 maxZoom=Math.max(href, maxZoom);
+		    	 minZoom=Math.min(href, minZoom);
+		    	 double units = Double.parseDouble(e.attribute("units-per-pixel").getValue());
+		    	 maxRes=Math.max(units, maxRes);
+		    	 minRes=Math.min(units, minRes);
+		     }
+		     //now make an entry in resources
+		     Json resource = createChartMsg(f, title);
+		     inProducer.sendBody(resource);
+		}catch(Exception e){
+			logger.error(e.getMessage(),e);
+			throw e;
 		}
-		ZipUtils.unzip(destDir, zipFile);
-		logger.debug("Unzipped file:"+destDir);
+	}
+	
+	private Json createChartMsg(String f, String title){
+		Json val = Json.object();
+		val.set(SignalKConstants.PATH, "charts." + "urn:mrn:signalk:uuid:"+UUID.randomUUID().toString());
+		Json currentChart = Json.object();
+		val.set(value, currentChart);
+		String time = Util.getIsoTimeString();
+		time = time.substring(0, time.indexOf("."));
+		currentChart.set("identifier", f);
+		currentChart.set(name, title);
+		currentChart.set("description", title);
+		currentChart.set("tilemapUrl", "/"+Util.getConfigProperty(MAP_DIR)+f);
+		
+		Json values = Json.array();
+		values.add(val);
+
+		Json update = Json.object();
+		
+		update.set(SignalKConstants.values, values);
+
+		Json updates = Json.array();
+		updates.add(update);
+		Json msg = Json.object();
+		msg.set(SignalKConstants.CONTEXT, resources);
+		msg.set(SignalKConstants.PUT, updates);
+		
+		
+		if(logger.isDebugEnabled())logger.debug("Created new chart msg:"+msg);
+		return msg;
 	}
 
 }
