@@ -25,3 +25,13 @@ Drag anchor circle
 Enable features
 
 
+features layers[] is null.
+On tablet chart and features list doesnt scroll, too long for screen
+No wind arrows?
+Sailgauge tries port 8080
+Remove last icons to menu
+
+hostapd and server dont start on reboot on pi
+Make Waypoint 'here' option
+
+When uploading zips the queue overflows.

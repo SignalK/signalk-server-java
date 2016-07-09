@@ -180,7 +180,7 @@ public class UploadProcessor extends SignalkProcessor implements Processor {
 		     }
 		     //now make an entry in resources
 		     Json resource = createChartMsg(f, title);
-		     inProducer.sendBody(resource);
+		     inProducer.asyncSendBody(inProducer.getDefaultEndpoint(),resource);
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
 			throw e;

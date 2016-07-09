@@ -82,11 +82,11 @@ public class RouteManager extends RouteBuilder  {
 
 	private static Logger logger = LogManager.getLogger(RouteManager.class);
 	
-	public static final String SEDA_INPUT = "seda:inputData?purgeWhenStopping=true&size=100";
-	public static final String SEDA_WEBSOCKETS = "seda:websockets?purgeWhenStopping=true&size=100";
+	public static final String SEDA_INPUT = "seda:inputData?purgeWhenStopping=true&size=1000";
+	public static final String SEDA_WEBSOCKETS = "seda:websockets?purgeWhenStopping=true&size=1000";
 	public static final String DIRECT_STOMP = "direct:stomp";
 	public static final String DIRECT_MQTT = "direct:mqtt";
-	public static final String DIRECT_TCP = "seda:tcp?purgeWhenStopping=true&size=100";
+	public static final String DIRECT_TCP = "seda:tcp?purgeWhenStopping=true&size=1000";
 	
 	public static final String SEDA_NMEA = "seda:nmeaOutput?purgeWhenStopping=true&size=100";
 	public static final String SEDA_COMMON_OUT = "seda:commonOut?purgeWhenStopping=true&size=100";
