@@ -312,7 +312,7 @@ public class FullExportProcessor extends SignalkProcessor implements Processor, 
             Map<String, Object> headers = new HashMap<>();
             headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
             headers.put(ConfigConstants.OUTPUT_TYPE, manager.getOutputType(wsSession));
-            outProducer.sendBodyAndHeaders(temp, headers);
+            asyncSendBodyAndHeaders(outProducer,temp, headers);
             lastSend.set(System.currentTimeMillis());
         } else {
             if (logger.isDebugEnabled()) {
@@ -369,7 +369,7 @@ public class FullExportProcessor extends SignalkProcessor implements Processor, 
 						HashMap<String, Object> headers = new HashMap<String, Object>();
 						headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
 						headers.put(ConfigConstants.OUTPUT_TYPE, manager.getOutputType(wsSession));
-						outProducer.sendBodyAndHeaders(temp, headers);
+						asyncSendBodyAndHeaders(outProducer,temp, headers);
 						lastSend = System.currentTimeMillis();
 					}
 					break;

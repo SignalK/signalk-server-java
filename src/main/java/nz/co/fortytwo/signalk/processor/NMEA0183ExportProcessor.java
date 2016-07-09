@@ -66,7 +66,7 @@ public class NMEA0183ExportProcessor extends SignalkProcessor implements Process
 	private void sendNmea(String nmea) {
 		if(logger.isDebugEnabled())logger.debug("Sending: "+nmea);
 		if(nmea!=null){
-			nmeaProducer.sendBodyAndHeader(nmea, WebsocketConstants.CONNECTION_KEY, WebsocketConstants.SEND_TO_ALL);
+			asyncSendBodyAndHeaders(nmeaProducer, nmea, WebsocketConstants.CONNECTION_KEY, WebsocketConstants.SEND_TO_ALL);
 		}
 		
 	}

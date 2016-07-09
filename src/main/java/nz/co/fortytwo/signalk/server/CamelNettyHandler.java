@@ -38,8 +38,10 @@ import nz.co.fortytwo.signalk.util.ConfigConstants;
 import nz.co.fortytwo.signalk.util.SignalKConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
+import org.apache.camel.Exchange;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.websocket.WebsocketConstants;
+import org.apache.camel.impl.DefaultExchange;
 import org.apache.camel.impl.DefaultProducerTemplate;
 import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
@@ -61,7 +63,7 @@ public class CamelNettyHandler extends SimpleChannelInboundHandler<String> {
 	
 	public CamelNettyHandler( String outputType) throws Exception {
 		this.outputType=outputType;
-		producer= new DefaultProducerTemplate(CamelContextFactory.getInstance());
+		producer= CamelContextFactory.getInstance().createProducerTemplate();
 		producer.setDefaultEndpointUri(RouteManager.SEDA_INPUT );
 		producer.start();
 		
@@ -92,8 +94,9 @@ public class CamelNettyHandler extends SimpleChannelInboundHandler<String> {
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, String request) throws Exception {
 		if(logger.isDebugEnabled())logger.debug("Request:" + request);
-		
-		producer.sendBodyAndHeaders(request, ctx.attr(msgHeaders).get());
+		Exchange ex = new DefaultExchange(CamelContextFactory.getInstance());
+		ex.getIn().getHeaders().putAll(ctx.attr(msgHeaders).get());
+		producer.asyncSend(producer.getDefaultEndpoint(), ex);
 	}
 
 	private Map<String, Object> getHeaders(ChannelHandlerContext ctx) throws Exception {

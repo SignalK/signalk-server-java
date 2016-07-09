@@ -86,7 +86,7 @@ public class JsonGetProcessor extends SignalkProcessor implements Processor{
 					if(logger.isDebugEnabled())logger.debug("Processed REST GET request:"+exchange.getIn().getBody(Json.class));
 				}else{
 					if(logger.isDebugEnabled())logger.debug("Processed GET request:"+temp);
-					outProducer.sendBodyAndHeaders(temp, headers);
+					asyncSendBodyAndHeaders(outProducer,temp, headers);
 				}
 			}else{
 				if(logger.isDebugEnabled())logger.debug("Skipped, not a GET request:"+exchange.getIn().getBody(Json.class));

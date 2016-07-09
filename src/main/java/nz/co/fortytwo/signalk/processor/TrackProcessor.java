@@ -135,7 +135,7 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 				geometry.set(COORDINATES, coords);
 				if(logger.isDebugEnabled())logger.debug("Saving track:"+count);
 				updateSourceAndTime(msg);
-				inProducer.sendBody(msg.toString());
+				inProducer.asyncSendBody(inProducer.getDefaultEndpoint(), msg.toString());
 				coords.asJsonList().clear();
 			}
 			if (count % (SAVE_COUNT * 4) == 0) {
@@ -155,10 +155,10 @@ public class TrackProcessor extends SignalkProcessor implements Processor {
 				}
 				geometry.set(COORDINATES, coords);
 				updateSourceAndTime(msg);
-				inProducer.sendBody(msg.toString());
+				inProducer.asyncSendBody(inProducer.getDefaultEndpoint(), msg.toString());
 				msg = createTrackMsg();
 				//save new message
-				inProducer.sendBody(msg.toString());
+				inProducer.asyncSendBody(inProducer.getDefaultEndpoint(), msg.toString());
 				count = 0;
 				track.clear();
 			}

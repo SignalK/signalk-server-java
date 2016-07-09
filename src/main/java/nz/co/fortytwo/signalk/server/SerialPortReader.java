@@ -44,6 +44,7 @@ import org.apache.camel.CamelExecutionException;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.ProducerTemplate;
+import org.apache.camel.impl.DefaultExchange;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
@@ -222,7 +223,9 @@ public class SerialPortReader implements Processor {
 									}
 									if(enableSerial){
 										try{
-											producer.sendBodyAndHeaders(lineStr,headers);
+											Exchange ex = new DefaultExchange(CamelContextFactory.getInstance());
+											ex.getIn().getHeaders().putAll(headers);
+											producer.asyncSend(producer.getDefaultEndpoint(), ex);
 										}catch(CamelExecutionException ce){
 											if(ce.getCause() instanceof IllegalStateException){
 												if("Queue full".equals(ce.getCause().getMessage())){

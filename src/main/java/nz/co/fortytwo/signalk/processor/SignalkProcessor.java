@@ -24,6 +24,8 @@
 
 package nz.co.fortytwo.signalk.processor;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import nz.co.fortytwo.signalk.model.SignalKModel;
@@ -38,6 +40,7 @@ import nz.co.fortytwo.signalk.util.Util;
 import org.apache.camel.Exchange;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.websocket.WebsocketConstants;
+import org.apache.camel.impl.DefaultExchange;
 import org.apache.camel.impl.DefaultProducerTemplate;
 import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
@@ -77,6 +80,22 @@ public class SignalkProcessor {
 		}
 	}
 	
+	protected void asyncSendBodyAndHeaders(ProducerTemplate p, Object body, String key, Object value ){
+		Map<String, Object> headers = new HashMap<>();
+		headers.put(key, value);
+		asyncSendBodyAndHeaders(p, body, headers);
+	}
+	/**
+	 * Convenience method for send async message and headers.
+	 * @param p
+	 * @param body
+	 * @param headers
+	 */
+	protected void asyncSendBodyAndHeaders(ProducerTemplate p, Object body, Map<String, Object> headers){
+		Exchange ex = new DefaultExchange(CamelContextFactory.getInstance());
+		ex.getIn().getHeaders().putAll(headers);
+		p.asyncSend(p.getDefaultEndpoint(), ex);
+	}
 	
 	/**
 	 * If a processor generates an NMEA string, then this method is a convenient way to send it to the NMEA stream

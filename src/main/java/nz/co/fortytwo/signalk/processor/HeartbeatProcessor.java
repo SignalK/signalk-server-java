@@ -78,7 +78,7 @@ public class HeartbeatProcessor extends SignalkProcessor implements Processor{
 				HashMap<String, Object> headers = new HashMap<String, Object>();
 				headers.put(WebsocketConstants.CONNECTION_KEY, session);
 				headers.put(ConfigConstants.OUTPUT_TYPE, manager.getOutputType(session));
-				producer.sendBodyAndHeaders(msg, headers);
+				asyncSendBodyAndHeaders(producer,msg, headers);
 			}
 			
 		} catch (Exception e) {
