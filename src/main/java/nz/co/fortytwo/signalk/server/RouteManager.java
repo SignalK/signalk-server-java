@@ -260,13 +260,15 @@ public class RouteManager extends RouteBuilder  {
 		Json wsClients = Util.getConfigJsonArray(ConfigConstants.CLIENT_WS);
 		if(wsClients!=null){
 			for(Object client: wsClients.asList()){
-				from("ahc:ws://"+client).id("Websocket Client:"+client)
+				logger.info("  Starting WS connection to url:ahc-ws://"+client);
+				from("ahc-ws://"+client).id("Websocket Client:"+client)
 					.onException(Exception.class).handled(true).maximumRedeliveries(0)
 						.to("log:nz.co.fortytwo.signalk.client.ws?level=ERROR&showException=true&showStackTrace=true")
 						.end()
-					.transform(body()
-					.convertToString())
+					.to("log:nz.co.fortytwo.signalk.client.ws?level=DEBUG")
+					.convertBodyTo(String.class)
 					.setHeader(MSG_SRC_BUS, constant("ws."+client.toString().replace('.', '_')))
+					
 					.to(SEDA_INPUT);
 			}
 		}
@@ -278,8 +280,7 @@ public class RouteManager extends RouteBuilder  {
 					.onException(Exception.class).handled(true).maximumRedeliveries(0)
 						.to("log:nz.co.fortytwo.signalk.client.tcp?level=ERROR&showException=true&showStackTrace=true")
 						.end()
-					.transform(body()
-					.convertToString())
+					.convertBodyTo(String.class)
 					.setHeader(MSG_SRC_BUS, constant("stomp."+client.toString().replace('.', '_')))
 					.to(SEDA_INPUT);
 			}
@@ -292,8 +293,7 @@ public class RouteManager extends RouteBuilder  {
 						.onException(Exception.class).handled(true).maximumRedeliveries(0)
 							.to("log:nz.co.fortytwo.signalk.client.mqtt?level=ERROR&showException=true&showStackTrace=true")
 							.end()
-						.transform(body()
-						.convertToString())
+						.convertBodyTo(String.class)
 						.setHeader(MSG_SRC_BUS, constant("mqtt."+client.toString().replace('.', '_')))
 						.to(SEDA_INPUT);
 				}
@@ -308,8 +308,7 @@ public class RouteManager extends RouteBuilder  {
 					.onException(Exception.class).handled(true).maximumRedeliveries(0)
 						.to("log:nz.co.fortytwo.signalk.client.stomp?level=ERROR&showException=true&showStackTrace=true")
 						.end()
-					.transform(body()
-					.convertToString())
+					.convertBodyTo(String.class)
 					.setHeader(MSG_SRC_BUS, constant("stomp."+client.toString().replace('.', '_')))
 					.to(SEDA_INPUT);
 			}
@@ -325,7 +324,7 @@ public class RouteManager extends RouteBuilder  {
 				.to("log:nz.co.fortytwo.signalk.model.receive?level=ERROR&showException=true&showStackTrace=true")
 				.end()
 			.split(body().tokenize("\n")).streaming()
-			.transform(body().convertToString())
+			.convertBodyTo(String.class)
 			.throttle(2).timePeriodMillis(1000)
 			.setHeader(MSG_SRC_BUS, constant("demo"))
 			.to(SEDA_INPUT).id(SignalkRouteFactory.getName("SEDA_INPUT"))

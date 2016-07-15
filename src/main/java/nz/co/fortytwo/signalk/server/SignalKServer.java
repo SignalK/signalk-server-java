@@ -76,6 +76,9 @@ public class SignalKServer {
 		if (Util.getConfigPropertyBoolean(ConfigConstants.HAWTIO_START)) {
 			logger.info("SignalKServer starting hawtio manager....");
 			server = startHawtio();
+		}else{
+			//start jolokia for remote management
+			server = startJolokia();
 		}
 
 		// Start activemq broker
@@ -106,6 +109,15 @@ public class SignalKServer {
 		System.exit(0);
 	}
 
+	private Server startJolokia() throws Exception {
+		Properties props = System.getProperties();
+		props.setProperty("jolokia.authenticationEnabled", "false");
+		System.setProperties(props);
+		//System.setProperty("hawtio.authenticationEnabled",Util.getConfigPropertyBoolean(ConfigConstants.HAWTIO_AUTHENTICATE).toString());
+		int hawtPort = Util.getConfigPropertyInt(ConfigConstants.JOLOKIA_PORT);
+		return startServer(hawtPort, Util.getConfigProperty(ConfigConstants.JOLOKIA_CONTEXT),Util.getConfigProperty(ConfigConstants.JOLOKIA_WAR));
+	}
+
 	private Server startHawtio() throws Exception {
 		// hawtio, auth disabled
 		Properties props = System.getProperties();
@@ -113,15 +125,19 @@ public class SignalKServer {
 		System.setProperties(props);
 		//System.setProperty("hawtio.authenticationEnabled",Util.getConfigPropertyBoolean(ConfigConstants.HAWTIO_AUTHENTICATE).toString());
 		int hawtPort = Util.getConfigPropertyInt(ConfigConstants.HAWTIO_PORT);
+		return startServer(hawtPort, Util.getConfigProperty(ConfigConstants.HAWTIO_CONTEXT),Util.getConfigProperty(ConfigConstants.HAWTIO_WAR));
+	}
+	private Server startServer(int hawtPort, String contextPath, String war) throws Exception {
+		
 		Server server = new Server(hawtPort);
 		HandlerCollection handlers = new HandlerCollection();
 		handlers.setServer(server);
 		server.setHandler(handlers);
 		WebAppContext webapp = new WebAppContext();
 		webapp.setServer(server);
-		webapp.setContextPath(Util.getConfigProperty(ConfigConstants.HAWTIO_CONTEXT));
+		webapp.setContextPath(contextPath);
 
-		webapp.setWar(Util.getConfigProperty(ConfigConstants.HAWTIO_WAR));
+		webapp.setWar(war);
 		webapp.setParentLoaderPriority(true);
 		webapp.setLogUrlOnStart(true);
 		// lets set a temporary directory so jetty doesn't bork if some process

@@ -7,6 +7,7 @@ VWT - True Wind Speed and Angle (obsolete)	$IIVWT,065,L,06.10,N,03.14,M,,*28
 $GPWCV - Waypoint Closure Velocity $GPWCV,,N,,D*5F
 $GPXTE - Cross-Track Error, Measured  $GPXTE,A,A,,R,N,D*06
 
+freeboardPLC error? NMEAHandler [Camel (camel-1) thread #0 - seda://inputData] For input string: "0."
 
 Do security outProcessor
 Use rule engine for security
@@ -22,16 +23,16 @@ Upload charts and select.
 
 Drag anchor circle
 
-Enable features
-
+Enable features saving
 
 no camel ahc component for remote ws connection
 On tablet chart and features list doesnt scroll, too long for screen
-No wind arrows?
+Intermittent wind arrows?
 Sailgauge tries port 8080
+
 Order of layers is random - make them stack properly
 
-hostapd and server dont start on reboot on pi
 Make Waypoint 'here' option
 
-When uploading zips the queue overflows.
+When uploading big zips the queue overflows.
+hostapd and server dont start on reboot of pi
