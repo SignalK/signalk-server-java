@@ -24,6 +24,7 @@
 package nz.co.fortytwo.signalk.processor;
 
 import java.io.IOException;
+import java.util.NavigableMap;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
@@ -71,7 +72,8 @@ public class SignalkModelProcessor extends SignalkProcessor implements Processor
 			logger.debug("SignalkModelProcessor  updating " + node);
 
 		signalkModel.putAll(node.getFullData());
-		if(node.getSubMap(SignalKConstants.CONFIG)!=null){
+		NavigableMap<String, Object> cnf = node.getSubMap(SignalKConstants.CONFIG);
+		if(cnf!=null && cnf.size()>0){
 			SignalKModelFactory.saveConfig(signalkModel);
 		}
 		if (logger.isDebugEnabled())

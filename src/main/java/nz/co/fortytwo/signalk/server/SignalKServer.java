@@ -97,7 +97,9 @@ public class SignalKServer {
 
 		routeManager.stopSerial();
 		routeManager.stopMdns();
-		server.stop();
+		if(server!=null){
+			server.stop();
+		}
 		broker.stop();
 		// write out the signalk model
 		SignalKModelFactory.save(SignalKModelFactory.getInstance());
