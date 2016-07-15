@@ -25,11 +25,11 @@ Drag anchor circle
 Enable features
 
 
-features layers[] is null.
+no camel ahc component for remote ws connection
 On tablet chart and features list doesnt scroll, too long for screen
 No wind arrows?
 Sailgauge tries port 8080
-Remove last icons to menu
+Order of layers is random - make them stack properly
 
 hostapd and server dont start on reboot on pi
 Make Waypoint 'here' option

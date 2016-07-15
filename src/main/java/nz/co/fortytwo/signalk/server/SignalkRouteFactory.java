@@ -206,7 +206,7 @@ public class SignalkRouteFactory {
 		routeBuilder.from(input).id(getName(name)) //.setExchangePattern(ExchangePattern.InOut);
 			.setExchangePattern(ExchangePattern.InOut)
 			.process(new RestApiProcessor())
-			.to(ExchangePattern.InOut,"seda:inputData?purgeWhenStopping=true&size=100")
+			.to(ExchangePattern.InOut,RouteManager.SEDA_INPUT)
 			.process(new ConfigFilterProcessor(false)).id(getName(ConfigFilterProcessor.class.getSimpleName()))
 			.process(new RestPathFilterProcessor()).id(getName(RestPathFilterProcessor.class.getSimpleName()));
 		
@@ -235,7 +235,7 @@ public class SignalkRouteFactory {
 		routeBuilder.from(input).id(getName(name)) 
 			.setExchangePattern(ExchangePattern.InOut)
 			.process(new RestApiProcessor())
-			.to(ExchangePattern.InOut,"seda:inputData?purgeWhenStopping=true&size=100")
+			.to(ExchangePattern.InOut,RouteManager.SEDA_INPUT)
 			.process(new ConfigFilterProcessor(true)).id(getName(ConfigFilterProcessor.class.getSimpleName()));
 		}
 	
