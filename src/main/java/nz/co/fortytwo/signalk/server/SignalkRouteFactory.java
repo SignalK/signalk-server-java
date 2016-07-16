@@ -218,7 +218,7 @@ public class SignalkRouteFactory {
 
 		}
 	public static void configureRestLoggerRoute(RouteBuilder routeBuilder ,String input, String name)throws IOException{
-		routeBuilder.from(input).id(getName(name)) 
+		routeBuilder.from(input).id(getName(name))
 			.setExchangePattern(ExchangePattern.InOut)
 			.process(new LoggerProcessor()).id(getName(LoggerProcessor.class.getSimpleName()));
 		}
@@ -383,7 +383,7 @@ public class SignalkRouteFactory {
 
 	public static void startLogRoutes(RouteBuilder routeBuilder, String  host, int restPort) {
 		//list logs dir
-		routeBuilder.from(host + restPort + "/signalk/v1/listLogs?sessionSupport=true&matchOnUriPrefix=true")
+		routeBuilder.from(host + restPort + "/signalk/v1/listLogs?sessionSupport=true&matchOnUriPrefix=true").id("REST List logs")
 					.setExchangePattern(ExchangePattern.InOut)
 					.process(new Processor() {
 						
@@ -394,7 +394,7 @@ public class SignalkRouteFactory {
 						}
 					});
 				
-		routeBuilder.from(host + restPort + "/signalk/v1/getLogs?sessionSupport=true&matchOnUriPrefix=true")
+		routeBuilder.from(host + restPort + "/signalk/v1/getLogs?sessionSupport=true&matchOnUriPrefix=true").id("REST Get logs")
 				.setExchangePattern(ExchangePattern.InOut)
 				.process(new Processor() {
 					

@@ -32,17 +32,24 @@ import java.util.List;
 import nz.co.fortytwo.signalk.util.ConfigConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
+import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.broker.BrokerPlugin;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.broker.TransportConnector;
 import org.apache.activemq.broker.jmx.ManagementContext;
+import org.apache.activemq.camel.component.ActiveMQComponent;
 import org.apache.activemq.command.ActiveMQDestination;
 import org.apache.activemq.command.ActiveMQTopic;
+import org.apache.activemq.pool.PooledConnectionFactory;
+import org.apache.activemq.usage.MemoryUsage;
+import org.apache.activemq.usage.SystemUsage;
+import org.apache.camel.component.jms.JmsConfiguration;
 
 public class ActiveMqBrokerFactory {
 
 	public static BrokerService newInstance() throws Exception {
 		final BrokerService broker = new BrokerService();
+		broker.setUseShutdownHook(false);
 		// vm connector
 		TransportConnector connector = new TransportConnector();
 		connector.setUri(new URI("tcp://localhost:61616"));
@@ -66,6 +73,11 @@ public class ActiveMqBrokerFactory {
 		broker.setPlugins(plugins.toArray(new BrokerPlugin[0]));
 		
 		broker.setPersistent(false);
+		SystemUsage usage = new SystemUsage();
+		MemoryUsage mem = new MemoryUsage();
+		mem.setLimit(16*1024*1024);
+		usage.setMemoryUsage(mem);
+		broker.setSystemUsage(usage);
 //"activemq:topic:ActiveMQ.Advisory.Connection?mapJmsMessage=false"
 		final ActiveMQTopic topic = new ActiveMQTopic("ActiveMQ.Advisory.Connection");
 		broker.setDestinations(new ActiveMQDestination[] { topic });
@@ -73,7 +85,26 @@ public class ActiveMqBrokerFactory {
 		final ManagementContext managementContext = new ManagementContext();
 		managementContext.setCreateConnector(true);
 		broker.setManagementContext(managementContext);
-
+		
 		return broker;
+	}
+	
+	public static ActiveMQComponent newAMQInstance(){
+		 ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory();
+		    connectionFactory.setBrokerURL("vm:localhost");
+		    // use a pooled connection factory between the module and the queue
+		    PooledConnectionFactory pooledConnectionFactory = new PooledConnectionFactory(connectionFactory);
+
+		    // how many connections should there be in the session pool?
+		    pooledConnectionFactory.setMaxConnections(100);
+		    pooledConnectionFactory.setMaximumActiveSessionPerConnection(100);
+		    pooledConnectionFactory.setCreateConnectionOnStartup(true);
+		    pooledConnectionFactory.setBlockIfSessionPoolIsFull(false);
+
+		    JmsConfiguration jmsConfiguration = new JmsConfiguration(pooledConnectionFactory);
+		    jmsConfiguration.setDeliveryPersistent(false);
+		    jmsConfiguration.setTimeToLive(1000*10);
+		    ActiveMQComponent activeMQComponent = ActiveMQComponent.activeMQComponent("vm:localhost");
+		    return activeMQComponent;
 	}
 }

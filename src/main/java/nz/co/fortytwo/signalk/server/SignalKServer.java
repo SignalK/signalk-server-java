@@ -78,6 +78,7 @@ public class SignalKServer {
 			server = startHawtio();
 		}else{
 			//start jolokia for remote management
+			logger.info("SignalKServer starting jolokia remote management agent....");
 			server = startJolokia();
 		}
 
@@ -115,7 +116,7 @@ public class SignalKServer {
 		System.setProperties(props);
 		//System.setProperty("hawtio.authenticationEnabled",Util.getConfigPropertyBoolean(ConfigConstants.HAWTIO_AUTHENTICATE).toString());
 		int hawtPort = Util.getConfigPropertyInt(ConfigConstants.JOLOKIA_PORT);
-		return startServer(hawtPort, Util.getConfigProperty(ConfigConstants.JOLOKIA_CONTEXT),Util.getConfigProperty(ConfigConstants.JOLOKIA_WAR));
+		return startServer(hawtPort, Util.getConfigProperty(ConfigConstants.JOLOKIA_CONTEXT),Util.getConfigProperty(ConfigConstants.JOLOKIA_WAR),"/.jolokia");
 	}
 
 	private Server startHawtio() throws Exception {
@@ -125,9 +126,9 @@ public class SignalKServer {
 		System.setProperties(props);
 		//System.setProperty("hawtio.authenticationEnabled",Util.getConfigPropertyBoolean(ConfigConstants.HAWTIO_AUTHENTICATE).toString());
 		int hawtPort = Util.getConfigPropertyInt(ConfigConstants.HAWTIO_PORT);
-		return startServer(hawtPort, Util.getConfigProperty(ConfigConstants.HAWTIO_CONTEXT),Util.getConfigProperty(ConfigConstants.HAWTIO_WAR));
+		return startServer(hawtPort, Util.getConfigProperty(ConfigConstants.HAWTIO_CONTEXT),Util.getConfigProperty(ConfigConstants.HAWTIO_WAR), "/.hawtio");
 	}
-	private Server startServer(int hawtPort, String contextPath, String war) throws Exception {
+	private Server startServer(int hawtPort, String contextPath, String war, String dirName) throws Exception {
 		
 		Server server = new Server(hawtPort);
 		HandlerCollection handlers = new HandlerCollection();
@@ -142,12 +143,11 @@ public class SignalKServer {
 		webapp.setLogUrlOnStart(true);
 		// lets set a temporary directory so jetty doesn't bork if some process
 		// zaps /tmp/*
-		String homeDir = System.getProperty("user.home", ".")
-				+ System.getProperty("hawtio.dirname", "/.hawtio");
+		String homeDir = System.getProperty("user.home", ".")+dirName;
 		String tempDirPath = homeDir + "/tmp";
 		File tempDir = new File(tempDirPath);
 		tempDir.mkdirs();
-		logger.info("using temp directory for hawtio jetty: "
+		logger.info("using temp directory for hawtio/jolokia jetty: "
 				+ tempDir.getPath());
 		webapp.setTempDirectory(tempDir);
 		// add hawtio

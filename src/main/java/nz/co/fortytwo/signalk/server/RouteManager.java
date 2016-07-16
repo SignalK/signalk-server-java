@@ -41,6 +41,7 @@ import java.util.Map;
 import javax.jmdns.JmmDNS;
 import javax.jmdns.ServiceInfo;
 
+import org.apache.activemq.camel.component.ActiveMQComponent;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.stomp.SkStompComponent;
 import org.apache.camel.component.websocket.SignalkWebsocketComponent;
@@ -82,7 +83,9 @@ public class RouteManager extends RouteBuilder  {
 
 	private static Logger logger = LogManager.getLogger(RouteManager.class);
 	
-	public static final String SEDA_INPUT = "seda:inputData?purgeWhenStopping=true&size=1000";
+	//public static final String SEDA_INPUT = "seda:inputData?purgeWhenStopping=true&size=1000";
+	public static final String SEDA_INPUT = "activemq:queue:inputData?jmsMessageType=Text&timeToLive=10000&asyncConsumer=true&acceptMessagesWhileStopping=true";
+	
 	public static final String SEDA_WEBSOCKETS = "seda:websockets?purgeWhenStopping=true&size=1000";
 	public static final String DIRECT_STOMP = "direct:stomp";
 	public static final String DIRECT_MQTT = "direct:mqtt";
@@ -129,7 +132,7 @@ public class RouteManager extends RouteBuilder  {
 		        .maximumRedeliveries(1)
 		        .redeliveryDelay(1000));
 		
-		from ("direct:fail")
+		from ("direct:fail").id("Fail")
         .to("log:log:nz.co.fortytwo.signalk.error?level=ERROR&showAll=true");
 		 
 		SignalKModelFactory.load(signalkModel);
@@ -137,7 +140,7 @@ public class RouteManager extends RouteBuilder  {
 		//set shutdown quickly, 5 min is too long
 		CamelContextFactory.getInstance().getShutdownStrategy().setShutdownNowOnTimeout(true);
 		CamelContextFactory.getInstance().getShutdownStrategy().setTimeout(10);
-		
+		//CamelContextFactory.getInstance().addComponent("activemq", ActiveMQComponent.activeMQComponent("vm://localhost?broker.persistent=false"));
 		//DNS-SD, zeroconf mDNS
 		startMdns();
 		
@@ -158,6 +161,7 @@ public class RouteManager extends RouteBuilder  {
 		}
 		new Thread(serialPortManager).start();
 		
+	
 		// main input to destination route
 		// put all input into signalk model 
 		SignalkRouteFactory.configureInputRoute(this, SEDA_INPUT);

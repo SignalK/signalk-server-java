@@ -25,14 +25,17 @@ Drag anchor circle
 
 Enable features saving
 
-no camel ahc component for remote ws connection
-On tablet chart and features list doesnt scroll, too long for screen
-Intermittent wind arrows?
-Sailgauge tries port 8080
+remote ws connection does not receive data
 
+Intermittent wind arrows?
 Order of layers is random - make them stack properly
+
+Sailgauge tries port 8080
 
 Make Waypoint 'here' option
 
-When uploading big zips the queue overflows.
+Testing needed:
+===============
 hostapd and server dont start on reboot of pi
+Remote Hawtio management
+When uploading big zips the queue overflows.
