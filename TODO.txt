@@ -17,7 +17,7 @@ do unit tests
 
 make sk GenerateSignalkData more useable and use for tests.
 
-permanent storage of timeseries data.
+make use of history timeseries data.
 
 Upload charts and select.
 
