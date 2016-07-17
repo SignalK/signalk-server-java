@@ -44,6 +44,8 @@ import com.google.common.eventbus.Subscribe;
 public class SaveProcessor extends SignalkProcessor implements Processor {
 
 	private static Logger logger = LogManager.getLogger(SaveProcessor.class);
+	private static Logger history = LogManager.getLogger("nz.co.fortytwo.signalk.history");
+	
 	private SaveThread saver = new SaveThread();
 	
 	public SaveProcessor(){
@@ -62,7 +64,7 @@ public class SaveProcessor extends SignalkProcessor implements Processor {
 		if (pathEvent.getPath() == null)
 			return;
 		//if (logger.isTraceEnabled())logger.trace(this.wsSession + " received event " + pathEvent.getPath());
-
+		history.info(String.format("%d|%s|%s", pathEvent.getTimestamp(), pathEvent.getPath(), signalkModel.get(pathEvent.getPath())));
 		// do we care?
 		saver.startSave();
 

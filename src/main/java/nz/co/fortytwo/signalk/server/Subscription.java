@@ -24,6 +24,10 @@
  */
 package nz.co.fortytwo.signalk.server;
 
+import static nz.co.fortytwo.signalk.util.SignalKConstants.dot;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.source;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.sourceRef;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.timestamp;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels;
 import io.netty.util.internal.ConcurrentSet;
 
@@ -258,6 +262,12 @@ public class Subscription {
 			return;
 		if (pathEvent.getPath() == null)
 			return;
+		if(path.endsWith(dot+source)
+    			&& path.endsWith(dot+timestamp)
+    			&& path.contains(dot+source+dot)
+    			&& path.endsWith(dot+sourceRef)){
+        	return;
+        }
 		if (logger.isDebugEnabled())
 			logger.debug(this.hashCode() + " received event " + pathEvent.getPath());
 		if(isSubscribed(pathEvent.getPath())){

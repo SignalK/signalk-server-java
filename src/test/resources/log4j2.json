@@ -71,7 +71,7 @@
 			},
 			{
 				"name": "nz.co.fortytwo.signalk.processor.FullToDeltaProcessor",
-				"level": "info"
+				"level": "error"
 			},
 			{
 				"name": "nz.co.fortytwo.signalk.server.SubscriptionManager",
@@ -79,7 +79,7 @@
 			},
 			{
 				"name": "nz.co.fortytwo.signalk.handler.FullToDeltaConverter",
-				"level": "info"
+				"level": "error"
 			},
 			{
 				"name": "nz.co.fortytwo.signalk.processor.RestApiProcessor",
@@ -93,6 +93,14 @@
 				"name": "nz.co.fortytwo.signalk.server.SubcribeWsTest",
 				"level": "info"
 			},
+			{
+				"name": "nz.co.fortytwo.signalk.handler.AlarmHandler",
+				"level": "info"
+			},
+			{
+				"name": "nz.co.fortytwo.signalk.processor.NMEA0183ExportProcessor",
+				"level": "info"
+			},
 			
 			{
 				"name": "nz.co.fortytwo.signalk.util",
@@ -100,12 +108,21 @@
 			},
 			{
 				"name": "org.apache.camel",
+				"level": "error"
+			},
+			{
+				"name": "org.apache.activemq",
 				"level": "info"
 			},
 			{
 				"name": "nz.co.fortytwo.signalk.server.SerialPortManager",
 				"level": "fatal"
 			},
+			{
+				"name": "nz.co.fortytwo.signalk.server.NettyServer",
+				"level": "error"
+			},
+			
 			{
 				"name": "mjson",
 				"level": "error"

@@ -28,6 +28,10 @@ import static nz.co.fortytwo.signalk.util.SignalKConstants.POLICY_FIXED;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.POLICY_IDEAL;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.POLICY_INSTANT;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_FORMAT;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.dot;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.source;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.sourceRef;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.timestamp;
 
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
@@ -222,7 +226,13 @@ public class FullExportProcessor extends SignalkProcessor implements Processor, 
         String path = pathEvent.getPath();
         if (path == null)
             return;
-
+        
+        if(path.endsWith(dot+source)
+    			&& path.endsWith(dot+timestamp)
+    			&& path.contains(dot+source+dot)
+    			&& path.endsWith(dot+sourceRef)){
+        	return;
+        }
         // Send update if necessary.
         for (Subscription s : manager.getSubscriptions(wsSession)) {
             if (s.isActive() && s.isSubscribed(path) && routeId.equals(s.getRouteId())) {
