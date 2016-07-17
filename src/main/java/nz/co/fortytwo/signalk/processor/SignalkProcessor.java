@@ -93,6 +93,7 @@ public class SignalkProcessor {
 	 */
 	protected void asyncSendBodyAndHeaders(ProducerTemplate p, Object body, Map<String, Object> headers){
 		Exchange ex = new DefaultExchange(CamelContextFactory.getInstance());
+		ex.getIn().setBody(body);
 		ex.getIn().getHeaders().putAll(headers);
 		p.asyncSend(p.getDefaultEndpoint(), ex);
 	}

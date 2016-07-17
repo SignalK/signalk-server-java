@@ -77,7 +77,8 @@ public class JsonListProcessor extends SignalkProcessor implements Processor{
 					exchange.getIn().setBody(json);
 				}else{
 					if(logger.isDebugEnabled())logger.debug("Processed LIST request:"+exchange.getIn().getBody(Json.class));
-					outProducer.sendBodyAndHeaders(json, headers);
+					asyncSendBodyAndHeaders(outProducer,json, headers);
+					//outProducer.sendBodyAndHeaders(json, headers);
 				}
 				
 			}else{

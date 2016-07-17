@@ -34,6 +34,9 @@ Sailgauge tries port 8080
 
 Make Waypoint 'here' option
 
+signalk-config become zero-length on crash sometimes.
+mvn -o doesnt work after a new version!
+log4j and config may need re-working after ungrade.
 Testing needed:
 ===============
 hostapd and server dont start on reboot of pi

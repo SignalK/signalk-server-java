@@ -95,6 +95,7 @@ public class CamelNettyHandler extends SimpleChannelInboundHandler<String> {
 	protected void channelRead0(ChannelHandlerContext ctx, String request) throws Exception {
 		if(logger.isDebugEnabled())logger.debug("Request:" + request);
 		Exchange ex = new DefaultExchange(CamelContextFactory.getInstance());
+		ex.getIn().setBody(request);
 		ex.getIn().getHeaders().putAll(ctx.attr(msgHeaders).get());
 		producer.asyncSend(producer.getDefaultEndpoint(), ex);
 	}

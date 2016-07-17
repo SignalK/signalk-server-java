@@ -224,6 +224,7 @@ public class SerialPortReader implements Processor {
 									if(enableSerial){
 										try{
 											Exchange ex = new DefaultExchange(CamelContextFactory.getInstance());
+											ex.getIn().setBody(lineStr);
 											ex.getIn().getHeaders().putAll(headers);
 											producer.asyncSend(producer.getDefaultEndpoint(), ex);
 										}catch(CamelExecutionException ce){
