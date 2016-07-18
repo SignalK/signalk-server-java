@@ -164,6 +164,7 @@ public class UploadProcessor extends SignalkProcessor implements Processor {
 		     Document document = reader.read(new File(destDir, "tilemapresource.xml"));
 		     
 		     String title = document.getRootElement().element("Title").getText();
+		     String scale = document.getRootElement().element("scale").getText();
 		     double maxRes = 0.0;
 		     double minRes = Double.MAX_VALUE;
 		     int maxZoom = 0;
@@ -179,7 +180,7 @@ public class UploadProcessor extends SignalkProcessor implements Processor {
 		    	 minRes=Math.min(units, minRes);
 		     }
 		     //now make an entry in resources
-		     Json resource = createChartMsg(f, title);
+		     Json resource = createChartMsg(f, title, scale);
 		     inProducer.asyncSendBody(inProducer.getDefaultEndpoint(),resource);
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
@@ -187,7 +188,7 @@ public class UploadProcessor extends SignalkProcessor implements Processor {
 		}
 	}
 	
-	private Json createChartMsg(String f, String title){
+	private Json createChartMsg(String f, String title, String scale){
 		Json val = Json.object();
 		val.set(SignalKConstants.PATH, "charts." + "urn:mrn:signalk:uuid:"+UUID.randomUUID().toString());
 		Json currentChart = Json.object();
@@ -198,6 +199,12 @@ public class UploadProcessor extends SignalkProcessor implements Processor {
 		currentChart.set(name, title);
 		currentChart.set("description", title);
 		currentChart.set("tilemapUrl", "/"+Util.getConfigProperty(MAP_DIR)+f);
+		try{
+			int scaleInt = Integer.valueOf(scale);
+			currentChart.set("scale", scaleInt);
+		}catch(Exception e){
+			currentChart.set("scale", 0);
+		}
 		
 		Json values = Json.array();
 		values.add(val);
