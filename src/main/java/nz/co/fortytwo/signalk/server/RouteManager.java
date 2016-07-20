@@ -42,9 +42,12 @@ import javax.jmdns.JmmDNS;
 import javax.jmdns.ServiceInfo;
 
 import org.apache.activemq.camel.component.ActiveMQComponent;
+import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.ahc.ws.WsEndpoint;
 import org.apache.camel.component.stomp.SkStompComponent;
 import org.apache.camel.component.websocket.SignalkWebsocketComponent;
+import org.apache.camel.component.websocket.WebsocketEndpoint;
 import org.apache.camel.impl.JndiRegistry;
 import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry;
 import org.apache.logging.log4j.LogManager;
@@ -56,6 +59,7 @@ import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.util.ConfigConstants;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
 
@@ -262,18 +266,22 @@ public class RouteManager extends RouteBuilder  {
 		//start any clients if they exist
 		//WS
 		Json wsClients = Util.getConfigJsonArray(ConfigConstants.CLIENT_WS);
+		logger.error("  Starting WS connection to url:"+wsClients);
 		if(wsClients!=null){
 			for(Object client: wsClients.asList()){
-				logger.info("  Starting WS connection to url:ahc-ws://"+client);
-				from("ahc-ws://"+client).id("Websocket Client:"+client)
+				logger.error("  Starting WS connection to url:ahc-ws://"+client);
+				
+				WsEndpoint wsEndpoint = (WsEndpoint)getContext().getEndpoint("ahc-ws://"+client);
+				from(wsEndpoint).id("Websocket Client:"+client)
 					.onException(Exception.class).handled(true).maximumRedeliveries(0)
 						.to("log:nz.co.fortytwo.signalk.client.ws?level=ERROR&showException=true&showStackTrace=true")
 						.end()
 					.to("log:nz.co.fortytwo.signalk.client.ws?level=DEBUG")
 					.convertBodyTo(String.class)
 					.setHeader(MSG_SRC_BUS, constant("ws."+client.toString().replace('.', '_')))
-					
 					.to(SEDA_INPUT);
+				
+				wsEndpoint.connect();
 			}
 		}
 		//TCP
