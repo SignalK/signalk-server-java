@@ -266,10 +266,10 @@ public class RouteManager extends RouteBuilder  {
 		//start any clients if they exist
 		//WS
 		Json wsClients = Util.getConfigJsonArray(ConfigConstants.CLIENT_WS);
-		logger.error("  Starting WS connection to url:"+wsClients);
+		logger.info("  Starting WS connection to url:"+wsClients);
 		if(wsClients!=null){
 			for(Object client: wsClients.asList()){
-				logger.error("  Starting WS connection to url:ahc-ws://"+client);
+				logger.info("  Starting WS connection to url:ahc-ws://"+client);
 				
 				WsEndpoint wsEndpoint = (WsEndpoint)getContext().getEndpoint("ahc-ws://"+client);
 				from(wsEndpoint).id("Websocket Client:"+client)

@@ -31,6 +31,7 @@ Sailgauge tries port 8080
 
 Make Waypoint 'here' option
 
+NMEA ais outputs incorrect position format
 signalk-config become zero-length on crash sometimes.
 mvn -o doesnt work after a new version!
 log4j and config may need re-working after ungrade.
