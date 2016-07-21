@@ -19,17 +19,17 @@ make sk GenerateSignalkData more useable and use for tests.
 
 make use of history timeseries data.
 
-Upload charts and select.
+Make chart select mark charts already loaded
 
 Drag anchor circle
 
-Enable features saving
-
-remote ws connection does not receive data
+Enable features saving for routes and regions
 
 Sailgauge tries port 8080
 
 Make Waypoint 'here' option
+
+Remove @@@ from ais processor
 
 NMEA ais outputs incorrect position format
 signalk-config become zero-length on crash sometimes.
