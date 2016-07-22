@@ -34,11 +34,9 @@ Remove @@@ from ais processor
 NMEA ais outputs incorrect position format
 signalk-config become zero-length on crash sometimes.
 mvn -o doesnt work after a new version!
-log4j and config may need re-working after ungrade.
+log4j and config may need re-working after upgrade.
 server doesnt shutdown quickly
 
 Testing needed:
 ===============
 hostapd and server dont start on reboot of pi
-Remote Hawtio management
-When uploading big zips the queue overflows.
