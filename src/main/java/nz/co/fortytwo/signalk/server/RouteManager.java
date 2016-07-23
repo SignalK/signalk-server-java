@@ -35,11 +35,15 @@ import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_UPLOAD;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import javax.jmdns.JmmDNS;
+import javax.jmdns.ServiceEvent;
 import javax.jmdns.ServiceInfo;
+import javax.jmdns.ServiceListener;
 
 import org.apache.activemq.camel.component.ActiveMQComponent;
 import org.apache.camel.ProducerTemplate;
@@ -50,6 +54,7 @@ import org.apache.camel.component.websocket.SignalkWebsocketComponent;
 import org.apache.camel.component.websocket.WebsocketEndpoint;
 import org.apache.camel.impl.JndiRegistry;
 import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.http.MimeTypes;
@@ -268,20 +273,10 @@ public class RouteManager extends RouteBuilder  {
 		Json wsClients = Util.getConfigJsonArray(ConfigConstants.CLIENT_WS);
 		logger.info("  Starting WS connection to url:"+wsClients);
 		if(wsClients!=null){
-			for(Object client: wsClients.asList()){
-				logger.info("  Starting WS connection to url:ahc-ws://"+client);
+			for(Json client: wsClients.asJsonList()){
+				logger.info("  Starting WS connection to url:ahc-ws://"+client.asString());
 				
-				WsEndpoint wsEndpoint = (WsEndpoint)getContext().getEndpoint("ahc-ws://"+client);
-				from(wsEndpoint).id("Websocket Client:"+client)
-					.onException(Exception.class).handled(true).maximumRedeliveries(0)
-						.to("log:nz.co.fortytwo.signalk.client.ws?level=ERROR&showException=true&showStackTrace=true")
-						.end()
-					.to("log:nz.co.fortytwo.signalk.client.ws?level=DEBUG")
-					.convertBodyTo(String.class)
-					.setHeader(MSG_SRC_BUS, constant("ws."+client.toString().replace('.', '_')))
-					.to(SEDA_INPUT);
-				
-				wsEndpoint.connect();
+				startWsClient(client.asString());
 			}
 		}
 		//TCP
@@ -350,9 +345,96 @@ public class RouteManager extends RouteBuilder  {
 		}
 		
 		SignalkRouteFactory.startLogRoutes(this, JETTY_HTTP_0_0_0_0, restPort);
+		
+		if (Util.getConfigPropertyBoolean(ConfigConstants.ZEROCONF_AUTO)) {
+			startMdnsAutoconnect();
+		}
 	}
 
 	
+	private void startMdnsAutoconnect() {
+		//now listen and report other services
+		logger.info("Starting jmdns listener..");
+		jmdns.addServiceListener(_SIGNALK_WS_TCP_LOCAL, new ServiceListener() {
+			
+			@Override
+			public void serviceResolved(ServiceEvent evt) {
+				try {
+					//if(evt.getInfo().getInet4Addresses().length==0){
+						String name = evt.getName();
+						String thisHost = evt.getDNS().getInetAddress().getHostAddress();
+						logger.info("Resolved mDns service:"+name+" at "+thisHost);
+						logger.debug(name+" Server:"+evt.getInfo().getServer());
+						String[] remoteHost = evt.getInfo().getHostAddresses();
+						logger.debug(name+" Remotehost:"+remoteHost[0]);
+						//logger.error(name+" Type:"+evt.getInfo().getType());
+						//logger.error(name+" Port:"+evt.getInfo().getPort());
+						//logger.error(name+" Protocol:"+evt.getInfo().getProtocol());
+						//logger.error(name+" IPV4s:"+Arrays.toString(evt.getInfo().getInet4Addresses()));
+						//int port = evt.getInfo().getPort();
+						//logger.error(name+" Port:"+port);
+						//logger.error(name+" QName:"+evt.getInfo().getQualifiedName());
+						logger.debug(name+" URLs:"+Arrays.toString(evt.getInfo().getURLs()));
+						if(thisHost.startsWith(remoteHost[0]) 
+								|| evt.getDNS().getInetAddress().isLinkLocalAddress()
+								|| evt.getDNS().getInetAddress().isLoopbackAddress()){
+							logger.info(name+" Found own host: "+remoteHost[0]+", ignoring..");
+							return;
+						}
+						if(remoteHost[0].startsWith("[fe80") || evt.getDNS().getInetAddress().isLinkLocalAddress()){
+							logger.info(name+" Found ipv6 host: "+remoteHost[0]+", ignoring..");
+							return;
+						}
+						//we want to connect here
+						String url =evt.getInfo().getURLs()[0];
+						if(StringUtils.isNotBlank(url)){
+						logger.info(name+" Connecting to: "+url);
+						
+						url=url.substring(url.lastIndexOf(":")+2);
+						logger.info("  Starting WS connection to url:ahc-ws://"+url);
+		
+						startWsClient(url);
+						
+					}
+					
+				} catch (IOException | InterruptedException | ExecutionException e) {
+				
+					logger.error(e);
+				}
+				
+			}
+			
+			@Override
+			public void serviceRemoved(ServiceEvent evt) {
+				logger.info("Lost mDns service:"+evt.getName());
+				
+			}
+			
+			@Override
+			public void serviceAdded(ServiceEvent evt) {
+				logger.info("Found mDns service:"+evt.getName()+" at "+evt.getType());
+				
+			}
+		});
+		logger.info("Started jmdns listener");
+		
+	}
+
+	private void startWsClient(String client) throws InterruptedException, ExecutionException, IOException {
+		WsEndpoint wsEndpoint = (WsEndpoint)getContext().getEndpoint("ahc-ws://"+client);
+		from(wsEndpoint).id("Websocket Client:"+client)
+			.onException(Exception.class).handled(true).maximumRedeliveries(0)
+				.to("log:nz.co.fortytwo.signalk.client.ws?level=ERROR&showException=true&showStackTrace=true")
+				.end()
+			.to("log:nz.co.fortytwo.signalk.client.ws?level=DEBUG")
+			.convertBodyTo(String.class)
+			.setHeader(MSG_SRC_BUS, constant("ws."+client.toString().replace('.', '_')))
+			.to(SEDA_INPUT);
+		
+		wsEndpoint.connect();
+		
+	}
+
 	public void stopNettyServers(){
 		if(skServer!=null){
 			skServer.shutdownServer();

@@ -29,8 +29,6 @@ Sailgauge tries port 8080
 
 Make Waypoint 'here' option
 
-Remove @@@ from ais processor
-
 NMEA ais outputs incorrect position format
 signalk-config become zero-length on crash sometimes.
 mvn -o doesnt work after a new version!

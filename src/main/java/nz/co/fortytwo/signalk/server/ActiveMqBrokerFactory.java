@@ -29,9 +29,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import nz.co.fortytwo.signalk.util.ConfigConstants;
-import nz.co.fortytwo.signalk.util.Util;
-
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.broker.BrokerPlugin;
 import org.apache.activemq.broker.BrokerService;
@@ -44,6 +41,9 @@ import org.apache.activemq.pool.PooledConnectionFactory;
 import org.apache.activemq.usage.MemoryUsage;
 import org.apache.activemq.usage.SystemUsage;
 import org.apache.camel.component.jms.JmsConfiguration;
+
+import nz.co.fortytwo.signalk.util.ConfigConstants;
+import nz.co.fortytwo.signalk.util.Util;
 
 public class ActiveMqBrokerFactory {
 
