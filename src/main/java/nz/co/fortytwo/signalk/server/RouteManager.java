@@ -397,7 +397,7 @@ public class RouteManager extends RouteBuilder  {
 						
 					}
 					
-				} catch (IOException | InterruptedException | ExecutionException e) {
+				} catch (Exception e) {
 				
 					logger.error(e);
 				}
