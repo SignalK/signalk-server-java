@@ -390,7 +390,7 @@ public class RouteManager extends RouteBuilder  {
 						if(StringUtils.isNotBlank(url)){
 						logger.info(name+" Connecting to: "+url);
 						
-						url=url.substring(url.lastIndexOf(":")+2);
+						url=url.substring(url.indexOf("://")+3);
 						logger.info("  Starting WS connection to url:ahc-ws://"+url);
 		
 						startWsClient(url);
