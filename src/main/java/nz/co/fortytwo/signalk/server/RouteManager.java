@@ -391,7 +391,8 @@ public class RouteManager extends RouteBuilder  {
 						logger.info(name+" Connecting to: "+url);
 						
 						url=url.substring(url.indexOf("://")+3);
-						logger.info("  Starting WS connection to url:ahc-ws://"+url+"/v1/stream");
+						url=url+"/v1/stream";
+						logger.info("  Starting WS connection to url:ahc-ws://"+url);
 		
 						startWsClient(url);
 						
