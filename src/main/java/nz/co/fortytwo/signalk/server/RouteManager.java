@@ -52,8 +52,10 @@ import org.apache.camel.component.ahc.ws.WsEndpoint;
 import org.apache.camel.component.stomp.SkStompComponent;
 import org.apache.camel.component.websocket.SignalkWebsocketComponent;
 import org.apache.camel.component.websocket.WebsocketEndpoint;
+import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.impl.JndiRegistry;
 import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry;
+import org.apache.camel.model.RouteDefinition;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -388,15 +390,15 @@ public class RouteManager extends RouteBuilder  {
 						//we want to connect here
 						String url =evt.getInfo().getURLs()[0];
 						if(StringUtils.isNotBlank(url)){
-						logger.info(name+" Connecting to: "+url);
-						
-						url=url.substring(url.indexOf("://")+3);
-						url=url+"/v1/stream";
-						logger.info("  Starting WS connection to url:ahc-ws://"+url);
-		
-						startWsClient(url);
-						
-					}
+							logger.info(name+" Connecting to: "+url);
+							
+							url=url.substring(url.indexOf("://")+3);
+							url=url+"/v1/stream";
+							logger.info("  Starting WS connection to url:ahc-ws://"+url);
+			
+							startWsClient(url);
+							
+						}
 					
 				} catch (Exception e) {
 				
@@ -408,7 +410,8 @@ public class RouteManager extends RouteBuilder  {
 			@Override
 			public void serviceRemoved(ServiceEvent evt) {
 				logger.info("Lost mDns service:"+evt.getName());
-				
+				//String url =evt.getInfo().getURLs()[0];
+				logger.info("Lost service url:"+evt.toString());
 			}
 			
 			@Override
@@ -421,17 +424,20 @@ public class RouteManager extends RouteBuilder  {
 		
 	}
 
-	private void startWsClient(String client) throws InterruptedException, ExecutionException, IOException {
+	private void startWsClient(String client) throws Exception {
 		WsEndpoint wsEndpoint = (WsEndpoint)getContext().getEndpoint("ahc-ws://"+client);
-		from(wsEndpoint).id("Websocket Client:"+client)
-			.onException(Exception.class).handled(true).maximumRedeliveries(0)
+		RouteDefinition route = from(wsEndpoint);
+		
+		route.onException(Exception.class).handled(true).maximumRedeliveries(0)
 				.to("log:nz.co.fortytwo.signalk.client.ws?level=ERROR&showException=true&showStackTrace=true")
 				.end()
 			.to("log:nz.co.fortytwo.signalk.client.ws?level=DEBUG")
 			.convertBodyTo(String.class)
 			.setHeader(MSG_SRC_BUS, constant("ws."+client.toString().replace('.', '_')))
 			.to(SEDA_INPUT);
-		
+		route.setId("Websocket Client:"+client);
+		((DefaultCamelContext)CamelContextFactory.getInstance()).addRouteDefinition(route);
+		((DefaultCamelContext)CamelContextFactory.getInstance()).startRoute(route.getId());
 		wsEndpoint.connect();
 		
 	}
