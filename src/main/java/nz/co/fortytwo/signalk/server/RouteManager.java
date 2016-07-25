@@ -275,10 +275,20 @@ public class RouteManager extends RouteBuilder  {
 		Json wsClients = Util.getConfigJsonArray(ConfigConstants.CLIENT_WS);
 		logger.info("  Starting WS connection to url:"+wsClients);
 		if(wsClients!=null){
-			for(Json client: wsClients.asJsonList()){
-				logger.info("  Starting WS connection to url:ahc-ws://"+client.asString());
+			for(Object client: wsClients.asList()){
+				logger.info("  Starting WS connection to url:ahc-ws://"+client);
 				
-				startWsClient(client.asString());
+				WsEndpoint wsEndpoint = (WsEndpoint)getContext().getEndpoint("ahc-ws://"+client);
+				from(wsEndpoint).id("Websocket Client:"+client)
+					.onException(Exception.class).handled(true).maximumRedeliveries(0)
+						.to("log:nz.co.fortytwo.signalk.client.ws?level=ERROR&showException=true&showStackTrace=true")
+						.end()
+					.to("log:nz.co.fortytwo.signalk.client.ws?level=DEBUG")
+					.convertBodyTo(String.class)
+					.setHeader(MSG_SRC_BUS, constant("ws."+client.toString().replace('.', '_')))
+					.to(SEDA_INPUT);
+				
+				wsEndpoint.connect();
 			}
 		}
 		//TCP
