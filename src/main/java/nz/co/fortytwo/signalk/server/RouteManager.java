@@ -32,6 +32,7 @@ import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_INSTALL;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_LOGGER;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_UPGRADE;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_UPLOAD;
+import static nz.co.fortytwo.signalk.util.SignalKConstants._SIGNALK_WS_TCP_LOCAL;
 
 import java.io.File;
 import java.io.IOException;
@@ -88,10 +89,7 @@ import nz.co.fortytwo.signalk.util.Util;
 public class RouteManager extends RouteBuilder  {
 	protected static final String JETTY_HTTP_0_0_0_0 = "jetty:http://0.0.0.0:";
 
-	public static final String _SIGNALK_HTTP_TCP_LOCAL = "_signalk-http._tcp.local.";
-
-	public static final String _SIGNALK_WS_TCP_LOCAL = "_signalk-ws._tcp.local.";
-
+	
 	private static Logger logger = LogManager.getLogger(RouteManager.class);
 	
 	//public static final String SEDA_INPUT = "seda:inputData?purgeWhenStopping=true&size=1000";
@@ -108,7 +106,7 @@ public class RouteManager extends RouteBuilder  {
 	public static final String STOMP = "skStomp:queue:signalk?brokerURL=tcp://0.0.0.0:"+Util.getConfigPropertyInt(ConfigConstants.STOMP_PORT);
 	public static final String MQTT = "mqtt:signalk?host=tcp://0.0.0.0:"+Util.getConfigPropertyInt(ConfigConstants.MQTT_PORT);
 
-	private JmmDNS jmdns = null;
+	
 	private int wsPort = 3000;
 	private int restPort = 8080;
 	//private String streamUrl;
@@ -152,8 +150,6 @@ public class RouteManager extends RouteBuilder  {
 		CamelContextFactory.getInstance().getShutdownStrategy().setShutdownNowOnTimeout(true);
 		CamelContextFactory.getInstance().getShutdownStrategy().setTimeout(10);
 		//CamelContextFactory.getInstance().addComponent("activemq", ActiveMQComponent.activeMQComponent("vm://localhost?broker.persistent=false"));
-		//DNS-SD, zeroconf mDNS
-		startMdns();
 		
 		//Netty tcp server
 		skServer = new NettyServer(null, ConfigConstants.OUTPUT_TCP);
@@ -277,17 +273,8 @@ public class RouteManager extends RouteBuilder  {
 		if(wsClients!=null){
 			for(Object client: wsClients.asList()){
 				logger.info("  Starting WS connection to url:ahc-ws://"+client);
-				
 				WsEndpoint wsEndpoint = (WsEndpoint)getContext().getEndpoint("ahc-ws://"+client);
-				from(wsEndpoint).id("Websocket Client:"+client)
-					.onException(Exception.class).handled(true).maximumRedeliveries(0)
-						.to("log:nz.co.fortytwo.signalk.client.ws?level=ERROR&showException=true&showStackTrace=true")
-						.end()
-					.to("log:nz.co.fortytwo.signalk.client.ws?level=DEBUG")
-					.convertBodyTo(String.class)
-					.setHeader(MSG_SRC_BUS, constant("ws."+client.toString().replace('.', '_')))
-					.to(SEDA_INPUT);
-				
+				setupClient("ahc-ws://"+client,client.toString(),"ws");
 				wsEndpoint.connect();
 			}
 		}
@@ -295,26 +282,14 @@ public class RouteManager extends RouteBuilder  {
 		Json tcpClients = Util.getConfigJsonArray(ConfigConstants.CLIENT_TCP);
 		if(tcpClients!=null){
 			for(Object client: tcpClients.asList()){
-				from("netty4:tcp://"+client+"?clientMode=true&textline=true").id("TCP Client:"+client)
-					.onException(Exception.class).handled(true).maximumRedeliveries(0)
-						.to("log:nz.co.fortytwo.signalk.client.tcp?level=ERROR&showException=true&showStackTrace=true")
-						.end()
-					.convertBodyTo(String.class)
-					.setHeader(MSG_SRC_BUS, constant("stomp."+client.toString().replace('.', '_')))
-					.to(SEDA_INPUT);
+				setupClient("netty4:tcp://"+client+"?clientMode=true&textline=true",client.toString(),"tcp");
 			}
 		}
 		//MQTT
 			Json mqttClients = Util.getConfigJsonArray(ConfigConstants.CLIENT_MQTT);
 			if(mqttClients!=null){
 				for(Object client: mqttClients.asList()){
-					from("mqtt://"+client).id("MQTT Client:"+client)
-						.onException(Exception.class).handled(true).maximumRedeliveries(0)
-							.to("log:nz.co.fortytwo.signalk.client.mqtt?level=ERROR&showException=true&showStackTrace=true")
-							.end()
-						.convertBodyTo(String.class)
-						.setHeader(MSG_SRC_BUS, constant("mqtt."+client.toString().replace('.', '_')))
-						.to(SEDA_INPUT);
+					setupClient("mqtt://"+client,client.toString(),"mqtt");
 				}
 			}
 		
@@ -323,13 +298,7 @@ public class RouteManager extends RouteBuilder  {
 		Json stompClients = Util.getConfigJsonArray(ConfigConstants.CLIENT_STOMP);
 		if(stompClients!=null){
 			for(Object client: stompClients.asList()){
-				from("stomp://"+client).id("STOMP Client:"+client)
-					.onException(Exception.class).handled(true).maximumRedeliveries(0)
-						.to("log:nz.co.fortytwo.signalk.client.stomp?level=ERROR&showException=true&showStackTrace=true")
-						.end()
-					.convertBodyTo(String.class)
-					.setHeader(MSG_SRC_BUS, constant("stomp."+client.toString().replace('.', '_')))
-					.to(SEDA_INPUT);
+				setupClient("stomp://"+client,client.toString(),"stomp");
 			}
 		}
 		
@@ -364,28 +333,34 @@ public class RouteManager extends RouteBuilder  {
 	}
 
 	
+	private void setupClient(String endpoint, String client, String serviceName) {
+		from(endpoint).id(serviceName.toUpperCase()+" Client:"+client)
+		.onException(Exception.class).handled(true).maximumRedeliveries(0)
+			.to("log:nz.co.fortytwo.signalk.client."+serviceName+"?level=ERROR&showException=true&showStackTrace=true")
+			.end()
+		.to("log:nz.co.fortytwo.signalk.client."+serviceName+"?level=DEBUG")
+		.convertBodyTo(String.class)
+		.setHeader(MSG_SRC_BUS, constant(serviceName+"."+client.toString().replace('.', '_')))
+		.to(SEDA_INPUT);
+	
+		
+	}
+
 	private void startMdnsAutoconnect() {
 		//now listen and report other services
 		logger.info("Starting jmdns listener..");
-		jmdns.addServiceListener(_SIGNALK_WS_TCP_LOCAL, new ServiceListener() {
+		JmmDNS.Factory.getInstance().addServiceListener(_SIGNALK_WS_TCP_LOCAL, new ServiceListener() {
 			
 			@Override
 			public void serviceResolved(ServiceEvent evt) {
 				try {
-					//if(evt.getInfo().getInet4Addresses().length==0){
 						String name = evt.getName();
 						String thisHost = evt.getDNS().getInetAddress().getHostAddress();
 						logger.info("Resolved mDns service:"+name+" at "+thisHost);
 						logger.debug(name+" Server:"+evt.getInfo().getServer());
 						String[] remoteHost = evt.getInfo().getHostAddresses();
 						logger.debug(name+" Remotehost:"+remoteHost[0]);
-						//logger.error(name+" Type:"+evt.getInfo().getType());
-						//logger.error(name+" Port:"+evt.getInfo().getPort());
-						//logger.error(name+" Protocol:"+evt.getInfo().getProtocol());
-						//logger.error(name+" IPV4s:"+Arrays.toString(evt.getInfo().getInet4Addresses()));
-						//int port = evt.getInfo().getPort();
-						//logger.error(name+" Port:"+port);
-						//logger.error(name+" QName:"+evt.getInfo().getQualifiedName());
+					
 						logger.debug(name+" URLs:"+Arrays.toString(evt.getInfo().getURLs()));
 						if(thisHost.startsWith(remoteHost[0]) 
 								|| evt.getDNS().getInetAddress().isLinkLocalAddress()
@@ -420,8 +395,6 @@ public class RouteManager extends RouteBuilder  {
 			@Override
 			public void serviceRemoved(ServiceEvent evt) {
 				logger.info("Lost mDns service:"+evt.getName());
-				//String url =evt.getInfo().getURLs()[0];
-				logger.info("Lost service url:"+evt.toString());
 			}
 			
 			@Override
@@ -471,56 +444,9 @@ public class RouteManager extends RouteBuilder  {
 		serialPortManager.stopSerial();
 		serialPortManager=null;
 	}
-	/**
-	 * Stop the DNS-SD server.
-	 * @throws IOException 
-	 */
-	public void stopMdns() throws IOException {
-		if(jmdns!=null){
-			jmdns.unregisterAllServices();
-			jmdns.close();
-			jmdns=null;
-		}
-	}
-	
-	private void startMdns() {
-		//DNS-SD
-		//NetworkTopologyDiscovery netTop = NetworkTopologyDiscovery.Factory.getInstance();
-		Runnable r = new Runnable() {
-			
-			@Override
-			public void run() {
-				jmdns = JmmDNS.Factory.getInstance();
-				
-				jmdns.registerServiceType(_SIGNALK_WS_TCP_LOCAL);
-				jmdns.registerServiceType(_SIGNALK_HTTP_TCP_LOCAL);
-				ServiceInfo wsInfo = ServiceInfo.create(_SIGNALK_WS_TCP_LOCAL,"signalk-ws",wsPort, 0,0, getMdnsTxt());
-				try {
-					jmdns.registerService(wsInfo);
-					ServiceInfo httpInfo = ServiceInfo
-						.create(_SIGNALK_HTTP_TCP_LOCAL, "signalk-http",restPort,0,0, getMdnsTxt());
-					jmdns.registerService(httpInfo);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		};
-		Thread t = new Thread(r);
-		t.setDaemon(true);
-		t.start();
-		
-	}
 
-	private Map<String,String> getMdnsTxt() {
-		Map<String,String> txtSet = new HashMap<String, String>();
-		txtSet.put("path", SIGNALK_DISCOVERY);
-		txtSet.put("server","signalk-server");
-		txtSet.put("version",Util.getConfigProperty(ConfigConstants.VERSION));
-		txtSet.put("vessel_name",Util.getConfigProperty(ConfigConstants.UUID));
-		txtSet.put("vessel_mmsi",Util.getConfigProperty(ConfigConstants.UUID));
-		txtSet.put("vessel_uuid",Util.getConfigProperty(ConfigConstants.UUID));
-		return txtSet;
-	}
+
+	
 
 
 }
