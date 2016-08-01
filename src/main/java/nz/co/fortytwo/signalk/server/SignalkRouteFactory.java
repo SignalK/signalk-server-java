@@ -85,6 +85,7 @@ import org.apache.camel.model.RouteDefinition;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
+import org.jivesoftware.smack.SASLAuthentication;
 
 import mjson.Json;
 
@@ -299,6 +300,7 @@ public class SignalkRouteFactory {
 					RouteManager.SEDA_WEBSOCKETS, 
 					RouteManager.DIRECT_MQTT, 
 					RouteManager.DIRECT_STOMP,
+					RouteManager.SEDA_XMPP,
 					"log:nz.co.fortytwo.signalk.model.output?level=DEBUG"
 					).id(getName("Multicast Outputs"))
 		.end();
@@ -310,6 +312,10 @@ public class SignalkRouteFactory {
 			.filter(routeBuilder.header(ConfigConstants.OUTPUT_TYPE).isEqualTo(ConfigConstants.OUTPUT_STOMP))
 			.process(new StompProcessor()).id(getName(StompProcessor.class.getSimpleName()))
 			.to(RouteManager.STOMP).id(getName("STOMP Broker"));
+		
+		routeBuilder.from(RouteManager.DIRECT_XMPP).id(getName("XMPP direct"))
+			.filter(routeBuilder.header(ConfigConstants.OUTPUT_TYPE).isEqualTo(ConfigConstants.OUTPUT_XMPP))
+			.to(RouteManager.SEDA_XMPP).id(getName("XMPP Broker"));
 	}
 	
 	public static void configureSubscribeTimer(RouteBuilder routeBuilder ,Subscription sub) throws Exception{

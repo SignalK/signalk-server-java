@@ -23,36 +23,35 @@
  */
 package nz.co.fortytwo.signalk.server;
 
+//import static nz.co.fortytwo.signalk.util.ConfigConstants.UUID;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.FORMAT_DELTA;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.MSG_SRC_BUS;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.POLICY_IDEAL;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_API;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_AUTH;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_CONFIG;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_DISCOVERY;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_INSTALL;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_LOGGER;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_RESTART;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_UPGRADE;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_UPLOAD;
 import static nz.co.fortytwo.signalk.util.SignalKConstants._SIGNALK_WS_TCP_LOCAL;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.dot;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
+import java.util.UUID;
 
 import javax.jmdns.JmmDNS;
 import javax.jmdns.ServiceEvent;
-import javax.jmdns.ServiceInfo;
 import javax.jmdns.ServiceListener;
 
-import org.apache.activemq.camel.component.ActiveMQComponent;
-import org.apache.camel.ProducerTemplate;
+import org.apache.camel.ExchangePattern;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.ahc.ws.WsEndpoint;
 import org.apache.camel.component.stomp.SkStompComponent;
 import org.apache.camel.component.websocket.SignalkWebsocketComponent;
-import org.apache.camel.component.websocket.WebsocketEndpoint;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.impl.JndiRegistry;
 import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry;
@@ -62,12 +61,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.jivesoftware.smack.SASLAuthentication;
+import org.jivesoftware.smack.SmackConfiguration;
+import org.jivesoftware.smackx.jiveproperties.JivePropertiesManager;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
+import nz.co.fortytwo.signalk.processor.ClientAppProcessor;
 import nz.co.fortytwo.signalk.util.ConfigConstants;
-import nz.co.fortytwo.signalk.util.SignalKConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
 
@@ -94,10 +96,11 @@ public class RouteManager extends RouteBuilder  {
 	
 	//public static final String SEDA_INPUT = "seda:inputData?purgeWhenStopping=true&size=1000";
 	public static final String SEDA_INPUT = "activemq:queue:inputData?jmsMessageType=Text&timeToLive=10000&asyncConsumer=true&acceptMessagesWhileStopping=true";
-	
+	public static final String SEDA_XMPP = "activemq:queue:xmppData?jmsMessageType=Text&timeToLive=10000&asyncConsumer=true&acceptMessagesWhileStopping=true";
 	public static final String SEDA_WEBSOCKETS = "seda:websockets?purgeWhenStopping=true&size=1000";
 	public static final String DIRECT_STOMP = "direct:stomp";
 	public static final String DIRECT_MQTT = "direct:mqtt";
+	public static final String DIRECT_XMPP = "direct:xmpp";
 	public static final String DIRECT_TCP = "seda:tcp?purgeWhenStopping=true&size=1000";
 	
 	public static final String SEDA_NMEA = "seda:nmeaOutput?purgeWhenStopping=true&size=100";
@@ -133,9 +136,13 @@ public class RouteManager extends RouteBuilder  {
 		configure0();
 	}
 	public void configure0() throws Exception {
-		//restConfiguration().component("jetty").port(8080);
-		//sessionSupport=true&matchOnUriPrefix=true&handlers=#staticHandler&enableJMX=true
-		//.componentProperty("handlers", "#staticHandler");
+		//XMPP
+		JivePropertiesManager.setJavaObjectEnabled(true);
+		SASLAuthentication.unsupportSASLMechanism("DIGEST-MD5");
+		SASLAuthentication.unregisterSASLMechanism("DIGEST-MD5");
+		SASLAuthentication.supportSASLMechanism("PLAIN",0);
+		//SmackConfiguration.DEBUG_ENABLED=true;
+		
 		errorHandler(deadLetterChannel("direct:fail")
 		        .useOriginalMessage()
 		        .maximumRedeliveries(1)
@@ -301,6 +308,37 @@ public class RouteManager extends RouteBuilder  {
 				setupClient("stomp://"+client,client.toString(),"stomp");
 			}
 		}
+		
+		//XMPP
+		//"xmpp": [{"server":"xmpp.www.42.co.nz","passwd":"motu","user":"motu","room":"signalk"}]
+		Json xmppClients = Util.getConfigJsonArray(ConfigConstants.XMPP);
+		if(xmppClients!=null){
+			for(Json client: xmppClients.asJsonList()){
+				String server = client.at("server").asString();
+				String user = client.at("user").asString();
+				String passwd = client.at("passwd").asString();
+				String room = client.at("room").asString();
+				String filter = client.at("filter").asString();
+				//receive
+				setupClient("xmpp://"+server+"?testConnectionOnStartup=false&room="+room+"&user="+user+"&password="+passwd+"&resource="+user+"&serviceName="+server,server+dot+room,"xmpp");
+				//tx
+				from(SEDA_XMPP+"&selector="+ConfigConstants.DESTINATION+" %3D '"+room+"'").id("XMPP out: "+room)
+				.convertBodyTo(String.class)
+				.to("xmpp://www.42.co.nz?testConnectionOnStartup=false&room=core@signalk.www.42.co.nz&user=motu&password=utom&resource=core&serviceName=www.42.co.nz").id("XMPP Service");
+				//and subscribe
+				String wsSession = UUID.randomUUID().toString();
+				for(String f:filter.split(",")){
+					Subscription sub = new Subscription(wsSession, f, 5000, 1000, FORMAT_DELTA, POLICY_IDEAL);
+					sub.setDestination(room);
+					SubscriptionManagerFactory.getInstance().addSubscription(sub);
+				}
+			}
+		}
+		//restart support
+		from(JETTY_HTTP_0_0_0_0 + restPort + SIGNALK_RESTART).id("Restart route")
+			.setExchangePattern(ExchangePattern.InOut)
+			.setBody(constant("Restarting now.."))
+			.to("file://./conf/?fileName=signalk-restart");
 		
 		
 		//Demo mode

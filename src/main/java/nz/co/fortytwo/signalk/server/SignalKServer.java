@@ -121,15 +121,16 @@ public class SignalKServer {
 			for(WatchEvent<?> watchEvent : key.pollEvents()) {
 				// Get the type of the event
 				kind = watchEvent.kind();
-				logger.info("SignalKServer conf/ event:"+watchEvent.kind() +" : "+watchEvent.context().toString());
+				logger.debug("SignalKServer conf/ event:"+watchEvent.kind() +" : "+watchEvent.context().toString());
 				if (StandardWatchEventKinds.OVERFLOW == kind) {
 					continue; //loop
 				} else if (StandardWatchEventKinds.ENTRY_MODIFY == kind) {
 					// A new Path was created 
+					@SuppressWarnings("unchecked")
 					Path newPath = ((WatchEvent<Path>) watchEvent).context();
 					// Output
-					if(newPath.endsWith("signalk-config.json")){
-						logger.info("SignalKServer conf/signalk-config.json changed, stopping");
+					if(newPath.endsWith("signalk-restart")){
+						logger.info("SignalKServer conf/signalk-restart changed, stopping..");
 						main.stop();
 						main.getCamelContexts().clear();
 						main.getRouteBuilders().clear();
@@ -180,7 +181,7 @@ public class SignalKServer {
 		// add our routes to Camel
 		main.addRouteBuilder(routeManager);
 	
-		logger.info("SignalKServer configued");
+		logger.info("SignalKServer configured");
 		
 	}
 
