@@ -324,7 +324,7 @@ public class RouteManager extends RouteBuilder  {
 				//tx
 				from(SEDA_XMPP+"&selector="+ConfigConstants.DESTINATION+" %3D '"+room+"'").id("XMPP out: "+room)
 				.convertBodyTo(String.class)
-				.to("xmpp://"+server+"?testConnectionOnStartup=false&room="+room+"&user="+user+"&password="+passwd+"&resource="+user+"&serviceName="+server,server+dot+room).id("XMPP Service:"+room);
+				.to("xmpp://"+server+"?testConnectionOnStartup=false&room="+room+"&user="+user+"&password="+passwd+"&resource="+user+"&serviceName="+server).id("XMPP Service:"+room);
 				//and subscribe
 				String wsSession = UUID.randomUUID().toString();
 				for(String f:filter.split(",")){
