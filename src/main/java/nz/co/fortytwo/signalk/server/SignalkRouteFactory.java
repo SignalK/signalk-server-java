@@ -300,7 +300,7 @@ public class SignalkRouteFactory {
 					RouteManager.SEDA_WEBSOCKETS, 
 					RouteManager.DIRECT_MQTT, 
 					RouteManager.DIRECT_STOMP,
-					RouteManager.SEDA_XMPP,
+					RouteManager.DIRECT_XMPP,
 					"log:nz.co.fortytwo.signalk.model.output?level=DEBUG"
 					).id(getName("Multicast Outputs"))
 		.end();
