@@ -23,6 +23,7 @@
  */
 package nz.co.fortytwo.signalk.server;
 
+import static nz.co.fortytwo.signalk.util.ConfigConstants.OUTPUT_XMPP;
 //import static nz.co.fortytwo.signalk.util.ConfigConstants.UUID;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.FORMAT_DELTA;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.MSG_SRC_BUS;
@@ -40,6 +41,7 @@ import static nz.co.fortytwo.signalk.util.SignalKConstants._SIGNALK_WS_TCP_LOCAL
 import static nz.co.fortytwo.signalk.util.SignalKConstants.dot;
 
 import java.io.File;
+import java.net.Inet4Address;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -47,6 +49,7 @@ import javax.jmdns.JmmDNS;
 import javax.jmdns.ServiceEvent;
 import javax.jmdns.ServiceListener;
 
+import org.apache.camel.Endpoint;
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.ahc.ws.WsEndpoint;
@@ -319,17 +322,19 @@ public class RouteManager extends RouteBuilder  {
 				String passwd = client.at("passwd").asString();
 				String room = client.at("room").asString();
 				String filter = client.at("filter").asString();
+				Endpoint xmppEndpoint = getContext().getEndpoint("xmpp://"+server+"?testConnectionOnStartup=false&room="+room+"&user="+user+"&password="+passwd+"&resource="+user+"&serviceName="+server);
 				//receive
-				setupClient("xmpp://"+server+"?testConnectionOnStartup=false&room="+room+"&user="+user+"&password="+passwd+"&resource="+user+"&serviceName="+server,server+dot+room,"xmpp");
+				setupClient(xmppEndpoint,server+dot+room,"xmpp");
 				//tx
 				from(SEDA_XMPP+"&selector="+ConfigConstants.DESTINATION+" %3D '"+room+"'").id("XMPP out: "+room)
-				.convertBodyTo(String.class)
-				.to("xmpp://"+server+"?testConnectionOnStartup=false&room="+room+"&user="+user+"&password="+passwd+"&resource="+user+"&serviceName="+server).id("XMPP Service:"+room);
+					.convertBodyTo(String.class)
+					.to(xmppEndpoint).id("XMPP Service:"+room);
 				//and subscribe
 				String wsSession = UUID.randomUUID().toString();
 				for(String f:filter.split(",")){
 					Subscription sub = new Subscription(wsSession, f, 5000, 1000, FORMAT_DELTA, POLICY_IDEAL);
 					sub.setDestination(room);
+					SubscriptionManagerFactory.getInstance().add(wsSession, wsSession,OUTPUT_XMPP,Inet4Address.getLocalHost().getHostAddress(), Inet4Address.getByName(server).getHostAddress());
 					SubscriptionManagerFactory.getInstance().addSubscription(sub);
 				}
 			}
@@ -370,18 +375,19 @@ public class RouteManager extends RouteBuilder  {
 		}
 	}
 
-	
 	private void setupClient(String endpoint, String client, String serviceName) {
-		from(endpoint).id(serviceName.toUpperCase()+" Client:"+client)
-		.onException(Exception.class).handled(true).maximumRedeliveries(0)
-			.to("log:nz.co.fortytwo.signalk.client."+serviceName+"?level=ERROR&showException=true&showStackTrace=true")
-			.end()
-		.to("log:nz.co.fortytwo.signalk.client."+serviceName+"?level=DEBUG")
-		.convertBodyTo(String.class)
-		.setHeader(MSG_SRC_BUS, constant(serviceName+"."+client.toString().replace('.', '_')))
-		.to(SEDA_INPUT);
+		setupClient(getContext().getEndpoint(endpoint), client, serviceName);
+	}
 	
-		
+	private void setupClient(Endpoint endpoint, String client, String serviceName) {
+		from(endpoint).id(serviceName.toUpperCase()+" Client:"+client)
+			.onException(Exception.class).handled(true).maximumRedeliveries(0)
+				.to("log:nz.co.fortytwo.signalk.client."+serviceName+"?level=ERROR&showException=true&showStackTrace=true")
+				.end()
+			.to("log:nz.co.fortytwo.signalk.client."+serviceName+"?level=DEBUG")
+			.convertBodyTo(String.class)
+			.setHeader(MSG_SRC_BUS, constant(serviceName+"."+client.toString().replace('.', '_')))
+			.to(SEDA_INPUT);
 	}
 
 	private void startMdnsAutoconnect() {
