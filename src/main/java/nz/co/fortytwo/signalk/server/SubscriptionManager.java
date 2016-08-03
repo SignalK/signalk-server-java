@@ -78,7 +78,7 @@ public class SubscriptionManager {
 	}
 	
 	/**
-	 * True if another subcription has the same route and is active
+	 * True if another subscription has the same route and is active
 	 * @param sub
 	 * @return
 	 */

@@ -98,8 +98,8 @@ public class RouteManager extends RouteBuilder  {
 	private static Logger logger = LogManager.getLogger(RouteManager.class);
 	
 	//public static final String SEDA_INPUT = "seda:inputData?purgeWhenStopping=true&size=1000";
-	public static final String SEDA_INPUT = "activemq:queue:inputData?jmsMessageType=Text&timeToLive=10000&asyncConsumer=true&acceptMessagesWhileStopping=true";
-	public static final String SEDA_XMPP = "activemq:queue:xmppData?jmsMessageType=Text&timeToLive=10000&asyncConsumer=true&acceptMessagesWhileStopping=true";
+	public static final String SEDA_INPUT = "activemq:queue:signalk.inputData?jmsMessageType=Text&timeToLive=10000&asyncConsumer=true&acceptMessagesWhileStopping=true";
+	public static final String SEDA_XMPP = "activemq:queue:signalk.xmppData?jmsMessageType=Text&timeToLive=10000&asyncConsumer=true&acceptMessagesWhileStopping=true";
 	public static final String SEDA_WEBSOCKETS = "seda:websockets?purgeWhenStopping=true&size=1000";
 	public static final String DIRECT_STOMP = "direct:stomp";
 	public static final String DIRECT_MQTT = "direct:mqtt";
@@ -331,10 +331,10 @@ public class RouteManager extends RouteBuilder  {
 					.to(xmppEndpoint).id("XMPP Service:"+room);
 				//and subscribe
 				String wsSession = UUID.randomUUID().toString();
+				SubscriptionManagerFactory.getInstance().add(wsSession, wsSession,OUTPUT_XMPP,Inet4Address.getLocalHost().getHostAddress(), Inet4Address.getByName(server).getHostAddress());
 				for(String f:filter.split(",")){
 					Subscription sub = new Subscription(wsSession, f, 5000, 1000, FORMAT_DELTA, POLICY_IDEAL);
 					sub.setDestination(room);
-					SubscriptionManagerFactory.getInstance().add(wsSession, wsSession,OUTPUT_XMPP,Inet4Address.getLocalHost().getHostAddress(), Inet4Address.getByName(server).getHostAddress());
 					SubscriptionManagerFactory.getInstance().addSubscription(sub);
 				}
 			}
