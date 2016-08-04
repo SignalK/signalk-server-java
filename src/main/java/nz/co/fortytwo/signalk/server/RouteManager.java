@@ -208,7 +208,7 @@ public class RouteManager extends RouteBuilder  {
 		restConfiguration().component("jetty")
 			.consumerProperty("matchOnUriPrefix", "true")
 			.componentProperty("matchOnUriPrefix", "true")
-			.host("0.0.0.0").port(8080);
+			.host("0.0.0.0").port(restPort);
 		
 		//websockets
 		
