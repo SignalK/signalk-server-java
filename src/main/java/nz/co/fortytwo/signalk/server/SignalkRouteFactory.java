@@ -114,7 +114,7 @@ public class SignalkRouteFactory {
 		// dump misc rubbish
 		.process(new InputFilterProcessor()).id(getName(InputFilterProcessor.class.getSimpleName()))
 		//now filter security
-		//.process(new IncomingSecurityFilter()).id(getName(IncomingSecurityFilter.class.getSimpleName()))
+		.process(new IncomingSecurityFilter()).id(getName(IncomingSecurityFilter.class.getSimpleName()))
 		//swap payloads to storage
 		//.process(new StorageProcessor()).id(getName(StorageProcessor.class.getSimpleName()))
 		//convert NMEA to signalk

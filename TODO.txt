@@ -37,6 +37,7 @@ ais requires Cog true? cogM not considered.
 signalk-config become zero-length on crash sometimes.
 mvn -o doesnt work after a new version!
 log4j and config may need re-working after upgrade.
+REST api needs attention - http://www:8088/signalk/v1/config returns all
 
 Finish adding XMPP support
 	start xmpp routes

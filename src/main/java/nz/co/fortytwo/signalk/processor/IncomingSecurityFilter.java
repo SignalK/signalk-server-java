@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import mjson.Json;
+import nz.co.fortytwo.signalk.util.ConfigConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
 import org.apache.camel.Exchange;
@@ -63,12 +64,9 @@ public class IncomingSecurityFilter extends SignalkProcessor implements
 
 	public IncomingSecurityFilter() {
 		// load lists now
-		Json deny = Util.getConfigJsonArray(CONFIG + dot
-				+ "server.security.deny.ip");
-		Json white = Util.getConfigJsonArray(CONFIG + dot
-				+ "server.security.white.ip");
-		Json config = Util.getConfigJsonArray(CONFIG + dot
-				+ "server.security.config.ip");
+		Json deny = Util.getConfigJsonArray(ConfigConstants.SECURITY_DENY);
+		Json white = Util.getConfigJsonArray(ConfigConstants.SECURITY_WHITE);
+		Json config = Util.getConfigJsonArray(ConfigConstants.SECURITY_CONFIG);
 		if (deny != null) {
 			for (Object o : deny.asList()) {
 				denyList.add((String) o);
@@ -105,9 +103,10 @@ public class IncomingSecurityFilter extends SignalkProcessor implements
 				return;
 			}
 			// denied - drop now
-			if (denyList.contains(srcIp)) {
+			//loop and check
+			if(Util.inNetworkList(denyList, srcIp)){
 				if (logger.isDebugEnabled())
-					logger.debug("Message DENIED for src ip(denyList):" + srcIp);
+					logger.warn("Message DENIED for src ip :" + srcIp);
 				exchange.getIn().setBody(null);
 				return;
 			}
@@ -117,13 +116,14 @@ public class IncomingSecurityFilter extends SignalkProcessor implements
 					CONFIG_ACTION, String.class);
 			if (CONFIG_ACTION_SAVE.equals(configSave)) {
 				// must be in the configAcceptlist!
-				if (configAcceptList.contains(srcIp)) {
+				
+				if(Util.inNetworkList(configAcceptList, srcIp)){
 					if (logger.isDebugEnabled())
 						logger.debug("Config save allowed for src ip:" + srcIp);
 					return;
 				} else {
 					if (logger.isDebugEnabled())
-						logger.debug("Config save DENIED for src ip:" + srcIp);
+						logger.warn("Config save DENIED for src ip:" + srcIp);
 					exchange.getIn().setBody(null);
 					return;
 				}
@@ -137,10 +137,9 @@ public class IncomingSecurityFilter extends SignalkProcessor implements
 			}
 
 			// we trust our whitelist
-			if (whiteList.contains(srcIp)) {
+			if(Util.inNetworkList(whiteList, srcIp)){
 				if (logger.isDebugEnabled())
-					logger.debug("Message allowed for src ip (whitelist):"
-							+ srcIp);
+					logger.debug("WhiteList message allowed for src ip:" + srcIp);
 				return;
 			}
 
