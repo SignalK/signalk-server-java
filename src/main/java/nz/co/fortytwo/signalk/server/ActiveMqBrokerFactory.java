@@ -34,8 +34,14 @@ import org.apache.activemq.broker.BrokerPlugin;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.broker.TransportConnector;
 import org.apache.activemq.broker.jmx.ManagementContext;
+import org.apache.activemq.broker.region.policy.IndividualDeadLetterStrategy;
+import org.apache.activemq.broker.region.policy.OldestMessageEvictionStrategy;
+import org.apache.activemq.broker.region.policy.PolicyEntry;
+import org.apache.activemq.broker.region.policy.PolicyMap;
+import org.apache.activemq.broker.region.policy.PrefetchRatePendingMessageLimitStrategy;
 import org.apache.activemq.camel.component.ActiveMQComponent;
 import org.apache.activemq.command.ActiveMQDestination;
+import org.apache.activemq.command.ActiveMQQueue;
 import org.apache.activemq.command.ActiveMQTopic;
 import org.apache.activemq.pool.PooledConnectionFactory;
 import org.apache.activemq.usage.MemoryUsage;
@@ -50,6 +56,7 @@ public class ActiveMqBrokerFactory {
 	public static BrokerService newInstance() throws Exception {
 		final BrokerService broker = new BrokerService();
 		broker.setUseShutdownHook(false);
+		broker.setDeleteAllMessagesOnStartup(true);
 		// vm connector
 		TransportConnector connector = new TransportConnector();
 		connector.setUri(new URI("tcp://localhost:61616"));
@@ -73,11 +80,8 @@ public class ActiveMqBrokerFactory {
 		broker.setPlugins(plugins.toArray(new BrokerPlugin[0]));
 		
 		broker.setPersistent(false);
-		SystemUsage usage = new SystemUsage();
-		MemoryUsage mem = new MemoryUsage();
-		mem.setLimit(16*1024*1024);
-		usage.setMemoryUsage(mem);
-		broker.setSystemUsage(usage);
+		
+		configureBroker(broker);
 //"activemq:topic:ActiveMQ.Advisory.Connection?mapJmsMessage=false"
 		final ActiveMQTopic topic = new ActiveMQTopic("ActiveMQ.Advisory.Connection");
 		broker.setDestinations(new ActiveMQDestination[] { topic });
@@ -88,6 +92,52 @@ public class ActiveMqBrokerFactory {
 		
 		return broker;
 	}
+	
+	private static void configureBroker(BrokerService broker) {
+		SystemUsage usage = new SystemUsage();
+		MemoryUsage mem = new MemoryUsage();
+		mem.setLimit(16*1024*1024);
+		usage.setMemoryUsage(mem);
+		broker.setSystemUsage(usage);
+		//DLQ strategy
+		
+        PolicyMap map = new PolicyMap();
+
+        map.put(new ActiveMQQueue(">"), queuePolicy(">"));
+        map.put(new ActiveMQTopic(">"), topicPolicy(">"));
+
+        PolicyEntry qEntry = new PolicyEntry();
+        qEntry.setQueue("signalk.>");
+
+        IndividualDeadLetterStrategy strategy = new IndividualDeadLetterStrategy();
+        strategy.setQueuePrefix("DLQ.");
+        strategy.setUseQueueForQueueMessages(true);
+        strategy.setProcessExpired(false);
+        strategy.setProcessNonPersistent(true);
+        qEntry.setDeadLetterStrategy(strategy);
+        
+        PrefetchRatePendingMessageLimitStrategy preFetchRate = new PrefetchRatePendingMessageLimitStrategy();
+        preFetchRate.setMultiplier(2.0);
+        qEntry.setPendingMessageLimitStrategy(preFetchRate);
+        qEntry.setMessageEvictionStrategy(new OldestMessageEvictionStrategy());
+        map.put(new ActiveMQQueue("signalk.>"), qEntry);
+
+        broker.setDestinationPolicy(map);
+    }
+
+    private static PolicyEntry topicPolicy(String name) {
+        PolicyEntry rc = new PolicyEntry();
+        rc.setTopic(name);
+        rc.setProducerFlowControl(false);
+        return rc;
+    }
+
+    private static PolicyEntry queuePolicy(String name) {
+        PolicyEntry rc = new PolicyEntry();
+        rc.setQueue(name);
+        rc.setProducerFlowControl(false);
+        return rc;
+    }
 	
 	public static ActiveMQComponent newAMQInstance(){
 		 ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory();

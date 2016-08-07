@@ -23,14 +23,37 @@
 
 package nz.co.fortytwo.signalk.server;
 
+import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_DISCOVERY;
+
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchEvent.Kind;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.jmdns.JmmDNS;
+import javax.jmdns.ServiceInfo;
+
 import org.apache.activemq.broker.BrokerService;
+import org.apache.camel.CamelContext;
+import org.apache.camel.Route;
+import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.impl.JndiRegistry;
+import org.apache.camel.impl.PropertyPlaceholderDelegateRegistry;
 import org.apache.camel.main.Main;
+import org.apache.camel.main.MainSupport;
+import org.apache.camel.model.RouteDefinition;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -42,6 +65,7 @@ import org.eclipse.jetty.webapp.WebAppContext;
 
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
 import nz.co.fortytwo.signalk.util.ConfigConstants;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
 public class SignalKServer {
@@ -50,6 +74,8 @@ public class SignalKServer {
 
 	private static Logger logger = LogManager.getLogger(SignalKServer.class);
 
+	private JmmDNS jmdns = null;
+	
 	protected SignalKServer(String configDir) throws Exception {
 		// init config
 		Properties props = System.getProperties();
@@ -73,6 +99,74 @@ public class SignalKServer {
 		// and stop Camel graceful
 		main.enableHangupSupport();
 
+		// Start activemq broker
+		BrokerService broker = ActiveMqBrokerFactory.newInstance();
+
+		broker.start();
+		//DNS-SD, zeroconf mDNS
+		startMdns();
+		configureRouteManager(main);
+		// and run, which keeps blocking until we terminate the JVM (or stop
+		// CamelContext)
+		main.start();
+		
+		WatchService service = FileSystems.getDefault().newWatchService();
+		Path dir = Paths.get("./conf");
+		dir.register(service, StandardWatchEventKinds.ENTRY_MODIFY);
+		WatchKey key = null;
+		while(true) {
+			key = service.take();
+			// Dequeueing events
+			Kind<?> kind = null;
+			for(WatchEvent<?> watchEvent : key.pollEvents()) {
+				// Get the type of the event
+				kind = watchEvent.kind();
+				logger.debug("SignalKServer conf/ event:"+watchEvent.kind() +" : "+watchEvent.context().toString());
+				if (StandardWatchEventKinds.OVERFLOW == kind) {
+					continue; //loop
+				} else if (StandardWatchEventKinds.ENTRY_MODIFY == kind) {
+					// A new Path was created 
+					@SuppressWarnings("unchecked")
+					Path newPath = ((WatchEvent<Path>) watchEvent).context();
+					// Output
+					if(newPath.endsWith("signalk-restart")){
+						logger.info("SignalKServer conf/signalk-restart changed, stopping..");
+						main.stop();
+						main.getCamelContexts().clear();
+						main.getRouteBuilders().clear();
+						main.getRouteDefinitions().clear();
+
+						// so now shutdown serial reader and server
+						RouteManager routeManager = RouteManagerFactory.getInstance();
+						routeManager.stopNettyServers();
+						routeManager.stopSerial();
+						if(server!=null){
+							server.stop();
+							server=null;
+						}
+						RouteManagerFactory.clear();
+						configureRouteManager(main);
+						main.start();
+					}
+			
+				}
+			}
+			
+			if(!key.reset()) {
+				break; //loop
+			}
+		}
+		
+		stopMdns();
+		broker.stop();
+		// write out the signalk model
+		SignalKModelFactory.save(SignalKModelFactory.getInstance());
+		System.exit(0);
+	}
+
+	private void configureRouteManager(MainSupport main) throws Exception {
+		logger.info("SignalKServer conf/signalk-config.json changed, restarting");
+		
 		if (Util.getConfigPropertyBoolean(ConfigConstants.HAWTIO_START)) {
 			logger.info("SignalKServer starting hawtio manager....");
 			server = startHawtio();
@@ -81,33 +175,14 @@ public class SignalKServer {
 			logger.info("SignalKServer starting jolokia remote management agent....");
 			server = startJolokia();
 		}
-
-		// Start activemq broker
-		BrokerService broker = ActiveMqBrokerFactory.newInstance();
-
-		broker.start();
-
+		
 		RouteManager routeManager = RouteManagerFactory.getInstance();
 
 		// add our routes to Camel
 		main.addRouteBuilder(routeManager);
+	
+		logger.info("SignalKServer configured");
 		
-		
-		// and run, which keeps blocking until we terminate the JVM (or stop
-		// CamelContext)
-		main.run();
-
-		// so now shutdown serial reader and server
-
-		routeManager.stopSerial();
-		routeManager.stopMdns();
-		if(server!=null){
-			server.stop();
-		}
-		broker.stop();
-		// write out the signalk model
-		SignalKModelFactory.save(SignalKModelFactory.getInstance());
-		System.exit(0);
 	}
 
 	private Server startJolokia() throws Exception {
@@ -185,7 +260,58 @@ public class SignalKServer {
 		
 
 	}
+	
+	/**
+	 * Stop the DNS-SD server.
+	 * @throws IOException 
+	 */
+	public void stopMdns() throws IOException {
+		if(jmdns!=null){
+			jmdns.unregisterAllServices();
+			jmdns.close();
+			jmdns=null;
+		}
+	}
+	
+	private void startMdns() {
+		//DNS-SD
+		//NetworkTopologyDiscovery netTop = NetworkTopologyDiscovery.Factory.getInstance();
+		Runnable r = new Runnable() {
+			
+			@Override
+			public void run() {
+				jmdns = JmmDNS.Factory.getInstance();
+				
+				jmdns.registerServiceType(SignalKConstants._SIGNALK_WS_TCP_LOCAL);
+				jmdns.registerServiceType(SignalKConstants._SIGNALK_HTTP_TCP_LOCAL);
+				ServiceInfo wsInfo = ServiceInfo.create(SignalKConstants._SIGNALK_WS_TCP_LOCAL,"signalk-ws",Util.getConfigPropertyInt(ConfigConstants.WEBSOCKET_PORT), 0,0, getMdnsTxt());
+				try {
+					jmdns.registerService(wsInfo);
+					ServiceInfo httpInfo = ServiceInfo
+						.create(SignalKConstants._SIGNALK_HTTP_TCP_LOCAL, "signalk-http",Util.getConfigPropertyInt(ConfigConstants.REST_PORT),0,0, getMdnsTxt());
+					jmdns.registerService(httpInfo);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		};
+		Thread t = new Thread(r);
+		t.setDaemon(true);
+		t.start();
+		
+	}
 
+	private Map<String,String> getMdnsTxt() {
+		Map<String,String> txtSet = new HashMap<String, String>();
+		txtSet.put("path", SIGNALK_DISCOVERY);
+		txtSet.put("server","signalk-server");
+		txtSet.put("version",Util.getConfigProperty(ConfigConstants.VERSION));
+		txtSet.put("vessel_name",Util.getConfigProperty(ConfigConstants.UUID));
+		txtSet.put("vessel_mmsi",Util.getConfigProperty(ConfigConstants.UUID));
+		txtSet.put("vessel_uuid",Util.getConfigProperty(ConfigConstants.UUID));
+		return txtSet;
+	}
+	
 	public static void main(String[] args) throws Exception {
 		// we look for and use a freeboard.cfg in the launch/cfg dir and use
 		// that to override defaults

@@ -117,7 +117,7 @@
 				<dependency>
 					<groupId>com.github.SignalK</groupId>
 					<artifactId>signalk-core-java</artifactId>
-					<version>JIT-Deploy-12</version>
+					<version>JIT-Deploy-13</version>
 				</dependency>
 			</dependencies>
 		</profile>
@@ -261,6 +261,11 @@
 		<dependency>
 		    <groupId>org.apache.camel</groupId>
 		    <artifactId>camel-ahc-ws</artifactId>
+		    <version>${camel.version}</version>
+		</dependency>
+		<dependency>
+   			<groupId>org.apache.camel</groupId>
+		    <artifactId>camel-xmpp</artifactId>
 		    <version>${camel.version}</version>
 		</dependency>
 		<!-- jetty Apache/Eclipse licence -->

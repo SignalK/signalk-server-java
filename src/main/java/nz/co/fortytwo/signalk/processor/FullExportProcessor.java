@@ -151,7 +151,6 @@ public class FullExportProcessor extends SignalkProcessor implements Processor, 
 	            exchange.getIn().setHeader(SIGNALK_FORMAT, sub.getFormat());
 	            if (sub.getDestination() != null) {
 	                exchange.getIn().setHeader(ConfigConstants.DESTINATION, sub.getDestination());
-
 	            }
 	            exchange.getIn().setHeader(ConfigConstants.OUTPUT_TYPE, manager.getOutputType(sub.getWsSession()));
 	            exchange.getIn().setHeader(WebsocketConstants.CONNECTION_KEY, sub.getWsSession());
@@ -239,7 +238,7 @@ public class FullExportProcessor extends SignalkProcessor implements Processor, 
                 switch (s.getPolicy()) {
                     case POLICY_INSTANT:
                         // Always send now.
-                        send(Collections.singletonList(path));
+                        send(Collections.singletonList(path),s);
                         return;
                     case POLICY_IDEAL:
                         // Schedule a timer if the queue is currently empty.
@@ -255,7 +254,7 @@ public class FullExportProcessor extends SignalkProcessor implements Processor, 
                                     for (String path = pendingPaths.poll(); path != null; path = pendingPaths.poll()) {
                                         paths.add(path);
                                     }
-                                    send(paths);
+                                    send(paths,s);
                                 }
                             };
                             // Schedule to send minPeriod after the last send; if that's in the past the task will run immediately.
@@ -299,7 +298,7 @@ public class FullExportProcessor extends SignalkProcessor implements Processor, 
 	}
 
 
-    private void send(Collection<String> paths) {
+    private void send(Collection<String> paths, Subscription sub) {
         if (paths.isEmpty()) {
             return;
         }
@@ -322,6 +321,9 @@ public class FullExportProcessor extends SignalkProcessor implements Processor, 
             Map<String, Object> headers = new HashMap<>();
             headers.put(WebsocketConstants.CONNECTION_KEY, wsSession);
             headers.put(ConfigConstants.OUTPUT_TYPE, manager.getOutputType(wsSession));
+            if (sub.getDestination() != null) {
+            	headers.put(ConfigConstants.DESTINATION, sub.getDestination());
+            }
             asyncSendBodyAndHeaders(outProducer,temp, headers);
             lastSend.set(System.currentTimeMillis());
         } else {
