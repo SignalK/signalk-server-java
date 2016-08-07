@@ -58,7 +58,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.http.MimeTypes;
+import org.eclipse.jetty.security.ConstraintMapping;
+import org.eclipse.jetty.security.ConstraintSecurityHandler;
+import org.eclipse.jetty.security.authentication.BasicAuthenticator;
 import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.util.security.Constraint;
 
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
@@ -183,19 +187,84 @@ public class RouteManager extends RouteBuilder  {
 		//bind in registry
 		PropertyPlaceholderDelegateRegistry registry = (PropertyPlaceholderDelegateRegistry) CamelContextFactory.getInstance().getRegistry();
 		JndiRegistry reg = (JndiRegistry)registry.getRegistry();
-		if(reg.lookup("staticHandler")==null){		
+		if(reg.lookup("staticHandler")==null){	
+			
 			ResourceHandler staticHandler = new ResourceHandler();
 			staticHandler.setResourceBase(Util.getConfigProperty(ConfigConstants.STATIC_DIR));	
 			staticHandler.setDirectoriesListed(false);
 			MimeTypes mimeTypes = staticHandler.getMimeTypes();
 			mimeTypes.addMimeMapping("log", MimeTypes.TEXT_HTML_UTF_8);
 			staticHandler.setMimeTypes(mimeTypes);
-			
 			//static files
 			reg.bind("staticHandler",staticHandler );
 			
 		}
+		if(reg.lookup("staticConfigHandler")==null){	
+			
+			Constraint constraint = new Constraint("BASIC", "rolename");
+			constraint.setAuthenticate(true);
+			
+			ConstraintMapping mapping = new ConstraintMapping();
+			mapping.setPathSpec("/config/*");
+			mapping.setConstraint(constraint);
+			
+			ConstraintSecurityHandler securityHandler = new ConstraintSecurityHandler();
+			securityHandler.setAuthenticator(new BasicAuthenticator());
+			securityHandler.setLoginService(new SignalkLoginService());
+			securityHandler.addConstraintMapping(mapping);
+			
+			ResourceHandler staticHandler = new ResourceHandler();
+			staticHandler.setResourceBase(Util.getConfigProperty(ConfigConstants.STATIC_DIR)+"config/");	
+			staticHandler.setDirectoriesListed(false);
+			MimeTypes mimeTypes = staticHandler.getMimeTypes();
+			mimeTypes.addMimeMapping("log", MimeTypes.TEXT_HTML_UTF_8);
+			staticHandler.setMimeTypes(mimeTypes);
+			securityHandler.setHandler(staticHandler);
+			//static files
+			reg.bind("staticConfigHandler",securityHandler );
+			
+		}
 		
+		if(reg.lookup("securityHandler")==null){	
+			Constraint constraint = new Constraint("BASIC", "rolename");
+			constraint.setAuthenticate(true);
+			
+			ConstraintMapping configMapping = new ConstraintMapping();
+			configMapping.setPathSpec("/signalk/v1/config/*");
+			configMapping.setConstraint(constraint);
+			
+			ConstraintMapping installMapping = new ConstraintMapping();
+			installMapping.setPathSpec("/signalk/v1/install/*");
+			installMapping.setConstraint(constraint);
+			
+			ConstraintMapping upgradeMapping = new ConstraintMapping();
+			upgradeMapping.setPathSpec("/signalk/v1/upgrade/*");
+			upgradeMapping.setConstraint(constraint);
+			
+			ConstraintMapping restartMapping = new ConstraintMapping();
+			restartMapping.setPathSpec("/signalk/v1/restart");
+			restartMapping.setConstraint(constraint);
+			
+			ConstraintMapping uploadMapping = new ConstraintMapping();
+			uploadMapping.setPathSpec("/signalk/v1/upload/*");
+			uploadMapping.setConstraint(constraint);
+			
+			ConstraintMapping loggerMapping = new ConstraintMapping();
+			loggerMapping.setPathSpec("/signalk/v1/logger/*");
+			loggerMapping.setConstraint(constraint);
+			
+			ConstraintSecurityHandler securityHandler = new ConstraintSecurityHandler();
+			securityHandler.setAuthenticator(new BasicAuthenticator());
+			securityHandler.setLoginService(new SignalkLoginService());
+			securityHandler.addConstraintMapping(installMapping);
+			securityHandler.addConstraintMapping(upgradeMapping);
+			securityHandler.addConstraintMapping(restartMapping);
+			securityHandler.addConstraintMapping(loggerMapping);
+			securityHandler.addConstraintMapping(configMapping);
+			securityHandler.addConstraintMapping(uploadMapping);
+			
+			reg.bind("securityHandler",securityHandler );
+		}
 		
 		restConfiguration().component("jetty")
 			.consumerProperty("matchOnUriPrefix", "true")
@@ -226,7 +295,7 @@ public class RouteManager extends RouteBuilder  {
 		
 		SignalkRouteFactory.configureHeartbeatRoute(this,"timer://heartbeat?fixedRate=true&period=1000");
 		
-		SignalkRouteFactory.configureAuthRoute(this, JETTY_HTTP_0_0_0_0 + restPort + SIGNALK_AUTH+"?sessionSupport=true&matchOnUriPrefix=true&handlers=#staticHandler&enableJMX=true&enableCORS=true");
+		SignalkRouteFactory.configureAuthRoute(this, JETTY_HTTP_0_0_0_0 + restPort + SIGNALK_AUTH+"?sessionSupport=true&matchOnUriPrefix=true&handlers=#securityHandler,#staticHandler,#staticConfigHandler&enableJMX=true&enableCORS=true");
 		SignalkRouteFactory.configureRestRoute(this, JETTY_HTTP_0_0_0_0 + restPort + SIGNALK_DISCOVERY+"?sessionSupport=true&matchOnUriPrefix=false&enableJMX=true&enableCORS=true","REST Discovery");
 		SignalkRouteFactory.configureRestRoute(this, JETTY_HTTP_0_0_0_0 + restPort + SIGNALK_API+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true&enableCORS=true","REST Api");
 		SignalkRouteFactory.configureRestConfigRoute(this, JETTY_HTTP_0_0_0_0 + restPort + SIGNALK_CONFIG+"?sessionSupport=true&matchOnUriPrefix=true&enableJMX=true&enableCORS=false","Config Api");
