@@ -164,7 +164,7 @@ public class UploadProcessor extends SignalkProcessor implements Processor {
 		     Document document = reader.read(new File(destDir, "tilemapresource.xml"));
 		     
 		     String title = document.getRootElement().element("Title").getText();
-		     String scale = document.getRootElement().element("Metadata").attributeValue("scale");
+		     String scale = document.getRootElement().element("Metadata").attribute("scale").getText();
 		     double maxRes = 0.0;
 		     double minRes = Double.MAX_VALUE;
 		     int maxZoom = 0;
