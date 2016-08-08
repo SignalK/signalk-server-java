@@ -53,16 +53,16 @@ import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logg
  * @author robert
  * 
  */
-public class IncomingSecurityFilter extends SignalkProcessor implements
+public class IncomingSecurityFirewall extends SignalkProcessor implements
 		Processor {
 
 	private static Logger logger = LogManager
-			.getLogger(IncomingSecurityFilter.class);
+			.getLogger(IncomingSecurityFirewall.class);
 	private List<String> whiteList = new ArrayList<String>();
 	private List<String> configAcceptList = new ArrayList<String>();
 	private List<String> denyList = new ArrayList<String>();
 
-	public IncomingSecurityFilter() {
+	public IncomingSecurityFirewall() {
 		// load lists now
 		Json deny = Util.getConfigJsonArray(ConfigConstants.SECURITY_DENY);
 		Json white = Util.getConfigJsonArray(ConfigConstants.SECURITY_WHITE);

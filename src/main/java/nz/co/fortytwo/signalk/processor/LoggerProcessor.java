@@ -27,6 +27,7 @@ package nz.co.fortytwo.signalk.processor;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.NavigableMap;
 
 import javax.servlet.http.HttpServletRequest;
@@ -90,7 +91,7 @@ public class LoggerProcessor extends SignalkProcessor implements Processor {
 		String conf = exchange.getIn().getBody(String.class);
 		//Json confJson = Json.read(conf);
 		logger.debug("POST Log4j2 = " + conf);
-		FileUtils.writeStringToFile(new File(Util.getRootPath()+"./conf/log4j2.json"), conf);
+		FileUtils.writeStringToFile(new File(Util.getRootPath()+"./conf/log4j2.json"), conf, StandardCharsets.UTF_8);
 
 	}
 

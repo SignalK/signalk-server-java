@@ -43,7 +43,7 @@ import nz.co.fortytwo.signalk.processor.FullExportProcessor;
 import nz.co.fortytwo.signalk.processor.FullImportProcessor;
 import nz.co.fortytwo.signalk.processor.FullToDeltaProcessor;
 import nz.co.fortytwo.signalk.processor.HeartbeatProcessor;
-import nz.co.fortytwo.signalk.processor.IncomingSecurityFilter;
+import nz.co.fortytwo.signalk.processor.IncomingSecurityFirewall;
 import nz.co.fortytwo.signalk.processor.InputFilterProcessor;
 import nz.co.fortytwo.signalk.processor.JsonGetProcessor;
 import nz.co.fortytwo.signalk.processor.JsonListProcessor;
@@ -55,6 +55,7 @@ import nz.co.fortytwo.signalk.processor.N2KProcessor;
 import nz.co.fortytwo.signalk.processor.NMEA0183ExportProcessor;
 import nz.co.fortytwo.signalk.processor.NMEAProcessor;
 import nz.co.fortytwo.signalk.processor.OutputFilterProcessor;
+import nz.co.fortytwo.signalk.processor.PermissionsProcessor;
 import nz.co.fortytwo.signalk.processor.RestApiProcessor;
 import nz.co.fortytwo.signalk.processor.RestAuthProcessor;
 import nz.co.fortytwo.signalk.processor.RestPathFilterProcessor;
@@ -114,7 +115,7 @@ public class SignalkRouteFactory {
 		// dump misc rubbish
 		.process(new InputFilterProcessor()).id(getName(InputFilterProcessor.class.getSimpleName()))
 		//now filter security
-		.process(new IncomingSecurityFilter()).id(getName(IncomingSecurityFilter.class.getSimpleName()))
+		.process(new IncomingSecurityFirewall()).id(getName(IncomingSecurityFirewall.class.getSimpleName()))
 		//swap payloads to storage
 		//.process(new StorageProcessor()).id(getName(StorageProcessor.class.getSimpleName()))
 		//convert NMEA to signalk
@@ -135,6 +136,8 @@ public class SignalkRouteFactory {
 		.process(new TrackProcessor()).id(getName(TrackProcessor.class.getSimpleName()))
 		//push source to sources and add $source
 		.process(new SourceToSourceRefProcessor()).id(getName(SourceToSourceRefProcessor.class.getSimpleName()))
+		//strip out according to meta owner,group,others
+		.process(new PermissionsProcessor()).id(getName(PermissionsProcessor.class.getSimpleName()))
 		//and update signalk model
 		.process(new SignalkModelProcessor()).id(getName(SignalkModelProcessor.class.getSimpleName()))
 		//we have processed all incoming data now - if there is more left its LIST, GET.
