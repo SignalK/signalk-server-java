@@ -26,13 +26,29 @@ package nz.co.fortytwo.signalk.server;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.camel.Exchange;
+import org.apache.camel.ExchangePattern;
+import org.apache.camel.Predicate;
+import org.apache.camel.Processor;
+import org.apache.camel.builder.PredicateBuilder;
+import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.websocket.WebsocketConstants;
+import org.apache.camel.component.websocket.WebsocketEndpoint;
+import org.apache.camel.impl.DefaultCamelContext;
+import org.apache.camel.model.RouteDefinition;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import mjson.Json;
 import nz.co.fortytwo.signalk.processor.AISProcessor;
+import nz.co.fortytwo.signalk.processor.AisExpiryProcessor;
 import nz.co.fortytwo.signalk.processor.AlarmProcessor;
 import nz.co.fortytwo.signalk.processor.AnchorWatchProcessor;
 import nz.co.fortytwo.signalk.processor.ClientAppProcessor;
@@ -64,7 +80,6 @@ import nz.co.fortytwo.signalk.processor.SignalkModelProcessor;
 import nz.co.fortytwo.signalk.processor.SourceRefToSourceProcessor;
 import nz.co.fortytwo.signalk.processor.SourceToSourceRefProcessor;
 import nz.co.fortytwo.signalk.processor.StompProcessor;
-import nz.co.fortytwo.signalk.processor.StorageProcessor;
 import nz.co.fortytwo.signalk.processor.TrackProcessor;
 import nz.co.fortytwo.signalk.processor.UploadProcessor;
 import nz.co.fortytwo.signalk.processor.ValidationProcessor;
@@ -73,25 +88,8 @@ import nz.co.fortytwo.signalk.processor.WsSessionProcessor;
 import nz.co.fortytwo.signalk.util.ConfigConstants;
 import nz.co.fortytwo.signalk.util.SignalKConstants;
 
-import org.apache.camel.Exchange;
-import org.apache.camel.ExchangePattern;
-import org.apache.camel.Predicate;
-import org.apache.camel.Processor;
-import org.apache.camel.builder.PredicateBuilder;
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.websocket.WebsocketConstants;
-import org.apache.camel.component.websocket.WebsocketEndpoint;
-import org.apache.camel.impl.DefaultCamelContext;
-import org.apache.camel.model.RouteDefinition;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
-import org.jivesoftware.smack.SASLAuthentication;
 
-import mjson.Json;
-
-
-
+ 
 public class SignalkRouteFactory {
 
 	private static Logger logger = LogManager.getLogger(SignalkRouteFactory.class);
@@ -257,6 +255,7 @@ public class SignalkRouteFactory {
 	
 	public static void configureBackgroundTimer(RouteBuilder routeBuilder ,String input){
 		routeBuilder.from(input).id(getName("Declination"))
+			.process(new AisExpiryProcessor()).id(getName(AisExpiryProcessor.class.getSimpleName()))
 			.process(new SaveProcessor()).id(getName(SaveProcessor.class.getSimpleName()))
 			.process(new DeclinationProcessor()).id(getName(DeclinationProcessor.class.getSimpleName()))
 			.to("log:nz.co.fortytwo.signalk.model.update?level=DEBUG").end();
