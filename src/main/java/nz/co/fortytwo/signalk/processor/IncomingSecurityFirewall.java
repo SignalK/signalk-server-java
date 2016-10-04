@@ -23,29 +23,29 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import static nz.co.fortytwo.signalk.util.SignalKConstants.CONFIG;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.CONFIG_ACTION;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.CONFIG_ACTION_SAVE;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.CONTEXT;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.DEMO;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.INTERNAL_IP;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.MSG_SRC_IP;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.MSG_TYPE;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.PUT;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.SERIAL;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.UPDATES;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.dot;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.self;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.camel.Exchange;
+import org.apache.camel.Processor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import mjson.Json;
 import nz.co.fortytwo.signalk.util.ConfigConstants;
 import nz.co.fortytwo.signalk.util.Util;
-
-import org.apache.camel.Exchange;
-import org.apache.camel.Processor;
-import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 /**
  * Parse the signalkModel json and remove anything that violates security
@@ -90,16 +90,21 @@ public class IncomingSecurityFirewall extends SignalkProcessor implements
 			// we trust local serial
 			String type = exchange.getIn().getHeader(MSG_TYPE,
 					String.class);
-			if (SERIAL.equals(type))
+			if (SERIAL.equals(type)||DEMO.equals(type)){
+				if (logger.isDebugEnabled())
+					logger.debug("Accepting msg:" + type);
 				return;
-
+			}
+			//TODO: check for valid XMPP/STOMP/MQTT SRC_IP ??
+			
 			// we filter on ip
 			String srcIp = exchange.getIn().getHeader(MSG_SRC_IP,
 					String.class);
 			if (logger.isDebugEnabled())
 				logger.debug("Checking src ip:" + srcIp);
 			if (srcIp == null) {
-				logger.debug(exchange);
+				logger.debug("Src ip null:"+exchange.getIn().getHeaders());
+				//exchange.getIn().setBody(null);
 				return;
 			}
 			// denied - drop now
@@ -131,8 +136,7 @@ public class IncomingSecurityFirewall extends SignalkProcessor implements
 			// we trust INTERNAL_IP
 			if (INTERNAL_IP.equals(type)) {
 				if (logger.isDebugEnabled())
-					logger.debug("Message allowed for src ip (internal):"
-							+ srcIp);
+					logger.debug("Message allowed for src ip (internal):"+ srcIp+":"+exchange.getIn().getHeaders());
 				return;
 			}
 
