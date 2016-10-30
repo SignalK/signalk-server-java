@@ -27,7 +27,7 @@ if [ -n "$JAVA_HOME" ]; then
 fi
 
 EXT="-Djava.util.Arrays.useLegacyMergeSort=true"
-MEM="-Xmx32m -XX:PermSize=32m -XX:MaxPermSize=48m"
+MEM="-Xmx32m"
 
 LOG4J=-Dlog4j.configuration=file://$SIGNALK_HOME/conf/log4j.properties
 
