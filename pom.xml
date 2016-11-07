@@ -6,6 +6,9 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>signalk-server-java</name>
 	<properties>
+	    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- <bundle.name>nsb-${project.version}</bundle.name> -->
 		<signalk.core.version>0.0.1-SNAPSHOT</signalk.core.version>
 		<jetty.version>8.1.16.v20140903</jetty.version>
@@ -173,6 +176,11 @@
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-core</artifactId>
 			<version>${camel.core.version}</version>
+		</dependency>
+		<dependency> 
+		  <groupId>org.apache.camel</groupId> 
+		  <artifactId>camel-spring-security</artifactId> 
+			<version>${camel.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.camel</groupId>

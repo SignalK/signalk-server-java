@@ -26,51 +26,10 @@ package nz.co.fortytwo.signalk.server;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.servlet.http.HttpServletResponse;
-
-import nz.co.fortytwo.signalk.processor.AISProcessor;
-import nz.co.fortytwo.signalk.processor.AlarmProcessor;
-import nz.co.fortytwo.signalk.processor.AnchorWatchProcessor;
-import nz.co.fortytwo.signalk.processor.ClientAppProcessor;
-import nz.co.fortytwo.signalk.processor.ConfigFilterProcessor;
-import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
-import nz.co.fortytwo.signalk.processor.DeltaImportProcessor;
-import nz.co.fortytwo.signalk.processor.FullExportProcessor;
-import nz.co.fortytwo.signalk.processor.FullImportProcessor;
-import nz.co.fortytwo.signalk.processor.FullToDeltaProcessor;
-import nz.co.fortytwo.signalk.processor.HeartbeatProcessor;
-import nz.co.fortytwo.signalk.processor.IncomingSecurityFilter;
-import nz.co.fortytwo.signalk.processor.InputFilterProcessor;
-import nz.co.fortytwo.signalk.processor.JsonGetProcessor;
-import nz.co.fortytwo.signalk.processor.JsonListProcessor;
-import nz.co.fortytwo.signalk.processor.JsonSubscribeProcessor;
-import nz.co.fortytwo.signalk.processor.LoggerProcessor;
-import nz.co.fortytwo.signalk.processor.MapToJsonProcessor;
-import nz.co.fortytwo.signalk.processor.MqttProcessor;
-import nz.co.fortytwo.signalk.processor.N2KProcessor;
-import nz.co.fortytwo.signalk.processor.NMEA0183ExportProcessor;
-import nz.co.fortytwo.signalk.processor.NMEAProcessor;
-import nz.co.fortytwo.signalk.processor.OutputFilterProcessor;
-import nz.co.fortytwo.signalk.processor.RestApiProcessor;
-import nz.co.fortytwo.signalk.processor.RestAuthProcessor;
-import nz.co.fortytwo.signalk.processor.RestPathFilterProcessor;
-import nz.co.fortytwo.signalk.processor.SaveProcessor;
-import nz.co.fortytwo.signalk.processor.SignalkModelProcessor;
-import nz.co.fortytwo.signalk.processor.SourceRefToSourceProcessor;
-import nz.co.fortytwo.signalk.processor.SourceToSourceRefProcessor;
-import nz.co.fortytwo.signalk.processor.StompProcessor;
-import nz.co.fortytwo.signalk.processor.StorageProcessor;
-import nz.co.fortytwo.signalk.processor.TrackProcessor;
-import nz.co.fortytwo.signalk.processor.UploadProcessor;
-import nz.co.fortytwo.signalk.processor.ValidationProcessor;
-import nz.co.fortytwo.signalk.processor.WindProcessor;
-import nz.co.fortytwo.signalk.processor.WsSessionProcessor;
-import nz.co.fortytwo.signalk.util.ConfigConstants;
-import nz.co.fortytwo.signalk.util.SignalKConstants;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePattern;
@@ -84,13 +43,53 @@ import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.model.RouteDefinition;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
-import org.jivesoftware.smack.SASLAuthentication;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import mjson.Json;
+import nz.co.fortytwo.signalk.processor.AISProcessor;
+import nz.co.fortytwo.signalk.processor.AisExpiryProcessor;
+import nz.co.fortytwo.signalk.processor.AlarmProcessor;
+import nz.co.fortytwo.signalk.processor.AnchorWatchProcessor;
+import nz.co.fortytwo.signalk.processor.ClientAppProcessor;
+import nz.co.fortytwo.signalk.processor.ConfigFilterProcessor;
+import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
+import nz.co.fortytwo.signalk.processor.DeltaImportProcessor;
+import nz.co.fortytwo.signalk.processor.FullExportProcessor;
+import nz.co.fortytwo.signalk.processor.FullImportProcessor;
+import nz.co.fortytwo.signalk.processor.FullToDeltaProcessor;
+import nz.co.fortytwo.signalk.processor.HeartbeatProcessor;
+import nz.co.fortytwo.signalk.processor.IncomingSecurityFirewall;
+import nz.co.fortytwo.signalk.processor.InputFilterProcessor;
+import nz.co.fortytwo.signalk.processor.JsonGetProcessor;
+import nz.co.fortytwo.signalk.processor.JsonListProcessor;
+import nz.co.fortytwo.signalk.processor.JsonSubscribeProcessor;
+import nz.co.fortytwo.signalk.processor.LoggerProcessor;
+import nz.co.fortytwo.signalk.processor.MapToJsonProcessor;
+import nz.co.fortytwo.signalk.processor.MqttProcessor;
+import nz.co.fortytwo.signalk.processor.N2KProcessor;
+import nz.co.fortytwo.signalk.processor.NMEA0183ExportProcessor;
+import nz.co.fortytwo.signalk.processor.NMEAProcessor;
+import nz.co.fortytwo.signalk.processor.OutputFilterProcessor;
+import nz.co.fortytwo.signalk.processor.PermissionsProcessor;
+import nz.co.fortytwo.signalk.processor.RestApiProcessor;
+import nz.co.fortytwo.signalk.processor.RestAuthProcessor;
+import nz.co.fortytwo.signalk.processor.RestPathFilterProcessor;
+import nz.co.fortytwo.signalk.processor.SaveProcessor;
+import nz.co.fortytwo.signalk.processor.SignalkModelProcessor;
+import nz.co.fortytwo.signalk.processor.SourceRefToSourceProcessor;
+import nz.co.fortytwo.signalk.processor.SourceToSourceRefProcessor;
+import nz.co.fortytwo.signalk.processor.StompProcessor;
+import nz.co.fortytwo.signalk.processor.TrackProcessor;
+import nz.co.fortytwo.signalk.processor.UploadProcessor;
+import nz.co.fortytwo.signalk.processor.ValidationProcessor;
+import nz.co.fortytwo.signalk.processor.WindProcessor;
+import nz.co.fortytwo.signalk.processor.WsSessionProcessor;
+import nz.co.fortytwo.signalk.util.ConfigConstants;
+import nz.co.fortytwo.signalk.util.SignalKConstants;
 
 
-
+ 
 public class SignalkRouteFactory {
 
 	private static Logger logger = LogManager.getLogger(SignalkRouteFactory.class);
@@ -114,7 +113,7 @@ public class SignalkRouteFactory {
 		// dump misc rubbish
 		.process(new InputFilterProcessor()).id(getName(InputFilterProcessor.class.getSimpleName()))
 		//now filter security
-		.process(new IncomingSecurityFilter()).id(getName(IncomingSecurityFilter.class.getSimpleName()))
+		.process(new IncomingSecurityFirewall()).id(getName(IncomingSecurityFirewall.class.getSimpleName()))
 		//swap payloads to storage
 		//.process(new StorageProcessor()).id(getName(StorageProcessor.class.getSimpleName()))
 		//convert NMEA to signalk
@@ -135,6 +134,8 @@ public class SignalkRouteFactory {
 		.process(new TrackProcessor()).id(getName(TrackProcessor.class.getSimpleName()))
 		//push source to sources and add $source
 		.process(new SourceToSourceRefProcessor()).id(getName(SourceToSourceRefProcessor.class.getSimpleName()))
+		//strip out according to meta owner,group,others
+		.process(new PermissionsProcessor()).id(getName(PermissionsProcessor.class.getSimpleName()))
 		//and update signalk model
 		.process(new SignalkModelProcessor()).id(getName(SignalkModelProcessor.class.getSimpleName()))
 		//we have processed all incoming data now - if there is more left its LIST, GET.
@@ -254,6 +255,7 @@ public class SignalkRouteFactory {
 	
 	public static void configureBackgroundTimer(RouteBuilder routeBuilder ,String input){
 		routeBuilder.from(input).id(getName("Declination"))
+			.process(new AisExpiryProcessor()).id(getName(AisExpiryProcessor.class.getSimpleName()))
 			.process(new SaveProcessor()).id(getName(SaveProcessor.class.getSimpleName()))
 			.process(new DeclinationProcessor()).id(getName(DeclinationProcessor.class.getSimpleName()))
 			.to("log:nz.co.fortytwo.signalk.model.update?level=DEBUG").end();

@@ -155,7 +155,7 @@ public class SerialPortReader implements Processor {
 		
 		private Pattern uid;
 		List<String> lines = new ArrayList<String>();
-		StringBuffer line = new StringBuffer(60);
+		StringBuilder line = new StringBuilder(60);
 		private boolean enableSerial=true;
 		private boolean complete;
 		protected InputStream in;
@@ -194,7 +194,7 @@ public class SerialPortReader implements Processor {
 								//10=LF, 13=CR, lines should end in CR/LF
 								if(r==10  ||x==256){
 									if(r==10)complete=true;
-									line.append(new String(buff));
+									line.append(buff);
 									buff=new byte[256];
 									x=0;
 								}
@@ -239,7 +239,7 @@ public class SerialPortReader implements Processor {
 									}
 								}
 								complete=false;
-								line=new StringBuffer(60);
+								line=new StringBuilder(60);
 							}
 						}
 				}

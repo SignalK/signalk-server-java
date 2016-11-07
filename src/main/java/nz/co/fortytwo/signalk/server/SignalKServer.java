@@ -94,7 +94,7 @@ public class SignalKServer {
 
 		// create a new Camel Main so we can easily start Camel
 		Main main = new Main();
-
+		//main.setApplicationContextUri("classpath:META-INF/spring/camel-context.xml");
 		// enable hangup support which mean we detect when the JVM terminates,
 		// and stop Camel graceful
 		main.enableHangupSupport();

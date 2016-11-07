@@ -30,7 +30,7 @@ Sailgauge tries port 8080
 Make Waypoint 'here' option
 
 Enable users and passwords and protect server pages
-Add restart from web page
+
 config.html wont delete arrays
 NMEA ais outputs incorrect position format?
 ais requires Cog true? cogM not considered.
@@ -40,10 +40,10 @@ log4j and config may need re-working after upgrade.
 REST api needs attention - http://www:8088/signalk/v1/config returns all
 
 Finish adding XMPP support
-	start xmpp routes
 	add outgoing filters
 	use queue to collect buffer
 	* dont make xmmp.42.co.nz the default!
+	*firewall needs an MSG_SRC_IP or a filter on XMPP server.
 
 need avahi-utils?
 

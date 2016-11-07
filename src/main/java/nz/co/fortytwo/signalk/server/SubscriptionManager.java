@@ -50,7 +50,9 @@ public class SubscriptionManager {
 	
 	//hold sessionid <> wsSessionId
 	BiMap<String, String> wsSessionMap = HashBiMap.create();
+	//map wsSession to output type
 	Map<String, String> outPutMap = new HashMap<String, String>();
+	//wsSession> localIp#remoteIp
 	Map<String, String> ipMap = new HashMap<String, String>();
 	//wsSessionId>Subscription
 	ConcurrentLinkedQueue<Subscription> subscriptions = new ConcurrentLinkedQueue<Subscription>();

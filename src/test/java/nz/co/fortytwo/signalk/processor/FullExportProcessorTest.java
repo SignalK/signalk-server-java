@@ -106,7 +106,7 @@ public class FullExportProcessorTest {
 
     @Test
     public void shouldEmitIfMatchesWithInstantPolicy() throws Exception {
-        testScenario("vessels.self.navigation", SignalKConstants.POLICY_INSTANT, 3, self_nav);
+        testScenario("vessels.self.navigation", SignalKConstants.POLICY_INSTANT, 1, self_nav);
     }
 
     @Test
