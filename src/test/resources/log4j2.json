@@ -59,11 +59,11 @@
 			},
 			{
 				"name": "nz.co.fortytwo.signalk.handler",
-				"level": "debug"
+				"level": "error"
 			},
 			{
 				"name": "nz.co.fortytwo.signalk.processor",
-				"level": "debug"
+				"level": "error"
 			},
 			{
 				"name": "nz.co.fortytwo.signalk.processor.InputFilterProcessor",
