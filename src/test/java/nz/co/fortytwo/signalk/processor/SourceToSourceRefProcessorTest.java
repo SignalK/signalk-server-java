@@ -25,6 +25,7 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
+import static nz.co.fortytwo.signalk.util.SignalKConstants.MSG_TYPE;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.dot;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.env_outside_pressure;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.nav_courseOverGroundMagnetic;
@@ -61,9 +62,11 @@ public class SourceToSourceRefProcessorTest{
 		
 		model.putAll(TestHelper.getSourcesModel().getFullData());
 		logger.debug("Input:"+model);
+		logger.debug("Input vessels:"+model.getSubMap("vessels"));
 		SourceToSourceRefProcessor processor = new SourceToSourceRefProcessor();
 		Exchange ex = new DefaultExchange(ctx);
 		ex.getIn().setBody(model);
+		ex.getIn().setHeader(MSG_TYPE,"unknown");
 		processor.process(ex);
 		logger.debug("Processed to:"+ex.getIn().getBody());
 		String srcRef = "unknown";

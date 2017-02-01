@@ -24,9 +24,12 @@
 package nz.co.fortytwo.signalk.server;
 
 import static nz.co.fortytwo.signalk.util.ConfigConstants.OUTPUT_XMPP;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.DEMO;
 //import static nz.co.fortytwo.signalk.util.ConfigConstants.UUID;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.FORMAT_DELTA;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.MSG_SRC_BUS;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.MSG_SRC_IP;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.MSG_TYPE;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.POLICY_IDEAL;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_API;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.SIGNALK_AUTH;
@@ -154,7 +157,7 @@ public class RouteManager extends RouteBuilder  {
 		        .redeliveryDelay(1000));
 		
 		from ("direct:fail").id("Fail")
-        .to("log:log:nz.co.fortytwo.signalk.error?level=ERROR&showAll=true");
+        .to("log:nz.co.fortytwo.signalk.error?level=ERROR&showAll=true");
 		 
 		SignalKModelFactory.load(signalkModel);
 		
@@ -421,9 +424,11 @@ public class RouteManager extends RouteBuilder  {
 				.onException(Exception.class).handled(true).maximumRedeliveries(0)
 				.to("log:nz.co.fortytwo.signalk.model.receive?level=ERROR&showException=true&showStackTrace=true")
 				.end()
-			.split(body().tokenize("\n")).streaming()
+			.split(body().regexTokenize("[\r\n|\n|\r]")).streaming()
 			.convertBodyTo(String.class)
-			.throttle(2).timePeriodMillis(1000)
+			.throttle(4).timePeriodMillis(1000)
+			.setHeader(MSG_TYPE, constant(DEMO))
+			//.setHeader(MSG_SRC_IP,constant("127.0.0.1"))
 			.setHeader(MSG_SRC_BUS, constant("demo"))
 			.to(SEDA_INPUT).id(SignalkRouteFactory.getName("SEDA_INPUT"))
 			.end();

@@ -24,24 +24,22 @@
 
 package nz.co.fortytwo.signalk.processor;
 
+import static nz.co.fortytwo.signalk.util.SignalKConstants.MSG_TYPE;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.dot;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.normal;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.label;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.source;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.sourceRef;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.sources;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.type;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels_dot_self_dot;
 
 import java.util.Map.Entry;
 import java.util.NavigableMap;
 
-import mjson.Json;
-import nz.co.fortytwo.signalk.model.SignalKModel;
-import nz.co.fortytwo.signalk.util.JsonSerializer;
-
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import nz.co.fortytwo.signalk.model.SignalKModel;
 
 /**
  * Replaces source with the actual $sourceRef object and stores source in sources.*
@@ -66,18 +64,19 @@ public class SourceToSourceRefProcessor extends SignalkProcessor implements Proc
 			for(String key : model.getKeys()){
 				//get the source.type key
 				//if(logger.isDebugEnabled())logger.debug("Key:"+key);
-				if(key.endsWith(dot+source+dot+type)){
+				if(key.endsWith(dot+source+dot+label)){
 					if(logger.isDebugEnabled())logger.debug("Convert key:"+key);
 					int pos = key.indexOf(dot+source+dot);
-					String typeVal = (String) model.get(key);
+					String typeVal = exchange.getIn().getHeader(MSG_TYPE,String.class);
 					
 					int pos1 = pos+source.length()+2;
 					String refKey = key.substring(0,pos);
-					if(logger.isDebugEnabled())logger.debug("refKey:"+refKey+", type:"+typeVal);
+					if(logger.isDebugEnabled())logger.debug("refKey:"+refKey+", bus:"+typeVal);
 					//get the label
-					String label = (String) model.get(refKey+dot+source+dot+"label");
+					String lbl = (String) model.get(refKey+dot+source+dot+label);
+					if(logger.isDebugEnabled())logger.debug("refKey:"+refKey+", label:"+lbl);
 					//set sourceRef
-					model.getFullData().put(refKey+dot+sourceRef, typeVal+dot+label);
+					model.getFullData().put(refKey+dot+sourceRef, typeVal+dot+lbl);
 					//put in sources
 					NavigableMap<String, Object> node = signalkModel.getSubMap(refKey+dot+source);
 					if(logger.isDebugEnabled())logger.debug("Found keys:"+node.size());
@@ -85,8 +84,8 @@ public class SourceToSourceRefProcessor extends SignalkProcessor implements Proc
 					if(node!=null){
 						for(Entry<String, Object> entry:node.entrySet()){
 							String nodeKey = entry.getKey().substring(pos1);
-							model.getFullData().put(sources+dot+typeVal+dot+label+dot+nodeKey, entry.getValue());
-							if(logger.isDebugEnabled())logger.debug("Added key:"+sources+dot+typeVal+dot+label+dot+nodeKey+"="+entry.getValue());
+							model.getFullData().put(sources+dot+typeVal+dot+lbl+dot+nodeKey, entry.getValue());
+							if(logger.isDebugEnabled())logger.debug("Added key:"+sources+dot+typeVal+dot+lbl+dot+nodeKey+"="+entry.getValue());
 						}
 					
 						//drop the source key and all subkeys

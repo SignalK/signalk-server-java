@@ -21,7 +21,7 @@ REM. set JAVA=%JAVA_HOME%\bin\java
 set EXT="-Djava.util.Arrays.useLegacyMergeSort=true"
 
 REM. optionally limit memory here
-REM. set MEM="-Xmx32m -XX:PermSize=32m -XX:MaxPermSize=48m"
+REM. set MEM="-Xmx32m"
 
 set LOG4J=-Dlog4j.configuration=file:/%SIGNALK_HOME%/conf/log4j.properties
 

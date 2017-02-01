@@ -227,9 +227,9 @@ public class FullExportProcessor extends SignalkProcessor implements Processor, 
             return;
         
         if(path.endsWith(dot+source)
-    			&& path.endsWith(dot+timestamp)
-    			&& path.contains(dot+source+dot)
-    			&& path.endsWith(dot+sourceRef)){
+    			|| path.endsWith(dot+timestamp)
+    			|| path.contains(dot+source+dot)
+    			|| path.endsWith(dot+sourceRef)){
         	return;
         }
         // Send update if necessary.
