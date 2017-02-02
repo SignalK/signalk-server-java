@@ -90,13 +90,16 @@
 		</pluginRepository>
 
 	</pluginRepositories>
-	
+
 	<profiles>
 		<profile>
 			<id>dev</id>
 			<activation>
-				<activeByDefault>true</activeByDefault>
-	        	</activation>
+				<property>
+			        <name>signalk.build</name>
+			        <value>dev</value>
+			    </property>
+	        </activation>
 			<dependencies>
 				<dependency>
 					<groupId>nz.co.fortytwo.signalk.core</groupId>
@@ -105,7 +108,6 @@
 				</dependency>
 			</dependencies>
 		</profile>
-<!--
 		<profile>
 			<id>release</id>
 			<activation>
@@ -119,7 +121,6 @@
 				</dependency>
 			</dependencies>
 		</profile>
--->
 	</profiles>
 	<dependencies>
 
@@ -335,17 +336,6 @@
 		    <artifactId>log4j-core</artifactId>
 		    <version>2.5</version>
 		  </dependency>
-                  
-    <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-log4j12</artifactId>
-        <version>1.7.21</version>
-    </dependency>
-    <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <version>1.6.6</version>
-    </dependency>                  		  
 		  
 
 		   <dependency>
@@ -375,7 +365,7 @@
 		<dependency>
 			<groupId>net.sf.marineapi</groupId>
 			<artifactId>marineapi</artifactId>
-			<version>0.7.0</version>
+			<version>0.9.0</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.codehaus.mojo</groupId>
@@ -469,6 +459,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
                                 <version>2.19.1</version>
+
 				<configuration>
 					<forkCount>1</forkCount>
 					<reuseForks>false</reuseForks>
