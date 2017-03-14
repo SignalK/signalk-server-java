@@ -325,6 +325,7 @@ public class RouteManager extends RouteBuilder  {
 		// timed actions
 		SignalkRouteFactory.configureBackgroundTimer(this, "timer://background?fixedRate=true&period=60000");
 		SignalkRouteFactory.configureWindTimer(this, "timer://wind?fixedRate=true&period=1000");
+		SignalkRouteFactory.configureDepthTimer(this, "timer://depth?fixedRate=true&period=1000");
 		SignalkRouteFactory.configureAnchorWatchTimer(this, "timer://anchorWatch?fixedRate=true&period=5000");
 		SignalkRouteFactory.configureAlarmsTimer(this, "timer://alarms?fixedRate=true&period=1000");
 		
