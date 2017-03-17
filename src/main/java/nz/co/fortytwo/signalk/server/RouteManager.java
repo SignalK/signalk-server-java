@@ -145,7 +145,7 @@ public class RouteManager extends RouteBuilder  {
 	}
 	public void configure0() throws Exception {
 		//XMPP
-		JivePropertiesManager.setJavaObjectEnabled(true);
+                JivePropertiesManager.setJavaObjectEnabled(true);
 		SASLAuthentication.unsupportSASLMechanism("DIGEST-MD5");
 		SASLAuthentication.unregisterSASLMechanism("DIGEST-MD5");
 		SASLAuthentication.supportSASLMechanism("PLAIN",0);
