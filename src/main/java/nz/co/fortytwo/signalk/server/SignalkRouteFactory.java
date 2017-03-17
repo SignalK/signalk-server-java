@@ -55,6 +55,7 @@ import nz.co.fortytwo.signalk.processor.ClientAppProcessor;
 import nz.co.fortytwo.signalk.processor.ConfigFilterProcessor;
 import nz.co.fortytwo.signalk.processor.DeclinationProcessor;
 import nz.co.fortytwo.signalk.processor.DeltaImportProcessor;
+import nz.co.fortytwo.signalk.processor.DepthProcessor;
 import nz.co.fortytwo.signalk.processor.FullExportProcessor;
 import nz.co.fortytwo.signalk.processor.FullImportProcessor;
 import nz.co.fortytwo.signalk.processor.FullToDeltaProcessor;
@@ -281,6 +282,13 @@ public class SignalkRouteFactory {
 	public static void configureWindTimer(RouteBuilder routeBuilder ,String input){
 		routeBuilder.from("timer://wind?fixedRate=true&period=1000").id(getName("True Wind"))
 			.process(new WindProcessor()).id(getName(WindProcessor.class.getSimpleName()))
+			.to("log:nz.co.fortytwo.signalk.model.update?level=DEBUG")
+			.end();
+	}
+
+        public static void configureDepthTimer(RouteBuilder routeBuilder ,String input){
+		routeBuilder.from("timer://depth?fixedRate=true&period=1000").id(getName("Depth"))
+			.process(new DepthProcessor()).id(getName(DepthProcessor.class.getSimpleName()))
 			.to("log:nz.co.fortytwo.signalk.model.update?level=DEBUG")
 			.end();
 	}
