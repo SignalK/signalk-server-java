@@ -117,7 +117,7 @@
 				<dependency>
 					<groupId>com.github.SignalK</groupId>
 					<artifactId>signalk-core-java</artifactId>
-					<version>JIT-Deploy-15</version>
+					<version>JIT-Deploy-17</version>
 				</dependency>
 			</dependencies>
 		</profile>
@@ -365,7 +365,7 @@
 		<dependency>
 			<groupId>net.sf.marineapi</groupId>
 			<artifactId>marineapi</artifactId>
-			<version>0.7.0</version>
+			<version>0.9.0</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.codehaus.mojo</groupId>

@@ -23,11 +23,7 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
-import nz.co.fortytwo.signalk.handler.NMEAHandler;
-import nz.co.fortytwo.signalk.model.SignalKModel;
-
-import static nz.co.fortytwo.signalk.util.SignalKConstants.MSG_SERIAL_PORT;
-import static nz.co.fortytwo.signalk.util.SignalKConstants.MSG_SRC_BUS;
+import nz.co.fortytwo.signalk.handler.DepthHandler;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -36,35 +32,24 @@ import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logg
 
 
 /**
- * Processes NMEA sentences in the body of a message, firing events to interested listeners
- * Converts the NMEA messages to signalk
+ * Calls DepthHandler to calculate depth.belowDurface and depth.belowKeek
  * 
- * @author robert
+ * @author RBerliner
  * 
  */
-public class NMEAProcessor extends SignalkProcessor implements Processor {
+public class DepthProcessor extends SignalkProcessor implements Processor{
 
-	private static Logger logger = LogManager.getLogger(NMEAProcessor.class);
-	
-
-	private NMEAHandler nmea = new NMEAHandler();
-
-	
+	private static Logger logger = LogManager.getLogger(DepthProcessor.class);
+	private DepthHandler depthHandler = new DepthHandler();
 
 	public void process(Exchange exchange) throws Exception {
-		if (exchange.getIn().getBody() == null || !(exchange.getIn().getBody() instanceof String)) {
-			return;
-		}
 		
-		String body = exchange.getIn().getBody(String.class);
-		logger.info(body + "\n");
-		String src = exchange.getIn().getHeader(MSG_SRC_BUS, String.class);
-		SignalKModel model = nmea.handle(body, src);
-		if(model!=null){
-			exchange.getIn().setBody(model);
+		try {		
+                        depthHandler.handle(signalkModel);			
+		} catch (Exception e) {
+			logger.error(e);
 		}
 	}
-
 	
 
 }
