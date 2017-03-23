@@ -129,6 +129,8 @@ public class SignalkRouteFactory {
 		.process(new DeltaImportProcessor()).id(getName(DeltaImportProcessor.class.getSimpleName()))
 		//deal with full format
 		.process(new FullImportProcessor()).id(getName(FullImportProcessor.class.getSimpleName()))
+		//add depth details
+		.process(new DepthProcessor()).id(getName(DepthProcessor.class.getSimpleName()))
 		//make sure we have timestamp/source
 		.process(new ValidationProcessor()).id(getName(ValidationProcessor.class.getSimpleName()))
 		//record track

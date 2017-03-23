@@ -24,6 +24,11 @@
 package nz.co.fortytwo.signalk.processor;
 
 import nz.co.fortytwo.signalk.handler.DepthHandler;
+import nz.co.fortytwo.signalk.handler.NMEAHandler;
+import nz.co.fortytwo.signalk.model.SignalKModel;
+
+import static nz.co.fortytwo.signalk.util.SignalKConstants.MSG_SERIAL_PORT;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.MSG_SRC_BUS;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -32,24 +37,32 @@ import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logg
 
 
 /**
- * Calls DepthHandler to calculate depth.belowDurface and depth.belowKeek
+ * Processes signalk depthBelowTransducer messages in the body of a message, and updates depthBelowSurface, depthbelowKeel
  * 
- * @author RBerliner
+ * @author robert
  * 
  */
-public class DepthProcessor extends SignalkProcessor implements Processor{
+public class DepthProcessor extends SignalkProcessor implements Processor {
 
 	private static Logger logger = LogManager.getLogger(DepthProcessor.class);
-	private DepthHandler depthHandler = new DepthHandler();
+	
+
+	private DepthHandler depth = new DepthHandler();
+
+	
 
 	public void process(Exchange exchange) throws Exception {
-		
-		try {		
-                        depthHandler.handle(signalkModel);			
-		} catch (Exception e) {
-			logger.error(e);
+		if (exchange.getIn().getBody() == null || !(exchange.getIn().getBody() instanceof SignalKModel)) {
+			return;
 		}
+		
+		SignalKModel body = exchange.getIn().getBody(SignalKModel.class);
+		
+		depth.handle(body);
+		exchange.getIn().setBody(body);
+		
 	}
+
 	
 
 }
