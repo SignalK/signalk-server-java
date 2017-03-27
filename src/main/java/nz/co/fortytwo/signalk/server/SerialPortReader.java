@@ -158,7 +158,7 @@ public class SerialPortReader implements Processor {
 		//BufferedReader in;
 		
 		private Pattern uid;
-		List<String> lines = new ArrayList<String>();
+		//List<String> lines = new ArrayList<String>();
 		String line = null;
 		StringBuffer lineBuf = new StringBuffer();
 		private boolean enableSerial=true;
@@ -201,7 +201,7 @@ public class SerialPortReader implements Processor {
 									if(r==10){
 										complete=true;
 									}
-									lineBuf.append(buff);
+									lineBuf.append(new String(buff));
 									buff=new byte[256];
 									x=0;
 								}
