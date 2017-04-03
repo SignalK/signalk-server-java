@@ -59,6 +59,7 @@ public class FullToDeltaProcessor extends SignalkProcessor implements Processor 
 				//if(logger.isDebugEnabled())logger.debug("Converted to delta :" + json);
 				exchange.getIn().setBody(json);
 			}
+			if (exchange.getIn().getBody() == null) return;
 			if(logger.isDebugEnabled())logger.debug("Outputting :" + exchange.getIn().getBody().toString());
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
