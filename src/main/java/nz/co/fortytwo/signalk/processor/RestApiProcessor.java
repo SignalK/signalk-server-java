@@ -287,7 +287,10 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 		
 		Json version = Json.object();
 		String ver = Util.getConfigProperty(ConfigConstants.VERSION);
-		version.set("version", ver.substring(1));
+		if( ver.startsWith("v")){
+			ver = ver.substring(1);
+		}
+		version.set("version", ver);
 		version.set(SignalKConstants.websocketUrl, "ws://" + hostname + ":"
 				+ Util.getConfigPropertyInt(ConfigConstants.WEBSOCKET_PORT)
 				+ SignalKConstants.SIGNALK_WS);
@@ -309,7 +312,7 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 			version.set(SignalKConstants.mqttPort, "mqtt://" + hostname + ":"
 					+ Util.getConfigPropertyInt(ConfigConstants.MQTT_PORT));
 		Json endpoints = Json.object();
-		endpoints.set(ver.substring(0, 2), version );
+		endpoints.set("v"+ver.substring(0, ver.indexOf(".")), version );
 		return Json.object().set("endpoints", endpoints);
 	}
 
