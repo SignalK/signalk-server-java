@@ -23,6 +23,9 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
+import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels_dot_self;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -204,6 +207,12 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 		if (path.equals(SignalKConstants.SIGNALK_DISCOVERY)) {
 			doDiscovery(exchange, path);
 			return;
+		}
+		
+		//self
+		if (path.equals(SignalKConstants.SIGNALK_API+"/self")) {
+			path=SignalKConstants.SIGNALK_API+"/vessels/self/uuid";
+			exchange.getIn().setHeader(Exchange.HTTP_PATH,"/vessels/self/uuid");
 		}
 
 		path = standardizePath(path);
