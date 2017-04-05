@@ -32,6 +32,7 @@ import nz.co.fortytwo.signalk.handler.FullToDeltaConverter;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager; import org.apache.logging.log4j.Logger;
 
 /**
@@ -52,11 +53,13 @@ public class FullToDeltaProcessor extends SignalkProcessor implements Processor 
 			if (exchange.getIn().getBody() == null) return;
 			if(logger.isDebugEnabled())logger.debug("Processing :" + exchange.getIn().getBody().toString());
 			if(!(exchange.getIn().getBody() instanceof Json))return;
-			if (FORMAT_DELTA.equals(exchange.getIn().getHeader(SIGNALK_FORMAT))) {
+			String format = exchange.getIn().getHeader(SIGNALK_FORMAT, String.class);
+			if (StringUtils.isBlank(format) || FORMAT_DELTA.equals(format)) {
 				List<Json> json = fullToDelta.handle(exchange.getIn().getBody(Json.class));
 				//if(logger.isDebugEnabled())logger.debug("Converted to delta :" + json);
 				exchange.getIn().setBody(json);
 			}
+			if (exchange.getIn().getBody() == null) return;
 			if(logger.isDebugEnabled())logger.debug("Outputting :" + exchange.getIn().getBody().toString());
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);

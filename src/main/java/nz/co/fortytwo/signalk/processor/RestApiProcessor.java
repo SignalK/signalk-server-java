@@ -23,6 +23,9 @@
  */
 package nz.co.fortytwo.signalk.processor;
 
+import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels;
+import static nz.co.fortytwo.signalk.util.SignalKConstants.vessels_dot_self;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -205,6 +208,12 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 			doDiscovery(exchange, path);
 			return;
 		}
+		
+		//self
+		if (path.equals(SignalKConstants.SIGNALK_API+"/self")) {
+			path=SignalKConstants.SIGNALK_API+"/vessels/self/uuid";
+			exchange.getIn().setHeader(Exchange.HTTP_PATH,"/vessels/self/uuid");
+		}
 
 		path = standardizePath(path);
 
@@ -287,7 +296,10 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 		
 		Json version = Json.object();
 		String ver = Util.getConfigProperty(ConfigConstants.VERSION);
-		version.set("version", ver.substring(1));
+		if( ver.startsWith("v")){
+			ver = ver.substring(1);
+		}
+		version.set("version", ver);
 		version.set(SignalKConstants.websocketUrl, "ws://" + hostname + ":"
 				+ Util.getConfigPropertyInt(ConfigConstants.WEBSOCKET_PORT)
 				+ SignalKConstants.SIGNALK_WS);
@@ -309,7 +321,7 @@ public class RestApiProcessor extends SignalkProcessor implements Processor {
 			version.set(SignalKConstants.mqttPort, "mqtt://" + hostname + ":"
 					+ Util.getConfigPropertyInt(ConfigConstants.MQTT_PORT));
 		Json endpoints = Json.object();
-		endpoints.set(ver.substring(0, 2), version );
+		endpoints.set("v"+ver.substring(0, ver.indexOf(".")), version );
 		return Json.object().set("endpoints", endpoints);
 	}
 
