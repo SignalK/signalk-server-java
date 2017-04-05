@@ -158,8 +158,9 @@ public class SerialPortReader implements Processor {
 		//BufferedReader in;
 		
 		private Pattern uid;
-		List<String> lines = new ArrayList<String>();
+		//List<String> lines = new ArrayList<String>();
 		String line = null;
+		StringBuffer lineBuf = new StringBuffer();
 		private boolean enableSerial=true;
 		private boolean complete;
 		protected InputStream in;
@@ -197,8 +198,10 @@ public class SerialPortReader implements Processor {
 								
 								//10=LF, 13=CR, lines should end in CR/LF
 								if(r==10  ||x==256){
-									if(r==10)complete=true;
-									line = new String(buff);
+									if(r==10){
+										complete=true;
+									}
+									lineBuf.append(new String(buff));
 									buff=new byte[256];
 									x=0;
 								}
@@ -209,8 +212,8 @@ public class SerialPortReader implements Processor {
 								return;
 							}
 							//we have a line ending in CR/LF
-							if (complete && StringUtils.isNotBlank(line)) {
-								line = line.trim();
+							if (complete && StringUtils.isNotBlank(lineBuf)) {
+								line = lineBuf.toString().trim();
 								if(logger.isDebugEnabled())logger.debug(portName + ":Serial Received:" + line);
 								//its not empty!
 								if(line.length()>0){
@@ -218,7 +221,7 @@ public class SerialPortReader implements Processor {
 									if (!mapped && uid.matcher(line).matches()) {
 										// add to map
 										logger.debug(portName + ":Serial Received:" + line);
-										String type = StringUtils.substringBetween(line, ConfigConstants.UID + ":", ",");
+										String type = StringUtils.substringBetween(line.toString(), ConfigConstants.UID + ":", ",");
 										if (type != null) {
 											logger.debug(portName + ":  device name:" + type);
 											deviceType = type.trim();
@@ -244,6 +247,7 @@ public class SerialPortReader implements Processor {
 								}
 								complete=false;
 								line=null;
+								lineBuf= new StringBuffer();
 							}
 						}
 				}

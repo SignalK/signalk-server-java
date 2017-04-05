@@ -190,7 +190,7 @@ public class SignalkRouteFactory {
 			.end()
 		.process(new WsSessionProcessor()).id(getName(WsSessionProcessor.class.getSimpleName()))
 		//.to("log:nz.co.fortytwo.signalk.model.websocket.rx?level=INFO&showException=true&showStackTrace=true")
-		.to(input).id(getName("SEDA_INPUT"));
+		.to(input).id(getName(RouteManager.SEDA_INPUT));
 		
 	}
 	public static void configureTcpServerRoute(RouteBuilder routeBuilder ,String input, NettyServer nettyServer, String outputType) throws Exception{
