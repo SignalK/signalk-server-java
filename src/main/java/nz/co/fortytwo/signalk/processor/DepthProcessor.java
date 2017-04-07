@@ -51,16 +51,14 @@ public class DepthProcessor extends SignalkProcessor implements Processor {
 
 	
 
-	public void process(Exchange exchange) throws Exception {
-		if (exchange.getIn().getBody() == null || !(exchange.getIn().getBody() instanceof SignalKModel)) {
-			return;
+	public void process(Exchange exchange) throws Exception {		
+		try {
+		
+			depth.handle(signalkModel);
+			
+		} catch (Exception e) {
+			logger.error(e);
 		}
-		
-		SignalKModel body = exchange.getIn().getBody(SignalKModel.class);
-		
-		depth.handle(body);
-		exchange.getIn().setBody(body);
-		
 	}
 
 	
