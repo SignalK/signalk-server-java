@@ -130,7 +130,7 @@ public class SignalkRouteFactory {
 		//deal with full format
 		.process(new FullImportProcessor()).id(getName(FullImportProcessor.class.getSimpleName()))
 		//add depth details
-		.process(new DepthProcessor()).id(getName(DepthProcessor.class.getSimpleName()))
+//		.process(new DepthProcessor()).id(getName(DepthProcessor.class.getSimpleName()))
 		//make sure we have timestamp/source
 		.process(new ValidationProcessor()).id(getName(ValidationProcessor.class.getSimpleName()))
 		//record track
@@ -284,6 +284,13 @@ public class SignalkRouteFactory {
 	public static void configureWindTimer(RouteBuilder routeBuilder ,String input){
 		routeBuilder.from("timer://wind?fixedRate=true&period=1000").id(getName("True Wind"))
 			.process(new WindProcessor()).id(getName(WindProcessor.class.getSimpleName()))
+			.to("log:nz.co.fortytwo.signalk.model.update?level=DEBUG")
+			.end();
+	}
+
+        public static void configureDepthTimer(RouteBuilder routeBuilder ,String input){
+		routeBuilder.from("timer://depth?fixedRate=true&period=1000").id(getName("Depth"))
+			.process(new DepthProcessor()).id(getName(DepthProcessor.class.getSimpleName()))
 			.to("log:nz.co.fortytwo.signalk.model.update?level=DEBUG")
 			.end();
 	}
