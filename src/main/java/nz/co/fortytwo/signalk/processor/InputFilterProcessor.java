@@ -67,7 +67,9 @@ public class InputFilterProcessor extends SignalkProcessor implements Processor 
 				// NMEA - good
 				// System.out.println(msg);
 				exchange.getIn().setBody(msg);
-				sendNmea(exchange);
+				if(logger.isDebugEnabled())
+						logger.debug(msg.toString());
+                sendNmea(exchange);
 				ok = true;
 			} else if (msg.startsWith("{") && msg.endsWith("}")) {
 				Json json = Json.read(msg);
