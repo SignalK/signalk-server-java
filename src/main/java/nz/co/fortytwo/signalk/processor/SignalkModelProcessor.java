@@ -69,16 +69,14 @@ public class SignalkModelProcessor extends SignalkProcessor implements Processor
 		if (node.getFullData().size() == 0)
 			return;
 		if (logger.isDebugEnabled())
-//                    logger.debug("SignalkModelProcessor  updating " + node);
-                    logger.debug("SignalkModelProcessor  updating " + SignalKModelFactory.writePretty(node));
+            logger.debug("SignalkModelProcessor  updating " + SignalKModelFactory.writePretty(node));
 
 		signalkModel.putAll(node.getFullData());
 		NavigableMap<String, Object> cnf = node.getSubMap(SignalKConstants.CONFIG);
 		if(cnf!=null && cnf.size()>0){
 			SignalKModelFactory.saveConfig(signalkModel);
 		}
-//		if (logger.isDebugEnabled())
-//			logger.debug(signalkModel);
+
 	}
 
 }
