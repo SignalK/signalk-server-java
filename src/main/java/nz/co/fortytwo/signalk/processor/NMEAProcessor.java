@@ -57,7 +57,8 @@ public class NMEAProcessor extends SignalkProcessor implements Processor {
 		}
 		
 		String body = exchange.getIn().getBody(String.class);
-		logger.info(body + "\n");
+		if(logger.isDebugEnabled())
+				logger.debug(body + "\n");
 		String src = exchange.getIn().getHeader(MSG_SRC_BUS, String.class);
 		SignalKModel model = nmea.handle(body, src);
 		if(model!=null){
