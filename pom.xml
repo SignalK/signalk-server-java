@@ -14,8 +14,8 @@
 		<jetty.version>8.1.16.v20140903</jetty.version>
 		<!-- <jetty.version>9.2.9.v20150224</jetty.version> -->
 
-		<camel.version>2.15.2</camel.version>
-		<camel.core.version>2.15.2</camel.core.version>
+		<camel.version>2.15.6</camel.version>
+		<camel.core.version>2.15.6</camel.core.version>
 		<jna.version>4.0.0</jna.version>
 		<apollo.version>1.7.1</apollo.version>
 		<activemq.version>5.11.1</activemq.version>
@@ -262,6 +262,12 @@
 		    <groupId>org.apache.camel</groupId>
 		    <artifactId>camel-ahc-ws</artifactId>
 		    <version>${camel.version}</version>
+		    <exclusions>
+		    	<exclusion>
+		    		<artifactId>netty</artifactId>
+		    		<groupId>io.netty</groupId>
+		    	</exclusion>
+		    </exclusions>
 		</dependency>
 		<dependency>
    			<groupId>org.apache.camel</groupId>
@@ -417,6 +423,12 @@
 			<artifactId>async-http-client</artifactId>
 			<version>1.8.14</version>
 			<scope>test</scope>
+<!-- 			<exclusions> -->
+<!-- 				<exclusion> -->
+<!-- 					<artifactId>netty</artifactId> -->
+<!-- 					<groupId>io.netty</groupId> -->
+<!-- 				</exclusion> -->
+<!-- 			</exclusions> --> 
 		</dependency>
 		<dependency>
 			<groupId>org.fusesource.mqtt-client</groupId>

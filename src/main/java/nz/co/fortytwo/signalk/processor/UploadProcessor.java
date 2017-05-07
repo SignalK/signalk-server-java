@@ -159,12 +159,24 @@ public class UploadProcessor extends SignalkProcessor implements Processor {
 			ZipUtils.unzip(destDir, zipFile);
 			logger.debug("Unzipped file:"+destDir);
 			//now add a reference in resources
-			
+			loadChart(f);
+		}catch(Exception e){
+			logger.error(e.getMessage(),e);
+			throw e;
+		}
+	}
+	
+	public void loadChart(String chartName) throws Exception{
+		try{
+			 File destDir = new File(Util.getConfigProperty(STATIC_DIR)+Util.getConfigProperty(MAP_DIR)+chartName);
 			 SAXReader reader = new SAXReader();
 		     Document document = reader.read(new File(destDir, "tilemapresource.xml"));
 		     
 		     String title = document.getRootElement().element("Title").getText();
-		     String scale = document.getRootElement().element("Metadata").attribute("scale").getText();
+		     String scale = "250000";
+		     if(document.getRootElement().element("Metadata")!=null){
+		    	 scale = document.getRootElement().element("Metadata").attribute("scale").getText();
+		     }
 		     double maxRes = 0.0;
 		     double minRes = Double.MAX_VALUE;
 		     int maxZoom = 0;
@@ -180,7 +192,7 @@ public class UploadProcessor extends SignalkProcessor implements Processor {
 		    	 minRes=Math.min(units, minRes);
 		     }
 		     //now make an entry in resources
-		     Json resource = createChartMsg(f, title, scale);
+		     Json resource = createChartMsg(chartName, title, scale);
 		     inProducer.asyncSendBody(inProducer.getDefaultEndpoint(),resource);
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);

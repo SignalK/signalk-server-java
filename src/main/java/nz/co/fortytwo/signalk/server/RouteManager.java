@@ -23,7 +23,9 @@
  */
 package nz.co.fortytwo.signalk.server;
 
+import static nz.co.fortytwo.signalk.util.ConfigConstants.MAP_DIR;
 import static nz.co.fortytwo.signalk.util.ConfigConstants.OUTPUT_XMPP;
+import static nz.co.fortytwo.signalk.util.ConfigConstants.STATIC_DIR;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.DEMO;
 //import static nz.co.fortytwo.signalk.util.ConfigConstants.UUID;
 import static nz.co.fortytwo.signalk.util.SignalKConstants.FORMAT_DELTA;
@@ -77,6 +79,7 @@ import org.jivesoftware.smackx.jiveproperties.JivePropertiesManager;
 import mjson.Json;
 import nz.co.fortytwo.signalk.model.SignalKModel;
 import nz.co.fortytwo.signalk.model.impl.SignalKModelFactory;
+import nz.co.fortytwo.signalk.processor.UploadProcessor;
 import nz.co.fortytwo.signalk.util.ConfigConstants;
 import nz.co.fortytwo.signalk.util.Util;
 
@@ -350,10 +353,10 @@ public class RouteManager extends RouteBuilder  {
 		//start any clients if they exist
 		//WS
 		Json wsClients = Util.getConfigJsonArray(ConfigConstants.CLIENT_WS);
-		logger.info("  Starting WS connection to url:"+wsClients);
+		logger.info("  WS client connections : "+wsClients);
 		if(wsClients!=null){
 			for(Object client: wsClients.asList()){
-				logger.info("  Starting WS connection to url:ahc-ws://"+client);
+				logger.info("  Starting WS client connection to url:ahc-ws://"+client);
 				WsEndpoint wsEndpoint = (WsEndpoint)getContext().getEndpoint("ahc-ws://"+client);
 				setupClient("ahc-ws://"+client,client.toString(),"ws");
 				wsEndpoint.connect();
@@ -410,6 +413,9 @@ public class RouteManager extends RouteBuilder  {
 				}
 			}
 		}
+		//reload charts into resources
+		reloadCharts();
+		
 		//restart support
 		from(JETTY_HTTP_0_0_0_0 + restPort + SIGNALK_RESTART).id("Restart route")
 			.setExchangePattern(ExchangePattern.InOut)
@@ -446,6 +452,23 @@ public class RouteManager extends RouteBuilder  {
 		if (Util.getConfigPropertyBoolean(ConfigConstants.ZEROCONF_AUTO)) {
 			startMdnsAutoconnect();
 		}
+	}
+
+	private void reloadCharts() {
+		File mapDir = new File(Util.getConfigProperty(STATIC_DIR)+Util.getConfigProperty(MAP_DIR));
+		logger.debug("Reloading charts from: "+mapDir.getAbsolutePath());
+		UploadProcessor processor = new UploadProcessor();
+		for(File chart:mapDir.listFiles()){
+			if(chart.isDirectory()){
+				logger.debug("Reloading: "+chart.getName());
+				try {
+					processor.loadChart(chart.getName());
+				} catch (Exception e) {
+					logger.warn(e.getMessage());
+				}
+			}
+		}
+		
 	}
 
 	private void setupClient(String endpoint, String client, String serviceName) {

@@ -105,7 +105,7 @@ public class SubcribeWsTest extends SignalKCamelTestSupport{
         latch2.await(3, TimeUnit.SECONDS);
       //await messages
         String restUrl = json.at("endpoints").at("v1").at(websocketUrl).asString();
-        logger.debug("Open websocket at :"+restUrl);
+        logger.debug("Open websocket at: "+restUrl);
         WebSocket websocket = c.prepareGet(restUrl).setCookies(r1.getCookies()).execute(
                 new WebSocketUpgradeHandler.Builder()
                     .addWebSocketListener(new DefaultWebSocketListener() {
