@@ -455,8 +455,13 @@ public class RouteManager extends RouteBuilder  {
 	}
 
 	private void reloadCharts() {
-		File mapDir = new File(Util.getConfigProperty(STATIC_DIR)+Util.getConfigProperty(MAP_DIR));
+		String staticDir = Util.getConfigProperty(STATIC_DIR);
+		if(!staticDir.endsWith("/")){
+			staticDir=staticDir+"/";
+		}
+		File mapDir = new File(staticDir+Util.getConfigProperty(MAP_DIR));
 		logger.debug("Reloading charts from: "+mapDir.getAbsolutePath());
+		if(mapDir==null || !mapDir.exists() || mapDir.listFiles()==null)return;
 		UploadProcessor processor = new UploadProcessor();
 		for(File chart:mapDir.listFiles()){
 			if(chart.isDirectory()){
