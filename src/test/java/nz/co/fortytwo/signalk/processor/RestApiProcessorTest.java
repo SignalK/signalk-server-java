@@ -40,8 +40,8 @@ public class RestApiProcessorTest {
         logger.debug(discovery);
         Json endpoints = discovery.at("endpoints");
         String ver = Util.getConfigProperty(ConfigConstants.VERSION);
-        Json version = endpoints.at(ver.substring(0, 2));
-        assertThat(version.at("version").asString(), equalTo(ver.substring(1)));
+        Json version = endpoints.at("v1");
+        assertThat(version.at("version").asString(), equalTo(ver));
         assertThat(version.at("signalk-http").asString(), equalTo("http://localhost:8080/signalk/v1/api/"));
         assertThat(version.at("signalk-ws").asString(), equalTo("ws://localhost:3000/signalk/v1/stream"));
         assertThat(version.at("signalk-udp").asString(), equalTo("udp://localhost:55554"));

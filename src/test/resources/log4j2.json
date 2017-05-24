@@ -59,11 +59,11 @@
 			},
 			{
 				"name": "nz.co.fortytwo.signalk.handler",
-				"level": "error"
+				"level": "debug"
 			},
 			{
 				"name": "nz.co.fortytwo.signalk.processor",
-				"level": "error"
+				"level": "debug"
 			},
 			{
 				"name": "nz.co.fortytwo.signalk.processor.InputFilterProcessor",
@@ -90,8 +90,8 @@
 				"level": "info"
 			},
 			{
-				"name": "nz.co.fortytwo.signalk.server.SubcribeWsTest",
-				"level": "info"
+				"name": "nz.co.fortytwo.signalk.server",
+				"level": "debug"
 			},
 			{
 				"name": "nz.co.fortytwo.signalk.handler.AlarmHandler",
