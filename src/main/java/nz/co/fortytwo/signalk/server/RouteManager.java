@@ -48,6 +48,7 @@ import static nz.co.fortytwo.signalk.util.SignalKConstants.dot;
 import java.io.File;
 import java.net.Inet4Address;
 import java.util.Arrays;
+import java.util.TreeMap;
 import java.util.UUID;
 
 import javax.jmdns.JmmDNS;
@@ -463,13 +464,18 @@ public class RouteManager extends RouteBuilder  {
 		logger.debug("Reloading charts from: "+mapDir.getAbsolutePath());
 		if(mapDir==null || !mapDir.exists() || mapDir.listFiles()==null)return;
 		UploadProcessor processor = new UploadProcessor();
+		TreeMap<String, Object> treeMap = new TreeMap<String, Object>(signalkModel.getSubMap("resources.charts"));
 		for(File chart:mapDir.listFiles()){
 			if(chart.isDirectory()){
-				logger.debug("Reloading: "+chart.getName());
-				try {
-					processor.loadChart(chart.getName());
-				} catch (Exception e) {
-					logger.warn(e.getMessage());
+				if (treeMap.containsValue(chart.getName())) {
+					  logger.info("chart "+chart.getName() + " already in model");
+				} else {
+					logger.debug("Reloading: "+chart.getName());
+					try {
+						processor.loadChart(chart.getName());
+					} catch (Exception e) {
+						logger.warn(e.getMessage());
+					}
 				}
 			}
 		}
