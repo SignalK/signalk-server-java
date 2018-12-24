@@ -1,6 +1,9 @@
 Signal K java server
 =================================================
 
+__DEPRECATED: Replced by https://github.com/SignalK/artemis-server__
+__ See https://github.com/SignalK/signalk-java for installation of the artemis-server__
+
 An example Signal K server using java. If you are after a quick install and trial of the java signalk server then you should use the signalk-java project. Its easier to install and has the front end that was previously in this project.
 
 Provided under an Apache 2 licence
